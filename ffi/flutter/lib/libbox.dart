@@ -3,6 +3,7 @@ library;
 import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:ffi/ffi.dart';
 
@@ -144,17 +145,17 @@ final class LibboxSystemProxyOptions {
 /// command server using [LibboxInitOptions.commandPort] and [commandSecret]
 /// and use its gRPC interface independently.
 final class LibboxFfi {
-  LibboxFfi._(this.raw);
+  LibboxFfi._(this.raw, [this._libraryPath, this._useProcess = false]);
 
   factory LibboxFfi.fromLibrary(DynamicLibrary library) =>
       LibboxFfi._(LibboxRawBindings(library));
 
   factory LibboxFfi.open([String? path]) =>
-      LibboxFfi.fromLibrary(openDefaultLibrary(path));
+      LibboxFfi._(LibboxRawBindings(openDefaultLibrary(path)), path);
 
   factory LibboxFfi.openBundled([String? path]) {
     if (path != null && path.isNotEmpty) {
-      return LibboxFfi.fromLibrary(DynamicLibrary.open(path));
+      return LibboxFfi._(LibboxRawBindings(DynamicLibrary.open(path)), path);
     }
     if (Platform.isIOS) {
       return LibboxFfi.fromLibrary(DynamicLibrary.process());
@@ -163,9 +164,11 @@ final class LibboxFfi {
   }
 
   factory LibboxFfi.process() =>
-      LibboxFfi.fromLibrary(DynamicLibrary.process());
+      LibboxFfi._(LibboxRawBindings(DynamicLibrary.process()), null, true);
 
   final LibboxRawBindings raw;
+  final String? _libraryPath;
+  final bool _useProcess;
 
   static List<String> get defaultLibraryNames {
     if (Platform.isWindows) return const ['libbox.dll'];
@@ -314,6 +317,36 @@ final class LibboxFfi {
     }
   }
 
+  /// Runs a blocking native operation on a background isolate so the calling
+  /// isolate (typically the UI) is never frozen by long native work such as
+  /// service start, reload or rule-set downloads. The native library is
+  /// process-global, so reopening it inside the worker is cheap and safe.
+  Future<T> _runNative<T>(T Function(LibboxFfi core) operation) {
+    final path = _libraryPath;
+    final useProcess = _useProcess;
+    return Isolate.run(() {
+      final core = useProcess ? LibboxFfi.process() : LibboxFfi.open(path);
+      return operation(core);
+    });
+  }
+
+  Future<LibboxService> startAsync(String configJson) async {
+    final handle = await _runNative((core) => core.start(configJson).handle);
+    return LibboxService._(this, handle);
+  }
+
+  Future<void> checkConfigAsync(String configJson) =>
+      _runNative((core) => core.checkConfig(configJson));
+
+  Future<void> reloadAsync(LibboxHandle handle, String configJson) =>
+      _runNative((core) => core.reload(handle, configJson));
+
+  Future<void> stopAsync(LibboxHandle handle) =>
+      _runNative((core) => core.stop(handle));
+
+  Future<void> freeHandleAsync(LibboxHandle handle) =>
+      _runNative((core) => core.freeHandle(handle));
+
   LibboxServiceSnapshot serviceState(LibboxHandle handle) {
     final json = calloc<Pointer<Utf8>>();
     final error = calloc<Pointer<Utf8>>();
@@ -432,6 +465,28 @@ final class LibboxService {
   void reload(String configJson) {
     _ensureOpen();
     _core.reload(handle, configJson);
+  }
+
+  Future<void> reloadAsync(String configJson) async {
+    _ensureOpen();
+    await _core.reloadAsync(handle, configJson);
+  }
+
+  Future<void> closeAsync() async {
+    if (_closed) return;
+    _closed = true;
+    try {
+      if (_systemProxyEnabled) {
+        try {
+          _core.setSystemProxy(false);
+        } catch (_) {
+          // The service handle must still be released when proxy restoration fails.
+        }
+      }
+      await _core.stopAsync(handle);
+    } finally {
+      await _core.freeHandleAsync(handle);
+    }
   }
 
   void enableSystemProxy([

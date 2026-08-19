@@ -13,7 +13,7 @@ dependencies:
     git:
       url: https://github.com/TargetProxy/libbox.git
       path: ffi/flutter
-      ref: main
+      ref: 1.13.19
 ```
 
 Then fetch the dependency:

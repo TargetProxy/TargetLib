@@ -33,8 +33,7 @@ param(
         'with_naive_outbound',
         'with_purego',
         'with_clash_api',
-        'badlinkname',
-        'tfogo_checklinkname0'
+        'badlinkname'
     ),
 
     [switch]$DebugBuild
