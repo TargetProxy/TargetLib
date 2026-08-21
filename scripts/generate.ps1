@@ -13,7 +13,7 @@ try {
     protoc -I . `
         --go_out=. --go_opt=paths=source_relative `
         --go-grpc_out=. --go-grpc_opt=paths=source_relative `
-        api/libbox/v1/manager.proto
+        api/TargetLib/v1/manager.proto
     if ($LASTEXITCODE -ne 0) {
         throw "protoc failed with exit code $LASTEXITCODE"
     }

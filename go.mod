@@ -1,4 +1,4 @@
-module github.com/loafman1120/libbox
+module github.com/loafman1120/TargetLib
 
 go 1.26
 

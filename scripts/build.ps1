@@ -1,12 +1,12 @@
 <#
 .SYNOPSIS
-Builds the standalone Desktop libbox gRPC daemon.
+Builds the standalone Desktop TargetLib gRPC daemon.
 
 .EXAMPLE
 .\scripts\build.ps1
 
 .EXAMPLE
-.\scripts\build.ps1 -OutputPath dist\libboxd.exe -DebugBuild
+.\scripts\build.ps1 -OutputPath dist\targetlibd.exe -DebugBuild
 #>
 [CmdletBinding()]
 param(
@@ -37,7 +37,7 @@ $goCommand = Get-Command go -ErrorAction Stop
 
 if ([string]::IsNullOrWhiteSpace($OutputPath)) {
     $extension = if ($env:OS -eq 'Windows_NT') { '.exe' } else { '' }
-    $OutputPath = Join-Path $repositoryRoot "build\libboxd$extension"
+    $OutputPath = Join-Path $repositoryRoot "build\targetlibd$extension"
 } elseif (-not [System.IO.Path]::IsPathRooted($OutputPath)) {
     $OutputPath = Join-Path $repositoryRoot $OutputPath
 }
@@ -55,7 +55,7 @@ $arguments = @(
 )
 $linkerFlags = if ($DebugBuild) { '-checklinkname=0' } else { '-s -w -buildid= -checklinkname=0' }
 $arguments += @('-ldflags', $linkerFlags)
-$arguments += './cmd/libboxd'
+$arguments += './cmd/targetlibd'
 
 # Strip + perf env (no priority, apply directly)
 if (-not $DebugBuild) {

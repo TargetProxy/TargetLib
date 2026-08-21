@@ -1,12 +1,12 @@
 <#
 .SYNOPSIS
-Builds the libbox C ABI from ffi/native.
+Builds the TargetLib C ABI from ffi/native.
 
 .EXAMPLE
 .\scripts\build-native.ps1
 
 .EXAMPLE
-.\scripts\build-native.ps1 -BuildMode c-archive -OutputPath dist\libbox.a
+.\scripts\build-native.ps1 -BuildMode c-archive -OutputPath dist\targetlib.a
 #>
 [CmdletBinding()]
 param(
@@ -40,7 +40,7 @@ $goCommand = Get-Command go -ErrorAction Stop
 
 if ([string]::IsNullOrWhiteSpace($OutputPath)) {
     $extension = if ($BuildMode -eq 'c-shared') { '.dll' } else { '.a' }
-    $OutputPath = Join-Path $repositoryRoot "build\libbox$extension"
+    $OutputPath = Join-Path $repositoryRoot "build\targetlib$extension"
 } elseif (-not [System.IO.Path]::IsPathRooted($OutputPath)) {
     $OutputPath = Join-Path $repositoryRoot $OutputPath
 }

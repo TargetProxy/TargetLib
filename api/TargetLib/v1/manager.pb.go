@@ -2,9 +2,9 @@
 // versions:
 // 	protoc-gen-go v1.36.11
 // 	protoc        v7.35.1
-// source: api/libbox/v1/manager.proto
+// source: api/TargetLib/v1/manager.proto
 
-package libboxv1
+package targetlibv1
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -64,11 +64,11 @@ func (x ServiceStateType) String() string {
 }
 
 func (ServiceStateType) Descriptor() protoreflect.EnumDescriptor {
-	return file_api_libbox_v1_manager_proto_enumTypes[0].Descriptor()
+	return file_api_TargetLib_v1_manager_proto_enumTypes[0].Descriptor()
 }
 
 func (ServiceStateType) Type() protoreflect.EnumType {
-	return &file_api_libbox_v1_manager_proto_enumTypes[0]
+	return &file_api_TargetLib_v1_manager_proto_enumTypes[0]
 }
 
 func (x ServiceStateType) Number() protoreflect.EnumNumber {
@@ -77,22 +77,22 @@ func (x ServiceStateType) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use ServiceStateType.Descriptor instead.
 func (ServiceStateType) EnumDescriptor() ([]byte, []int) {
-	return file_api_libbox_v1_manager_proto_rawDescGZIP(), []int{0}
+	return file_api_TargetLib_v1_manager_proto_rawDescGZIP(), []int{0}
 }
 
 type VersionResponse struct {
-	state           protoimpl.MessageState `protogen:"open.v1"`
-	LibboxVersion   string                 `protobuf:"bytes,1,opt,name=libbox_version,json=libboxVersion,proto3" json:"libbox_version,omitempty"`
-	SingBoxVersion  string                 `protobuf:"bytes,2,opt,name=sing_box_version,json=singBoxVersion,proto3" json:"sing_box_version,omitempty"`
-	GoVersion       string                 `protobuf:"bytes,3,opt,name=go_version,json=goVersion,proto3" json:"go_version,omitempty"`
-	ProtocolVersion uint32                 `protobuf:"varint,4,opt,name=protocol_version,json=protocolVersion,proto3" json:"protocol_version,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	TargetlibVersion string                 `protobuf:"bytes,1,opt,name=targetlib_version,json=targetlibVersion,proto3" json:"targetlib_version,omitempty"`
+	SingBoxVersion   string                 `protobuf:"bytes,2,opt,name=sing_box_version,json=singBoxVersion,proto3" json:"sing_box_version,omitempty"`
+	GoVersion        string                 `protobuf:"bytes,3,opt,name=go_version,json=goVersion,proto3" json:"go_version,omitempty"`
+	ProtocolVersion  uint32                 `protobuf:"varint,4,opt,name=protocol_version,json=protocolVersion,proto3" json:"protocol_version,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *VersionResponse) Reset() {
 	*x = VersionResponse{}
-	mi := &file_api_libbox_v1_manager_proto_msgTypes[0]
+	mi := &file_api_TargetLib_v1_manager_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -104,7 +104,7 @@ func (x *VersionResponse) String() string {
 func (*VersionResponse) ProtoMessage() {}
 
 func (x *VersionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_libbox_v1_manager_proto_msgTypes[0]
+	mi := &file_api_TargetLib_v1_manager_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -117,12 +117,12 @@ func (x *VersionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VersionResponse.ProtoReflect.Descriptor instead.
 func (*VersionResponse) Descriptor() ([]byte, []int) {
-	return file_api_libbox_v1_manager_proto_rawDescGZIP(), []int{0}
+	return file_api_TargetLib_v1_manager_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *VersionResponse) GetLibboxVersion() string {
+func (x *VersionResponse) GetTargetlibVersion() string {
 	if x != nil {
-		return x.LibboxVersion
+		return x.TargetlibVersion
 	}
 	return ""
 }
@@ -158,7 +158,7 @@ type CapabilitiesResponse struct {
 
 func (x *CapabilitiesResponse) Reset() {
 	*x = CapabilitiesResponse{}
-	mi := &file_api_libbox_v1_manager_proto_msgTypes[1]
+	mi := &file_api_TargetLib_v1_manager_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -170,7 +170,7 @@ func (x *CapabilitiesResponse) String() string {
 func (*CapabilitiesResponse) ProtoMessage() {}
 
 func (x *CapabilitiesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_libbox_v1_manager_proto_msgTypes[1]
+	mi := &file_api_TargetLib_v1_manager_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -183,7 +183,7 @@ func (x *CapabilitiesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CapabilitiesResponse.ProtoReflect.Descriptor instead.
 func (*CapabilitiesResponse) Descriptor() ([]byte, []int) {
-	return file_api_libbox_v1_manager_proto_rawDescGZIP(), []int{1}
+	return file_api_TargetLib_v1_manager_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *CapabilitiesResponse) GetPlatform() string {
@@ -209,7 +209,7 @@ type ConfigRequest struct {
 
 func (x *ConfigRequest) Reset() {
 	*x = ConfigRequest{}
-	mi := &file_api_libbox_v1_manager_proto_msgTypes[2]
+	mi := &file_api_TargetLib_v1_manager_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -221,7 +221,7 @@ func (x *ConfigRequest) String() string {
 func (*ConfigRequest) ProtoMessage() {}
 
 func (x *ConfigRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_libbox_v1_manager_proto_msgTypes[2]
+	mi := &file_api_TargetLib_v1_manager_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -234,7 +234,7 @@ func (x *ConfigRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ConfigRequest.ProtoReflect.Descriptor instead.
 func (*ConfigRequest) Descriptor() ([]byte, []int) {
-	return file_api_libbox_v1_manager_proto_rawDescGZIP(), []int{2}
+	return file_api_TargetLib_v1_manager_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *ConfigRequest) GetContent() string {
@@ -254,7 +254,7 @@ type CheckConfigResponse struct {
 
 func (x *CheckConfigResponse) Reset() {
 	*x = CheckConfigResponse{}
-	mi := &file_api_libbox_v1_manager_proto_msgTypes[3]
+	mi := &file_api_TargetLib_v1_manager_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -266,7 +266,7 @@ func (x *CheckConfigResponse) String() string {
 func (*CheckConfigResponse) ProtoMessage() {}
 
 func (x *CheckConfigResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_libbox_v1_manager_proto_msgTypes[3]
+	mi := &file_api_TargetLib_v1_manager_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -279,7 +279,7 @@ func (x *CheckConfigResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CheckConfigResponse.ProtoReflect.Descriptor instead.
 func (*CheckConfigResponse) Descriptor() ([]byte, []int) {
-	return file_api_libbox_v1_manager_proto_rawDescGZIP(), []int{3}
+	return file_api_TargetLib_v1_manager_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *CheckConfigResponse) GetValid() bool {
@@ -305,7 +305,7 @@ type StartRequest struct {
 
 func (x *StartRequest) Reset() {
 	*x = StartRequest{}
-	mi := &file_api_libbox_v1_manager_proto_msgTypes[4]
+	mi := &file_api_TargetLib_v1_manager_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -317,7 +317,7 @@ func (x *StartRequest) String() string {
 func (*StartRequest) ProtoMessage() {}
 
 func (x *StartRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_libbox_v1_manager_proto_msgTypes[4]
+	mi := &file_api_TargetLib_v1_manager_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -330,7 +330,7 @@ func (x *StartRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StartRequest.ProtoReflect.Descriptor instead.
 func (*StartRequest) Descriptor() ([]byte, []int) {
-	return file_api_libbox_v1_manager_proto_rawDescGZIP(), []int{4}
+	return file_api_TargetLib_v1_manager_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *StartRequest) GetConfig() string {
@@ -349,7 +349,7 @@ type ReloadRequest struct {
 
 func (x *ReloadRequest) Reset() {
 	*x = ReloadRequest{}
-	mi := &file_api_libbox_v1_manager_proto_msgTypes[5]
+	mi := &file_api_TargetLib_v1_manager_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -361,7 +361,7 @@ func (x *ReloadRequest) String() string {
 func (*ReloadRequest) ProtoMessage() {}
 
 func (x *ReloadRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_libbox_v1_manager_proto_msgTypes[5]
+	mi := &file_api_TargetLib_v1_manager_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -374,7 +374,7 @@ func (x *ReloadRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReloadRequest.ProtoReflect.Descriptor instead.
 func (*ReloadRequest) Descriptor() ([]byte, []int) {
-	return file_api_libbox_v1_manager_proto_rawDescGZIP(), []int{5}
+	return file_api_TargetLib_v1_manager_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *ReloadRequest) GetConfig() string {
@@ -393,7 +393,7 @@ type RestartRequest struct {
 
 func (x *RestartRequest) Reset() {
 	*x = RestartRequest{}
-	mi := &file_api_libbox_v1_manager_proto_msgTypes[6]
+	mi := &file_api_TargetLib_v1_manager_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -405,7 +405,7 @@ func (x *RestartRequest) String() string {
 func (*RestartRequest) ProtoMessage() {}
 
 func (x *RestartRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_libbox_v1_manager_proto_msgTypes[6]
+	mi := &file_api_TargetLib_v1_manager_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -418,7 +418,7 @@ func (x *RestartRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RestartRequest.ProtoReflect.Descriptor instead.
 func (*RestartRequest) Descriptor() ([]byte, []int) {
-	return file_api_libbox_v1_manager_proto_rawDescGZIP(), []int{6}
+	return file_api_TargetLib_v1_manager_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *RestartRequest) GetConfig() string {
@@ -437,7 +437,7 @@ type OperationResponse struct {
 
 func (x *OperationResponse) Reset() {
 	*x = OperationResponse{}
-	mi := &file_api_libbox_v1_manager_proto_msgTypes[7]
+	mi := &file_api_TargetLib_v1_manager_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -449,7 +449,7 @@ func (x *OperationResponse) String() string {
 func (*OperationResponse) ProtoMessage() {}
 
 func (x *OperationResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_libbox_v1_manager_proto_msgTypes[7]
+	mi := &file_api_TargetLib_v1_manager_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -462,7 +462,7 @@ func (x *OperationResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OperationResponse.ProtoReflect.Descriptor instead.
 func (*OperationResponse) Descriptor() ([]byte, []int) {
-	return file_api_libbox_v1_manager_proto_rawDescGZIP(), []int{7}
+	return file_api_TargetLib_v1_manager_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *OperationResponse) GetState() *ServiceState {
@@ -474,7 +474,7 @@ func (x *OperationResponse) GetState() *ServiceState {
 
 type ServiceState struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
-	State           ServiceStateType       `protobuf:"varint,1,opt,name=state,proto3,enum=libbox.v1.ServiceStateType" json:"state,omitempty"`
+	State           ServiceStateType       `protobuf:"varint,1,opt,name=state,proto3,enum=targetlib.v1.ServiceStateType" json:"state,omitempty"`
 	ErrorMessage    string                 `protobuf:"bytes,2,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
 	ChangedAtUnixMs int64                  `protobuf:"varint,3,opt,name=changed_at_unix_ms,json=changedAtUnixMs,proto3" json:"changed_at_unix_ms,omitempty"`
 	unknownFields   protoimpl.UnknownFields
@@ -483,7 +483,7 @@ type ServiceState struct {
 
 func (x *ServiceState) Reset() {
 	*x = ServiceState{}
-	mi := &file_api_libbox_v1_manager_proto_msgTypes[8]
+	mi := &file_api_TargetLib_v1_manager_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -495,7 +495,7 @@ func (x *ServiceState) String() string {
 func (*ServiceState) ProtoMessage() {}
 
 func (x *ServiceState) ProtoReflect() protoreflect.Message {
-	mi := &file_api_libbox_v1_manager_proto_msgTypes[8]
+	mi := &file_api_TargetLib_v1_manager_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -508,7 +508,7 @@ func (x *ServiceState) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ServiceState.ProtoReflect.Descriptor instead.
 func (*ServiceState) Descriptor() ([]byte, []int) {
-	return file_api_libbox_v1_manager_proto_rawDescGZIP(), []int{8}
+	return file_api_TargetLib_v1_manager_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *ServiceState) GetState() ServiceStateType {
@@ -532,13 +532,13 @@ func (x *ServiceState) GetChangedAtUnixMs() int64 {
 	return 0
 }
 
-var File_api_libbox_v1_manager_proto protoreflect.FileDescriptor
+var File_api_TargetLib_v1_manager_proto protoreflect.FileDescriptor
 
-const file_api_libbox_v1_manager_proto_rawDesc = "" +
+const file_api_TargetLib_v1_manager_proto_rawDesc = "" +
 	"\n" +
-	"\x1bapi/libbox/v1/manager.proto\x12\tlibbox.v1\x1a\x1bgoogle/protobuf/empty.proto\"\xac\x01\n" +
-	"\x0fVersionResponse\x12%\n" +
-	"\x0elibbox_version\x18\x01 \x01(\tR\rlibboxVersion\x12(\n" +
+	"\x1eapi/TargetLib/v1/manager.proto\x12\ftargetlib.v1\x1a\x1bgoogle/protobuf/empty.proto\"\xb2\x01\n" +
+	"\x0fVersionResponse\x12+\n" +
+	"\x11targetlib_version\x18\x01 \x01(\tR\x10targetlibVersion\x12(\n" +
 	"\x10sing_box_version\x18\x02 \x01(\tR\x0esingBoxVersion\x12\x1d\n" +
 	"\n" +
 	"go_version\x18\x03 \x01(\tR\tgoVersion\x12)\n" +
@@ -556,11 +556,11 @@ const file_api_libbox_v1_manager_proto_rawDesc = "" +
 	"\rReloadRequest\x12\x16\n" +
 	"\x06config\x18\x01 \x01(\tR\x06config\"(\n" +
 	"\x0eRestartRequest\x12\x16\n" +
-	"\x06config\x18\x01 \x01(\tR\x06config\"B\n" +
-	"\x11OperationResponse\x12-\n" +
-	"\x05state\x18\x01 \x01(\v2\x17.libbox.v1.ServiceStateR\x05state\"\x93\x01\n" +
-	"\fServiceState\x121\n" +
-	"\x05state\x18\x01 \x01(\x0e2\x1b.libbox.v1.ServiceStateTypeR\x05state\x12#\n" +
+	"\x06config\x18\x01 \x01(\tR\x06config\"E\n" +
+	"\x11OperationResponse\x120\n" +
+	"\x05state\x18\x01 \x01(\v2\x1a.targetlib.v1.ServiceStateR\x05state\"\x96\x01\n" +
+	"\fServiceState\x124\n" +
+	"\x05state\x18\x01 \x01(\x0e2\x1e.targetlib.v1.ServiceStateTypeR\x05state\x12#\n" +
 	"\rerror_message\x18\x02 \x01(\tR\ferrorMessage\x12+\n" +
 	"\x12changed_at_unix_ms\x18\x03 \x01(\x03R\x0fchangedAtUnixMs*\xb6\x01\n" +
 	"\x10ServiceStateType\x12\x1d\n" +
@@ -569,67 +569,67 @@ const file_api_libbox_v1_manager_proto_rawDesc = "" +
 	"\x16SERVICE_STATE_STARTING\x10\x02\x12\x19\n" +
 	"\x15SERVICE_STATE_RUNNING\x10\x03\x12\x1a\n" +
 	"\x16SERVICE_STATE_STOPPING\x10\x04\x12\x18\n" +
-	"\x14SERVICE_STATE_FAILED\x10\x052\xec\x04\n" +
-	"\rLibboxManager\x12@\n" +
+	"\x14SERVICE_STATE_FAILED\x10\x052\x96\x05\n" +
+	"\x10TargetLibManager\x12C\n" +
 	"\n" +
-	"GetVersion\x12\x16.google.protobuf.Empty\x1a\x1a.libbox.v1.VersionResponse\x12J\n" +
-	"\x0fGetCapabilities\x12\x16.google.protobuf.Empty\x1a\x1f.libbox.v1.CapabilitiesResponse\x12G\n" +
-	"\vCheckConfig\x12\x18.libbox.v1.ConfigRequest\x1a\x1e.libbox.v1.CheckConfigResponse\x12>\n" +
-	"\x05Start\x12\x17.libbox.v1.StartRequest\x1a\x1c.libbox.v1.OperationResponse\x12@\n" +
-	"\x06Reload\x12\x18.libbox.v1.ReloadRequest\x1a\x1c.libbox.v1.OperationResponse\x12B\n" +
-	"\aRestart\x12\x19.libbox.v1.RestartRequest\x1a\x1c.libbox.v1.OperationResponse\x12<\n" +
-	"\x04Stop\x12\x16.google.protobuf.Empty\x1a\x1c.libbox.v1.OperationResponse\x12;\n" +
-	"\bGetState\x12\x16.google.protobuf.Empty\x1a\x17.libbox.v1.ServiceState\x12C\n" +
-	"\x0eSubscribeState\x12\x16.google.protobuf.Empty\x1a\x17.libbox.v1.ServiceState0\x01B6Z4github.com/loafman1120/libbox/api/libbox/v1;libboxv1b\x06proto3"
+	"GetVersion\x12\x16.google.protobuf.Empty\x1a\x1d.targetlib.v1.VersionResponse\x12M\n" +
+	"\x0fGetCapabilities\x12\x16.google.protobuf.Empty\x1a\".targetlib.v1.CapabilitiesResponse\x12M\n" +
+	"\vCheckConfig\x12\x1b.targetlib.v1.ConfigRequest\x1a!.targetlib.v1.CheckConfigResponse\x12D\n" +
+	"\x05Start\x12\x1a.targetlib.v1.StartRequest\x1a\x1f.targetlib.v1.OperationResponse\x12F\n" +
+	"\x06Reload\x12\x1b.targetlib.v1.ReloadRequest\x1a\x1f.targetlib.v1.OperationResponse\x12H\n" +
+	"\aRestart\x12\x1c.targetlib.v1.RestartRequest\x1a\x1f.targetlib.v1.OperationResponse\x12?\n" +
+	"\x04Stop\x12\x16.google.protobuf.Empty\x1a\x1f.targetlib.v1.OperationResponse\x12>\n" +
+	"\bGetState\x12\x16.google.protobuf.Empty\x1a\x1a.targetlib.v1.ServiceState\x12F\n" +
+	"\x0eSubscribeState\x12\x16.google.protobuf.Empty\x1a\x1a.targetlib.v1.ServiceState0\x01B?Z=github.com/loafman1120/TargetLib/api/TargetLib/v1;targetlibv1b\x06proto3"
 
 var (
-	file_api_libbox_v1_manager_proto_rawDescOnce sync.Once
-	file_api_libbox_v1_manager_proto_rawDescData []byte
+	file_api_TargetLib_v1_manager_proto_rawDescOnce sync.Once
+	file_api_TargetLib_v1_manager_proto_rawDescData []byte
 )
 
-func file_api_libbox_v1_manager_proto_rawDescGZIP() []byte {
-	file_api_libbox_v1_manager_proto_rawDescOnce.Do(func() {
-		file_api_libbox_v1_manager_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_api_libbox_v1_manager_proto_rawDesc), len(file_api_libbox_v1_manager_proto_rawDesc)))
+func file_api_TargetLib_v1_manager_proto_rawDescGZIP() []byte {
+	file_api_TargetLib_v1_manager_proto_rawDescOnce.Do(func() {
+		file_api_TargetLib_v1_manager_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_api_TargetLib_v1_manager_proto_rawDesc), len(file_api_TargetLib_v1_manager_proto_rawDesc)))
 	})
-	return file_api_libbox_v1_manager_proto_rawDescData
+	return file_api_TargetLib_v1_manager_proto_rawDescData
 }
 
-var file_api_libbox_v1_manager_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_api_libbox_v1_manager_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
-var file_api_libbox_v1_manager_proto_goTypes = []any{
-	(ServiceStateType)(0),        // 0: libbox.v1.ServiceStateType
-	(*VersionResponse)(nil),      // 1: libbox.v1.VersionResponse
-	(*CapabilitiesResponse)(nil), // 2: libbox.v1.CapabilitiesResponse
-	(*ConfigRequest)(nil),        // 3: libbox.v1.ConfigRequest
-	(*CheckConfigResponse)(nil),  // 4: libbox.v1.CheckConfigResponse
-	(*StartRequest)(nil),         // 5: libbox.v1.StartRequest
-	(*ReloadRequest)(nil),        // 6: libbox.v1.ReloadRequest
-	(*RestartRequest)(nil),       // 7: libbox.v1.RestartRequest
-	(*OperationResponse)(nil),    // 8: libbox.v1.OperationResponse
-	(*ServiceState)(nil),         // 9: libbox.v1.ServiceState
+var file_api_TargetLib_v1_manager_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_api_TargetLib_v1_manager_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_api_TargetLib_v1_manager_proto_goTypes = []any{
+	(ServiceStateType)(0),        // 0: targetlib.v1.ServiceStateType
+	(*VersionResponse)(nil),      // 1: targetlib.v1.VersionResponse
+	(*CapabilitiesResponse)(nil), // 2: targetlib.v1.CapabilitiesResponse
+	(*ConfigRequest)(nil),        // 3: targetlib.v1.ConfigRequest
+	(*CheckConfigResponse)(nil),  // 4: targetlib.v1.CheckConfigResponse
+	(*StartRequest)(nil),         // 5: targetlib.v1.StartRequest
+	(*ReloadRequest)(nil),        // 6: targetlib.v1.ReloadRequest
+	(*RestartRequest)(nil),       // 7: targetlib.v1.RestartRequest
+	(*OperationResponse)(nil),    // 8: targetlib.v1.OperationResponse
+	(*ServiceState)(nil),         // 9: targetlib.v1.ServiceState
 	(*emptypb.Empty)(nil),        // 10: google.protobuf.Empty
 }
-var file_api_libbox_v1_manager_proto_depIdxs = []int32{
-	9,  // 0: libbox.v1.OperationResponse.state:type_name -> libbox.v1.ServiceState
-	0,  // 1: libbox.v1.ServiceState.state:type_name -> libbox.v1.ServiceStateType
-	10, // 2: libbox.v1.LibboxManager.GetVersion:input_type -> google.protobuf.Empty
-	10, // 3: libbox.v1.LibboxManager.GetCapabilities:input_type -> google.protobuf.Empty
-	3,  // 4: libbox.v1.LibboxManager.CheckConfig:input_type -> libbox.v1.ConfigRequest
-	5,  // 5: libbox.v1.LibboxManager.Start:input_type -> libbox.v1.StartRequest
-	6,  // 6: libbox.v1.LibboxManager.Reload:input_type -> libbox.v1.ReloadRequest
-	7,  // 7: libbox.v1.LibboxManager.Restart:input_type -> libbox.v1.RestartRequest
-	10, // 8: libbox.v1.LibboxManager.Stop:input_type -> google.protobuf.Empty
-	10, // 9: libbox.v1.LibboxManager.GetState:input_type -> google.protobuf.Empty
-	10, // 10: libbox.v1.LibboxManager.SubscribeState:input_type -> google.protobuf.Empty
-	1,  // 11: libbox.v1.LibboxManager.GetVersion:output_type -> libbox.v1.VersionResponse
-	2,  // 12: libbox.v1.LibboxManager.GetCapabilities:output_type -> libbox.v1.CapabilitiesResponse
-	4,  // 13: libbox.v1.LibboxManager.CheckConfig:output_type -> libbox.v1.CheckConfigResponse
-	8,  // 14: libbox.v1.LibboxManager.Start:output_type -> libbox.v1.OperationResponse
-	8,  // 15: libbox.v1.LibboxManager.Reload:output_type -> libbox.v1.OperationResponse
-	8,  // 16: libbox.v1.LibboxManager.Restart:output_type -> libbox.v1.OperationResponse
-	8,  // 17: libbox.v1.LibboxManager.Stop:output_type -> libbox.v1.OperationResponse
-	9,  // 18: libbox.v1.LibboxManager.GetState:output_type -> libbox.v1.ServiceState
-	9,  // 19: libbox.v1.LibboxManager.SubscribeState:output_type -> libbox.v1.ServiceState
+var file_api_TargetLib_v1_manager_proto_depIdxs = []int32{
+	9,  // 0: targetlib.v1.OperationResponse.state:type_name -> targetlib.v1.ServiceState
+	0,  // 1: targetlib.v1.ServiceState.state:type_name -> targetlib.v1.ServiceStateType
+	10, // 2: targetlib.v1.TargetLibManager.GetVersion:input_type -> google.protobuf.Empty
+	10, // 3: targetlib.v1.TargetLibManager.GetCapabilities:input_type -> google.protobuf.Empty
+	3,  // 4: targetlib.v1.TargetLibManager.CheckConfig:input_type -> targetlib.v1.ConfigRequest
+	5,  // 5: targetlib.v1.TargetLibManager.Start:input_type -> targetlib.v1.StartRequest
+	6,  // 6: targetlib.v1.TargetLibManager.Reload:input_type -> targetlib.v1.ReloadRequest
+	7,  // 7: targetlib.v1.TargetLibManager.Restart:input_type -> targetlib.v1.RestartRequest
+	10, // 8: targetlib.v1.TargetLibManager.Stop:input_type -> google.protobuf.Empty
+	10, // 9: targetlib.v1.TargetLibManager.GetState:input_type -> google.protobuf.Empty
+	10, // 10: targetlib.v1.TargetLibManager.SubscribeState:input_type -> google.protobuf.Empty
+	1,  // 11: targetlib.v1.TargetLibManager.GetVersion:output_type -> targetlib.v1.VersionResponse
+	2,  // 12: targetlib.v1.TargetLibManager.GetCapabilities:output_type -> targetlib.v1.CapabilitiesResponse
+	4,  // 13: targetlib.v1.TargetLibManager.CheckConfig:output_type -> targetlib.v1.CheckConfigResponse
+	8,  // 14: targetlib.v1.TargetLibManager.Start:output_type -> targetlib.v1.OperationResponse
+	8,  // 15: targetlib.v1.TargetLibManager.Reload:output_type -> targetlib.v1.OperationResponse
+	8,  // 16: targetlib.v1.TargetLibManager.Restart:output_type -> targetlib.v1.OperationResponse
+	8,  // 17: targetlib.v1.TargetLibManager.Stop:output_type -> targetlib.v1.OperationResponse
+	9,  // 18: targetlib.v1.TargetLibManager.GetState:output_type -> targetlib.v1.ServiceState
+	9,  // 19: targetlib.v1.TargetLibManager.SubscribeState:output_type -> targetlib.v1.ServiceState
 	11, // [11:20] is the sub-list for method output_type
 	2,  // [2:11] is the sub-list for method input_type
 	2,  // [2:2] is the sub-list for extension type_name
@@ -637,27 +637,27 @@ var file_api_libbox_v1_manager_proto_depIdxs = []int32{
 	0,  // [0:2] is the sub-list for field type_name
 }
 
-func init() { file_api_libbox_v1_manager_proto_init() }
-func file_api_libbox_v1_manager_proto_init() {
-	if File_api_libbox_v1_manager_proto != nil {
+func init() { file_api_TargetLib_v1_manager_proto_init() }
+func file_api_TargetLib_v1_manager_proto_init() {
+	if File_api_TargetLib_v1_manager_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_libbox_v1_manager_proto_rawDesc), len(file_api_libbox_v1_manager_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_TargetLib_v1_manager_proto_rawDesc), len(file_api_TargetLib_v1_manager_proto_rawDesc)),
 			NumEnums:      1,
 			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_api_libbox_v1_manager_proto_goTypes,
-		DependencyIndexes: file_api_libbox_v1_manager_proto_depIdxs,
-		EnumInfos:         file_api_libbox_v1_manager_proto_enumTypes,
-		MessageInfos:      file_api_libbox_v1_manager_proto_msgTypes,
+		GoTypes:           file_api_TargetLib_v1_manager_proto_goTypes,
+		DependencyIndexes: file_api_TargetLib_v1_manager_proto_depIdxs,
+		EnumInfos:         file_api_TargetLib_v1_manager_proto_enumTypes,
+		MessageInfos:      file_api_TargetLib_v1_manager_proto_msgTypes,
 	}.Build()
-	File_api_libbox_v1_manager_proto = out.File
-	file_api_libbox_v1_manager_proto_goTypes = nil
-	file_api_libbox_v1_manager_proto_depIdxs = nil
+	File_api_TargetLib_v1_manager_proto = out.File
+	file_api_TargetLib_v1_manager_proto_goTypes = nil
+	file_api_TargetLib_v1_manager_proto_depIdxs = nil
 }

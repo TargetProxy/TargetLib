@@ -11,11 +11,11 @@ import (
 	"sync"
 
 	"github.com/kardianos/service"
-	"github.com/loafman1120/libbox/manager"
+	"github.com/loafman1120/TargetLib/manager"
 	"google.golang.org/grpc"
 )
 
-const serviceName = "libboxd"
+const serviceName = "targetlibd"
 
 type commandOptions struct {
 	basePath    string
@@ -58,7 +58,7 @@ func main() {
 	serviceConfig := &service.Config{
 		Name:        serviceName,
 		DisplayName: serviceName,
-		Description: "libbox gRPC daemon for sing-box",
+		Description: "TargetLib gRPC daemon for sing-box",
 		Arguments:   serviceArguments(options),
 		Option: service.KeyValue{
 			"StartType":              "automatic",

@@ -1,12 +1,12 @@
 syntax = "proto3";
 
-package libbox.v1;
+package targetlib.v1;
 
-option go_package = "github.com/loafman1120/libbox/api/libbox/v1;libboxv1";
+option go_package = "github.com/loafman1120/TargetLib/api/TargetLib/v1;targetlibv1";
 
 import "google/protobuf/empty.proto";
 
-service LibboxManager {
+service TargetLibManager {
   rpc GetVersion(google.protobuf.Empty) returns (VersionResponse);
   rpc GetCapabilities(google.protobuf.Empty) returns (CapabilitiesResponse);
   rpc CheckConfig(ConfigRequest) returns (CheckConfigResponse);
@@ -19,7 +19,7 @@ service LibboxManager {
 }
 
 message VersionResponse {
-  string libbox_version = 1;
+  string targetlib_version = 1;
   string sing_box_version = 2;
   string go_version = 3;
   uint32 protocol_version = 4;

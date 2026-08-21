@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	libboxv1 "github.com/loafman1120/libbox/api/libbox/v1"
+	targetlibv1 "github.com/loafman1120/TargetLib/api/TargetLib/v1"
 	"github.com/sagernet/sing-box/daemon"
 	"google.golang.org/grpc"
 )
@@ -49,7 +49,7 @@ func Listen(manager *Manager, socketPath string) (*Server, error) {
 	// Windows ignores this mode for AF_UNIX sockets.
 	_ = os.Chmod(socketPath, 0o600)
 	server := grpc.NewServer()
-	libboxv1.RegisterLibboxManagerServer(server, manager)
+	targetlibv1.RegisterTargetLibManagerServer(server, manager)
 	daemon.RegisterStartedServiceServer(server, manager.StartedService())
 	return &Server{
 		manager:  manager,
