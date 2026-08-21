@@ -16,8 +16,6 @@ service LibboxManager {
   rpc Stop(google.protobuf.Empty) returns (OperationResponse);
   rpc GetState(google.protobuf.Empty) returns (ServiceState);
   rpc SubscribeState(google.protobuf.Empty) returns (stream ServiceState);
-  rpc GetSystemProxyStatus(google.protobuf.Empty) returns (SystemProxyStatus);
-  rpc SetSystemProxy(SetSystemProxyRequest) returns (SystemProxyStatus);
 }
 
 message VersionResponse {
@@ -29,7 +27,8 @@ message VersionResponse {
 
 message CapabilitiesResponse {
   string platform = 1;
-  bool system_proxy = 2;
+  reserved 2;
+  reserved "system_proxy";
   bool platform_vpn = 3;
   reserved 4;
 }
@@ -72,18 +71,4 @@ message ServiceState {
   ServiceStateType state = 1;
   string error_message = 2;
   int64 changed_at_unix_ms = 3;
-}
-
-message SystemProxyStatus {
-  bool supported = 1;
-  bool enabled = 2;
-  string server = 3;
-  string bypass = 4;
-}
-
-message SetSystemProxyRequest {
-  bool enabled = 1;
-  string host = 2;
-  uint32 port = 3;
-  string bypass = 4;
 }

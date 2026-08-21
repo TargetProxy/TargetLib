@@ -151,7 +151,6 @@ func (x *VersionResponse) GetProtocolVersion() uint32 {
 type CapabilitiesResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Platform      string                 `protobuf:"bytes,1,opt,name=platform,proto3" json:"platform,omitempty"`
-	SystemProxy   bool                   `protobuf:"varint,2,opt,name=system_proxy,json=systemProxy,proto3" json:"system_proxy,omitempty"`
 	PlatformVpn   bool                   `protobuf:"varint,3,opt,name=platform_vpn,json=platformVpn,proto3" json:"platform_vpn,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -192,13 +191,6 @@ func (x *CapabilitiesResponse) GetPlatform() string {
 		return x.Platform
 	}
 	return ""
-}
-
-func (x *CapabilitiesResponse) GetSystemProxy() bool {
-	if x != nil {
-		return x.SystemProxy
-	}
-	return false
 }
 
 func (x *CapabilitiesResponse) GetPlatformVpn() bool {
@@ -540,142 +532,6 @@ func (x *ServiceState) GetChangedAtUnixMs() int64 {
 	return 0
 }
 
-type SystemProxyStatus struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Supported     bool                   `protobuf:"varint,1,opt,name=supported,proto3" json:"supported,omitempty"`
-	Enabled       bool                   `protobuf:"varint,2,opt,name=enabled,proto3" json:"enabled,omitempty"`
-	Server        string                 `protobuf:"bytes,3,opt,name=server,proto3" json:"server,omitempty"`
-	Bypass        string                 `protobuf:"bytes,4,opt,name=bypass,proto3" json:"bypass,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *SystemProxyStatus) Reset() {
-	*x = SystemProxyStatus{}
-	mi := &file_api_libbox_v1_manager_proto_msgTypes[9]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *SystemProxyStatus) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SystemProxyStatus) ProtoMessage() {}
-
-func (x *SystemProxyStatus) ProtoReflect() protoreflect.Message {
-	mi := &file_api_libbox_v1_manager_proto_msgTypes[9]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SystemProxyStatus.ProtoReflect.Descriptor instead.
-func (*SystemProxyStatus) Descriptor() ([]byte, []int) {
-	return file_api_libbox_v1_manager_proto_rawDescGZIP(), []int{9}
-}
-
-func (x *SystemProxyStatus) GetSupported() bool {
-	if x != nil {
-		return x.Supported
-	}
-	return false
-}
-
-func (x *SystemProxyStatus) GetEnabled() bool {
-	if x != nil {
-		return x.Enabled
-	}
-	return false
-}
-
-func (x *SystemProxyStatus) GetServer() string {
-	if x != nil {
-		return x.Server
-	}
-	return ""
-}
-
-func (x *SystemProxyStatus) GetBypass() string {
-	if x != nil {
-		return x.Bypass
-	}
-	return ""
-}
-
-type SetSystemProxyRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Enabled       bool                   `protobuf:"varint,1,opt,name=enabled,proto3" json:"enabled,omitempty"`
-	Host          string                 `protobuf:"bytes,2,opt,name=host,proto3" json:"host,omitempty"`
-	Port          uint32                 `protobuf:"varint,3,opt,name=port,proto3" json:"port,omitempty"`
-	Bypass        string                 `protobuf:"bytes,4,opt,name=bypass,proto3" json:"bypass,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *SetSystemProxyRequest) Reset() {
-	*x = SetSystemProxyRequest{}
-	mi := &file_api_libbox_v1_manager_proto_msgTypes[10]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *SetSystemProxyRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SetSystemProxyRequest) ProtoMessage() {}
-
-func (x *SetSystemProxyRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_libbox_v1_manager_proto_msgTypes[10]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SetSystemProxyRequest.ProtoReflect.Descriptor instead.
-func (*SetSystemProxyRequest) Descriptor() ([]byte, []int) {
-	return file_api_libbox_v1_manager_proto_rawDescGZIP(), []int{10}
-}
-
-func (x *SetSystemProxyRequest) GetEnabled() bool {
-	if x != nil {
-		return x.Enabled
-	}
-	return false
-}
-
-func (x *SetSystemProxyRequest) GetHost() string {
-	if x != nil {
-		return x.Host
-	}
-	return ""
-}
-
-func (x *SetSystemProxyRequest) GetPort() uint32 {
-	if x != nil {
-		return x.Port
-	}
-	return 0
-}
-
-func (x *SetSystemProxyRequest) GetBypass() string {
-	if x != nil {
-		return x.Bypass
-	}
-	return ""
-}
-
 var File_api_libbox_v1_manager_proto protoreflect.FileDescriptor
 
 const file_api_libbox_v1_manager_proto_rawDesc = "" +
@@ -686,11 +542,10 @@ const file_api_libbox_v1_manager_proto_rawDesc = "" +
 	"\x10sing_box_version\x18\x02 \x01(\tR\x0esingBoxVersion\x12\x1d\n" +
 	"\n" +
 	"go_version\x18\x03 \x01(\tR\tgoVersion\x12)\n" +
-	"\x10protocol_version\x18\x04 \x01(\rR\x0fprotocolVersion\"~\n" +
+	"\x10protocol_version\x18\x04 \x01(\rR\x0fprotocolVersion\"o\n" +
 	"\x14CapabilitiesResponse\x12\x1a\n" +
 	"\bplatform\x18\x01 \x01(\tR\bplatform\x12!\n" +
-	"\fsystem_proxy\x18\x02 \x01(\bR\vsystemProxy\x12!\n" +
-	"\fplatform_vpn\x18\x03 \x01(\bR\vplatformVpnJ\x04\b\x04\x10\x05\")\n" +
+	"\fplatform_vpn\x18\x03 \x01(\bR\vplatformVpnJ\x04\b\x02\x10\x03J\x04\b\x04\x10\x05R\fsystem_proxy\")\n" +
 	"\rConfigRequest\x12\x18\n" +
 	"\acontent\x18\x01 \x01(\tR\acontent\"T\n" +
 	"\x13CheckConfigResponse\x12\x14\n" +
@@ -707,24 +562,14 @@ const file_api_libbox_v1_manager_proto_rawDesc = "" +
 	"\fServiceState\x121\n" +
 	"\x05state\x18\x01 \x01(\x0e2\x1b.libbox.v1.ServiceStateTypeR\x05state\x12#\n" +
 	"\rerror_message\x18\x02 \x01(\tR\ferrorMessage\x12+\n" +
-	"\x12changed_at_unix_ms\x18\x03 \x01(\x03R\x0fchangedAtUnixMs\"{\n" +
-	"\x11SystemProxyStatus\x12\x1c\n" +
-	"\tsupported\x18\x01 \x01(\bR\tsupported\x12\x18\n" +
-	"\aenabled\x18\x02 \x01(\bR\aenabled\x12\x16\n" +
-	"\x06server\x18\x03 \x01(\tR\x06server\x12\x16\n" +
-	"\x06bypass\x18\x04 \x01(\tR\x06bypass\"q\n" +
-	"\x15SetSystemProxyRequest\x12\x18\n" +
-	"\aenabled\x18\x01 \x01(\bR\aenabled\x12\x12\n" +
-	"\x04host\x18\x02 \x01(\tR\x04host\x12\x12\n" +
-	"\x04port\x18\x03 \x01(\rR\x04port\x12\x16\n" +
-	"\x06bypass\x18\x04 \x01(\tR\x06bypass*\xb6\x01\n" +
+	"\x12changed_at_unix_ms\x18\x03 \x01(\x03R\x0fchangedAtUnixMs*\xb6\x01\n" +
 	"\x10ServiceStateType\x12\x1d\n" +
 	"\x19SERVICE_STATE_UNSPECIFIED\x10\x00\x12\x16\n" +
 	"\x12SERVICE_STATE_IDLE\x10\x01\x12\x1a\n" +
 	"\x16SERVICE_STATE_STARTING\x10\x02\x12\x19\n" +
 	"\x15SERVICE_STATE_RUNNING\x10\x03\x12\x1a\n" +
 	"\x16SERVICE_STATE_STOPPING\x10\x04\x12\x18\n" +
-	"\x14SERVICE_STATE_FAILED\x10\x052\x8c\x06\n" +
+	"\x14SERVICE_STATE_FAILED\x10\x052\xec\x04\n" +
 	"\rLibboxManager\x12@\n" +
 	"\n" +
 	"GetVersion\x12\x16.google.protobuf.Empty\x1a\x1a.libbox.v1.VersionResponse\x12J\n" +
@@ -735,9 +580,7 @@ const file_api_libbox_v1_manager_proto_rawDesc = "" +
 	"\aRestart\x12\x19.libbox.v1.RestartRequest\x1a\x1c.libbox.v1.OperationResponse\x12<\n" +
 	"\x04Stop\x12\x16.google.protobuf.Empty\x1a\x1c.libbox.v1.OperationResponse\x12;\n" +
 	"\bGetState\x12\x16.google.protobuf.Empty\x1a\x17.libbox.v1.ServiceState\x12C\n" +
-	"\x0eSubscribeState\x12\x16.google.protobuf.Empty\x1a\x17.libbox.v1.ServiceState0\x01\x12L\n" +
-	"\x14GetSystemProxyStatus\x12\x16.google.protobuf.Empty\x1a\x1c.libbox.v1.SystemProxyStatus\x12P\n" +
-	"\x0eSetSystemProxy\x12 .libbox.v1.SetSystemProxyRequest\x1a\x1c.libbox.v1.SystemProxyStatusB6Z4github.com/loafman1120/libbox/api/libbox/v1;libboxv1b\x06proto3"
+	"\x0eSubscribeState\x12\x16.google.protobuf.Empty\x1a\x17.libbox.v1.ServiceState0\x01B6Z4github.com/loafman1120/libbox/api/libbox/v1;libboxv1b\x06proto3"
 
 var (
 	file_api_libbox_v1_manager_proto_rawDescOnce sync.Once
@@ -752,49 +595,43 @@ func file_api_libbox_v1_manager_proto_rawDescGZIP() []byte {
 }
 
 var file_api_libbox_v1_manager_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_api_libbox_v1_manager_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_api_libbox_v1_manager_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_api_libbox_v1_manager_proto_goTypes = []any{
-	(ServiceStateType)(0),         // 0: libbox.v1.ServiceStateType
-	(*VersionResponse)(nil),       // 1: libbox.v1.VersionResponse
-	(*CapabilitiesResponse)(nil),  // 2: libbox.v1.CapabilitiesResponse
-	(*ConfigRequest)(nil),         // 3: libbox.v1.ConfigRequest
-	(*CheckConfigResponse)(nil),   // 4: libbox.v1.CheckConfigResponse
-	(*StartRequest)(nil),          // 5: libbox.v1.StartRequest
-	(*ReloadRequest)(nil),         // 6: libbox.v1.ReloadRequest
-	(*RestartRequest)(nil),        // 7: libbox.v1.RestartRequest
-	(*OperationResponse)(nil),     // 8: libbox.v1.OperationResponse
-	(*ServiceState)(nil),          // 9: libbox.v1.ServiceState
-	(*SystemProxyStatus)(nil),     // 10: libbox.v1.SystemProxyStatus
-	(*SetSystemProxyRequest)(nil), // 11: libbox.v1.SetSystemProxyRequest
-	(*emptypb.Empty)(nil),         // 12: google.protobuf.Empty
+	(ServiceStateType)(0),        // 0: libbox.v1.ServiceStateType
+	(*VersionResponse)(nil),      // 1: libbox.v1.VersionResponse
+	(*CapabilitiesResponse)(nil), // 2: libbox.v1.CapabilitiesResponse
+	(*ConfigRequest)(nil),        // 3: libbox.v1.ConfigRequest
+	(*CheckConfigResponse)(nil),  // 4: libbox.v1.CheckConfigResponse
+	(*StartRequest)(nil),         // 5: libbox.v1.StartRequest
+	(*ReloadRequest)(nil),        // 6: libbox.v1.ReloadRequest
+	(*RestartRequest)(nil),       // 7: libbox.v1.RestartRequest
+	(*OperationResponse)(nil),    // 8: libbox.v1.OperationResponse
+	(*ServiceState)(nil),         // 9: libbox.v1.ServiceState
+	(*emptypb.Empty)(nil),        // 10: google.protobuf.Empty
 }
 var file_api_libbox_v1_manager_proto_depIdxs = []int32{
 	9,  // 0: libbox.v1.OperationResponse.state:type_name -> libbox.v1.ServiceState
 	0,  // 1: libbox.v1.ServiceState.state:type_name -> libbox.v1.ServiceStateType
-	12, // 2: libbox.v1.LibboxManager.GetVersion:input_type -> google.protobuf.Empty
-	12, // 3: libbox.v1.LibboxManager.GetCapabilities:input_type -> google.protobuf.Empty
+	10, // 2: libbox.v1.LibboxManager.GetVersion:input_type -> google.protobuf.Empty
+	10, // 3: libbox.v1.LibboxManager.GetCapabilities:input_type -> google.protobuf.Empty
 	3,  // 4: libbox.v1.LibboxManager.CheckConfig:input_type -> libbox.v1.ConfigRequest
 	5,  // 5: libbox.v1.LibboxManager.Start:input_type -> libbox.v1.StartRequest
 	6,  // 6: libbox.v1.LibboxManager.Reload:input_type -> libbox.v1.ReloadRequest
 	7,  // 7: libbox.v1.LibboxManager.Restart:input_type -> libbox.v1.RestartRequest
-	12, // 8: libbox.v1.LibboxManager.Stop:input_type -> google.protobuf.Empty
-	12, // 9: libbox.v1.LibboxManager.GetState:input_type -> google.protobuf.Empty
-	12, // 10: libbox.v1.LibboxManager.SubscribeState:input_type -> google.protobuf.Empty
-	12, // 11: libbox.v1.LibboxManager.GetSystemProxyStatus:input_type -> google.protobuf.Empty
-	11, // 12: libbox.v1.LibboxManager.SetSystemProxy:input_type -> libbox.v1.SetSystemProxyRequest
-	1,  // 13: libbox.v1.LibboxManager.GetVersion:output_type -> libbox.v1.VersionResponse
-	2,  // 14: libbox.v1.LibboxManager.GetCapabilities:output_type -> libbox.v1.CapabilitiesResponse
-	4,  // 15: libbox.v1.LibboxManager.CheckConfig:output_type -> libbox.v1.CheckConfigResponse
-	8,  // 16: libbox.v1.LibboxManager.Start:output_type -> libbox.v1.OperationResponse
-	8,  // 17: libbox.v1.LibboxManager.Reload:output_type -> libbox.v1.OperationResponse
-	8,  // 18: libbox.v1.LibboxManager.Restart:output_type -> libbox.v1.OperationResponse
-	8,  // 19: libbox.v1.LibboxManager.Stop:output_type -> libbox.v1.OperationResponse
-	9,  // 20: libbox.v1.LibboxManager.GetState:output_type -> libbox.v1.ServiceState
-	9,  // 21: libbox.v1.LibboxManager.SubscribeState:output_type -> libbox.v1.ServiceState
-	10, // 22: libbox.v1.LibboxManager.GetSystemProxyStatus:output_type -> libbox.v1.SystemProxyStatus
-	10, // 23: libbox.v1.LibboxManager.SetSystemProxy:output_type -> libbox.v1.SystemProxyStatus
-	13, // [13:24] is the sub-list for method output_type
-	2,  // [2:13] is the sub-list for method input_type
+	10, // 8: libbox.v1.LibboxManager.Stop:input_type -> google.protobuf.Empty
+	10, // 9: libbox.v1.LibboxManager.GetState:input_type -> google.protobuf.Empty
+	10, // 10: libbox.v1.LibboxManager.SubscribeState:input_type -> google.protobuf.Empty
+	1,  // 11: libbox.v1.LibboxManager.GetVersion:output_type -> libbox.v1.VersionResponse
+	2,  // 12: libbox.v1.LibboxManager.GetCapabilities:output_type -> libbox.v1.CapabilitiesResponse
+	4,  // 13: libbox.v1.LibboxManager.CheckConfig:output_type -> libbox.v1.CheckConfigResponse
+	8,  // 14: libbox.v1.LibboxManager.Start:output_type -> libbox.v1.OperationResponse
+	8,  // 15: libbox.v1.LibboxManager.Reload:output_type -> libbox.v1.OperationResponse
+	8,  // 16: libbox.v1.LibboxManager.Restart:output_type -> libbox.v1.OperationResponse
+	8,  // 17: libbox.v1.LibboxManager.Stop:output_type -> libbox.v1.OperationResponse
+	9,  // 18: libbox.v1.LibboxManager.GetState:output_type -> libbox.v1.ServiceState
+	9,  // 19: libbox.v1.LibboxManager.SubscribeState:output_type -> libbox.v1.ServiceState
+	11, // [11:20] is the sub-list for method output_type
+	2,  // [2:11] is the sub-list for method input_type
 	2,  // [2:2] is the sub-list for extension type_name
 	2,  // [2:2] is the sub-list for extension extendee
 	0,  // [0:2] is the sub-list for field type_name
@@ -811,7 +648,7 @@ func file_api_libbox_v1_manager_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_libbox_v1_manager_proto_rawDesc), len(file_api_libbox_v1_manager_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   11,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

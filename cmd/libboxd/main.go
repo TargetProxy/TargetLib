@@ -6,51 +6,200 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"os/signal"
 	"path/filepath"
-	"syscall"
+	"strconv"
+	"sync"
 
+	"github.com/kardianos/service"
 	"github.com/loafman1120/libbox/manager"
 	"google.golang.org/grpc"
 )
 
+const serviceName = "libboxd"
+
+type commandOptions struct {
+	basePath    string
+	workingPath string
+	tempPath    string
+	locale      string
+	logMaxLines int
+	debug       bool
+}
+
+type program struct {
+	options    manager.Options
+	socketPath string
+	logger     service.Logger
+
+	mu     sync.Mutex
+	server *manager.Server
+}
+
 func main() {
-	basePath := flag.String("base-path", ".", "runtime base directory")
-	workingPath := flag.String("working-path", "", "sing-box working directory")
-	tempPath := flag.String("temp-path", "", "sing-box temporary directory")
-	locale := flag.String("locale", "", "locale identifier")
-	logMaxLines := flag.Int("log-max-lines", 300, "number of retained log lines")
-	debugMode := flag.Bool("debug", false, "enable debug mode")
-	flag.Parse()
+	action, options, err := parseCommandLine(os.Args[1:])
+	if err != nil {
+		if errors.Is(err, flag.ErrHelp) {
+			return
+		}
+		fatal(err)
+	}
 
-	absBasePath, err := filepath.Abs(*basePath)
+	program := &program{
+		options: manager.Options{
+			BasePath:    options.basePath,
+			WorkingPath: options.workingPath,
+			TempPath:    options.tempPath,
+			Locale:      options.locale,
+			LogMaxLines: options.logMaxLines,
+			Debug:       options.debug,
+		},
+		socketPath: filepath.Join(options.basePath, "command.sock"),
+	}
+	serviceConfig := &service.Config{
+		Name:        serviceName,
+		DisplayName: serviceName,
+		Description: "libbox gRPC daemon for sing-box",
+		Arguments:   serviceArguments(options),
+		Option: service.KeyValue{
+			"StartType":              "automatic",
+			"OnFailure":              "restart",
+			"OnFailureDelayDuration": "5s",
+			"Restart":                "on-failure",
+			"LimitNOFILE":            -1,
+		},
+	}
+	svc, err := service.New(program, serviceConfig)
 	if err != nil {
 		fatal(err)
 	}
-	_, server, err := manager.NewLocal(context.Background(), manager.Options{
-		BasePath:    absBasePath,
-		WorkingPath: *workingPath,
-		TempPath:    *tempPath,
-		Locale:      *locale,
-		LogMaxLines: *logMaxLines,
-		Debug:       *debugMode,
-	}, filepath.Join(absBasePath, "command.sock"))
-	if err != nil {
-		fatal(err)
-	}
-	defer server.Close()
+	program.logger, _ = svc.Logger(nil)
 
-	serveError := make(chan error, 1)
-	go func() { serveError <- server.Serve() }()
-	signals := make(chan os.Signal, 1)
-	signal.Notify(signals, os.Interrupt, syscall.SIGTERM)
-	select {
-	case <-signals:
-	case err := <-serveError:
-		if err != nil && !errors.Is(err, grpc.ErrServerStopped) {
+	if action != "" {
+		if err := control(svc, action); err != nil {
 			fatal(err)
 		}
+		return
 	}
+	if err := svc.Run(); err != nil {
+		fatal(err)
+	}
+}
+
+func (p *program) Start(service.Service) error {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if p.server != nil {
+		return nil
+	}
+	_, server, err := manager.NewLocal(context.Background(), p.options, p.socketPath)
+	if err != nil {
+		return err
+	}
+	p.server = server
+	go func() {
+		serveErr := server.Serve()
+		if serveErr != nil && !errors.Is(serveErr, grpc.ErrServerStopped) && p.logger != nil {
+			_ = p.logger.Errorf("gRPC server stopped: %v", serveErr)
+		}
+	}()
+	return nil
+}
+
+func (p *program) Stop(service.Service) error {
+	p.mu.Lock()
+	server := p.server
+	p.server = nil
+	p.mu.Unlock()
+	if server != nil {
+		server.Close()
+	}
+	return nil
+}
+
+func (p *program) Shutdown(s service.Service) error {
+	return p.Stop(s)
+}
+
+func parseCommandLine(arguments []string) (string, commandOptions, error) {
+	var action string
+	if len(arguments) > 0 && isServiceAction(arguments[0]) {
+		action = arguments[0]
+		arguments = arguments[1:]
+	}
+
+	flags := flag.NewFlagSet(serviceName, flag.ContinueOnError)
+	basePath := flags.String("base-path", ".", "runtime base directory")
+	workingPath := flags.String("working-path", "", "sing-box working directory")
+	tempPath := flags.String("temp-path", "", "sing-box temporary directory")
+	locale := flags.String("locale", "", "locale identifier")
+	logMaxLines := flags.Int("log-max-lines", 300, "number of retained log lines")
+	debugMode := flags.Bool("debug", false, "enable debug mode")
+	if err := flags.Parse(arguments); err != nil {
+		return "", commandOptions{}, err
+	}
+	if flags.NArg() != 0 {
+		return "", commandOptions{}, fmt.Errorf("unknown command: %s", flags.Arg(0))
+	}
+	absBasePath, err := filepath.Abs(*basePath)
+	if err != nil {
+		return "", commandOptions{}, err
+	}
+	return action, commandOptions{
+		basePath:    absBasePath,
+		workingPath: *workingPath,
+		tempPath:    *tempPath,
+		locale:      *locale,
+		logMaxLines: *logMaxLines,
+		debug:       *debugMode,
+	}, nil
+}
+
+func isServiceAction(value string) bool {
+	for _, action := range append(service.ControlAction[:], "status") {
+		if value == action {
+			return true
+		}
+	}
+	return false
+}
+
+func serviceArguments(options commandOptions) []string {
+	arguments := []string{
+		"--base-path", options.basePath,
+		"--log-max-lines", strconv.Itoa(options.logMaxLines),
+	}
+	if options.workingPath != "" {
+		arguments = append(arguments, "--working-path", options.workingPath)
+	}
+	if options.tempPath != "" {
+		arguments = append(arguments, "--temp-path", options.tempPath)
+	}
+	if options.locale != "" {
+		arguments = append(arguments, "--locale", options.locale)
+	}
+	if options.debug {
+		arguments = append(arguments, "--debug")
+	}
+	return arguments
+}
+
+func control(svc service.Service, action string) error {
+	if action != "status" {
+		return service.Control(svc, action)
+	}
+	status, err := svc.Status()
+	if err != nil {
+		return err
+	}
+	switch status {
+	case service.StatusRunning:
+		fmt.Println("running")
+	case service.StatusStopped:
+		fmt.Println("stopped")
+	default:
+		fmt.Println("unknown")
+	}
+	return nil
 }
 
 func fatal(err error) {

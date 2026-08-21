@@ -22,7 +22,6 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 
 	libboxv1 "github.com/loafman1120/libbox/api/libbox/v1"
-	"github.com/loafman1120/libbox/platform/systemproxy"
 )
 
 // Manager owns the single StartedService used by both gRPC APIs.
@@ -35,11 +34,6 @@ type Manager struct {
 	configMu sync.RWMutex
 	config   string
 	close    sync.Once
-
-	proxyMu     sync.Mutex
-	proxyHost   string
-	proxyPort   uint32
-	proxyBypass string
 }
 
 func Setup(options Options) error {
@@ -61,11 +55,7 @@ func New(ctx context.Context, options Options) (*Manager, error) {
 	if err := Setup(options); err != nil {
 		return nil, err
 	}
-	m := &Manager{
-		proxyHost:   "127.0.0.1",
-		proxyPort:   2080,
-		proxyBypass: "<local>",
-	}
+	m := &Manager{}
 	m.started = daemon.NewStartedService(daemon.ServiceOptions{
 		Context:     serviceContext(ctx, options),
 		Handler:     m,
@@ -112,13 +102,8 @@ func (m *Manager) GetVersion(context.Context, *emptypb.Empty) (*libboxv1.Version
 }
 
 func (m *Manager) GetCapabilities(context.Context, *emptypb.Empty) (*libboxv1.CapabilitiesResponse, error) {
-	proxyState, err := systemproxy.GetStatus()
-	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
 	return &libboxv1.CapabilitiesResponse{
 		Platform:    runtime.GOOS,
-		SystemProxy: proxyState.Supported,
 		PlatformVpn: false,
 	}, nil
 }
@@ -219,15 +204,9 @@ func (m *Manager) StopService() error {
 		return err
 	}
 	if current.Status == daemon.ServiceStatus_IDLE || current.Status == daemon.ServiceStatus_FATAL {
-		if err := m.restoreSystemProxy(); err != nil {
-			return status.Error(codes.Internal, err.Error())
-		}
 		return nil
 	}
 	if err := m.started.CloseService(); err != nil {
-		return status.Error(codes.Internal, err.Error())
-	}
-	if err := m.restoreSystemProxy(); err != nil {
 		return status.Error(codes.Internal, err.Error())
 	}
 	return nil
@@ -259,30 +238,6 @@ func (m *Manager) SubscribeState(_ *emptypb.Empty, stream grpc.ServerStreamingSe
 	return m.started.SubscribeServiceStatus(&emptypb.Empty{}, &statusRelay{target: stream})
 }
 
-func (m *Manager) GetSystemProxyStatus(context.Context, *emptypb.Empty) (*libboxv1.SystemProxyStatus, error) {
-	return m.systemProxyStatus()
-}
-
-func (m *Manager) SetSystemProxy(_ context.Context, request *libboxv1.SetSystemProxyRequest) (*libboxv1.SystemProxyStatus, error) {
-	m.proxyMu.Lock()
-	defer m.proxyMu.Unlock()
-	if request.GetEnabled() {
-		if request.GetHost() == "" {
-			return nil, status.Error(codes.InvalidArgument, "system proxy host is empty")
-		}
-		if request.GetPort() == 0 || request.GetPort() > 65535 {
-			return nil, status.Error(codes.InvalidArgument, "system proxy port is out of range")
-		}
-		m.proxyHost = request.GetHost()
-		m.proxyPort = request.GetPort()
-		m.proxyBypass = request.GetBypass()
-	}
-	if err := systemproxy.Set(request.GetEnabled(), m.proxyHost, int32(m.proxyPort), m.proxyBypass); err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-	return m.systemProxyStatus()
-}
-
 func (m *Manager) ServiceStop() error { return m.StopService() }
 
 func (m *Manager) ServiceReload() error {
@@ -296,17 +251,11 @@ func (m *Manager) ServiceReload() error {
 }
 
 func (m *Manager) SystemProxyStatus() (*daemon.SystemProxyStatus, error) {
-	value, err := systemproxy.GetStatus()
-	if err != nil {
-		return nil, err
-	}
-	return &daemon.SystemProxyStatus{Available: value.Supported, Enabled: value.Enabled}, nil
+	return &daemon.SystemProxyStatus{Available: false, Enabled: false}, nil
 }
 
-func (m *Manager) SetSystemProxyEnabled(enabled bool) error {
-	m.proxyMu.Lock()
-	defer m.proxyMu.Unlock()
-	return systemproxy.Set(enabled, m.proxyHost, int32(m.proxyPort), m.proxyBypass)
+func (m *Manager) SetSystemProxyEnabled(bool) error {
+	return status.Error(codes.Unimplemented, "system proxy is managed by the desktop client")
 }
 
 func (*Manager) WriteDebugMessage(string) {}
@@ -319,7 +268,6 @@ func (m *Manager) Close() {
 		if err == nil && (current.Status == daemon.ServiceStatus_STARTED || current.Status == daemon.ServiceStatus_STARTING) {
 			_ = m.started.CloseService()
 		}
-		_ = m.restoreSystemProxy()
 		m.started.Close()
 	})
 }
@@ -395,27 +343,6 @@ func (r *statusRelay) SetTrailer(md metadata.MD)       { r.target.SetTrailer(md)
 func (r *statusRelay) Context() context.Context        { return r.target.Context() }
 func (r *statusRelay) SendMsg(value any) error         { return r.target.SendMsg(value) }
 func (r *statusRelay) RecvMsg(value any) error         { return r.target.RecvMsg(value) }
-
-func (m *Manager) systemProxyStatus() (*libboxv1.SystemProxyStatus, error) {
-	value, err := systemproxy.GetStatus()
-	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-	return &libboxv1.SystemProxyStatus{
-		Supported: value.Supported,
-		Enabled:   value.Enabled,
-		Server:    value.Server,
-		Bypass:    value.Bypass,
-	}, nil
-}
-
-func (m *Manager) restoreSystemProxy() error {
-	value, err := systemproxy.GetStatus()
-	if err != nil || !value.Enabled {
-		return err
-	}
-	return systemproxy.Set(false, m.proxyHost, int32(m.proxyPort), m.proxyBypass)
-}
 
 func projectVersion() string {
 	if info, ok := debug.ReadBuildInfo(); ok && info.Main.Version != "" && info.Main.Version != "(devel)" {

@@ -34,7 +34,6 @@ import (
 
 	libboxv1 "github.com/loafman1120/libbox/api/libbox/v1"
 	"github.com/loafman1120/libbox/manager"
-	"github.com/loafman1120/libbox/platform/systemproxy"
 )
 
 type initOptions struct {
@@ -211,34 +210,6 @@ func libbox_service_state(handle C.libbox_handle, jsonOut **C.char, errOut **C.c
 		return fail(errOut, err.Error())
 	}
 	*jsonOut = C.CString(string(payload))
-	return 0
-}
-
-//export libbox_system_proxy_status
-func libbox_system_proxy_status(jsonOut **C.char, errOut **C.char) C.int32_t {
-	clearErr(errOut)
-	if jsonOut == nil {
-		return fail(errOut, "libbox_system_proxy_status: nil output")
-	}
-	*jsonOut = nil
-	value, err := systemproxy.GetStatus()
-	if err != nil {
-		return fail(errOut, err.Error())
-	}
-	payload, err := json.Marshal(value)
-	if err != nil {
-		return fail(errOut, err.Error())
-	}
-	*jsonOut = C.CString(string(payload))
-	return 0
-}
-
-//export libbox_set_system_proxy
-func libbox_set_system_proxy(host *C.char, port C.int32_t, bypass *C.char, enabled C.bool, errOut **C.char) C.int32_t {
-	clearErr(errOut)
-	if err := systemproxy.Set(bool(enabled), cstr(host), int32(port), cstr(bypass)); err != nil {
-		return fail(errOut, err.Error())
-	}
 	return 0
 }
 

@@ -20,7 +20,10 @@ param(
         'with_naive_outbound',
         'with_purego',
         'with_clash_api',
-        'badlinkname'
+        'badlinkname',
+        'http2legacy',
+        'netgo',
+        'osusergo'
     ),
 
     [switch]$DebugBuild
@@ -46,12 +49,21 @@ $arguments = @(
     'build',
     '-trimpath',
     '-buildvcs=false',
+    '-pgo=auto',
     '-tags', ($BuildTags -join ','),
     '-o', $OutputPath
 )
 $linkerFlags = if ($DebugBuild) { '-checklinkname=0' } else { '-s -w -buildid= -checklinkname=0' }
 $arguments += @('-ldflags', $linkerFlags)
 $arguments += './cmd/libboxd'
+
+# Strip + perf env (no priority, apply directly)
+if (-not $DebugBuild) {
+    $env:CGO_ENABLED = '0'
+    if ($env:GOARCH -eq 'amd64' -or [string]::IsNullOrWhiteSpace($env:GOARCH)) {
+        $env:GOAMD64 = 'v3'
+    }
+}
 
 Push-Location $repositoryRoot
 try {

@@ -3,9 +3,9 @@ module github.com/loafman1120/libbox
 go 1.26
 
 require (
+	github.com/kardianos/service v1.3.0
 	github.com/sagernet/sing v0.8.13
 	github.com/sagernet/sing-box v1.13.19
-	golang.org/x/sys v0.47.0
 	google.golang.org/grpc v1.83.0
 	google.golang.org/protobuf v1.36.12
 )
@@ -149,6 +149,7 @@ require (
 	golang.org/x/net v0.58.0 // indirect
 	golang.org/x/oauth2 v0.36.0 // indirect
 	golang.org/x/sync v0.22.0 // indirect
+	golang.org/x/sys v0.47.0 // indirect
 	golang.org/x/term v0.45.0 // indirect
 	golang.org/x/text v0.41.0 // indirect
 	golang.org/x/time v0.15.0 // indirect

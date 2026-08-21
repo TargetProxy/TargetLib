@@ -23,7 +23,10 @@ param(
         'with_naive_outbound',
         'with_purego',
         'with_clash_api',
-        'badlinkname'
+        'badlinkname',
+        'http2legacy',
+        'netgo',
+        'osusergo'
     ),
 
     [switch]$DebugBuild
@@ -48,13 +51,19 @@ $arguments = @(
     'build',
     '-trimpath',
     '-buildvcs=false',
+    '-pgo=auto',
     "-buildmode=$BuildMode",
     '-tags', ($BuildTags -join ','),
     '-o', $OutputPath
 )
-$linkerFlags = if ($DebugBuild) { '-checklinkname=0' } else { '-s -w -buildid= -checklinkname=0' }
+# Strip: -s -w already; extend with gc-sections for c-archive/c-shared where supported
+$linkerFlags = if ($DebugBuild) { '-checklinkname=0' } else { '-s -w -buildid= -checklinkname=0 -extldflags=-Wl,--gc-sections,--strip-all' }
 $arguments += @('-ldflags', $linkerFlags)
 $arguments += './ffi/native'
+
+if (-not $DebugBuild -and ($env:GOARCH -eq 'amd64' -or [string]::IsNullOrWhiteSpace($env:GOARCH))) {
+    $env:GOAMD64 = 'v3'
+}
 
 Push-Location $repositoryRoot
 try {
