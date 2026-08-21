@@ -41,8 +41,6 @@ final class LibboxInitOptions {
     this.workingPath = '.',
     this.tempPath = '.',
     this.locale,
-    this.commandSecret = '',
-    this.commandPort = 0,
     this.logMaxLines = 300,
     this.debug = false,
     this.oomKillerEnabled = false,
@@ -54,8 +52,6 @@ final class LibboxInitOptions {
   final String workingPath;
   final String tempPath;
   final String? locale;
-  final String commandSecret;
-  final int commandPort;
   final int logMaxLines;
   final bool debug;
   final bool oomKillerEnabled;
@@ -64,14 +60,20 @@ final class LibboxInitOptions {
 }
 
 enum LibboxServiceState {
+  starting,
   running,
+  stopping,
   stopped,
+  failed,
   closed,
   unknown;
 
   static LibboxServiceState fromWire(String? value) => switch (value) {
+        'starting' => starting,
         'running' => running,
+        'stopping' => stopping,
         'stopped' => stopped,
+        'failed' => failed,
         'closed' => closed,
         _ => unknown,
       };
@@ -142,7 +144,7 @@ final class LibboxSystemProxyOptions {
 /// High-level API for the current `libbox` C ABI.
 ///
 /// Logs are intentionally not exposed here. Applications can enable libbox's
-/// command server using [LibboxInitOptions.commandPort] and [commandSecret]
+/// command server over the local Unix socket at `<basePath>/command.sock`.
 /// and use its gRPC interface independently.
 final class LibboxFfi {
   LibboxFfi._(this.raw, [this._libraryPath, this._useProcess = false]);
@@ -229,8 +231,6 @@ final class LibboxFfi {
         ..workingPath = allocate(options.workingPath)
         ..tempPath = allocate(options.tempPath)
         ..locale = allocate(options.locale)
-        ..commandSecret = allocate(options.commandSecret)
-        ..commandPort = options.commandPort
         ..logMaxLines = options.logMaxLines
         ..debug = options.debug
         ..oomKillerEnabled = options.oomKillerEnabled

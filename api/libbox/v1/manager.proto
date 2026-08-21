@@ -1,0 +1,89 @@
+syntax = "proto3";
+
+package libbox.v1;
+
+option go_package = "github.com/loafman1120/libbox/api/libbox/v1;libboxv1";
+
+import "google/protobuf/empty.proto";
+
+service LibboxManager {
+  rpc GetVersion(google.protobuf.Empty) returns (VersionResponse);
+  rpc GetCapabilities(google.protobuf.Empty) returns (CapabilitiesResponse);
+  rpc CheckConfig(ConfigRequest) returns (CheckConfigResponse);
+  rpc Start(StartRequest) returns (OperationResponse);
+  rpc Reload(ReloadRequest) returns (OperationResponse);
+  rpc Restart(RestartRequest) returns (OperationResponse);
+  rpc Stop(google.protobuf.Empty) returns (OperationResponse);
+  rpc GetState(google.protobuf.Empty) returns (ServiceState);
+  rpc SubscribeState(google.protobuf.Empty) returns (stream ServiceState);
+  rpc GetSystemProxyStatus(google.protobuf.Empty) returns (SystemProxyStatus);
+  rpc SetSystemProxy(SetSystemProxyRequest) returns (SystemProxyStatus);
+}
+
+message VersionResponse {
+  string libbox_version = 1;
+  string sing_box_version = 2;
+  string go_version = 3;
+  uint32 protocol_version = 4;
+}
+
+message CapabilitiesResponse {
+  string platform = 1;
+  bool system_proxy = 2;
+  bool platform_vpn = 3;
+  reserved 4;
+}
+
+message ConfigRequest {
+  string content = 1;
+}
+
+message CheckConfigResponse {
+  bool valid = 1;
+  string formatted_error = 2;
+}
+
+message StartRequest {
+  string config = 1;
+}
+
+message ReloadRequest {
+  string config = 1;
+}
+
+message RestartRequest {
+  string config = 1;
+}
+
+message OperationResponse {
+  ServiceState state = 1;
+}
+
+enum ServiceStateType {
+  SERVICE_STATE_UNSPECIFIED = 0;
+  SERVICE_STATE_IDLE = 1;
+  SERVICE_STATE_STARTING = 2;
+  SERVICE_STATE_RUNNING = 3;
+  SERVICE_STATE_STOPPING = 4;
+  SERVICE_STATE_FAILED = 5;
+}
+
+message ServiceState {
+  ServiceStateType state = 1;
+  string error_message = 2;
+  int64 changed_at_unix_ms = 3;
+}
+
+message SystemProxyStatus {
+  bool supported = 1;
+  bool enabled = 2;
+  string server = 3;
+  string bypass = 4;
+}
+
+message SetSystemProxyRequest {
+  bool enabled = 1;
+  string host = 2;
+  uint32 port = 3;
+  string bypass = 4;
+}

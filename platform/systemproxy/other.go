@@ -1,4 +1,4 @@
-//go:build !windows && !darwin && !linux
+//go:build (!windows && !darwin && !linux) || android || ios
 
 package systemproxy
 
@@ -16,5 +16,5 @@ func GetStatus() (Status, error) {
 }
 
 func Set(bool, string, int32, string) error {
-	return errors.New("system proxy is only implemented on Windows, macOS, and Linux")
+	return errors.New("system proxy is only implemented on desktop platforms")
 }

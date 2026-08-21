@@ -8,11 +8,6 @@ final class LibboxNativeInitOptions extends Struct {
   external Pointer<Utf8> workingPath;
   external Pointer<Utf8> tempPath;
   external Pointer<Utf8> locale;
-  external Pointer<Utf8> commandSecret;
-
-  @Int32()
-  external int commandPort;
-
   @Int32()
   external int logMaxLines;
 

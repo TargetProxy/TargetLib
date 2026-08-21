@@ -1,15 +1,18 @@
 <#
 .SYNOPSIS
-Builds the standalone Desktop libbox gRPC daemon.
+Builds the libbox C ABI from ffi/native.
 
 .EXAMPLE
-.\scripts\build.ps1
+.\scripts\build-native.ps1
 
 .EXAMPLE
-.\scripts\build.ps1 -OutputPath dist\libboxd.exe -DebugBuild
+.\scripts\build-native.ps1 -BuildMode c-archive -OutputPath dist\libbox.a
 #>
 [CmdletBinding()]
 param(
+    [ValidateSet('c-shared', 'c-archive')]
+    [string]$BuildMode = 'c-shared',
+
     [string]$OutputPath,
 
     [string[]]$BuildTags = @(
@@ -33,25 +36,25 @@ $repositoryRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $goCommand = Get-Command go -ErrorAction Stop
 
 if ([string]::IsNullOrWhiteSpace($OutputPath)) {
-    $extension = if ($env:OS -eq 'Windows_NT') { '.exe' } else { '' }
-    $OutputPath = Join-Path $repositoryRoot "build\libboxd$extension"
+    $extension = if ($BuildMode -eq 'c-shared') { '.dll' } else { '.a' }
+    $OutputPath = Join-Path $repositoryRoot "build\libbox$extension"
 } elseif (-not [System.IO.Path]::IsPathRooted($OutputPath)) {
     $OutputPath = Join-Path $repositoryRoot $OutputPath
 }
 $OutputPath = [System.IO.Path]::GetFullPath($OutputPath)
-$outputDirectory = Split-Path -Parent $OutputPath
-New-Item -ItemType Directory -Force -Path $outputDirectory | Out-Null
+New-Item -ItemType Directory -Force -Path (Split-Path -Parent $OutputPath) | Out-Null
 
 $arguments = @(
     'build',
     '-trimpath',
     '-buildvcs=false',
+    "-buildmode=$BuildMode",
     '-tags', ($BuildTags -join ','),
     '-o', $OutputPath
 )
 $linkerFlags = if ($DebugBuild) { '-checklinkname=0' } else { '-s -w -buildid= -checklinkname=0' }
 $arguments += @('-ldflags', $linkerFlags)
-$arguments += './cmd/libboxd'
+$arguments += './ffi/native'
 
 Push-Location $repositoryRoot
 try {

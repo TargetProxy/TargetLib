@@ -1,6 +1,5 @@
 // Temporary end-to-end verification of the async FFI path (Isolate.run + cgo).
 // Run with: LIBBOX_LIBRARY=<path-to-libbox.dll> dart run tool/async_smoke.dart
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:libbox/libbox.dart';
@@ -19,8 +18,6 @@ Future<void> main() async {
       basePath: '.',
       workingPath: '.',
       tempPath: '.',
-      commandPort: 0,
-      commandSecret: 'async-smoke-secret',
     ),
   );
 
@@ -29,11 +26,13 @@ Future<void> main() async {
 ''';
   final startWatch = Stopwatch()..start();
   final service = await core.startAsync(config);
-  stdout.writeln('startAsync ok in ${startWatch.elapsedMilliseconds}ms, handle=${service.handle}');
+  stdout.writeln(
+      'startAsync ok in ${startWatch.elapsedMilliseconds}ms, handle=${service.handle}');
 
   final state = service.state();
   stdout.writeln('service state: ${state.state}, running=${state.running}');
 
   await service.closeAsync();
-  stdout.writeln('closeAsync ok (stop + freeHandle on background isolate) — ASYNC FFI PATH WORKS');
+  stdout.writeln(
+      'closeAsync ok (stop + freeHandle on background isolate) — ASYNC FFI PATH WORKS');
 }
