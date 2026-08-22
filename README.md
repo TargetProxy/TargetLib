@@ -2,7 +2,7 @@
 
 > **Windows 专用** — 专为 Windows 平台设计与优化的 sing-box 管理框架。提供原生 Windows Service 集成、命名管道 / UDS 双栈支持及 `targetlib.dll` C ABI，深度适配 Windows 桌面环境。*底层具备跨平台能力，但当前版本仅针对 Windows 进行完整测试与调优。*
 
-基于 `sing-box` 的轻量封装，提供 gRPC 守护进程 `targetlibd` 与 C ABI (`targetlib.dll` / `targetlib.h`)，统一管理 sing-box 的启动、重载与状态查询。
+基于 `sing-box` 的轻量封装，提供 gRPC 守护进程 `TargetLib` 与 C ABI (`targetlib.dll` / `targetlib.h`)，统一管理 sing-box 的启动、重载与状态查询。
 
 ## 平台支持
 
@@ -15,18 +15,21 @@
 
 - 专为 Windows 打造的 sing-box 管控层，仅暴露必要能力
 - Windows Service 原生集成（`install` / `start` / `stop` / `status`），支持开机自启
-- gRPC 服务：`GetVersion` / `CheckConfig` / `Start` / `Reload` / `Restart` / `Stop` / `GetState` / `SubscribeState`
+- gRPC 服务：运行时生命周期管理，以及完整的订阅 CRUD、更新、端点查询和事件流
 - Windows 专属 C ABI (`targetlib.dll` / `targetlib.h`) 供桌面端通过 FFI 调用
 - 单例 `StartedService`，支持并发安全的配置热重载
+- 跨平台 Go 订阅服务：加密持久化、条件更新、自动调度、节点中间态及代理端点解析
 
 ## 目录结构
 
 ```
 TargetLib/
-├── api/TargetLib/v1/manager.proto   # gRPC 定义
-├── cmd/targetlibd/                  # 独立守护进程 (go build)
+├── api/TargetLib/                   # 聚合的 TargetLib gRPC 定义
+├── cmd/TargetLib/                   # 独立守护进程 (go build)
 ├── ffi/native/                      # C ABI 导出 (c-shared / c-archive)
 ├── manager/                         # 核心管理逻辑 (Setup/New/Server)
+├── config/                          # sing-box 配置构建
+├── subscriptions/                   # 订阅生命周期、gRPC 适配与代理端点解析
 ├── scripts/                         # 构建脚本
 └── build/                           # 构建产物 (gitignored)
 ```
@@ -43,19 +46,19 @@ TargetLib/
 
 ```powershell
 .\scripts\build.ps1
-# 输出 build/targetlibd.exe
+# 输出 build/TargetLib.exe
 # 自定义输出
-.\scripts\build.ps1 -OutputPath dist/targetlibd.exe -DebugBuild
+.\scripts\build.ps1 -OutputPath dist/TargetLib.exe -DebugBuild
 ```
 
 运行：
 
 ```powershell
-.\build\targetlibd.exe --base-path ./run --log-max-lines 300
+.\build\TargetLib.exe --base-path ./run --log-max-lines 300
 # 服务控制 (Windows service)
-.\build\targetlibd.exe install
-.\build\targetlibd.exe start
-.\build\targetlibd.exe status
+.\build\TargetLib.exe install
+.\build\TargetLib.exe start
+.\build\TargetLib.exe status
 ```
 
 ### 构建 C ABI
@@ -76,7 +79,6 @@ targetlib_init(&opts, &err);
 
 targetlib_handle h;
 targetlib_start("{\"log\":{...}}", &h, &err);
-targetlib_service_state(h, &json, &err);
 targetlib_stop(h, &err);
 targetlib_free_handle(h);
 targetlib_free_string(err);
@@ -86,12 +88,12 @@ targetlib_free_string(err);
 
 ```powershell
 .\scripts\generate.ps1
-# 生成 api/TargetLib/v1/*.pb.go
+# 生成 api/TargetLib/*.pb.go
 ```
 
 ## gRPC API
 
-`service TargetLibManager` ( `api/TargetLib/v1/manager.proto` )：
+`service TargetLib` (`api/TargetLib/targetlib.proto`) 聚合运行时和订阅管理：
 
 | RPC | 说明 |
 |---|---|
@@ -102,6 +104,18 @@ targetlib_free_string(err);
 | GetState / SubscribeState | 查询 / 订阅 `ServiceState` |
 
 `ServiceState`: `IDLE` / `STARTING` / `RUNNING` / `STOPPING` / `FAILED`
+
+| RPC | 说明 |
+|---|---|
+| ListSubscriptions / GetSubscription | 获取脱敏订阅视图和节点中间态 |
+| AddSubscription / RemoveSubscription / RenameSubscription | 订阅 CRUD |
+| SetSubscriptionEnabled / ConfigureSubscriptionUpdates | 启用和自动更新配置 |
+| UpdateSubscription | 下载、解析、解析端点并持久化 |
+| GetSubscriptionConfig | 显式读取完整 sing-box 配置 |
+| GetResolvedEndpoints | 返回供宿主处理的代理节点 IP，不修改 TUN |
+| SubscribeSubscriptionEvents | 订阅新增、更新、删除和阶段事件 |
+
+列表、单项和事件响应不会包含订阅 URL、请求头、缓存校验器或节点原始配置。
 
 ## 配置
 
@@ -115,12 +129,16 @@ type Options struct {
     Locale      string
     LogMaxLines int    // 默认 300
     Debug       bool
+    SubscriptionStore subscriptions.Store // nil 时使用内存存储
 }
 ```
 
+`TargetLib` 默认使用系统凭据库保护的加密 BadgerDB。Android/iOS 宿主可从
+Keystore/Keychain 取得 32 字节密钥后注入 `subscriptions.OpenBadgerStore(path, key)`。
+
 ## 协议版本
 
-`manager.ProtocolVersion = 1`
+`manager.ProtocolVersion = 2`
 
 ## 许可证
 

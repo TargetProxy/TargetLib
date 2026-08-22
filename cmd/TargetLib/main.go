@@ -12,10 +12,11 @@ import (
 
 	"github.com/kardianos/service"
 	"github.com/loafman1120/TargetLib/manager"
+	"github.com/loafman1120/TargetLib/subscriptions/keyringstore"
 	"google.golang.org/grpc"
 )
 
-const serviceName = "targetlibd"
+const serviceName = "TargetLib"
 
 type commandOptions struct {
 	basePath    string
@@ -91,7 +92,13 @@ func (p *program) Start(service.Service) error {
 	if p.server != nil {
 		return nil
 	}
-	_, server, err := manager.NewLocal(context.Background(), p.options, p.socketPath)
+	store, err := keyringstore.New(filepath.Join(p.options.BasePath, "subscriptions.badger"), "TargetLib")
+	if err != nil {
+		return err
+	}
+	options := p.options
+	options.SubscriptionStore = store
+	_, server, err := manager.NewLocal(context.Background(), options, p.socketPath)
 	if err != nil {
 		return err
 	}

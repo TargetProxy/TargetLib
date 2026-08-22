@@ -21,14 +21,19 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 
-	targetlibv1 "github.com/loafman1120/TargetLib/api/TargetLib/v1"
+	targetlibapi "github.com/loafman1120/TargetLib/api/TargetLib"
+	subscriptioncore "github.com/loafman1120/TargetLib/subscriptions"
 )
 
 // Manager owns the single StartedService used by both gRPC APIs.
 type Manager struct {
-	targetlibv1.UnimplementedTargetLibManagerServer
+	*subscriptioncore.Handler
 
-	started *daemon.StartedService
+	started            *daemon.StartedService
+	subscriptions      *subscriptioncore.Manager
+	subscriptionCancel context.CancelFunc
+	subscriptionDone   chan struct{}
+	subscriptionStore  io.Closer
 
 	opMu     sync.Mutex
 	configMu sync.RWMutex
@@ -55,7 +60,21 @@ func New(ctx context.Context, options Options) (*Manager, error) {
 	if err := Setup(options); err != nil {
 		return nil, err
 	}
-	m := &Manager{}
+	subscriptionManager := subscriptioncore.NewManager(subscriptioncore.Options{Store: options.SubscriptionStore})
+	if err := subscriptionManager.Load(ctx); err != nil {
+		if closer, ok := options.SubscriptionStore.(io.Closer); ok {
+			_ = closer.Close()
+		}
+		return nil, err
+	}
+	subscriptionContext, cancelSubscriptions := context.WithCancel(ctx)
+	m := &Manager{
+		Handler: subscriptioncore.NewHandler(subscriptionManager), subscriptions: subscriptionManager,
+		subscriptionCancel: cancelSubscriptions, subscriptionDone: make(chan struct{}),
+	}
+	if closer, ok := options.SubscriptionStore.(io.Closer); ok {
+		m.subscriptionStore = closer
+	}
 	m.started = daemon.NewStartedService(daemon.ServiceOptions{
 		Context:     serviceContext(ctx, options),
 		Handler:     m,
@@ -63,6 +82,10 @@ func New(ctx context.Context, options Options) (*Manager, error) {
 		LogMaxLines: options.LogMaxLines,
 		OOMKiller:   options.OOMKiller,
 	})
+	go func() {
+		defer close(m.subscriptionDone)
+		_ = subscriptionManager.Run(subscriptionContext)
+	}()
 	return m, nil
 }
 
@@ -92,54 +115,55 @@ func serviceContext(ctx context.Context, options Options) context.Context {
 
 func (m *Manager) StartedService() *daemon.StartedService { return m.started }
 
-func (m *Manager) GetVersion(context.Context, *emptypb.Empty) (*targetlibv1.VersionResponse, error) {
-	return &targetlibv1.VersionResponse{
-		TargetlibVersion:   projectVersion(),
-		SingBoxVersion:  libbox.Version(),
-		GoVersion:       runtime.Version(),
-		ProtocolVersion: ProtocolVersion,
+func (m *Manager) GetVersion(context.Context, *emptypb.Empty) (*targetlibapi.VersionResponse, error) {
+	return &targetlibapi.VersionResponse{
+		TargetlibVersion: projectVersion(),
+		SingBoxVersion:   libbox.Version(),
+		GoVersion:        runtime.Version(),
+		ProtocolVersion:  ProtocolVersion,
 	}, nil
 }
 
-func (m *Manager) GetCapabilities(context.Context, *emptypb.Empty) (*targetlibv1.CapabilitiesResponse, error) {
-	return &targetlibv1.CapabilitiesResponse{
-		Platform:    runtime.GOOS,
-		PlatformVpn: false,
+func (m *Manager) GetCapabilities(context.Context, *emptypb.Empty) (*targetlibapi.CapabilitiesResponse, error) {
+	return &targetlibapi.CapabilitiesResponse{
+		Platform:               runtime.GOOS,
+		PlatformVpn:            false,
+		SubscriptionManagement: true,
 	}, nil
 }
 
-func (m *Manager) CheckConfig(_ context.Context, request *targetlibv1.ConfigRequest) (*targetlibv1.CheckConfigResponse, error) {
+func (m *Manager) CheckConfig(_ context.Context, request *targetlibapi.ConfigRequest) (*targetlibapi.CheckConfigResponse, error) {
 	if request.GetContent() == "" {
-		return &targetlibv1.CheckConfigResponse{Valid: false, FormattedError: "config is empty"}, nil
+		return &targetlibapi.CheckConfigResponse{Valid: false, FormattedError: "config is empty"}, nil
 	}
 	if err := libbox.CheckConfig(request.GetContent()); err != nil {
-		return &targetlibv1.CheckConfigResponse{Valid: false, FormattedError: err.Error()}, nil
+		return &targetlibapi.CheckConfigResponse{Valid: false, FormattedError: err.Error()}, nil
 	}
-	return &targetlibv1.CheckConfigResponse{Valid: true}, nil
+	return &targetlibapi.CheckConfigResponse{Valid: true}, nil
 }
 
-func (m *Manager) Start(_ context.Context, request *targetlibv1.StartRequest) (*targetlibv1.OperationResponse, error) {
+func (m *Manager) Start(_ context.Context, request *targetlibapi.StartRequest) (*targetlibapi.OperationResponse, error) {
 	if err := m.StartConfig(request.GetConfig()); err != nil {
 		return nil, err
 	}
 	return m.operationResponse()
 }
 
-func (m *Manager) Reload(_ context.Context, request *targetlibv1.ReloadRequest) (*targetlibv1.OperationResponse, error) {
+func (m *Manager) Reload(_ context.Context, request *targetlibapi.ReloadRequest) (*targetlibapi.OperationResponse, error) {
 	if err := m.ReloadConfig(request.GetConfig()); err != nil {
 		return nil, err
 	}
 	return m.operationResponse()
 }
 
-func (m *Manager) Restart(_ context.Context, request *targetlibv1.RestartRequest) (*targetlibv1.OperationResponse, error) {
+func (m *Manager) Restart(_ context.Context, request *targetlibapi.RestartRequest) (*targetlibapi.OperationResponse, error) {
 	if err := m.RestartConfig(request.GetConfig()); err != nil {
 		return nil, err
 	}
 	return m.operationResponse()
 }
 
-func (m *Manager) Stop(context.Context, *emptypb.Empty) (*targetlibv1.OperationResponse, error) {
+func (m *Manager) Stop(context.Context, *emptypb.Empty) (*targetlibapi.OperationResponse, error) {
 	if err := m.StopService(); err != nil {
 		return nil, err
 	}
@@ -222,11 +246,11 @@ func (m *Manager) startOrReload(config string) error {
 	return nil
 }
 
-func (m *Manager) GetState(context.Context, *emptypb.Empty) (*targetlibv1.ServiceState, error) {
+func (m *Manager) GetState(context.Context, *emptypb.Empty) (*targetlibapi.ServiceState, error) {
 	return m.State()
 }
 
-func (m *Manager) State() (*targetlibv1.ServiceState, error) {
+func (m *Manager) State() (*targetlibapi.ServiceState, error) {
 	current, err := m.currentStatus()
 	if err != nil {
 		return nil, err
@@ -234,7 +258,7 @@ func (m *Manager) State() (*targetlibv1.ServiceState, error) {
 	return managerState(current), nil
 }
 
-func (m *Manager) SubscribeState(_ *emptypb.Empty, stream grpc.ServerStreamingServer[targetlibv1.ServiceState]) error {
+func (m *Manager) SubscribeState(_ *emptypb.Empty, stream grpc.ServerStreamingServer[targetlibapi.ServiceState]) error {
 	return m.started.SubscribeServiceStatus(&emptypb.Empty{}, &statusRelay{target: stream})
 }
 
@@ -262,6 +286,8 @@ func (*Manager) WriteDebugMessage(string) {}
 
 func (m *Manager) Close() {
 	m.close.Do(func() {
+		m.subscriptionCancel()
+		<-m.subscriptionDone
 		m.opMu.Lock()
 		defer m.opMu.Unlock()
 		current, err := m.currentStatus()
@@ -269,15 +295,18 @@ func (m *Manager) Close() {
 			_ = m.started.CloseService()
 		}
 		m.started.Close()
+		if m.subscriptionStore != nil {
+			_ = m.subscriptionStore.Close()
+		}
 	})
 }
 
-func (m *Manager) operationResponse() (*targetlibv1.OperationResponse, error) {
+func (m *Manager) operationResponse() (*targetlibapi.OperationResponse, error) {
 	current, err := m.currentStatus()
 	if err != nil {
 		return nil, err
 	}
-	return &targetlibv1.OperationResponse{State: managerState(current)}, nil
+	return &targetlibapi.OperationResponse{State: managerState(current)}, nil
 }
 
 var errStatusReceived = errors.New("status received")
@@ -294,21 +323,21 @@ func (m *Manager) currentStatus() (*daemon.ServiceStatus, error) {
 	return nil, err
 }
 
-func managerState(source *daemon.ServiceStatus) *targetlibv1.ServiceState {
-	stateType := targetlibv1.ServiceStateType_SERVICE_STATE_UNSPECIFIED
+func managerState(source *daemon.ServiceStatus) *targetlibapi.ServiceState {
+	stateType := targetlibapi.ServiceStateType_SERVICE_STATE_UNSPECIFIED
 	switch source.GetStatus() {
 	case daemon.ServiceStatus_IDLE:
-		stateType = targetlibv1.ServiceStateType_SERVICE_STATE_IDLE
+		stateType = targetlibapi.ServiceStateType_SERVICE_STATE_IDLE
 	case daemon.ServiceStatus_STARTING:
-		stateType = targetlibv1.ServiceStateType_SERVICE_STATE_STARTING
+		stateType = targetlibapi.ServiceStateType_SERVICE_STATE_STARTING
 	case daemon.ServiceStatus_STARTED:
-		stateType = targetlibv1.ServiceStateType_SERVICE_STATE_RUNNING
+		stateType = targetlibapi.ServiceStateType_SERVICE_STATE_RUNNING
 	case daemon.ServiceStatus_STOPPING:
-		stateType = targetlibv1.ServiceStateType_SERVICE_STATE_STOPPING
+		stateType = targetlibapi.ServiceStateType_SERVICE_STATE_STOPPING
 	case daemon.ServiceStatus_FATAL:
-		stateType = targetlibv1.ServiceStateType_SERVICE_STATE_FAILED
+		stateType = targetlibapi.ServiceStateType_SERVICE_STATE_FAILED
 	}
-	return &targetlibv1.ServiceState{
+	return &targetlibapi.ServiceState{
 		State:           stateType,
 		ErrorMessage:    source.GetErrorMessage(),
 		ChangedAtUnixMs: time.Now().UnixMilli(),
@@ -331,7 +360,7 @@ func (*firstStatusReceiver) SendMsg(any) error            { return nil }
 func (*firstStatusReceiver) RecvMsg(any) error            { return io.EOF }
 
 type statusRelay struct {
-	target grpc.ServerStreamingServer[targetlibv1.ServiceState]
+	target grpc.ServerStreamingServer[targetlibapi.ServiceState]
 }
 
 func (r *statusRelay) Send(value *daemon.ServiceStatus) error {
@@ -352,4 +381,4 @@ func projectVersion() string {
 }
 
 var _ daemon.PlatformHandler = (*Manager)(nil)
-var _ targetlibv1.TargetLibManagerServer = (*Manager)(nil)
+var _ targetlibapi.TargetLibServer = (*Manager)(nil)
