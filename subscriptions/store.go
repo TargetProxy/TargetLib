@@ -8,9 +8,16 @@ type Store interface {
 	Load(context.Context) ([]Subscription, error)
 	Put(context.Context, Subscription) error
 	Delete(context.Context, string) error
+	// GetActiveID/SetActiveID persist which subscription is currently active.
+	// An empty ID means no active subscription.
+	GetActiveID(context.Context) (string, error)
+	SetActiveID(context.Context, string) error
 }
 
-type MemoryStore struct{ items []Subscription }
+type MemoryStore struct {
+	items    []Subscription
+	activeID string
+}
 
 func (s *MemoryStore) Load(context.Context) ([]Subscription, error) {
 	return cloneSubscriptions(s.items), nil
@@ -32,6 +39,13 @@ func (s *MemoryStore) Delete(_ context.Context, id string) error {
 			break
 		}
 	}
+	return nil
+}
+
+func (s *MemoryStore) GetActiveID(context.Context) (string, error) { return s.activeID, nil }
+
+func (s *MemoryStore) SetActiveID(_ context.Context, id string) error {
+	s.activeID = id
 	return nil
 }
 

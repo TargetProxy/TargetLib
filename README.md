@@ -1,15 +1,17 @@
 # TargetLib
 
-> **Windows 专用** — 专为 Windows 平台设计与优化的 sing-box 管理框架。提供原生 Windows Service 集成、命名管道 / UDS 双栈支持及 `targetlib.dll` C ABI，深度适配 Windows 桌面环境。*底层具备跨平台能力，但当前版本仅针对 Windows 进行完整测试与调优。*
+> **Windows 专用** — 专为 Windows 平台设计与优化的 sing-box 管理框架。提供原生 Windows Service 集成、命名管道 / UDS 双栈支持及
+> `targetlib.dll` C ABI，深度适配 Windows 桌面环境。 *底层具备跨平台能力，但当前版本仅针对 Windows 进行完整测试与调优。*
 
-基于 `sing-box` 的轻量封装，提供 gRPC 守护进程 `TargetLib` 与 C ABI (`targetlib.dll` / `targetlib.h`)，统一管理 sing-box 的启动、重载与状态查询。
+基于 `sing-box` 的轻量封装，提供 gRPC 守护进程 `TargetLib` 与 C ABI (`targetlib.dll` / `targetlib.h`)，统一管理 sing-box
+的启动、重载与状态查询。
 
 ## 平台支持
 
-| 平台 | 状态 | 说明 |
-|---|---|---|
-| **Windows 10/11 (x64)** | ✅ 官方支持 | 首要目标平台，提供 Service 模式、FFI DLL、PowerShell 一键构建 |
-| 其他平台 | ⚠️ 未官方支持 | 代码具备跨平台可移植性，但不提供构建/测试保障 |
+| 平台                    | 状态          | 说明                                                          |
+|-------------------------|---------------|---------------------------------------------------------------|
+| **Windows 10/11 (x64)** | ✅ 官方支持   | 首要目标平台，提供 Service 模式、FFI DLL、PowerShell 一键构建 |
+| 其他平台                | ⚠️ 未官方支持 | 代码具备跨平台可移植性，但不提供构建/测试保障                 |
 
 ## 功能
 
@@ -95,25 +97,25 @@ targetlib_free_string(err);
 
 `service TargetLib` (`api/TargetLib/targetlib.proto`) 聚合运行时和订阅管理：
 
-| RPC | 说明 |
-|---|---|
-| GetVersion | 返回 TargetLib / sing-box / Go / protocol 版本 |
-| GetCapabilities | 平台信息 |
-| CheckConfig | 校验 JSON 配置 |
-| Start/Reload/Restart/Stop | 生命周期控制 |
-| GetState / SubscribeState | 查询 / 订阅 `ServiceState` |
+| RPC                       | 说明                                           |
+|---------------------------|------------------------------------------------|
+| GetVersion                | 返回 TargetLib / sing-box / Go / protocol 版本 |
+| GetCapabilities           | 平台信息                                       |
+| CheckConfig               | 校验 JSON 配置                                 |
+| Start/Reload/Restart/Stop | 生命周期控制                                   |
+| GetState / SubscribeState | 查询 / 订阅 `ServiceState`                     |
 
 `ServiceState`: `IDLE` / `STARTING` / `RUNNING` / `STOPPING` / `FAILED`
 
-| RPC | 说明 |
-|---|---|
-| ListSubscriptions / GetSubscription | 获取脱敏订阅视图和节点中间态 |
-| AddSubscription / RemoveSubscription / RenameSubscription | 订阅 CRUD |
-| SetSubscriptionEnabled / ConfigureSubscriptionUpdates | 启用和自动更新配置 |
-| UpdateSubscription | 下载、解析、解析端点并持久化 |
-| GetSubscriptionConfig | 显式读取完整 sing-box 配置 |
-| GetResolvedEndpoints | 返回供宿主处理的代理节点 IP，不修改 TUN |
-| SubscribeSubscriptionEvents | 订阅新增、更新、删除和阶段事件 |
+| RPC                                                       | 说明                                    |
+|-----------------------------------------------------------|-----------------------------------------|
+| ListSubscriptions / GetSubscription                       | 获取脱敏订阅视图和节点中间态            |
+| AddSubscription / RemoveSubscription / RenameSubscription | 订阅 CRUD                               |
+| SetSubscriptionEnabled / ConfigureSubscriptionUpdates     | 启用和自动更新配置                      |
+| UpdateSubscription                                        | 下载、解析、解析端点并持久化            |
+| GetSubscriptionConfig                                     | 显式读取完整 sing-box 配置              |
+| GetResolvedEndpoints                                      | 返回供宿主处理的代理节点 IP，不修改 TUN |
+| SubscribeSubscriptionEvents                               | 订阅新增、更新、删除和阶段事件          |
 
 列表、单项和事件响应不会包含订阅 URL、请求头、缓存校验器或节点原始配置。
 
@@ -133,8 +135,8 @@ type Options struct {
 }
 ```
 
-`TargetLib` 默认使用系统凭据库保护的加密 BadgerDB。Android/iOS 宿主可从
-Keystore/Keychain 取得 32 字节密钥后注入 `subscriptions.OpenBadgerStore(path, key)`。
+`TargetLib` 默认使用系统凭据库保护的加密 BadgerDB。Android/iOS 宿主可从 Keystore/Keychain 取得 32 字节密钥后注入
+`subscriptions.OpenBadgerStore(path, key)`。
 
 ## 协议版本
 

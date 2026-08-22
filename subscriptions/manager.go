@@ -45,6 +45,7 @@ type Manager struct {
 	subscribers                    map[uint64]chan Event
 	nextSubscriber                 uint64
 	schedulerUpdates               sync.WaitGroup
+	activeID                       string
 }
 
 func NewManager(options Options) *Manager {
@@ -80,6 +81,10 @@ func (m *Manager) Load(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("load subscriptions: %w", err)
 	}
+	activeID, err := m.store.GetActiveID(ctx)
+	if err != nil {
+		return fmt.Errorf("load active subscription: %w", err)
+	}
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.items = make(map[string]Subscription, len(items))
@@ -92,6 +97,13 @@ func (m *Manager) Load(ctx context.Context) error {
 		}
 		m.items[item.ID] = cloneSubscription(item)
 	}
+	// Drop stale references so a removed subscription cannot stay active.
+	if activeID != "" {
+		if _, ok := m.items[activeID]; !ok {
+			activeID = ""
+		}
+	}
+	m.activeID = activeID
 	return nil
 }
 
@@ -103,6 +115,11 @@ func (m *Manager) AddRequest(request AddRequest) (Subscription, error) {
 	if strings.TrimSpace(request.ID) == "" {
 		request.ID = uuid.NewString()
 	}
+	normalized, err := NormalizeSubscriptionURL(request.URL)
+	if err != nil {
+		return Subscription{}, err
+	}
+	request.URL = normalized
 	if err := validateURL(request.URL); err != nil {
 		return Subscription{}, err
 	}
@@ -123,7 +140,7 @@ func (m *Manager) AddRequest(request AddRequest) (Subscription, error) {
 		return Subscription{}, fmt.Errorf("%s: %w", item.ID, ErrAlreadyExists)
 	}
 	m.items[item.ID] = item
-	err := m.store.Put(context.Background(), cloneSubscription(item))
+	err = m.store.Put(context.Background(), cloneSubscription(item))
 	if err != nil {
 		delete(m.items, item.ID)
 		m.mu.Unlock()
@@ -148,9 +165,39 @@ func (m *Manager) Remove(id string) bool {
 		m.mu.Unlock()
 		return false
 	}
+	// Removing the active subscription clears the persisted active state.
+	if m.activeID == id {
+		m.activeID = ""
+		_ = m.store.SetActiveID(context.Background(), "")
+	}
 	m.mu.Unlock()
 	m.publish(EventRemoved, item)
 	return true
+}
+
+// SetActive persists which subscription is currently active. An empty id
+// clears the active subscription.
+func (m *Manager) SetActive(ctx context.Context, id string) error {
+	id = strings.TrimSpace(id)
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if id != "" {
+		if _, ok := m.items[id]; !ok {
+			return fmt.Errorf("%s: %w", id, ErrNotFound)
+		}
+	}
+	if err := m.store.SetActiveID(ctx, id); err != nil {
+		return err
+	}
+	m.activeID = id
+	return nil
+}
+
+// ActiveID returns the persisted active subscription id, or "" when none.
+func (m *Manager) ActiveID() string {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	return m.activeID
 }
 
 func (m *Manager) Rename(ctx context.Context, id, name string) error {

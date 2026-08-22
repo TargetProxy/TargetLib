@@ -15,6 +15,7 @@ import (
 const (
 	badgerSchemaVersion byte = 1
 	badgerPrefix             = "subscription/"
+	badgerActiveIDKey        = "meta/active_subscription_id"
 )
 
 type BadgerStore struct {
@@ -119,6 +120,39 @@ func (s *BadgerStore) Delete(ctx context.Context, id string) error {
 		return err
 	}
 	return s.db.Update(func(transaction *badger.Txn) error { return transaction.Delete(badgerKey(id)) })
+}
+
+func (s *BadgerStore) GetActiveID(ctx context.Context) (string, error) {
+	if err := ctx.Err(); err != nil {
+		return "", err
+	}
+	var id string
+	err := s.db.View(func(transaction *badger.Txn) error {
+		item, err := transaction.Get([]byte(badgerActiveIDKey))
+		if errors.Is(err, badger.ErrKeyNotFound) {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		return item.Value(func(value []byte) error {
+			id = string(value)
+			return nil
+		})
+	})
+	return id, err
+}
+
+func (s *BadgerStore) SetActiveID(ctx context.Context, id string) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	return s.db.Update(func(transaction *badger.Txn) error {
+		if id == "" {
+			return transaction.Delete([]byte(badgerActiveIDKey))
+		}
+		return transaction.Set([]byte(badgerActiveIDKey), []byte(id))
+	})
 }
 
 func (s *BadgerStore) decodeSubscription(value []byte) (Subscription, error) {

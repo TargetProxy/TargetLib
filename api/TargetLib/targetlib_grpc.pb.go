@@ -41,6 +41,9 @@ const (
 	TargetLib_BuildConfig_FullMethodName                  = "/targetlib.TargetLib/BuildConfig"
 	TargetLib_GetResolvedEndpoints_FullMethodName         = "/targetlib.TargetLib/GetResolvedEndpoints"
 	TargetLib_SubscribeSubscriptionEvents_FullMethodName  = "/targetlib.TargetLib/SubscribeSubscriptionEvents"
+	TargetLib_SetActiveSubscription_FullMethodName        = "/targetlib.TargetLib/SetActiveSubscription"
+	TargetLib_GetActiveSubscription_FullMethodName        = "/targetlib.TargetLib/GetActiveSubscription"
+	TargetLib_GetIpInfo_FullMethodName                    = "/targetlib.TargetLib/GetIpInfo"
 )
 
 // TargetLibClient is the client API for TargetLib service.
@@ -68,6 +71,11 @@ type TargetLibClient interface {
 	BuildConfig(ctx context.Context, in *BuildConfigRequest, opts ...grpc.CallOption) (*SubscriptionConfig, error)
 	GetResolvedEndpoints(ctx context.Context, in *ResolvedEndpointsRequest, opts ...grpc.CallOption) (*ResolvedEndpoints, error)
 	SubscribeSubscriptionEvents(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[SubscriptionEvent], error)
+	// Active subscription state is persisted by the backend; clients do not track it.
+	SetActiveSubscription(ctx context.Context, in *SetActiveSubscriptionRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	GetActiveSubscription(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ActiveSubscriptionResponse, error)
+	// IP geolocation query (egress from the backend).
+	GetIpInfo(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*IpInfoResponse, error)
 }
 
 type targetLibClient struct {
@@ -306,6 +314,36 @@ func (c *targetLibClient) SubscribeSubscriptionEvents(ctx context.Context, in *e
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type TargetLib_SubscribeSubscriptionEventsClient = grpc.ServerStreamingClient[SubscriptionEvent]
 
+func (c *targetLibClient) SetActiveSubscription(ctx context.Context, in *SetActiveSubscriptionRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, TargetLib_SetActiveSubscription_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *targetLibClient) GetActiveSubscription(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ActiveSubscriptionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ActiveSubscriptionResponse)
+	err := c.cc.Invoke(ctx, TargetLib_GetActiveSubscription_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *targetLibClient) GetIpInfo(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*IpInfoResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(IpInfoResponse)
+	err := c.cc.Invoke(ctx, TargetLib_GetIpInfo_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TargetLibServer is the server API for TargetLib service.
 // All implementations must embed UnimplementedTargetLibServer
 // for forward compatibility.
@@ -331,6 +369,11 @@ type TargetLibServer interface {
 	BuildConfig(context.Context, *BuildConfigRequest) (*SubscriptionConfig, error)
 	GetResolvedEndpoints(context.Context, *ResolvedEndpointsRequest) (*ResolvedEndpoints, error)
 	SubscribeSubscriptionEvents(*emptypb.Empty, grpc.ServerStreamingServer[SubscriptionEvent]) error
+	// Active subscription state is persisted by the backend; clients do not track it.
+	SetActiveSubscription(context.Context, *SetActiveSubscriptionRequest) (*emptypb.Empty, error)
+	GetActiveSubscription(context.Context, *emptypb.Empty) (*ActiveSubscriptionResponse, error)
+	// IP geolocation query (egress from the backend).
+	GetIpInfo(context.Context, *emptypb.Empty) (*IpInfoResponse, error)
 	mustEmbedUnimplementedTargetLibServer()
 }
 
@@ -403,6 +446,15 @@ func (UnimplementedTargetLibServer) GetResolvedEndpoints(context.Context, *Resol
 }
 func (UnimplementedTargetLibServer) SubscribeSubscriptionEvents(*emptypb.Empty, grpc.ServerStreamingServer[SubscriptionEvent]) error {
 	return status.Error(codes.Unimplemented, "method SubscribeSubscriptionEvents not implemented")
+}
+func (UnimplementedTargetLibServer) SetActiveSubscription(context.Context, *SetActiveSubscriptionRequest) (*emptypb.Empty, error) {
+	return nil, status.Error(codes.Unimplemented, "method SetActiveSubscription not implemented")
+}
+func (UnimplementedTargetLibServer) GetActiveSubscription(context.Context, *emptypb.Empty) (*ActiveSubscriptionResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetActiveSubscription not implemented")
+}
+func (UnimplementedTargetLibServer) GetIpInfo(context.Context, *emptypb.Empty) (*IpInfoResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetIpInfo not implemented")
 }
 func (UnimplementedTargetLibServer) mustEmbedUnimplementedTargetLibServer() {}
 func (UnimplementedTargetLibServer) testEmbeddedByValue()                   {}
@@ -789,6 +841,60 @@ func _TargetLib_SubscribeSubscriptionEvents_Handler(srv interface{}, stream grpc
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type TargetLib_SubscribeSubscriptionEventsServer = grpc.ServerStreamingServer[SubscriptionEvent]
 
+func _TargetLib_SetActiveSubscription_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetActiveSubscriptionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TargetLibServer).SetActiveSubscription(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TargetLib_SetActiveSubscription_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TargetLibServer).SetActiveSubscription(ctx, req.(*SetActiveSubscriptionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TargetLib_GetActiveSubscription_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TargetLibServer).GetActiveSubscription(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TargetLib_GetActiveSubscription_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TargetLibServer).GetActiveSubscription(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TargetLib_GetIpInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TargetLibServer).GetIpInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TargetLib_GetIpInfo_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TargetLibServer).GetIpInfo(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TargetLib_ServiceDesc is the grpc.ServiceDesc for TargetLib service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -871,6 +977,18 @@ var TargetLib_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetResolvedEndpoints",
 			Handler:    _TargetLib_GetResolvedEndpoints_Handler,
+		},
+		{
+			MethodName: "SetActiveSubscription",
+			Handler:    _TargetLib_SetActiveSubscription_Handler,
+		},
+		{
+			MethodName: "GetActiveSubscription",
+			Handler:    _TargetLib_GetActiveSubscription_Handler,
+		},
+		{
+			MethodName: "GetIpInfo",
+			Handler:    _TargetLib_GetIpInfo_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

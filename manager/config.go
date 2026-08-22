@@ -10,6 +10,7 @@ import (
 
 	targetlibapi "github.com/loafman1120/TargetLib/api/TargetLib"
 	"github.com/loafman1120/TargetLib/config"
+	subscriptioncore "github.com/loafman1120/TargetLib/subscriptions"
 )
 
 // BuildConfig 把应用设置与订阅中间态（或原始配置）合成为可运行的 sing-box 配置，
@@ -37,7 +38,16 @@ func (m *Manager) BuildConfig(_ context.Context, request *targetlibapi.BuildConf
 	case *targetlibapi.BuildConfigRequest_RawConfig:
 		content, err = config.BuildFromRaw(settings, source.RawConfig)
 	default:
-		return nil, status.Error(codes.InvalidArgument, "build source is required")
+		// No explicit source: build from the persisted active subscription.
+		// Without one (or with a stale reference) fall back to a direct-only
+		// configuration so the core always has a runnable config.
+		var nodes []subscriptioncore.Node
+		if id := m.subscriptions.ActiveID(); id != "" {
+			if subscription, ok := m.subscriptions.Get(id); ok {
+				nodes = subscription.Nodes
+			}
+		}
+		content, err = config.BuildFromNodes(settings, nodes)
 	}
 	if err != nil {
 		if errors.Is(err, config.ErrInvalidSettings) || errors.Is(err, config.ErrInvalidSource) {

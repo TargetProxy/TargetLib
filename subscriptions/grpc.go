@@ -161,6 +161,21 @@ func (s *Handler) GetResolvedEndpoints(_ context.Context, request *targetlibapi.
 	return &targetlibapi.ResolvedEndpoints{Addresses: s.manager.ResolvedEndpoints(enabledOnly)}, nil
 }
 
+func (s *Handler) SetActiveSubscription(ctx context.Context, request *targetlibapi.SetActiveSubscriptionRequest) (*emptypb.Empty, error) {
+	id := ""
+	if request != nil {
+		id = request.GetId()
+	}
+	if err := s.manager.SetActive(ctx, id); err != nil {
+		return nil, subscriptionError(err)
+	}
+	return &emptypb.Empty{}, nil
+}
+
+func (s *Handler) GetActiveSubscription(context.Context, *emptypb.Empty) (*targetlibapi.ActiveSubscriptionResponse, error) {
+	return &targetlibapi.ActiveSubscriptionResponse{Id: s.manager.ActiveID()}, nil
+}
+
 func (s *Handler) SubscribeSubscriptionEvents(_ *emptypb.Empty, stream grpc.ServerStreamingServer[targetlibapi.SubscriptionEvent]) error {
 	events, unsubscribe := s.manager.Subscribe(32)
 	defer unsubscribe()

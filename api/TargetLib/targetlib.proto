@@ -29,6 +29,13 @@ service TargetLib {
   rpc BuildConfig(BuildConfigRequest) returns (SubscriptionConfig);
   rpc GetResolvedEndpoints(ResolvedEndpointsRequest) returns (ResolvedEndpoints);
   rpc SubscribeSubscriptionEvents(google.protobuf.Empty) returns (stream SubscriptionEvent);
+
+  // Active subscription state is persisted by the backend; clients do not track it.
+  rpc SetActiveSubscription(SetActiveSubscriptionRequest) returns (google.protobuf.Empty);
+  rpc GetActiveSubscription(google.protobuf.Empty) returns (ActiveSubscriptionResponse);
+
+  // IP geolocation query (egress from the backend).
+  rpc GetIpInfo(google.protobuf.Empty) returns (IpInfoResponse);
 }
 
 message VersionResponse {
@@ -196,10 +203,33 @@ message BuildConfigRequest {
     // 透传原始配置：替换 inbounds、迁移遗留写法、注入 cache_file。
     bytes raw_config = 3;
   }
+  // When source is unset, the backend uses the persisted active subscription;
+  // if none exists, it falls back to a default direct-only configuration.
 }
 
 message ResolvedEndpoints {
   repeated string addresses = 1;
+}
+
+message SetActiveSubscriptionRequest {
+  // Empty id clears the active subscription (backend falls back to the
+  // default direct-only configuration).
+  string id = 1;
+}
+
+message ActiveSubscriptionResponse {
+  // Empty when no subscription is active.
+  string id = 1;
+}
+
+message IpInfoResponse {
+  string ip = 1;
+  string country = 2;
+  string country_code = 3;
+  string city = 4;
+  string isp = 5;
+  string org = 6;
+  string as_name = 7;
 }
 
 message SubscriptionEvent {
