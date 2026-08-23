@@ -32,7 +32,6 @@ type Settings struct {
 	ListenAddress string
 	MixedPort     int
 	ProxyMode     ProxyMode
-	SystemProxy   bool
 	IPv6          bool
 	CacheFilePath string
 }

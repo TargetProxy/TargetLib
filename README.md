@@ -103,6 +103,9 @@ targetlib_free_string(err);
 | GetCapabilities           | 平台信息                                       |
 | CheckConfig               | 校验 JSON 配置                                 |
 | Start/Reload/Restart/Stop | 生命周期控制                                   |
+| ApplyRuntimeSettings      | 原子构建、校验并启动或重载运行配置             |
+| TestOutbound              | 测试单个 outbound 并返回结构化延迟结果          |
+| TestOutbounds             | 合并 URLTest group 后并发测试并流式返回结果     |
 | GetState / SubscribeState | 查询 / 订阅 `ServiceState`                     |
 
 `ServiceState`: `IDLE` / `STARTING` / `RUNNING` / `STOPPING` / `FAILED`
@@ -140,7 +143,7 @@ type Options struct {
 
 ## 协议版本
 
-`manager.ProtocolVersion = 2`
+`manager.ProtocolVersion = 5`
 
 ## 许可证
 

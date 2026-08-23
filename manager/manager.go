@@ -35,10 +35,14 @@ type Manager struct {
 	subscriptionDone   chan struct{}
 	subscriptionStore  io.Closer
 
-	opMu     sync.Mutex
-	configMu sync.RWMutex
-	config   string
-	close    sync.Once
+	opMu          sync.Mutex
+	configMu      sync.RWMutex
+	config        string
+	lastSettings  *targetlibapi.BuildConfigSettings
+	latency       latencyService
+	latencyMu     sync.Mutex
+	latencyGroups map[string]chan struct{}
+	close         sync.Once
 }
 
 func Setup(options Options) error {
@@ -72,16 +76,18 @@ func New(ctx context.Context, options Options) (*Manager, error) {
 		Handler: subscriptioncore.NewHandler(subscriptionManager), subscriptions: subscriptionManager,
 		subscriptionCancel: cancelSubscriptions, subscriptionDone: make(chan struct{}),
 	}
+	m.Handler.SetActiveChangedCallback(m.reloadActiveSubscription)
 	if closer, ok := options.SubscriptionStore.(io.Closer); ok {
 		m.subscriptionStore = closer
 	}
 	m.started = daemon.NewStartedService(daemon.ServiceOptions{
 		Context:     serviceContext(ctx, options),
-		Handler:     m,
+		Handler:     platformHandler{manager: m},
 		Debug:       options.Debug,
 		LogMaxLines: options.LogMaxLines,
 		OOMKiller:   options.OOMKiller,
 	})
+	m.latency = m.started
 	go func() {
 		defer close(m.subscriptionDone)
 		_ = subscriptionManager.Run(subscriptionContext)
@@ -274,15 +280,25 @@ func (m *Manager) ServiceReload() error {
 	return m.ReloadConfig(config)
 }
 
-func (m *Manager) SystemProxyStatus() (*daemon.SystemProxyStatus, error) {
+// platformHandler exists only to satisfy sing-box's internal daemon contract.
+// System proxy ownership stays in the user-session UI process.
+type platformHandler struct {
+	manager *Manager
+}
+
+func (h platformHandler) ServiceStop() error { return h.manager.ServiceStop() }
+
+func (h platformHandler) ServiceReload() error { return h.manager.ServiceReload() }
+
+func (platformHandler) SystemProxyStatus() (*daemon.SystemProxyStatus, error) {
 	return &daemon.SystemProxyStatus{Available: false, Enabled: false}, nil
 }
 
-func (m *Manager) SetSystemProxyEnabled(bool) error {
+func (platformHandler) SetSystemProxyEnabled(bool) error {
 	return status.Error(codes.Unimplemented, "system proxy is managed by the desktop client")
 }
 
-func (*Manager) WriteDebugMessage(string) {}
+func (platformHandler) WriteDebugMessage(string) {}
 
 func (m *Manager) Close() {
 	m.close.Do(func() {
@@ -380,5 +396,5 @@ func projectVersion() string {
 	return "devel"
 }
 
-var _ daemon.PlatformHandler = (*Manager)(nil)
+var _ daemon.PlatformHandler = platformHandler{}
 var _ targetlibapi.TargetLibServer = (*Manager)(nil)

@@ -2,7 +2,7 @@ package manager
 
 import "github.com/loafman1120/TargetLib/subscriptions"
 
-const ProtocolVersion uint32 = 3
+const ProtocolVersion uint32 = 5
 
 type Options struct {
 	BasePath    string

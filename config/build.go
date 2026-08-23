@@ -139,7 +139,7 @@ func validationContext() context.Context {
 // （机场常带需管理员权限的 tun），入站主权始终在应用侧。
 func buildInbounds(settings Settings) ([]*option.Inbound, error) {
 	var inbounds []*option.Inbound
-	if settings.ProxyMode == ProxyModeMixed || settings.SystemProxy {
+	if settings.ProxyMode == ProxyModeMixed {
 		address, err := netip.ParseAddr(strings.TrimSpace(settings.ListenAddress))
 		if err != nil {
 			return nil, fmt.Errorf("%w: listen address %q is not a valid IP address", ErrInvalidSettings, settings.ListenAddress)

@@ -15,16 +15,36 @@ import (
 
 type Handler struct {
 	targetlibapi.UnimplementedTargetLibServer
-	manager *Manager
+	manager       *Manager
+	activeChanged func(context.Context) error
 }
 
 func NewHandler(manager *Manager) *Handler {
 	return &Handler{manager: manager}
 }
 
-func (s *Handler) ListSubscriptions(context.Context, *emptypb.Empty) (*targetlibapi.SubscriptionList, error) {
+func (s *Handler) SetActiveChangedCallback(callback func(context.Context) error) {
+	s.activeChanged = callback
+}
+
+func (s *Handler) ListSubscriptions(ctx context.Context, _ *emptypb.Empty) (*targetlibapi.SubscriptionList, error) {
+	if s.manager.ActiveID() == "" {
+		for _, item := range s.manager.Views() {
+			if item.Enabled {
+				if err := s.manager.SetActive(ctx, item.ID); err != nil {
+					return nil, subscriptionError(err)
+				}
+				if s.activeChanged != nil {
+					if err := s.activeChanged(ctx); err != nil {
+						return nil, err
+					}
+				}
+				break
+			}
+		}
+	}
 	views := s.manager.Views()
-	result := &targetlibapi.SubscriptionList{Subscriptions: make([]*targetlibapi.SubscriptionView, len(views))}
+	result := &targetlibapi.SubscriptionList{ActiveId: s.manager.ActiveID(), Subscriptions: make([]*targetlibapi.SubscriptionView, len(views))}
 	for i := range views {
 		result.Subscriptions[i] = grpcSubscriptionView(views[i])
 	}
@@ -43,7 +63,7 @@ func (s *Handler) GetSubscription(_ context.Context, request *targetlibapi.Subsc
 	return grpcSubscriptionView(view), nil
 }
 
-func (s *Handler) AddSubscription(_ context.Context, request *targetlibapi.AddSubscriptionRequest) (*targetlibapi.SubscriptionView, error) {
+func (s *Handler) AddSubscription(ctx context.Context, request *targetlibapi.AddSubscriptionRequest) (*targetlibapi.SubscriptionView, error) {
 	if request == nil {
 		return nil, status.Error(codes.InvalidArgument, "request is required")
 	}
@@ -68,10 +88,26 @@ func (s *Handler) AddSubscription(_ context.Context, request *targetlibapi.AddSu
 		return nil, subscriptionError(err)
 	}
 	view, _ := s.manager.View(item.ID)
+	if request.GetUpdateNow() {
+		if _, err := s.manager.Update(ctx, item.ID); err != nil {
+			return nil, subscriptionError(err)
+		}
+		view, _ = s.manager.View(item.ID)
+	}
+	if request.GetActivate() {
+		if err := s.manager.SetActive(ctx, item.ID); err != nil {
+			return nil, subscriptionError(err)
+		}
+		if s.activeChanged != nil {
+			if err := s.activeChanged(ctx); err != nil {
+				return nil, err
+			}
+		}
+	}
 	return grpcSubscriptionView(view), nil
 }
 
-func (s *Handler) RemoveSubscription(_ context.Context, request *targetlibapi.SubscriptionId) (*emptypb.Empty, error) {
+func (s *Handler) RemoveSubscription(ctx context.Context, request *targetlibapi.SubscriptionId) (*emptypb.Empty, error) {
 	id, err := subscriptionID(request)
 	if err != nil {
 		return nil, err
@@ -81,6 +117,21 @@ func (s *Handler) RemoveSubscription(_ context.Context, request *targetlibapi.Su
 	}
 	if !s.manager.Remove(id) {
 		return nil, status.Error(codes.Internal, "remove subscription failed")
+	}
+	if s.manager.ActiveID() == "" {
+		for _, item := range s.manager.Views() {
+			if item.Enabled {
+				if err := s.manager.SetActive(ctx, item.ID); err != nil {
+					return nil, subscriptionError(err)
+				}
+				if s.activeChanged != nil {
+					if err := s.activeChanged(ctx); err != nil {
+						return nil, err
+					}
+				}
+				break
+			}
+		}
 	}
 	return &emptypb.Empty{}, nil
 }
@@ -131,6 +182,11 @@ func (s *Handler) UpdateSubscription(ctx context.Context, request *targetlibapi.
 	if updateErr != nil && result.Subscription.ID == "" {
 		return nil, subscriptionError(updateErr)
 	}
+	if s.manager.ActiveID() == id && s.activeChanged != nil {
+		if err := s.activeChanged(ctx); err != nil {
+			return nil, err
+		}
+	}
 	view, ok := s.manager.View(id)
 	if !ok {
 		return nil, status.Errorf(codes.NotFound, "subscription %q not found", id)
@@ -168,6 +224,11 @@ func (s *Handler) SetActiveSubscription(ctx context.Context, request *targetliba
 	}
 	if err := s.manager.SetActive(ctx, id); err != nil {
 		return nil, subscriptionError(err)
+	}
+	if s.activeChanged != nil {
+		if err := s.activeChanged(ctx); err != nil {
+			return nil, err
+		}
 	}
 	return &emptypb.Empty{}, nil
 }

@@ -3,10 +3,14 @@ package manager
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 
+	"github.com/sagernet/sing-box/daemon"
+	"github.com/sagernet/sing-box/experimental/libbox"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/proto"
 
 	targetlibapi "github.com/loafman1120/TargetLib/api/TargetLib"
 	"github.com/loafman1120/TargetLib/config"
@@ -16,6 +20,84 @@ import (
 // BuildConfig 把应用设置与订阅中间态（或原始配置）合成为可运行的 sing-box 配置，
 // 替代客户端侧的配置拼装逻辑。
 func (m *Manager) BuildConfig(_ context.Context, request *targetlibapi.BuildConfigRequest) (*targetlibapi.SubscriptionConfig, error) {
+	content, err := m.buildConfig(request)
+	if err != nil {
+		return nil, err
+	}
+	return &targetlibapi.SubscriptionConfig{Content: content}, nil
+}
+
+// ApplyRuntimeSettings builds and validates the requested configuration while
+// holding the lifecycle lock, then starts or reloads the core. A failed reload
+// is followed by a best-effort restoration of the last known good config.
+func (m *Manager) ApplyRuntimeSettings(_ context.Context, request *targetlibapi.BuildConfigRequest) (*targetlibapi.OperationResponse, error) {
+	m.opMu.Lock()
+	defer m.opMu.Unlock()
+
+	content, err := m.buildConfig(request)
+	if err != nil {
+		return nil, err
+	}
+	if err := libbox.CheckConfig(string(content)); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	current, err := m.currentStatus()
+	if err != nil {
+		return nil, err
+	}
+	switch current.Status {
+	case daemon.ServiceStatus_IDLE, daemon.ServiceStatus_FATAL:
+	case daemon.ServiceStatus_STARTED, daemon.ServiceStatus_STARTING:
+	default:
+		return nil, status.Error(codes.FailedPrecondition, "service is stopping")
+	}
+
+	m.configMu.RLock()
+	previousConfig := m.config
+	m.configMu.RUnlock()
+	wasRunning := current.Status == daemon.ServiceStatus_STARTED || current.Status == daemon.ServiceStatus_STARTING
+	if err := m.started.StartOrReloadService(string(content), &daemon.OverrideOptions{}); err != nil {
+		if wasRunning && previousConfig != "" {
+			if rollbackErr := m.started.StartOrReloadService(previousConfig, &daemon.OverrideOptions{}); rollbackErr != nil {
+				return nil, status.Error(codes.Internal, fmt.Sprintf("apply runtime settings: %v; restore previous config: %v", err, rollbackErr))
+			}
+			return nil, status.Error(codes.Internal, fmt.Sprintf("apply runtime settings: %v; previous config restored", err))
+		}
+		return nil, status.Error(codes.Internal, fmt.Sprintf("apply runtime settings: %v", err))
+	}
+
+	m.configMu.Lock()
+	m.config = string(content)
+	m.lastSettings = proto.Clone(request.GetSettings()).(*targetlibapi.BuildConfigSettings)
+	m.configMu.Unlock()
+	return m.operationResponse()
+}
+
+// reloadActiveSubscription rebuilds the persisted active subscription using
+// the last UI settings after a subscription mutation.
+func (m *Manager) reloadActiveSubscription(ctx context.Context) error {
+	m.configMu.RLock()
+	settings := m.lastSettings
+	if settings != nil {
+		settings = proto.Clone(settings).(*targetlibapi.BuildConfigSettings)
+	}
+	m.configMu.RUnlock()
+	if settings == nil {
+		return nil
+	}
+	current, err := m.currentStatus()
+	if err != nil {
+		return err
+	}
+	if current.Status != daemon.ServiceStatus_STARTED && current.Status != daemon.ServiceStatus_STARTING {
+		return nil
+	}
+	_, err = m.ApplyRuntimeSettings(ctx, &targetlibapi.BuildConfigRequest{Settings: settings})
+	return err
+}
+
+func (m *Manager) buildConfig(request *targetlibapi.BuildConfigRequest) ([]byte, error) {
 	if request == nil {
 		return nil, status.Error(codes.InvalidArgument, "request is required")
 	}
@@ -55,7 +137,7 @@ func (m *Manager) BuildConfig(_ context.Context, request *targetlibapi.BuildConf
 		}
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	return &targetlibapi.SubscriptionConfig{Content: content}, nil
+	return content, nil
 }
 
 func buildSettings(proto *targetlibapi.BuildConfigSettings) (config.Settings, error) {
@@ -65,7 +147,6 @@ func buildSettings(proto *targetlibapi.BuildConfigSettings) (config.Settings, er
 	settings := config.Settings{
 		ListenAddress: proto.GetListenAddress(),
 		MixedPort:     int(proto.GetMixedPort()),
-		SystemProxy:   proto.GetSystemProxy(),
 		IPv6:          proto.GetIpv6(),
 		CacheFilePath: proto.GetCacheFilePath(),
 	}

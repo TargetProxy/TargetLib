@@ -39,6 +39,9 @@ const (
 	TargetLib_UpdateSubscription_FullMethodName           = "/targetlib.TargetLib/UpdateSubscription"
 	TargetLib_GetSubscriptionConfig_FullMethodName        = "/targetlib.TargetLib/GetSubscriptionConfig"
 	TargetLib_BuildConfig_FullMethodName                  = "/targetlib.TargetLib/BuildConfig"
+	TargetLib_ApplyRuntimeSettings_FullMethodName         = "/targetlib.TargetLib/ApplyRuntimeSettings"
+	TargetLib_TestOutbound_FullMethodName                 = "/targetlib.TargetLib/TestOutbound"
+	TargetLib_TestOutbounds_FullMethodName                = "/targetlib.TargetLib/TestOutbounds"
 	TargetLib_GetResolvedEndpoints_FullMethodName         = "/targetlib.TargetLib/GetResolvedEndpoints"
 	TargetLib_SubscribeSubscriptionEvents_FullMethodName  = "/targetlib.TargetLib/SubscribeSubscriptionEvents"
 	TargetLib_SetActiveSubscription_FullMethodName        = "/targetlib.TargetLib/SetActiveSubscription"
@@ -69,6 +72,12 @@ type TargetLibClient interface {
 	UpdateSubscription(ctx context.Context, in *SubscriptionId, opts ...grpc.CallOption) (*SubscriptionUpdateResult, error)
 	GetSubscriptionConfig(ctx context.Context, in *SubscriptionId, opts ...grpc.CallOption) (*SubscriptionConfig, error)
 	BuildConfig(ctx context.Context, in *BuildConfigRequest, opts ...grpc.CallOption) (*SubscriptionConfig, error)
+	// Atomically builds, validates, and applies a runtime configuration. When
+	// the service is already running, a failed reload restores the last known
+	// good configuration before returning an error.
+	ApplyRuntimeSettings(ctx context.Context, in *BuildConfigRequest, opts ...grpc.CallOption) (*OperationResponse, error)
+	TestOutbound(ctx context.Context, in *TestOutboundRequest, opts ...grpc.CallOption) (*LatencyTestResult, error)
+	TestOutbounds(ctx context.Context, in *TestOutboundsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[LatencyTestResult], error)
 	GetResolvedEndpoints(ctx context.Context, in *ResolvedEndpointsRequest, opts ...grpc.CallOption) (*ResolvedEndpoints, error)
 	SubscribeSubscriptionEvents(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[SubscriptionEvent], error)
 	// Active subscription state is persisted by the backend; clients do not track it.
@@ -285,6 +294,45 @@ func (c *targetLibClient) BuildConfig(ctx context.Context, in *BuildConfigReques
 	return out, nil
 }
 
+func (c *targetLibClient) ApplyRuntimeSettings(ctx context.Context, in *BuildConfigRequest, opts ...grpc.CallOption) (*OperationResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(OperationResponse)
+	err := c.cc.Invoke(ctx, TargetLib_ApplyRuntimeSettings_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *targetLibClient) TestOutbound(ctx context.Context, in *TestOutboundRequest, opts ...grpc.CallOption) (*LatencyTestResult, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(LatencyTestResult)
+	err := c.cc.Invoke(ctx, TargetLib_TestOutbound_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *targetLibClient) TestOutbounds(ctx context.Context, in *TestOutboundsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[LatencyTestResult], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &TargetLib_ServiceDesc.Streams[1], TargetLib_TestOutbounds_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[TestOutboundsRequest, LatencyTestResult]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type TargetLib_TestOutboundsClient = grpc.ServerStreamingClient[LatencyTestResult]
+
 func (c *targetLibClient) GetResolvedEndpoints(ctx context.Context, in *ResolvedEndpointsRequest, opts ...grpc.CallOption) (*ResolvedEndpoints, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ResolvedEndpoints)
@@ -297,7 +345,7 @@ func (c *targetLibClient) GetResolvedEndpoints(ctx context.Context, in *Resolved
 
 func (c *targetLibClient) SubscribeSubscriptionEvents(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[SubscriptionEvent], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &TargetLib_ServiceDesc.Streams[1], TargetLib_SubscribeSubscriptionEvents_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &TargetLib_ServiceDesc.Streams[2], TargetLib_SubscribeSubscriptionEvents_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -367,6 +415,12 @@ type TargetLibServer interface {
 	UpdateSubscription(context.Context, *SubscriptionId) (*SubscriptionUpdateResult, error)
 	GetSubscriptionConfig(context.Context, *SubscriptionId) (*SubscriptionConfig, error)
 	BuildConfig(context.Context, *BuildConfigRequest) (*SubscriptionConfig, error)
+	// Atomically builds, validates, and applies a runtime configuration. When
+	// the service is already running, a failed reload restores the last known
+	// good configuration before returning an error.
+	ApplyRuntimeSettings(context.Context, *BuildConfigRequest) (*OperationResponse, error)
+	TestOutbound(context.Context, *TestOutboundRequest) (*LatencyTestResult, error)
+	TestOutbounds(*TestOutboundsRequest, grpc.ServerStreamingServer[LatencyTestResult]) error
 	GetResolvedEndpoints(context.Context, *ResolvedEndpointsRequest) (*ResolvedEndpoints, error)
 	SubscribeSubscriptionEvents(*emptypb.Empty, grpc.ServerStreamingServer[SubscriptionEvent]) error
 	// Active subscription state is persisted by the backend; clients do not track it.
@@ -440,6 +494,15 @@ func (UnimplementedTargetLibServer) GetSubscriptionConfig(context.Context, *Subs
 }
 func (UnimplementedTargetLibServer) BuildConfig(context.Context, *BuildConfigRequest) (*SubscriptionConfig, error) {
 	return nil, status.Error(codes.Unimplemented, "method BuildConfig not implemented")
+}
+func (UnimplementedTargetLibServer) ApplyRuntimeSettings(context.Context, *BuildConfigRequest) (*OperationResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ApplyRuntimeSettings not implemented")
+}
+func (UnimplementedTargetLibServer) TestOutbound(context.Context, *TestOutboundRequest) (*LatencyTestResult, error) {
+	return nil, status.Error(codes.Unimplemented, "method TestOutbound not implemented")
+}
+func (UnimplementedTargetLibServer) TestOutbounds(*TestOutboundsRequest, grpc.ServerStreamingServer[LatencyTestResult]) error {
+	return status.Error(codes.Unimplemented, "method TestOutbounds not implemented")
 }
 func (UnimplementedTargetLibServer) GetResolvedEndpoints(context.Context, *ResolvedEndpointsRequest) (*ResolvedEndpoints, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetResolvedEndpoints not implemented")
@@ -812,6 +875,53 @@ func _TargetLib_BuildConfig_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TargetLib_ApplyRuntimeSettings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(BuildConfigRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TargetLibServer).ApplyRuntimeSettings(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TargetLib_ApplyRuntimeSettings_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TargetLibServer).ApplyRuntimeSettings(ctx, req.(*BuildConfigRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TargetLib_TestOutbound_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TestOutboundRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TargetLibServer).TestOutbound(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TargetLib_TestOutbound_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TargetLibServer).TestOutbound(ctx, req.(*TestOutboundRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TargetLib_TestOutbounds_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(TestOutboundsRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(TargetLibServer).TestOutbounds(m, &grpc.GenericServerStream[TestOutboundsRequest, LatencyTestResult]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type TargetLib_TestOutboundsServer = grpc.ServerStreamingServer[LatencyTestResult]
+
 func _TargetLib_GetResolvedEndpoints_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ResolvedEndpointsRequest)
 	if err := dec(in); err != nil {
@@ -975,6 +1085,14 @@ var TargetLib_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _TargetLib_BuildConfig_Handler,
 		},
 		{
+			MethodName: "ApplyRuntimeSettings",
+			Handler:    _TargetLib_ApplyRuntimeSettings_Handler,
+		},
+		{
+			MethodName: "TestOutbound",
+			Handler:    _TargetLib_TestOutbound_Handler,
+		},
+		{
 			MethodName: "GetResolvedEndpoints",
 			Handler:    _TargetLib_GetResolvedEndpoints_Handler,
 		},
@@ -995,6 +1113,11 @@ var TargetLib_ServiceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "SubscribeState",
 			Handler:       _TargetLib_SubscribeState_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "TestOutbounds",
+			Handler:       _TargetLib_TestOutbounds_Handler,
 			ServerStreams: true,
 		},
 		{
