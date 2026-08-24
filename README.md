@@ -1,25 +1,26 @@
 # TargetLib
 
-> **Windows 专用** — 专为 Windows 平台设计与优化的 sing-box 管理框架。提供原生 Windows Service 集成、命名管道 / UDS 双栈支持及
-> `targetlib.dll` C ABI，深度适配 Windows 桌面环境。 *底层具备跨平台能力，但当前版本仅针对 Windows 进行完整测试与调优。*
+> **全平台统一架构** — TargetLib 为 Windows、Linux、macOS、Android 和 iOS 提供统一的 sing-box 管理能力。所有宿主共享同一份
+> TargetLib gRPC 协议；native FFI 仅负责启动和释放本地 gRPC 服务，不维护独立的业务接口。
 
-基于 `sing-box` 的轻量封装，提供 gRPC 守护进程 `TargetLib` 与 C ABI (`targetlib.dll` / `targetlib.h`)，统一管理 sing-box
-的启动、重载与状态查询。
+TargetLib 是基于 `sing-box` 的轻量封装，统一管理 sing-box 的启动、重载、状态、日志和订阅。
 
 ## 平台支持
 
-| 平台                    | 状态          | 说明                                                          |
-|-------------------------|---------------|---------------------------------------------------------------|
-| **Windows 10/11 (x64)** | ✅ 官方支持   | 首要目标平台，提供 Service 模式、FFI DLL、PowerShell 一键构建 |
-| 其他平台                | ⚠️ 未官方支持 | 代码具备跨平台可移植性，但不提供构建/测试保障                 |
+| 平台                    | 接入方式                  | 说明                                      |
+|-------------------------|---------------------------|-------------------------------------------|
+| Windows                 | daemon / native + gRPC   | 可作为 Windows Service 运行               |
+| Linux                   | daemon / native + gRPC   | 使用 Unix socket                          |
+| macOS                   | daemon / native + gRPC   | 使用 Unix socket                          |
+| Android                 | native + gRPC             | FFI 仅负责启动本地服务                    |
+| iOS                     | native + gRPC             | FFI 仅负责启动本地服务                    |
 
 ## 功能
 
-- 专为 Windows 打造的 sing-box 管控层，仅暴露必要能力
-- Windows Service 原生集成（`install` / `start` / `stop` / `status`），支持开机自启
-- gRPC 服务：运行时生命周期管理，以及完整的订阅 CRUD、更新、端点查询和事件流
-- Windows 专属 C ABI (`targetlib.dll` / `targetlib.h`) 供桌面端通过 FFI 调用
-- 单例 `StartedService`，支持并发安全的配置热重载
+- 跨平台 sing-box 管控层，仅暴露 TargetLib 自有能力
+- 统一 gRPC 服务：运行时生命周期管理，以及完整的订阅 CRUD、更新、端点查询、日志和事件流
+- 轻量 C ABI（`targetlib` native library）仅用于启动、停止和释放 gRPC 服务
+- 每个宿主进程维护一个运行时实例，支持并发安全的配置热重载
 - 跨平台 Go 订阅服务：加密持久化、条件更新、自动调度、节点中间态及代理端点解析
 
 ## 目录结构
@@ -44,7 +45,11 @@ TargetLib/
 - protoc >= 3.x (仅改 proto 时需要)
 - `protoc-gen-go` / `protoc-gen-go-grpc`
 
-### 构建守护进程
+### 构建 daemon
+
+```sh
+go build -o build/TargetLib ./cmd/TargetLib
+```
 
 ```powershell
 .\scripts\build.ps1
@@ -56,13 +61,13 @@ TargetLib/
 .\scripts\build.ps1 -SkipTargetSync
 ```
 
-更新已经注册的 Windows 服务时，请在管理员 PowerShell 中运行：
+Windows Service 管理和目标同步脚本仅适用于 Windows：
 
 ```powershell
 .\scripts\update-installed-service.ps1
 ```
 
-运行：
+运行 daemon：
 
 ```powershell
 .\build\TargetLib.exe --base-path ./run --log-max-lines 300
@@ -72,7 +77,14 @@ TargetLib/
 .\build\TargetLib.exe status
 ```
 
-### 构建 C ABI
+### 构建 native FFI
+
+```sh
+go build -buildmode=c-shared -o build/targetlib.so ./ffi/native
+go build -buildmode=c-archive -o build/targetlib.a ./ffi/native
+```
+
+Windows 使用 `.dll`，macOS 使用 `.dylib`；扩展名由 Go 工具链决定。
 
 ```powershell
 .\scripts\build-native.ps1
@@ -95,6 +107,10 @@ targetlib_free_handle(h);
 targetlib_free_string(err);
 ```
 
+所有平台的宿主均使用同一份 `api/TargetLib/targetlib.proto`。native 宿主调用
+`targetlib_start` 后，通过 `<base_path>/command.sock` 连接 TargetLib gRPC；重载、状态、日志、订阅和测试等能力全部通过
+gRPC 完成，不在 C ABI 中重复实现。
+
 ### 重新生成 proto
 
 ```powershell
@@ -105,6 +121,9 @@ targetlib_free_string(err);
 ## gRPC API
 
 `service TargetLib` (`api/TargetLib/targetlib.proto`) 聚合运行时和订阅管理：
+
+所有平台的 daemon/native library 对外提供完全一致的 `TargetLib` service。sing-box 原始
+`daemon.StartedService` 不对外注册。
 
 | RPC                       | 说明                                           |
 |---------------------------|------------------------------------------------|
