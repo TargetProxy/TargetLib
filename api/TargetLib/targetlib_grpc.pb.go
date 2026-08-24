@@ -30,6 +30,9 @@ const (
 	TargetLib_GetState_FullMethodName                     = "/targetlib.TargetLib/GetState"
 	TargetLib_SubscribeState_FullMethodName               = "/targetlib.TargetLib/SubscribeState"
 	TargetLib_SubscribeLogs_FullMethodName                = "/targetlib.TargetLib/SubscribeLogs"
+	TargetLib_SelectOutbound_FullMethodName               = "/targetlib.TargetLib/SelectOutbound"
+	TargetLib_CloseConnection_FullMethodName              = "/targetlib.TargetLib/CloseConnection"
+	TargetLib_CloseAllConnections_FullMethodName          = "/targetlib.TargetLib/CloseAllConnections"
 	TargetLib_ListSubscriptions_FullMethodName            = "/targetlib.TargetLib/ListSubscriptions"
 	TargetLib_GetSubscription_FullMethodName              = "/targetlib.TargetLib/GetSubscription"
 	TargetLib_AddSubscription_FullMethodName              = "/targetlib.TargetLib/AddSubscription"
@@ -64,6 +67,9 @@ type TargetLibClient interface {
 	GetState(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ServiceState, error)
 	SubscribeState(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ServiceState], error)
 	SubscribeLogs(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[LogBatch], error)
+	SelectOutbound(ctx context.Context, in *SelectOutboundRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	CloseConnection(ctx context.Context, in *CloseConnectionRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	CloseAllConnections(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	ListSubscriptions(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*SubscriptionList, error)
 	GetSubscription(ctx context.Context, in *SubscriptionId, opts ...grpc.CallOption) (*SubscriptionView, error)
 	AddSubscription(ctx context.Context, in *AddSubscriptionRequest, opts ...grpc.CallOption) (*SubscriptionView, error)
@@ -214,6 +220,36 @@ func (c *targetLibClient) SubscribeLogs(ctx context.Context, in *emptypb.Empty, 
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type TargetLib_SubscribeLogsClient = grpc.ServerStreamingClient[LogBatch]
+
+func (c *targetLibClient) SelectOutbound(ctx context.Context, in *SelectOutboundRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, TargetLib_SelectOutbound_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *targetLibClient) CloseConnection(ctx context.Context, in *CloseConnectionRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, TargetLib_CloseConnection_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *targetLibClient) CloseAllConnections(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, TargetLib_CloseAllConnections_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
 
 func (c *targetLibClient) ListSubscriptions(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*SubscriptionList, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
@@ -427,6 +463,9 @@ type TargetLibServer interface {
 	GetState(context.Context, *emptypb.Empty) (*ServiceState, error)
 	SubscribeState(*emptypb.Empty, grpc.ServerStreamingServer[ServiceState]) error
 	SubscribeLogs(*emptypb.Empty, grpc.ServerStreamingServer[LogBatch]) error
+	SelectOutbound(context.Context, *SelectOutboundRequest) (*emptypb.Empty, error)
+	CloseConnection(context.Context, *CloseConnectionRequest) (*emptypb.Empty, error)
+	CloseAllConnections(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
 	ListSubscriptions(context.Context, *emptypb.Empty) (*SubscriptionList, error)
 	GetSubscription(context.Context, *SubscriptionId) (*SubscriptionView, error)
 	AddSubscription(context.Context, *AddSubscriptionRequest) (*SubscriptionView, error)
@@ -489,6 +528,15 @@ func (UnimplementedTargetLibServer) SubscribeState(*emptypb.Empty, grpc.ServerSt
 }
 func (UnimplementedTargetLibServer) SubscribeLogs(*emptypb.Empty, grpc.ServerStreamingServer[LogBatch]) error {
 	return status.Error(codes.Unimplemented, "method SubscribeLogs not implemented")
+}
+func (UnimplementedTargetLibServer) SelectOutbound(context.Context, *SelectOutboundRequest) (*emptypb.Empty, error) {
+	return nil, status.Error(codes.Unimplemented, "method SelectOutbound not implemented")
+}
+func (UnimplementedTargetLibServer) CloseConnection(context.Context, *CloseConnectionRequest) (*emptypb.Empty, error) {
+	return nil, status.Error(codes.Unimplemented, "method CloseConnection not implemented")
+}
+func (UnimplementedTargetLibServer) CloseAllConnections(context.Context, *emptypb.Empty) (*emptypb.Empty, error) {
+	return nil, status.Error(codes.Unimplemented, "method CloseAllConnections not implemented")
 }
 func (UnimplementedTargetLibServer) ListSubscriptions(context.Context, *emptypb.Empty) (*SubscriptionList, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListSubscriptions not implemented")
@@ -730,6 +778,60 @@ func _TargetLib_SubscribeLogs_Handler(srv interface{}, stream grpc.ServerStream)
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type TargetLib_SubscribeLogsServer = grpc.ServerStreamingServer[LogBatch]
+
+func _TargetLib_SelectOutbound_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SelectOutboundRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TargetLibServer).SelectOutbound(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TargetLib_SelectOutbound_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TargetLibServer).SelectOutbound(ctx, req.(*SelectOutboundRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TargetLib_CloseConnection_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CloseConnectionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TargetLibServer).CloseConnection(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TargetLib_CloseConnection_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TargetLibServer).CloseConnection(ctx, req.(*CloseConnectionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TargetLib_CloseAllConnections_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TargetLibServer).CloseAllConnections(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TargetLib_CloseAllConnections_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TargetLibServer).CloseAllConnections(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
 
 func _TargetLib_ListSubscriptions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(emptypb.Empty)
@@ -1079,6 +1181,18 @@ var TargetLib_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetState",
 			Handler:    _TargetLib_GetState_Handler,
+		},
+		{
+			MethodName: "SelectOutbound",
+			Handler:    _TargetLib_SelectOutbound_Handler,
+		},
+		{
+			MethodName: "CloseConnection",
+			Handler:    _TargetLib_CloseConnection_Handler,
+		},
+		{
+			MethodName: "CloseAllConnections",
+			Handler:    _TargetLib_CloseAllConnections_Handler,
 		},
 		{
 			MethodName: "ListSubscriptions",

@@ -272,6 +272,26 @@ func (m *Manager) SubscribeLogs(_ *emptypb.Empty, stream grpc.ServerStreamingSer
 	return m.started.SubscribeLog(&emptypb.Empty{}, newLogRelay(stream))
 }
 
+func (m *Manager) SelectOutbound(ctx context.Context, request *targetlibapi.SelectOutboundRequest) (*emptypb.Empty, error) {
+	if request == nil || request.GetGroupTag() == "" || request.GetOutboundTag() == "" {
+		return nil, status.Error(codes.InvalidArgument, "group_tag and outbound_tag are required")
+	}
+	return m.started.SelectOutbound(ctx, &daemon.SelectOutboundRequest{
+		GroupTag: request.GetGroupTag(), OutboundTag: request.GetOutboundTag(),
+	})
+}
+
+func (m *Manager) CloseConnection(ctx context.Context, request *targetlibapi.CloseConnectionRequest) (*emptypb.Empty, error) {
+	if request == nil || request.GetId() == "" {
+		return nil, status.Error(codes.InvalidArgument, "connection id is required")
+	}
+	return m.started.CloseConnection(ctx, &daemon.CloseConnectionRequest{Id: request.GetId()})
+}
+
+func (m *Manager) CloseAllConnections(ctx context.Context, request *emptypb.Empty) (*emptypb.Empty, error) {
+	return m.started.CloseAllConnections(ctx, request)
+}
+
 func (m *Manager) ServiceStop() error { return m.StopService() }
 
 func (m *Manager) ServiceReload() error {

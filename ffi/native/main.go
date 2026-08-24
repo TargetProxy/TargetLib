@@ -34,10 +34,6 @@ import (
 	"github.com/loafman1120/TargetLib/manager"
 )
 
-type initOptions struct {
-	manager.Options
-}
-
 type nativeService struct {
 	manager *manager.Manager
 	server  *manager.Server
@@ -45,7 +41,8 @@ type nativeService struct {
 
 var (
 	optionsMu   sync.RWMutex
-	currentInit initOptions
+	currentInit manager.Options
+	initialized bool
 	nextHandle  atomic.Uint64
 	servicesMu  sync.RWMutex
 	services    = make(map[uint64]*nativeService)
@@ -72,22 +69,21 @@ func targetlib_init(raw *C.targetlib_init_options, errOut **C.char) C.int32_t {
 	if raw == nil {
 		return fail(errOut, "targetlib_init: nil options")
 	}
-	options := initOptions{
-		Options: manager.Options{
-			BasePath:    cstr(raw.base_path),
-			WorkingPath: cstr(raw.working_path),
-			TempPath:    cstr(raw.temp_path),
-			Locale:      cstr(raw.locale),
-			LogMaxLines: int(raw.log_max_lines),
-			Debug:       bool(raw.debug),
-			OOMKiller:   bool(raw.oom_killer_enabled) && !bool(raw.oom_killer_disabled),
-		},
+	options := manager.Options{
+		BasePath:    cstr(raw.base_path),
+		WorkingPath: cstr(raw.working_path),
+		TempPath:    cstr(raw.temp_path),
+		Locale:      cstr(raw.locale),
+		LogMaxLines: int(raw.log_max_lines),
+		Debug:       bool(raw.debug),
+		OOMKiller:   bool(raw.oom_killer_enabled) && !bool(raw.oom_killer_disabled),
 	}
-	if err := manager.Setup(options.Options); err != nil {
+	if err := manager.Setup(options); err != nil {
 		return fail(errOut, err.Error())
 	}
 	optionsMu.Lock()
 	currentInit = options
+	initialized = true
 	optionsMu.Unlock()
 	return 0
 }
@@ -110,10 +106,14 @@ func targetlib_start(configJSON *C.char, out *C.targetlib_handle, errOut **C.cha
 	}
 
 	optionsMu.RLock()
+	if !initialized {
+		optionsMu.RUnlock()
+		return fail(errOut, "targetlib_start: not initialized")
+	}
 	options := currentInit
 	optionsMu.RUnlock()
 	serviceManager, server, err := manager.NewLocal(
-		context.Background(), options.Options, filepath.Join(options.BasePath, "command.sock"),
+		context.Background(), options, filepath.Join(options.BasePath, "command.sock"),
 	)
 	if err != nil {
 		return fail(errOut, err.Error())

@@ -17,6 +17,9 @@ service TargetLib {
   rpc GetState(google.protobuf.Empty) returns (ServiceState);
   rpc SubscribeState(google.protobuf.Empty) returns (stream ServiceState);
   rpc SubscribeLogs(google.protobuf.Empty) returns (stream LogBatch);
+  rpc SelectOutbound(SelectOutboundRequest) returns (google.protobuf.Empty);
+  rpc CloseConnection(CloseConnectionRequest) returns (google.protobuf.Empty);
+  rpc CloseAllConnections(google.protobuf.Empty) returns (google.protobuf.Empty);
 
   rpc ListSubscriptions(google.protobuf.Empty) returns (SubscriptionList);
   rpc GetSubscription(SubscriptionId) returns (SubscriptionView);
@@ -64,6 +67,15 @@ message LogMessage {
 message LogBatch {
   repeated LogMessage messages = 1;
   bool reset = 2;
+}
+
+message SelectOutboundRequest {
+  string group_tag = 1;
+  string outbound_tag = 2;
+}
+
+message CloseConnectionRequest {
+  string id = 1;
 }
 
 message VersionResponse {

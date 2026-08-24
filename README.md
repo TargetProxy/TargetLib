@@ -136,6 +136,9 @@ gRPC 完成，不在 C ABI 中重复实现。
 | TestOutbounds             | 合并 URLTest group 后并发测试并流式返回结果     |
 | GetState / SubscribeState | 查询 / 订阅 `ServiceState`                     |
 | SubscribeLogs             | 订阅过滤后的运行日志（仅 INFO 及以上）         |
+| SelectOutbound            | 在运行中的选择器中动态切换出站，不重载配置       |
+| CloseConnection            | 关闭指定连接                                  |
+| CloseAllConnections        | 关闭当前全部连接                              |
 
 `BuildConfigSettings.route_mode` 支持 `DIRECT`（全部直连）、`RULE`（使用配置路由规则）和 `ALL`（全部使用代理主 outbound）；未设置时默认为 `RULE`。通过 `ApplyRuntimeSettings` 可在运行时原子切换。
 
