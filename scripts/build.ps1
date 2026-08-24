@@ -12,6 +12,8 @@ Builds the standalone Desktop TargetLib gRPC daemon.
 param(
     [string]$OutputPath,
 
+    [string]$TargetProjectPath,
+
     [string[]]$BuildTags = @(
         'with_gvisor',
         'with_quic',
@@ -26,7 +28,9 @@ param(
         'osusergo'
     ),
 
-    [switch]$DebugBuild
+    [switch]$DebugBuild,
+
+    [switch]$SkipTargetSync
 )
 
 Set-StrictMode -Version Latest
@@ -79,3 +83,24 @@ if (-not (Test-Path -LiteralPath $OutputPath)) {
     throw "Build completed without creating $OutputPath"
 }
 Write-Host "Built $OutputPath"
+
+if (-not $SkipTargetSync -and $env:OS -eq 'Windows_NT') {
+    if ([string]::IsNullOrWhiteSpace($TargetProjectPath)) {
+        $TargetProjectPath = Join-Path (Split-Path -Parent $repositoryRoot) 'Target'
+    } elseif (-not [System.IO.Path]::IsPathRooted($TargetProjectPath)) {
+        $TargetProjectPath = Join-Path $repositoryRoot $TargetProjectPath
+    }
+    $TargetProjectPath = [System.IO.Path]::GetFullPath($TargetProjectPath)
+    $runnerRoot = Join-Path $TargetProjectPath 'build\windows'
+    if (Test-Path -LiteralPath $runnerRoot) {
+        $runnerExecutables = Get-ChildItem -LiteralPath $runnerRoot -Filter 'target.exe' -File -Recurse
+        $runnerDirectories = $runnerExecutables |
+            ForEach-Object { $_.Directory.FullName } |
+            Sort-Object -Unique
+        foreach ($runnerDirectory in $runnerDirectories) {
+            $bundledPath = Join-Path $runnerDirectory 'TargetLib.exe'
+            Copy-Item -LiteralPath $OutputPath -Destination $bundledPath -Force
+            Write-Host "Synced $bundledPath"
+        }
+    }
+}

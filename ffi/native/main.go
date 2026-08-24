@@ -118,11 +118,11 @@ func targetlib_start(configJSON *C.char, out *C.targetlib_handle, errOut **C.cha
 	if err != nil {
 		return fail(errOut, err.Error())
 	}
+	go func() { _ = server.Serve() }()
 	if err := serviceManager.StartConfig(config); err != nil {
 		server.Close()
 		return fail(errOut, err.Error())
 	}
-	go func() { _ = server.Serve() }()
 
 	handle := nextHandle.Add(1)
 	servicesMu.Lock()

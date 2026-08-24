@@ -49,8 +49,17 @@ TargetLib/
 ```powershell
 .\scripts\build.ps1
 # 输出 build/TargetLib.exe
+# 如果同级 Target 已有 Windows 构建，同时刷新其 Debug/Release/Profile 副本
 # 自定义输出
 .\scripts\build.ps1 -OutputPath dist/TargetLib.exe -DebugBuild
+# CI 或仅构建 TargetLib 时跳过 Target 同步
+.\scripts\build.ps1 -SkipTargetSync
+```
+
+更新已经注册的 Windows 服务时，请在管理员 PowerShell 中运行：
+
+```powershell
+.\scripts\update-installed-service.ps1
 ```
 
 运行：
@@ -107,6 +116,9 @@ targetlib_free_string(err);
 | TestOutbound              | 测试单个 outbound 并返回结构化延迟结果          |
 | TestOutbounds             | 合并 URLTest group 后并发测试并流式返回结果     |
 | GetState / SubscribeState | 查询 / 订阅 `ServiceState`                     |
+| SubscribeLogs             | 订阅过滤后的运行日志（仅 INFO 及以上）         |
+
+`BuildConfigSettings.route_mode` 支持 `DIRECT`（全部直连）、`RULE`（使用配置路由规则）和 `ALL`（全部使用代理主 outbound）；未设置时默认为 `RULE`。通过 `ApplyRuntimeSettings` 可在运行时原子切换。
 
 `ServiceState`: `IDLE` / `STARTING` / `RUNNING` / `STOPPING` / `FAILED`
 

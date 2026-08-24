@@ -31,7 +31,6 @@ const (
 // builtConfig 的骨架字段用 sing-box option 包类型安全生成；outbounds 由
 // 规范化后的节点 map 与 option 类型的分组混合组成，经 json.RawMessage 拼装。
 type builtConfig struct {
-	Log          option.LogOptions           `json:"log"`
 	Inbounds     []*option.Inbound           `json:"inbounds"`
 	Outbounds    []json.RawMessage           `json:"outbounds"`
 	Route        option.RouteOptions         `json:"route"`
@@ -90,16 +89,17 @@ func BuildFromNodes(settings Settings, nodes []subscriptions.Node) ([]byte, erro
 		)
 		finalOutbound = "proxy"
 	}
+	finalOutbound = applyGeneratedRouteMode(finalOutbound, settings.RouteMode)
 	config := builtConfig{
-		Log:       option.LogOptions{Level: "info", Timestamp: true},
 		Inbounds:  inbounds,
 		Outbounds: outbounds,
 		Route:     option.RouteOptions{AutoDetectInterface: true, Final: finalOutbound},
+		// StartedService connection telemetry depends on the internal Clash API
+		// traffic manager. No external controller is configured or exposed.
+		Experimental: &option.ExperimentalOptions{ClashAPI: &option.ClashAPIOptions{}},
 	}
 	if path := strings.TrimSpace(settings.CacheFilePath); path != "" {
-		config.Experimental = &option.ExperimentalOptions{
-			CacheFile: &option.CacheFileOptions{Enabled: true, Path: singBoxPath(path)},
-		}
+		config.Experimental.CacheFile = &option.CacheFileOptions{Enabled: true, Path: singBoxPath(path)}
 	}
 	content, err := singjson.MarshalContext(context.Background(), config)
 	if err != nil {
@@ -109,6 +109,17 @@ func BuildFromNodes(settings Settings, nodes []subscriptions.Node) ([]byte, erro
 		return nil, fmt.Errorf("validate generated config: %w", err)
 	}
 	return content, nil
+}
+
+func applyGeneratedRouteMode(finalOutbound string, mode RouteMode) string {
+	switch mode {
+	case RouteModeDirect:
+		return "direct"
+	case RouteModeAll, RouteModeRule:
+		return finalOutbound
+	default:
+		return finalOutbound
+	}
 }
 
 func validateConfig(content []byte) error {

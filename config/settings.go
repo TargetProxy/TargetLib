@@ -28,12 +28,21 @@ const (
 	ProxyModeTun   ProxyMode = "tun"
 )
 
+type RouteMode string
+
+const (
+	RouteModeRule   RouteMode = "rule"
+	RouteModeDirect RouteMode = "direct"
+	RouteModeAll    RouteMode = "all"
+)
+
 type Settings struct {
 	ListenAddress string
 	MixedPort     int
 	ProxyMode     ProxyMode
 	IPv6          bool
 	CacheFilePath string
+	RouteMode     RouteMode
 }
 
 func (s Settings) Validate() error {
@@ -48,6 +57,14 @@ func (s Settings) Validate() error {
 	case ProxyModeMixed, ProxyModeTun:
 	default:
 		return fmt.Errorf("%w: unknown proxy mode %q", ErrInvalidSettings, s.ProxyMode)
+	}
+	if s.RouteMode == "" {
+		s.RouteMode = RouteModeRule
+	}
+	switch s.RouteMode {
+	case RouteModeDirect, RouteModeRule, RouteModeAll:
+	default:
+		return fmt.Errorf("%w: unknown route mode %q", ErrInvalidSettings, s.RouteMode)
 	}
 	return nil
 }

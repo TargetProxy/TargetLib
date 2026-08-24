@@ -45,6 +45,7 @@ func BuildFromRaw(settings Settings, raw []byte) ([]byte, error) {
 	migrateLegacyDnsOutbound(config)
 	normalizeAnyTlsAlpn(config)
 	mergeCacheFile(config, settings.CacheFilePath)
+	applyRawRouteMode(config, settings.RouteMode)
 	content, err := json.Marshal(config)
 	if err != nil {
 		return nil, err
@@ -53,6 +54,53 @@ func BuildFromRaw(settings Settings, raw []byte) ([]byte, error) {
 		return nil, fmt.Errorf("%w: validate config: %v", ErrInvalidSource, err)
 	}
 	return content, nil
+}
+
+func applyRawRouteMode(config map[string]any, mode RouteMode) {
+	if mode == "" || mode == RouteModeRule {
+		return
+	}
+	route, _ := config["route"].(map[string]any)
+	if route == nil {
+		route = map[string]any{}
+		config["route"] = route
+	}
+	delete(route, "rules")
+	if mode == RouteModeDirect {
+		route["final"] = "direct"
+		return
+	}
+	if mode == RouteModeAll {
+		if proxy := primaryProxyOutbound(config); proxy != "" {
+			route["final"] = proxy
+		}
+	}
+}
+
+func primaryProxyOutbound(config map[string]any) string {
+	outbounds, _ := config["outbounds"].([]any)
+	for _, raw := range outbounds {
+		outbound, ok := raw.(map[string]any)
+		if !ok {
+			continue
+		}
+		tag, _ := outbound["tag"].(string)
+		if tag == "proxy" {
+			return tag
+		}
+	}
+	for _, raw := range outbounds {
+		outbound, ok := raw.(map[string]any)
+		if !ok {
+			continue
+		}
+		typ, _ := outbound["type"].(string)
+		tag, _ := outbound["tag"].(string)
+		if tag != "" && typ != "direct" && typ != "block" {
+			return tag
+		}
+	}
+	return ""
 }
 
 func decodeJSONNumber(content []byte, target any) error {

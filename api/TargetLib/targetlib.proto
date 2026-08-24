@@ -16,6 +16,7 @@ service TargetLib {
   rpc Stop(google.protobuf.Empty) returns (OperationResponse);
   rpc GetState(google.protobuf.Empty) returns (ServiceState);
   rpc SubscribeState(google.protobuf.Empty) returns (stream ServiceState);
+  rpc SubscribeLogs(google.protobuf.Empty) returns (stream LogBatch);
 
   rpc ListSubscriptions(google.protobuf.Empty) returns (SubscriptionList);
   rpc GetSubscription(SubscriptionId) returns (SubscriptionView);
@@ -42,6 +43,27 @@ service TargetLib {
 
   // IP geolocation query (egress from the backend).
   rpc GetIpInfo(google.protobuf.Empty) returns (IpInfoResponse);
+}
+
+enum LogLevel {
+  LOG_LEVEL_UNSPECIFIED = 0;
+  LOG_LEVEL_PANIC = 1;
+  LOG_LEVEL_FATAL = 2;
+  LOG_LEVEL_ERROR = 3;
+  LOG_LEVEL_WARN = 4;
+  LOG_LEVEL_INFO = 5;
+  LOG_LEVEL_DEBUG = 6;
+  LOG_LEVEL_TRACE = 7;
+}
+
+message LogMessage {
+  LogLevel level = 1;
+  string message = 2;
+}
+
+message LogBatch {
+  repeated LogMessage messages = 1;
+  bool reset = 2;
 }
 
 message VersionResponse {
@@ -195,6 +217,13 @@ enum ProxyMode {
   PROXY_MODE_TUN = 2;
 }
 
+enum RouteMode {
+  ROUTE_MODE_UNSPECIFIED = 0;
+  ROUTE_MODE_DIRECT = 1;
+  ROUTE_MODE_RULE = 2;
+  ROUTE_MODE_ALL = 3;
+}
+
 message BuildConfigSettings {
   string listen_address = 1;
   uint32 mixed_port = 2;
@@ -203,6 +232,7 @@ message BuildConfigSettings {
   reserved "system_proxy";
   bool ipv6 = 5;
   string cache_file_path = 6;
+  RouteMode route_mode = 7;
 }
 
 message BuildConfigRequest {

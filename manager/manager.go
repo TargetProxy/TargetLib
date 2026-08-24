@@ -25,7 +25,7 @@ import (
 	subscriptioncore "github.com/loafman1120/TargetLib/subscriptions"
 )
 
-// Manager owns the single StartedService used by both gRPC APIs.
+// Manager owns the single StartedService used by the TargetLib gRPC API.
 type Manager struct {
 	*subscriptioncore.Handler
 
@@ -265,7 +265,11 @@ func (m *Manager) State() (*targetlibapi.ServiceState, error) {
 }
 
 func (m *Manager) SubscribeState(_ *emptypb.Empty, stream grpc.ServerStreamingServer[targetlibapi.ServiceState]) error {
-	return m.started.SubscribeServiceStatus(&emptypb.Empty{}, &statusRelay{target: stream})
+	return m.started.SubscribeServiceStatus(&emptypb.Empty{}, newStatusRelay(stream))
+}
+
+func (m *Manager) SubscribeLogs(_ *emptypb.Empty, stream grpc.ServerStreamingServer[targetlibapi.LogBatch]) error {
+	return m.started.SubscribeLog(&emptypb.Empty{}, newLogRelay(stream))
 }
 
 func (m *Manager) ServiceStop() error { return m.StopService() }
@@ -375,19 +379,55 @@ func (*firstStatusReceiver) Context() context.Context     { return context.Backg
 func (*firstStatusReceiver) SendMsg(any) error            { return nil }
 func (*firstStatusReceiver) RecvMsg(any) error            { return io.EOF }
 
+type streamRelay struct{ target grpc.ServerStream }
+
+func (r streamRelay) SetHeader(md metadata.MD) error  { return r.target.SetHeader(md) }
+func (r streamRelay) SendHeader(md metadata.MD) error { return r.target.SendHeader(md) }
+func (r streamRelay) SetTrailer(md metadata.MD)       { r.target.SetTrailer(md) }
+func (r streamRelay) Context() context.Context        { return r.target.Context() }
+func (r streamRelay) SendMsg(value any) error         { return r.target.SendMsg(value) }
+func (r streamRelay) RecvMsg(value any) error         { return r.target.RecvMsg(value) }
+
 type statusRelay struct {
-	target grpc.ServerStreamingServer[targetlibapi.ServiceState]
+	streamRelay
+	server grpc.ServerStreamingServer[targetlibapi.ServiceState]
+}
+
+func newStatusRelay(server grpc.ServerStreamingServer[targetlibapi.ServiceState]) *statusRelay {
+	return &statusRelay{streamRelay: streamRelay{target: server}, server: server}
+}
+
+type logRelay struct {
+	streamRelay
+	server grpc.ServerStreamingServer[targetlibapi.LogBatch]
+}
+
+func newLogRelay(server grpc.ServerStreamingServer[targetlibapi.LogBatch]) *logRelay {
+	return &logRelay{streamRelay: streamRelay{target: server}, server: server}
+}
+
+func (r *logRelay) Send(value *daemon.Log) error {
+	batch := &targetlibapi.LogBatch{Reset_: value.GetReset_()}
+	for _, message := range value.GetMessages() {
+		// sing-box forwards platform logs below its configured level. Keep
+		// the public TargetLib stream at info and above.
+		if message == nil || message.GetLevel() > daemon.LogLevel_INFO {
+			continue
+		}
+		batch.Messages = append(batch.Messages, &targetlibapi.LogMessage{
+			Level:   targetlibapi.LogLevel(message.GetLevel() + 1),
+			Message: message.GetMessage(),
+		})
+	}
+	if len(batch.Messages) == 0 && !batch.Reset_ {
+		return nil
+	}
+	return r.server.Send(batch)
 }
 
 func (r *statusRelay) Send(value *daemon.ServiceStatus) error {
-	return r.target.Send(managerState(value))
+	return r.server.Send(managerState(value))
 }
-func (r *statusRelay) SetHeader(md metadata.MD) error  { return r.target.SetHeader(md) }
-func (r *statusRelay) SendHeader(md metadata.MD) error { return r.target.SendHeader(md) }
-func (r *statusRelay) SetTrailer(md metadata.MD)       { r.target.SetTrailer(md) }
-func (r *statusRelay) Context() context.Context        { return r.target.Context() }
-func (r *statusRelay) SendMsg(value any) error         { return r.target.SendMsg(value) }
-func (r *statusRelay) RecvMsg(value any) error         { return r.target.RecvMsg(value) }
 
 func projectVersion() string {
 	if info, ok := debug.ReadBuildInfo(); ok && info.Main.Version != "" && info.Main.Version != "(devel)" {

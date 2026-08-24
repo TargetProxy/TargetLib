@@ -4,7 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"strings"
+	"time"
 
 	"github.com/sagernet/sing-box/daemon"
 	"github.com/sagernet/sing-box/experimental/libbox"
@@ -30,7 +32,7 @@ func (m *Manager) BuildConfig(_ context.Context, request *targetlibapi.BuildConf
 // ApplyRuntimeSettings builds and validates the requested configuration while
 // holding the lifecycle lock, then starts or reloads the core. A failed reload
 // is followed by a best-effort restoration of the last known good config.
-func (m *Manager) ApplyRuntimeSettings(_ context.Context, request *targetlibapi.BuildConfigRequest) (*targetlibapi.OperationResponse, error) {
+func (m *Manager) ApplyRuntimeSettings(ctx context.Context, request *targetlibapi.BuildConfigRequest) (*targetlibapi.OperationResponse, error) {
 	m.opMu.Lock()
 	defer m.opMu.Unlock()
 
@@ -42,29 +44,35 @@ func (m *Manager) ApplyRuntimeSettings(_ context.Context, request *targetlibapi.
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	current, err := m.currentStatus()
+	current, err := m.waitForStableStatus(ctx)
 	if err != nil {
 		return nil, err
 	}
 	switch current.Status {
 	case daemon.ServiceStatus_IDLE, daemon.ServiceStatus_FATAL:
-	case daemon.ServiceStatus_STARTED, daemon.ServiceStatus_STARTING:
+	case daemon.ServiceStatus_STARTED:
 	default:
-		return nil, status.Error(codes.FailedPrecondition, "service is stopping")
+		return nil, status.Errorf(codes.FailedPrecondition, "service is not ready to apply settings: %s", current.Status.String())
 	}
 
 	m.configMu.RLock()
 	previousConfig := m.config
 	m.configMu.RUnlock()
-	wasRunning := current.Status == daemon.ServiceStatus_STARTED || current.Status == daemon.ServiceStatus_STARTING
+	wasRunning := current.Status == daemon.ServiceStatus_STARTED
 	if err := m.started.StartOrReloadService(string(content), &daemon.OverrideOptions{}); err != nil {
+		applyErr := runtimeSettingsError("apply runtime settings", current.Status, err)
+		// os.ErrInvalid is rejected before sing-box changes the active instance,
+		// so attempting a rollback would only repeat the same invalid transition.
+		if errors.Is(err, os.ErrInvalid) {
+			return nil, applyErr
+		}
 		if wasRunning && previousConfig != "" {
 			if rollbackErr := m.started.StartOrReloadService(previousConfig, &daemon.OverrideOptions{}); rollbackErr != nil {
-				return nil, status.Error(codes.Internal, fmt.Sprintf("apply runtime settings: %v; restore previous config: %v", err, rollbackErr))
+				return nil, status.Error(codes.Internal, fmt.Sprintf("%v; restore previous config: %v", applyErr, rollbackErr))
 			}
-			return nil, status.Error(codes.Internal, fmt.Sprintf("apply runtime settings: %v; previous config restored", err))
+			return nil, status.Error(status.Code(applyErr), fmt.Sprintf("%v; previous config restored", applyErr))
 		}
-		return nil, status.Error(codes.Internal, fmt.Sprintf("apply runtime settings: %v", err))
+		return nil, applyErr
 	}
 
 	m.configMu.Lock()
@@ -72,6 +80,40 @@ func (m *Manager) ApplyRuntimeSettings(_ context.Context, request *targetlibapi.
 	m.lastSettings = proto.Clone(request.GetSettings()).(*targetlibapi.BuildConfigSettings)
 	m.configMu.Unlock()
 	return m.operationResponse()
+}
+
+const stableStatusTimeout = 15 * time.Second
+
+func (m *Manager) waitForStableStatus(ctx context.Context) (*daemon.ServiceStatus, error) {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	ctx, cancel := context.WithTimeout(ctx, stableStatusTimeout)
+	defer cancel()
+
+	ticker := time.NewTicker(50 * time.Millisecond)
+	defer ticker.Stop()
+	for {
+		current, err := m.currentStatus()
+		if err != nil {
+			return nil, err
+		}
+		if current.Status != daemon.ServiceStatus_STARTING && current.Status != daemon.ServiceStatus_STOPPING {
+			return current, nil
+		}
+		select {
+		case <-ctx.Done():
+			return nil, status.Errorf(codes.FailedPrecondition, "service remained in %s state: %v", current.Status.String(), ctx.Err())
+		case <-ticker.C:
+		}
+	}
+}
+
+func runtimeSettingsError(operation string, serviceStatus daemon.ServiceStatus_Type, err error) error {
+	if errors.Is(err, os.ErrInvalid) {
+		return status.Errorf(codes.FailedPrecondition, "%s rejected while service state is %s: %v", operation, serviceStatus.String(), err)
+	}
+	return status.Errorf(codes.Internal, "%s: %v", operation, err)
 }
 
 // reloadActiveSubscription rebuilds the persisted active subscription using
@@ -149,6 +191,16 @@ func buildSettings(proto *targetlibapi.BuildConfigSettings) (config.Settings, er
 		MixedPort:     int(proto.GetMixedPort()),
 		IPv6:          proto.GetIpv6(),
 		CacheFilePath: proto.GetCacheFilePath(),
+	}
+	switch proto.GetRouteMode() {
+	case targetlibapi.RouteMode_ROUTE_MODE_DIRECT:
+		settings.RouteMode = config.RouteModeDirect
+	case targetlibapi.RouteMode_ROUTE_MODE_ALL:
+		settings.RouteMode = config.RouteModeAll
+	case targetlibapi.RouteMode_ROUTE_MODE_UNSPECIFIED, targetlibapi.RouteMode_ROUTE_MODE_RULE:
+		settings.RouteMode = config.RouteModeRule
+	default:
+		return config.Settings{}, status.Error(codes.InvalidArgument, "unknown route mode")
 	}
 	switch proto.GetProxyMode() {
 	case targetlibapi.ProxyMode_PROXY_MODE_MIXED:
