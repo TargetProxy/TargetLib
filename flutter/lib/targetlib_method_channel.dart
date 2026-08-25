@@ -16,4 +16,16 @@ class MethodChannelTargetlib extends TargetlibPlatform {
     );
     return version;
   }
+
+  @override
+  Future<bool> requestVpnPermission() async =>
+      await methodChannel.invokeMethod<bool>('requestVpnPermission') ?? false;
+
+  @override
+  Future<void> startAndroidService({required String basePath}) => methodChannel
+      .invokeMethod<void>('startAndroidService', {'basePath': basePath});
+
+  @override
+  Future<void> stopAndroidService() =>
+      methodChannel.invokeMethod<void>('stopAndroidService');
 }

@@ -28,6 +28,19 @@ const (
 	tunMTU           = 1500
 )
 
+// TUN 前缀是全平台唯一的地址来源。Android 的 VpnService 在 establish()
+// 之前经 JNI 读取同一常量来配置内核接口，因此两侧永远不可能漂移。
+const (
+	tunIPv4Address    = "172.18.0.1"
+	tunIPv4PrefixBits = 30
+)
+
+// TunIPv4Address 返回 TUN 入站使用的 IPv4 地址。
+func TunIPv4Address() string { return tunIPv4Address }
+
+// TunIPv4PrefixBits 返回 TUN IPv4 地址的前缀长度。
+func TunIPv4PrefixBits() int32 { return tunIPv4PrefixBits }
+
 // builtConfig 的骨架字段用 sing-box option 包类型安全生成；outbounds 由
 // 规范化后的节点 map 与 option 类型的分组混合组成，经 json.RawMessage 拼装。
 type builtConfig struct {
@@ -164,7 +177,10 @@ func buildInbounds(settings Settings) ([]*option.Inbound, error) {
 		})
 	}
 	if settings.ProxyMode == ProxyModeTun {
-		addresses := []netip.Prefix{netip.MustParsePrefix("172.18.0.1/30")}
+		// Android VpnService 用 TunIPv4Address/PrefixBits 配置同一前缀。
+		addresses := []netip.Prefix{
+			netip.PrefixFrom(netip.MustParseAddr(tunIPv4Address), tunIPv4PrefixBits),
+		}
 		if settings.IPv6 {
 			addresses = append(addresses, netip.MustParsePrefix("fd00:1:fd00:1::1/126"))
 		}

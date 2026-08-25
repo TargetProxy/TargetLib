@@ -31,6 +31,7 @@ import (
 
 	libbox "github.com/sagernet/sing-box/experimental/libbox"
 
+	"github.com/loafman1120/TargetLib/config"
 	"github.com/loafman1120/TargetLib/manager"
 )
 
@@ -129,6 +130,49 @@ func targetlib_start(configJSON *C.char, out *C.targetlib_handle, errOut **C.cha
 	services[handle] = &nativeService{manager: serviceManager, server: server}
 	servicesMu.Unlock()
 	*out = C.targetlib_handle(handle)
+	return 0
+}
+
+//export targetlib_serve
+func targetlib_serve(out *C.targetlib_handle, errOut **C.char) C.int32_t {
+	clearErr(errOut)
+	if out == nil {
+		return fail(errOut, "targetlib_serve: nil handle output")
+	}
+	*out = 0
+	optionsMu.RLock()
+	if !initialized {
+		optionsMu.RUnlock()
+		return fail(errOut, "targetlib_serve: not initialized")
+	}
+	options := currentInit
+	optionsMu.RUnlock()
+	serviceManager, server, err := manager.NewLocal(
+		context.Background(), options, filepath.Join(options.BasePath, "command.sock"),
+	)
+	if err != nil {
+		return fail(errOut, err.Error())
+	}
+	go func() { _ = server.Serve() }()
+	handle := nextHandle.Add(1)
+	servicesMu.Lock()
+	services[handle] = &nativeService{manager: serviceManager, server: server}
+	servicesMu.Unlock()
+	*out = C.targetlib_handle(handle)
+	return 0
+}
+
+//export targetlib_tun_ipv4_address
+func targetlib_tun_ipv4_address() *C.char { return C.CString(config.TunIPv4Address()) }
+
+//export targetlib_tun_ipv4_prefix_bits
+func targetlib_tun_ipv4_prefix_bits() C.int32_t { return C.int32_t(config.TunIPv4PrefixBits()) }
+
+//export targetlib_set_tun_fd
+func targetlib_set_tun_fd(fd C.int32_t) C.int32_t {
+	if err := manager.SetTunFD(int32(fd)); err != nil {
+		return -1
+	}
 	return 0
 }
 

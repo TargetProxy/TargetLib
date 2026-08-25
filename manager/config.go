@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"runtime"
 	"strings"
 	"time"
 
@@ -202,11 +203,15 @@ func buildSettings(proto *targetlibapi.BuildConfigSettings) (config.Settings, er
 	default:
 		return config.Settings{}, status.Error(codes.InvalidArgument, "unknown route mode")
 	}
-	switch proto.GetProxyMode() {
-	case targetlibapi.ProxyMode_PROXY_MODE_MIXED:
-		settings.ProxyMode = config.ProxyModeMixed
-	case targetlibapi.ProxyMode_PROXY_MODE_TUN:
+	if runtime.GOOS == "android" || runtime.GOOS == "ios" {
 		settings.ProxyMode = config.ProxyModeTun
+	} else {
+		switch proto.GetProxyMode() {
+		case targetlibapi.ProxyMode_PROXY_MODE_MIXED:
+			settings.ProxyMode = config.ProxyModeMixed
+		case targetlibapi.ProxyMode_PROXY_MODE_TUN:
+			settings.ProxyMode = config.ProxyModeTun
+		}
 	}
 	if err := settings.Validate(); err != nil {
 		return config.Settings{}, status.Error(codes.InvalidArgument, err.Error())

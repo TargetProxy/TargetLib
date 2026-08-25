@@ -5,22 +5,27 @@ import 'package:path_provider/path_provider.dart';
 
 import 'target_lib_connection.dart';
 import 'target_lib_service_manager.dart';
+import '../../targetlib_platform_interface.dart';
 
 /// Cross-platform TargetLib process and command-socket runtime.
 final class TargetLibRuntime {
   TargetLibRuntime({TargetLibServiceManager? serviceManager})
-      : _serviceManager = serviceManager ?? TargetLibServiceManager();
+    : _serviceManager = serviceManager ?? TargetLibServiceManager();
 
   final TargetLibServiceManager _serviceManager;
   TargetLibConnection? _connection;
   Process? _process;
   String? _socketPath;
+  bool _androidServiceStarted = false;
 
   TargetLibConnection? get connection => _connection;
   String? get socketPath => _socketPath;
   TargetLibServiceManager get serviceManager => _serviceManager;
   static bool get isSupported =>
-      Platform.isWindows || Platform.isLinux || Platform.isMacOS;
+      Platform.isWindows ||
+      Platform.isLinux ||
+      Platform.isMacOS ||
+      Platform.isAndroid;
 
   Future<String> resolveBasePath({
     String override = '',
@@ -39,7 +44,9 @@ final class TargetLibRuntime {
     try {
       final cache = await getApplicationCacheDirectory();
       if (cache.path.trim().isNotEmpty) {
-        final target = Directory('${cache.path}${Platform.pathSeparator}Target');
+        final target = Directory(
+          '${cache.path}${Platform.pathSeparator}Target',
+        );
         await target.create(recursive: true);
         return target.path;
       }
@@ -66,13 +73,20 @@ final class TargetLibRuntime {
     final base = Directory(basePath);
     await base.create(recursive: true);
     _socketPath = '${base.path}${Platform.pathSeparator}command.sock';
-    if (_process == null && !await File(_socketPath!).exists()) {
-      _process = await _serviceManager.launch(
-        basePath: base.path,
-        workingPath: workingPath,
-        tempPath: tempPath,
-        locale: locale,
-      );
+    if (!await File(_socketPath!).exists()) {
+      if (Platform.isAndroid) {
+        await TargetlibPlatform.instance.startAndroidService(
+          basePath: base.path,
+        );
+        _androidServiceStarted = true;
+      } else {
+        _process ??= await _serviceManager.launch(
+          basePath: base.path,
+          workingPath: workingPath,
+          tempPath: tempPath,
+          locale: locale,
+        );
+      }
     }
     try {
       _connection = await TargetLibConnection.connect(_socketPath!);
@@ -89,12 +103,19 @@ final class TargetLibRuntime {
       }
       final socket = File(_socketPath!);
       if (await socket.exists()) await socket.delete();
-      _process = await _serviceManager.launch(
-        basePath: base.path,
-        workingPath: workingPath,
-        tempPath: tempPath,
-        locale: locale,
-      );
+      if (Platform.isAndroid) {
+        await TargetlibPlatform.instance.startAndroidService(
+          basePath: base.path,
+        );
+        _androidServiceStarted = true;
+      } else {
+        _process = await _serviceManager.launch(
+          basePath: base.path,
+          workingPath: workingPath,
+          tempPath: tempPath,
+          locale: locale,
+        );
+      }
       _connection = await TargetLibConnection.connect(_socketPath!);
       return _connection!;
     }
@@ -107,7 +128,14 @@ final class TargetLibRuntime {
     _process = null;
     if (process != null) {
       process.kill();
-      await process.exitCode.timeout(const Duration(seconds: 2), onTimeout: () => -1);
+      await process.exitCode.timeout(
+        const Duration(seconds: 2),
+        onTimeout: () => -1,
+      );
+    }
+    if (Platform.isAndroid && _androidServiceStarted) {
+      await TargetlibPlatform.instance.stopAndroidService();
+      _androidServiceStarted = false;
     }
   }
 }

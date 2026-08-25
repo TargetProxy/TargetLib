@@ -11,9 +11,11 @@ import (
 	"time"
 
 	box "github.com/sagernet/sing-box"
+	"github.com/sagernet/sing-box/adapter"
 	"github.com/sagernet/sing-box/daemon"
 	"github.com/sagernet/sing-box/experimental/libbox"
 	"github.com/sagernet/sing-box/include"
+	"github.com/sagernet/sing/service"
 	"github.com/sagernet/sing/service/filemanager"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -110,13 +112,17 @@ func normalizeOptions(options Options) Options {
 
 func serviceContext(ctx context.Context, options Options) context.Context {
 	ctx = filemanager.WithDefault(ctx, options.WorkingPath, options.TempPath, os.Getuid(), os.Getgid())
-	return box.Context(ctx,
+	ctx = box.Context(ctx,
 		include.InboundRegistry(),
 		include.OutboundRegistry(),
 		include.EndpointRegistry(),
 		include.DNSTransportRegistry(),
 		include.ServiceRegistry(),
 	)
+	if platform := newPlatformInterface(); platform != nil {
+		service.MustRegister[adapter.PlatformInterface](ctx, platform)
+	}
+	return ctx
 }
 
 func (m *Manager) StartedService() *daemon.StartedService { return m.started }
@@ -133,7 +139,7 @@ func (m *Manager) GetVersion(context.Context, *emptypb.Empty) (*targetlibapi.Ver
 func (m *Manager) GetCapabilities(context.Context, *emptypb.Empty) (*targetlibapi.CapabilitiesResponse, error) {
 	return &targetlibapi.CapabilitiesResponse{
 		Platform:               runtime.GOOS,
-		PlatformVpn:            false,
+		PlatformVpn:            runtime.GOOS == "android" || runtime.GOOS == "ios",
 		SubscriptionManagement: true,
 	}, nil
 }

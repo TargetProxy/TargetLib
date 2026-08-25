@@ -72,6 +72,7 @@ kotlin {
 }
 
 dependencies {
+    implementation("androidx.activity:activity-ktx:1.10.1")
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("org.mockito:mockito-core:5.0.0")
 }

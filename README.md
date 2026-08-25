@@ -77,20 +77,14 @@ Windows Service 管理和目标同步脚本仅适用于 Windows：
 .\build\TargetLib.exe status
 ```
 
-### 构建 native FFI
-
-```sh
-go build -buildmode=c-shared -o build/targetlib.so ./ffi/native
-go build -buildmode=c-archive -o build/targetlib.a ./ffi/native
-```
-
-Windows 使用 `.dll`，macOS 使用 `.dylib`；扩展名由 Go 工具链决定。
+Android 使用 NDK Clang 交叉编译 Go C-shared 库和 JNI 适配库，不依赖 gomobile：
 
 ```powershell
-.\scripts\build-native.ps1
-# 输出 build/targetlib.dll + build/targetlib.h
-.\scripts\build-native.ps1 -BuildMode c-archive -OutputPath dist/targetlib.a
+.\scripts\build-android.ps1 -NdkPath "$env:LOCALAPPDATA\Android\Sdk\ndk\<version>"
 ```
+
+产物写入 `flutter/android/src/main/jniLibs/<abi>/`，包括 `libtargetlib.so` 和
+`libtargetlib_jni.so`。脚本默认构建 `arm64-v8a` 与 `x86_64`，可通过 `-Abis` 调整。
 
 C 调用示例：
 
