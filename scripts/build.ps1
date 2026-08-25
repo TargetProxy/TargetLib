@@ -41,7 +41,7 @@ $goCommand = Get-Command go -ErrorAction Stop
 
 if ([string]::IsNullOrWhiteSpace($OutputPath)) {
     $extension = if ($env:OS -eq 'Windows_NT') { '.exe' } else { '' }
-    $OutputPath = Join-Path $repositoryRoot "build\TargetLib$extension"
+    $OutputPath = Join-Path (Join-Path $repositoryRoot 'build') "TargetLib$extension"
 } elseif (-not [System.IO.Path]::IsPathRooted($OutputPath)) {
     $OutputPath = Join-Path $repositoryRoot $OutputPath
 }
@@ -57,6 +57,8 @@ $arguments = @(
     '-tags', ($BuildTags -join ','),
     '-o', $OutputPath
 )
+# sing-box uses an internal http2 transport hook that requires linkname checks
+# to be disabled with current Go toolchains.
 $linkerFlags = if ($DebugBuild) { '-checklinkname=0' } else { '-s -w -buildid= -checklinkname=0' }
 $arguments += @('-ldflags', $linkerFlags)
 $arguments += './cmd/TargetLib'
