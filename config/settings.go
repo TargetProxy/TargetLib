@@ -1,13 +1,7 @@
 // Package config 把应用设置与订阅中间态合成为可运行的 sing-box 配置。
 //
-// 输入有两种来源：
-//   - BuildFromNodes：消费 subscriptions 包的中间态（Node.Config），把每个节点
-//     规范化为标准 outbound 后套上 urltest/selector 骨架；
-//   - BuildFromRaw：透传订阅原始配置，替换 inbounds（应用拥有入站主权），
-//     迁移遗留写法并注入 cache_file。
-//
-// 规范化刻意发生在构建时而非解析时：中间态（RawHash、已存储节点）保持稳定，
-// 骨架则用 sing-box option 包类型安全生成。
+// 所有来源先解析为 profile.Profile；Build 是唯一最终配置生成入口。
+// 运行时只消费节点快照，不透传服务商的 rule、DNS 或入站配置。
 package config
 
 import (

@@ -11,7 +11,7 @@ gRPC adapter or host bridge
         v
 subscriptions.Manager
   |-- HTTPFetcher (Resty / net/http)
-  |-- ParseProfile (complete sing-box JSON + neutral nodes)
+  |-- ParseProfile -> profile.Profile (nodes-only snapshot with typed node outbounds)
   |-- Resolver (neutral proxy endpoint IPs)
   |-- Store (atomic encrypted snapshots)
   `-- event stream + scheduler
@@ -25,13 +25,15 @@ must not download profiles, parse headers, schedule updates, or resolve endpoint
 
 ## Update transaction
 
-1. Mark the subscription `updating/fetching` and reject a concurrent update.
+1. Coalesce concurrent updates for the same subscription with `singleflight` and mark it `updating/fetching`.
 2. Fetch over HTTPS with a bounded response, retry policy, ETag, and Last-Modified validators.
-3. Parse and retain the complete sing-box JSON document.
-4. Produce neutral nodes, including failed intermediate nodes instead of silently dropping them.
+3. Parse the source into the TargetLib `profile.Profile` node snapshot.
+4. Retain only node data and typed node outbounds for persistence/reparse, including failed nodes.
 5. Resolve ready proxy endpoints into platform-neutral IP address strings.
-6. Atomically persist the new snapshot and publish an event.
-7. On failure, retain the last good profile and schedule a bounded retry.
+6. Submit the candidate state to the single-writer coordinator.
+7. Apply an affected active runtime, atomically persist all related keys, and publish the immutable read snapshot.
+8. If persistence fails after a runtime reload, restore the previous runtime before returning the error.
+9. On download or parse failure, retain the last good profile and schedule a bounded retry.
 
 The subscription package does not construct TUN routes or call socket-protect APIs. Android VPNService, Apple Network
 Extension, and desktop TUN adapters can consume `ResolvedEndpoints` according to their own lifecycle.
@@ -53,7 +55,8 @@ Redirects are capped and HTTPS downgrade redirects are rejected.
 ## Persistence and secrets
 
 `OpenBadgerStore(path, key)` is the only persistent-store entry point. Each subscription is a separate versioned CBOR
-value in BadgerDB and changes use single-record transactions. Badger encrypts keys and values with AES-256; the host
+value in BadgerDB. `Store.Update` groups subscription records, the active ID, and runtime metadata into one Badger
+transaction when an operation changes more than one key. Badger encrypts keys and values with AES-256; the host
 injects exactly 32 bytes of key material:
 
 - Android: key material supplied by the host's Keystore integration
@@ -67,6 +70,13 @@ compactors, an 8MB value-log limit, disabled metrics/logging, and synchronous wr
 so every profile fits in one simple transaction. Call `Close` during an orderly host shutdown and never open the same
 database directory from two processes.
 
+## Configuration boundary
+
+Raw JSON is a parser input, never a runtime build input. Every source adapter produces a node-only `profile.Profile`,
+and `config.Build(settings, profile)` is the only final configuration-generation path. The builder owns application
+inbounds, node normalization, the default selector/urltest layer, route-mode overrides, cache injection, and final
+sing-box validation. A complete sing-box subscription therefore cannot bypass TargetLib's orchestration logic.
+
 ## Mobile boundary
 
 Android and Apple builds use the same HTTP, parser, scheduler, model, and event code. The host owns filesystem paths,
@@ -78,7 +88,7 @@ application-private storage and must not be an iCloud/backup-coordinated directo
 
 The gRPC adapter in the `subscriptions` package maps protobuf messages to the public manager methods and exposes `Event`
 as a server stream. `View` is the transport-safe read model: it keeps node intermediate states and quota data while
-excluding URLs, headers, cache validators, raw configs, and node credentials. Raw config is available only through the
-explicit `GetSubscriptionConfig` RPC.
+excluding URLs, headers, cache validators, raw configs, and node credentials. The nested `ProfileView` is node-only:
+it carries just the fields needed for front-end selection and keeps provider sections out of the payload.
 
 The adapter contains no subscription behavior. FFI and platform TUN handling remain host-owned.

@@ -1,23 +1,20 @@
 package config
 
 import (
-	"context"
-	"encoding/json"
 	"fmt"
 	"net/netip"
+	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
-	"sync"
 	"time"
 
-	box "github.com/sagernet/sing-box"
-	"github.com/sagernet/sing-box/include"
+	C "github.com/sagernet/sing-box/constant"
 	"github.com/sagernet/sing-box/option"
 	singjson "github.com/sagernet/sing/common/json"
 	"github.com/sagernet/sing/common/json/badoption"
 
-	"github.com/loafman1120/TargetLib/subscriptions"
+	targetprofile "github.com/loafman1120/TargetLib/profile"
 )
 
 const (
@@ -26,6 +23,8 @@ const (
 	urlTestTolerance = 50
 	tunInterfaceName = "target0"
 	tunMTU           = 1500
+	tunDNSPublicTag  = "public-dns"
+	tunDNSPublicAddr = "119.29.29.29"
 )
 
 // TUN 前缀是全平台唯一的地址来源。Android 的 VpnService 在 establish()
@@ -41,80 +40,68 @@ func TunIPv4Address() string { return tunIPv4Address }
 // TunIPv4PrefixBits 返回 TUN IPv4 地址的前缀长度。
 func TunIPv4PrefixBits() int32 { return tunIPv4PrefixBits }
 
-// builtConfig 的骨架字段用 sing-box option 包类型安全生成；outbounds 由
-// 规范化后的节点 map 与 option 类型的分组混合组成，经 json.RawMessage 拼装。
-type builtConfig struct {
-	Inbounds     []*option.Inbound           `json:"inbounds"`
-	Outbounds    []json.RawMessage           `json:"outbounds"`
-	Route        option.RouteOptions         `json:"route"`
-	Experimental *option.ExperimentalOptions `json:"experimental,omitempty"`
+// RoutePlan 保存路由决策；Base 仅承载未被 TargetLib 接管的上游字段。
+type RoutePlan struct {
+	Base                option.RouteOptions
+	Rules               []option.Rule
+	Final               string
+	AutoDetectInterface bool
 }
 
-// BuildFromNodes 消费订阅中间态（含 Node.Config 的节点列表），合成完整配置。
-// 规范化失败的节点按 Dart 端行为直接跳过。
-func BuildFromNodes(settings Settings, nodes []subscriptions.Node) ([]byte, error) {
+// RuntimePlan 保存日志、缓存和上游运行时元数据。
+type RuntimePlan struct {
+	Schema       string
+	Log          option.LogOptions
+	NTP          *option.NTPOptions
+	Certificate  *option.CertificateOptions
+	Endpoints    []option.Endpoint
+	Services     []option.Service
+	Experimental option.ExperimentalOptions
+}
+
+// Blueprint 是按配置 section 划分的最终计划。Emit 不再推断或修补配置。
+type Blueprint struct {
+	Inbounds  []option.Inbound
+	Outbounds []option.Outbound
+	DNS       *option.DNSOptions
+	Route     RoutePlan
+	Runtime   RuntimePlan
+}
+
+// Plan 将应用设置和订阅中间态解析为结构化的、应用拥有的运行配置计划。
+// 订阅只贡献可用节点；其 DNS、路由、运行时和出站组合配置均不透传。
+func Plan(settings Settings, source targetprofile.Profile) (Blueprint, error) {
 	if err := settings.Validate(); err != nil {
-		return nil, err
+		return Blueprint{}, err
 	}
 	inbounds, err := buildInbounds(settings)
 	if err != nil {
-		return nil, err
+		return Blueprint{}, err
 	}
-	outbounds := []json.RawMessage{mustMarshalOutbound(&option.Outbound{
-		Type: "direct", Tag: "direct", Options: option.DirectOutboundOptions{},
-	})}
-	tags := make([]string, 0, len(nodes))
-	for i := range nodes {
-		node := &nodes[i]
-		if node.Config == nil {
-			continue
-		}
-		outbound, err := NormalizeOutbound(node.ID, node.Type, node.Config)
-		if err != nil {
-			continue
-		}
-		encoded, err := json.Marshal(outbound)
-		if err != nil {
-			return nil, fmt.Errorf("marshal outbound %q: %w", node.ID, err)
-		}
-		outbounds = append(outbounds, encoded)
-		tags = append(tags, node.ID)
+	outbounds, finalOutbound, err := planOutbounds(source.Nodes)
+	if err != nil {
+		return Blueprint{}, err
 	}
-	finalOutbound := "direct"
-	if len(tags) > 0 {
-		outbounds = append(outbounds,
-			mustMarshalOutbound(&option.Outbound{
-				Type: "urltest", Tag: "urltest",
-				Options: option.URLTestOutboundOptions{
-					Outbounds: tags,
-					URL:       urlTestURL,
-					Interval:  badoption.Duration(urlTestInterval),
-					Tolerance: urlTestTolerance,
-				},
-			}),
-			mustMarshalOutbound(&option.Outbound{
-				Type: "selector", Tag: "proxy",
-				Options: option.SelectorOutboundOptions{
-					Outbounds: append(append([]string{"urltest"}, tags...), "direct"),
-					Default:   "urltest",
-				},
-			}),
-		)
-		finalOutbound = "proxy"
+	route := planRoute(finalOutbound, settings)
+	dns, err := planDNS(settings.ProxyMode == ProxyModeTun)
+	if err != nil {
+		return Blueprint{}, err
 	}
-	finalOutbound = applyGeneratedRouteMode(finalOutbound, settings.RouteMode)
-	config := builtConfig{
-		Inbounds:  inbounds,
-		Outbounds: outbounds,
-		Route:     option.RouteOptions{AutoDetectInterface: true, Final: finalOutbound},
-		// StartedService connection telemetry depends on the internal Clash API
-		// traffic manager. No external controller is configured or exposed.
-		Experimental: &option.ExperimentalOptions{ClashAPI: &option.ClashAPIOptions{}},
+	return Blueprint{Inbounds: inbounds, Outbounds: outbounds, DNS: dns, Route: route,
+		Runtime: planRuntime(settings)}, nil
+}
+
+// Emit 将 Blueprint 序列化并校验，不包含配置决策。
+func Emit(plan Blueprint) ([]byte, error) {
+	experimental := plan.Runtime.Experimental
+	config := option.Options{
+		Schema: plan.Runtime.Schema, Log: &plan.Runtime.Log, DNS: plan.DNS, NTP: plan.Runtime.NTP,
+		Certificate: plan.Runtime.Certificate, Endpoints: plan.Runtime.Endpoints,
+		Inbounds: plan.Inbounds, Outbounds: plan.Outbounds,
+		Route:    emitRoute(plan.Route),
+		Services: plan.Runtime.Services, Experimental: &experimental,
 	}
-	if path := strings.TrimSpace(settings.CacheFilePath); path != "" {
-		config.Experimental.CacheFile = &option.CacheFileOptions{Enabled: true, Path: singBoxPath(path)}
-	}
-	content, err := singjson.MarshalContext(context.Background(), config)
+	content, err := singjson.MarshalContext(targetprofile.Context(), &config)
 	if err != nil {
 		return nil, err
 	}
@@ -124,52 +111,143 @@ func BuildFromNodes(settings Settings, nodes []subscriptions.Node) ([]byte, erro
 	return content, nil
 }
 
-func applyGeneratedRouteMode(finalOutbound string, mode RouteMode) string {
-	switch mode {
+// Build 保留稳定的公开入口。
+func Build(settings Settings, source targetprofile.Profile) ([]byte, error) {
+	plan, err := Plan(settings, source)
+	if err != nil {
+		return nil, err
+	}
+	return Emit(plan)
+}
+
+func planOutbounds(nodes []targetprofile.Node) ([]option.Outbound, string, error) {
+	outbounds := make([]option.Outbound, 0, len(nodes)+3)
+	nodeTags := make([]string, 0, len(nodes))
+	used := map[string]bool{"direct": true, "urltest": true, "proxy": true}
+	for _, node := range nodes {
+		if node.Phase == targetprofile.NodeFailed || node.Outbound == nil {
+			continue
+		}
+		tag := strings.TrimSpace(node.Name)
+		if tag == "" {
+			tag = node.ID
+		}
+		if tag == "" {
+			continue
+		}
+		if used[tag] {
+			return nil, "", fmt.Errorf("%w: outbound tag %q is reserved or duplicated", ErrInvalidSource, tag)
+		}
+		outbound := *node.Outbound
+		outbound.Tag = tag
+		outbounds = append(outbounds, outbound)
+		nodeTags = append(nodeTags, tag)
+		used[tag] = true
+	}
+	outbounds = append(outbounds, option.Outbound{Type: "direct", Tag: "direct", Options: option.DirectOutboundOptions{}})
+	if len(nodeTags) == 0 {
+		return outbounds, "direct", nil
+	}
+	outbounds = append(outbounds, option.Outbound{Type: "urltest", Tag: "urltest", Options: option.URLTestOutboundOptions{
+		Outbounds: append([]string(nil), nodeTags...), URL: urlTestURL, Interval: badoption.Duration(urlTestInterval), Tolerance: urlTestTolerance,
+	}})
+	members := append([]string{"urltest"}, nodeTags...)
+	members = append(members, "direct")
+	outbounds = append(outbounds, option.Outbound{Type: "selector", Tag: "proxy", Options: option.SelectorOutboundOptions{Outbounds: members, Default: "urltest"}})
+	return outbounds, "proxy", nil
+}
+
+// planDNS 只生成应用侧需要的 DNS；订阅提供的 DNS 永不透传。
+func planDNS(tunMode bool) (*option.DNSOptions, error) {
+	if tunMode {
+		return defaultTunDNS(), nil
+	}
+	return nil, nil
+}
+
+func defaultTunDNS() *option.DNSOptions {
+	return &option.DNSOptions{RawDNSOptions: option.RawDNSOptions{
+		Servers: []option.DNSServerOptions{{
+			Type: C.DNSTypeUDP,
+			Tag:  tunDNSPublicTag,
+			Options: &option.RemoteDNSServerOptions{DNSServerAddressOptions: option.DNSServerAddressOptions{
+				Server: tunDNSPublicAddr,
+			}},
+		}},
+		Final: tunDNSPublicTag,
+	}}
+}
+
+func tunDNSHijackRule() option.Rule {
+	return option.Rule{
+		Type: C.RuleTypeDefault,
+		DefaultOptions: option.DefaultRule{
+			RawDefaultRule: option.RawDefaultRule{Port: badoption.Listable[uint16]{53}},
+			RuleAction:     option.RuleAction{Action: C.RuleActionTypeHijackDNS},
+		},
+	}
+}
+
+func planRoute(finalOutbound string, settings Settings) RoutePlan {
+	// Route starts empty. In particular, never retain provider rule_set entries
+	// or rules that refer to provider-owned outbound tags.
+	base := option.RouteOptions{}
+	var rules []option.Rule
+	final := finalOutbound
+	switch settings.RouteMode {
 	case RouteModeDirect:
-		return "direct"
-	case RouteModeAll, RouteModeRule:
-		return finalOutbound
-	default:
-		return finalOutbound
+		rules = nil
+		final = "direct"
+	case RouteModeAll:
+		rules = nil
+		final = finalOutbound
+	case RouteModeRule:
+		// No provider rules are imported. Applications can add owned rules in a
+		// future settings/API layer without changing this isolation boundary.
+	}
+	if settings.ProxyMode == ProxyModeTun {
+		rules = append([]option.Rule{tunDNSHijackRule()}, rules...)
+	}
+	return RoutePlan{Base: base, Rules: rules, Final: final, AutoDetectInterface: true}
+}
+
+// emitRoute 将已完成决策的路由计划映射为 sing-box 对象。
+func emitRoute(plan RoutePlan) *option.RouteOptions {
+	route := plan.Base
+	route.Rules = plan.Rules
+	route.Final = plan.Final
+	route.AutoDetectInterface = plan.AutoDetectInterface
+	return &route
+}
+
+func planRuntime(settings Settings) RuntimePlan {
+	experimental := option.ExperimentalOptions{}
+	// TargetLib owns telemetry and cache storage regardless of upstream metadata.
+	experimental.ClashAPI = &option.ClashAPIOptions{}
+	if path := strings.TrimSpace(settings.CacheFilePath); path != "" {
+		experimental.CacheFile = &option.CacheFileOptions{Enabled: true, Path: singBoxPath(path)}
+	}
+	return RuntimePlan{
+		Log: option.LogOptions{Level: "info", Output: os.DevNull}, Experimental: experimental,
 	}
 }
 
 func validateConfig(content []byte) error {
-	_, err := singjson.UnmarshalExtendedContext[option.Options](validationContext(), content)
+	_, err := singjson.UnmarshalExtendedContext[option.Options](targetprofile.Context(), content)
 	return err
-}
-
-var (
-	validationContextOnce  sync.Once
-	validationContextValue context.Context
-)
-
-func validationContext() context.Context {
-	validationContextOnce.Do(func() {
-		validationContextValue = box.Context(
-			context.Background(),
-			include.InboundRegistry(),
-			include.OutboundRegistry(),
-			include.EndpointRegistry(),
-			include.DNSTransportRegistry(),
-			include.ServiceRegistry(),
-		)
-	})
-	return validationContextValue
 }
 
 // buildInbounds 生成应用拥有的入站面。订阅透传配置不得自带 inbounds
 // （机场常带需管理员权限的 tun），入站主权始终在应用侧。
-func buildInbounds(settings Settings) ([]*option.Inbound, error) {
-	var inbounds []*option.Inbound
+func buildInbounds(settings Settings) ([]option.Inbound, error) {
+	var inbounds []option.Inbound
 	if settings.ProxyMode == ProxyModeMixed {
 		address, err := netip.ParseAddr(strings.TrimSpace(settings.ListenAddress))
 		if err != nil {
 			return nil, fmt.Errorf("%w: listen address %q is not a valid IP address", ErrInvalidSettings, settings.ListenAddress)
 		}
 		listen := badoption.Addr(address)
-		inbounds = append(inbounds, &option.Inbound{
+		inbounds = append(inbounds, option.Inbound{
 			Type: "mixed", Tag: "mixed",
 			Options: option.HTTPMixedInboundOptions{
 				ListenOptions: option.ListenOptions{Listen: &listen, ListenPort: uint16(settings.MixedPort)},
@@ -184,7 +262,7 @@ func buildInbounds(settings Settings) ([]*option.Inbound, error) {
 		if settings.IPv6 {
 			addresses = append(addresses, netip.MustParsePrefix("fd00:1:fd00:1::1/126"))
 		}
-		inbounds = append(inbounds, &option.Inbound{
+		inbounds = append(inbounds, option.Inbound{
 			Type: "tun", Tag: "tun",
 			Options: option.TunInboundOptions{
 				InterfaceName:       tunInterfaceName,
@@ -197,15 +275,6 @@ func buildInbounds(settings Settings) ([]*option.Inbound, error) {
 		})
 	}
 	return inbounds, nil
-}
-
-func mustMarshalOutbound(outbound *option.Outbound) json.RawMessage {
-	encoded, err := outbound.MarshalJSONContext(context.Background())
-	if err != nil {
-		// 仅由静态字面量构成，序列化不可能失败。
-		panic(fmt.Sprintf("config: marshal outbound: %v", err))
-	}
-	return encoded
 }
 
 // singBoxPath 为 Windows 长路径添加 \\?\ 前缀（正斜杠形式），其余平台原样返回。

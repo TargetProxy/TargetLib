@@ -22,7 +22,6 @@ param(
         'with_naive_outbound',
         'with_purego',
         'with_clash_api',
-        'badlinkname',
         'http2legacy',
         'netgo',
         'osusergo'
@@ -57,13 +56,12 @@ $arguments = @(
     '-tags', ($BuildTags -join ','),
     '-o', $OutputPath
 )
-# sing-box uses an internal http2 transport hook that requires linkname checks
-# to be disabled with current Go toolchains.
+# sing-box 使用内部 http2 transport hook，当前 Go 工具链需要关闭 linkname 检查。
 $linkerFlags = if ($DebugBuild) { '-checklinkname=0' } else { '-s -w -buildid= -checklinkname=0' }
 $arguments += @('-ldflags', $linkerFlags)
 $arguments += './cmd/TargetLib'
 
-# Strip + perf env (no priority, apply directly)
+# Strip 与性能环境变量（不设置优先级，直接应用）。
 if (-not $DebugBuild) {
     $env:CGO_ENABLED = '0'
     if ($env:GOARCH -eq 'amd64' -or [string]::IsNullOrWhiteSpace($env:GOARCH)) {

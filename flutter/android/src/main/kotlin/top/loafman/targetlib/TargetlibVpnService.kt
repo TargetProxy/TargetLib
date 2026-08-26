@@ -11,7 +11,7 @@ import android.util.Log
 
 /** Foreground Android VPN host. JNI is owned exclusively by this service. */
 class TargetlibVpnService : VpnService() {
-    private var handle: Long = 0
+    private var nativeStarted = false
 
     override fun onCreate() {
         super.onCreate()
@@ -20,7 +20,7 @@ class TargetlibVpnService : VpnService() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (handle != 0L) return START_STICKY
+        if (nativeStarted) return START_STICKY
         try {
             val preferences = getSharedPreferences(PREFERENCES, MODE_PRIVATE)
             val requestedBasePath = intent?.getStringExtra(EXTRA_BASE_PATH)
@@ -37,11 +37,9 @@ class TargetlibVpnService : VpnService() {
                 .addRoute("0.0.0.0", 0)
                 .addDisallowedApplication(packageName)
                 .establish() ?: error("Unable to establish Android VPN interface")
-            TargetlibNative.init(
-                basePath = basePath,
-            )
             TargetlibNative.setTunFd(tunnel.detachFd())
-            handle = TargetlibNative.serve()
+            TargetlibNative.start(basePath = basePath)
+            nativeStarted = true
         } catch (error: Throwable) {
             Log.e(TAG, "Unable to start TargetLib VPN service", error)
             stopSelf(startId)
@@ -50,10 +48,9 @@ class TargetlibVpnService : VpnService() {
     }
 
     override fun onDestroy() {
-        if (handle != 0L) {
-            runCatching { TargetlibNative.stop(handle) }
-            runCatching { TargetlibNative.freeHandle(handle) }
-            handle = 0
+        if (nativeStarted) {
+            runCatching { TargetlibNative.stop() }
+            nativeStarted = false
         }
         stopForeground(STOP_FOREGROUND_REMOVE)
         super.onDestroy()

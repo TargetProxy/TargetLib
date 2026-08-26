@@ -15,34 +15,14 @@ import (
 
 type Handler struct {
 	targetlibapi.UnimplementedTargetLibServer
-	manager       *Manager
-	activeChanged func(context.Context) error
+	manager *Manager
 }
 
 func NewHandler(manager *Manager) *Handler {
 	return &Handler{manager: manager}
 }
 
-func (s *Handler) SetActiveChangedCallback(callback func(context.Context) error) {
-	s.activeChanged = callback
-}
-
-func (s *Handler) ListSubscriptions(ctx context.Context, _ *emptypb.Empty) (*targetlibapi.SubscriptionList, error) {
-	if s.manager.ActiveID() == "" {
-		for _, item := range s.manager.Views() {
-			if item.Enabled {
-				if err := s.manager.SetActive(ctx, item.ID); err != nil {
-					return nil, subscriptionError(err)
-				}
-				if s.activeChanged != nil {
-					if err := s.activeChanged(ctx); err != nil {
-						return nil, err
-					}
-				}
-				break
-			}
-		}
-	}
+func (s *Handler) ListSubscriptions(_ context.Context, _ *emptypb.Empty) (*targetlibapi.SubscriptionList, error) {
 	views := s.manager.Views()
 	result := &targetlibapi.SubscriptionList{ActiveId: s.manager.ActiveID(), Subscriptions: make([]*targetlibapi.SubscriptionView, len(views))}
 	for i := range views {
@@ -78,7 +58,7 @@ func (s *Handler) AddSubscription(ctx context.Context, request *targetlibapi.Add
 	if err != nil {
 		return nil, err
 	}
-	item, err := s.manager.AddRequest(AddRequest{
+	item, err := s.manager.AddRequest(ctx, AddRequest{
 		ID: request.GetId(), Name: request.GetName(), URL: request.GetUrl(),
 		Enabled: enabled, AutoUpdate: autoUpdate,
 		UpdateInterval: interval,
@@ -90,6 +70,9 @@ func (s *Handler) AddSubscription(ctx context.Context, request *targetlibapi.Add
 	view, _ := s.manager.View(item.ID)
 	if request.GetUpdateNow() {
 		if _, err := s.manager.Update(ctx, item.ID); err != nil {
+			if rollbackErr := s.manager.Remove(context.WithoutCancel(ctx), item.ID); rollbackErr != nil {
+				return nil, status.Errorf(codes.Internal, "update subscription: %v; rollback: %v", err, rollbackErr)
+			}
 			return nil, subscriptionError(err)
 		}
 		view, _ = s.manager.View(item.ID)
@@ -97,11 +80,6 @@ func (s *Handler) AddSubscription(ctx context.Context, request *targetlibapi.Add
 	if request.GetActivate() {
 		if err := s.manager.SetActive(ctx, item.ID); err != nil {
 			return nil, subscriptionError(err)
-		}
-		if s.activeChanged != nil {
-			if err := s.activeChanged(ctx); err != nil {
-				return nil, err
-			}
 		}
 	}
 	return grpcSubscriptionView(view), nil
@@ -115,23 +93,8 @@ func (s *Handler) RemoveSubscription(ctx context.Context, request *targetlibapi.
 	if _, ok := s.manager.View(id); !ok {
 		return nil, status.Errorf(codes.NotFound, "subscription %q not found", id)
 	}
-	if !s.manager.Remove(id) {
-		return nil, status.Error(codes.Internal, "remove subscription failed")
-	}
-	if s.manager.ActiveID() == "" {
-		for _, item := range s.manager.Views() {
-			if item.Enabled {
-				if err := s.manager.SetActive(ctx, item.ID); err != nil {
-					return nil, subscriptionError(err)
-				}
-				if s.activeChanged != nil {
-					if err := s.activeChanged(ctx); err != nil {
-						return nil, err
-					}
-				}
-				break
-			}
-		}
+	if err := s.manager.Remove(ctx, id); err != nil {
+		return nil, subscriptionError(err)
 	}
 	return &emptypb.Empty{}, nil
 }
@@ -182,11 +145,6 @@ func (s *Handler) UpdateSubscription(ctx context.Context, request *targetlibapi.
 	if updateErr != nil && result.Subscription.ID == "" {
 		return nil, subscriptionError(updateErr)
 	}
-	if s.manager.ActiveID() == id && s.activeChanged != nil {
-		if err := s.activeChanged(ctx); err != nil {
-			return nil, err
-		}
-	}
 	view, ok := s.manager.View(id)
 	if !ok {
 		return nil, status.Errorf(codes.NotFound, "subscription %q not found", id)
@@ -195,21 +153,6 @@ func (s *Handler) UpdateSubscription(ctx context.Context, request *targetlibapi.
 		Subscription: grpcSubscriptionView(view), Changed: result.Changed,
 		NotModified: result.NotModified, DurationMilliseconds: result.Duration.Milliseconds(),
 	}, nil
-}
-
-func (s *Handler) GetSubscriptionConfig(_ context.Context, request *targetlibapi.SubscriptionId) (*targetlibapi.SubscriptionConfig, error) {
-	id, err := subscriptionID(request)
-	if err != nil {
-		return nil, err
-	}
-	if _, ok := s.manager.View(id); !ok {
-		return nil, status.Errorf(codes.NotFound, "subscription %q not found", id)
-	}
-	content, ok := s.manager.Config(id)
-	if !ok {
-		return nil, status.Error(codes.FailedPrecondition, "subscription has no downloaded config")
-	}
-	return &targetlibapi.SubscriptionConfig{Content: content}, nil
 }
 
 func (s *Handler) GetResolvedEndpoints(_ context.Context, request *targetlibapi.ResolvedEndpointsRequest) (*targetlibapi.ResolvedEndpoints, error) {
@@ -224,11 +167,6 @@ func (s *Handler) SetActiveSubscription(ctx context.Context, request *targetliba
 	}
 	if err := s.manager.SetActive(ctx, id); err != nil {
 		return nil, subscriptionError(err)
-	}
-	if s.activeChanged != nil {
-		if err := s.activeChanged(ctx); err != nil {
-			return nil, err
-		}
 	}
 	return &emptypb.Empty{}, nil
 }
@@ -285,8 +223,6 @@ func subscriptionError(err error) error {
 		code = codes.NotFound
 	case errors.Is(err, ErrAlreadyExists):
 		code = codes.AlreadyExists
-	case errors.Is(err, ErrAlreadyUpdating):
-		code = codes.Aborted
 	case errors.Is(err, ErrInvalidURL),
 		errors.Is(err, ErrHTTPSRequired),
 		errors.Is(err, ErrIDRequired),
@@ -298,24 +234,27 @@ func subscriptionError(err error) error {
 }
 
 func grpcSubscriptionView(view View) *targetlibapi.SubscriptionView {
-	nodes := make([]*targetlibapi.SubscriptionNode, len(view.Nodes))
-	for i, node := range view.Nodes {
-		nodes[i] = &targetlibapi.SubscriptionNode{
-			Id: node.ID, Name: node.Name, Type: node.Type, Server: node.Server,
-			Port: int32(node.Port), Group: node.Group, Groups: append([]string(nil), node.Groups...),
-			Phase: subscriptionNodePhase(node.Phase), ErrorMessage: node.Error,
-		}
-	}
 	return &targetlibapi.SubscriptionView{
 		Id: view.ID, Name: view.Name, Source: view.Source, Enabled: view.Enabled,
 		AutoUpdate: view.AutoUpdate, UpdateIntervalSeconds: int64(view.UpdateInterval / time.Second),
-		Status: subscriptionStatus(view.Status), Stage: subscriptionStage(view.Stage), Nodes: nodes,
+		Status: subscriptionStatus(view.Status), Stage: subscriptionStage(view.Stage), Profile: grpcProfileView(view.Profile),
 		ErrorCode: view.ErrorCode, ErrorMessage: view.Error,
 		UpdatedAtUnixMs: unixMilliseconds(view.UpdatedAt), NextUpdateAtUnixMs: unixMilliseconds(view.NextUpdateAt),
 		UploadBytes: view.UploadBytes, DownloadBytes: view.DownloadBytes, TotalBytes: view.TotalBytes,
 		ExpiresAtUnixMs: unixMilliseconds(view.ExpiresAt), Title: view.Title,
 		WebPageUrl: view.WebPageURL, SupportUrl: view.SupportURL, MovedPermanentlyTo: view.MovedPermanentlyTo,
 	}
+}
+
+func grpcProfileView(view ProfileView) *targetlibapi.ProfileView {
+	nodes := make([]*targetlibapi.ProfileNode, len(view.Nodes))
+	for i, node := range view.Nodes {
+		nodes[i] = &targetlibapi.ProfileNode{
+			Tag: node.Tag, Name: node.Name, Type: node.Type, Server: node.Server,
+			Port: int32(node.Port), Phase: profileNodePhase(node.Phase), ErrorMessage: node.Error,
+		}
+	}
+	return &targetlibapi.ProfileView{Nodes: nodes}
 }
 
 func subscriptionEvent(event Event) *targetlibapi.SubscriptionEvent {
@@ -368,18 +307,18 @@ func subscriptionStage(value UpdateStage) targetlibapi.SubscriptionUpdateStage {
 	}
 }
 
-func subscriptionNodePhase(value NodePhase) targetlibapi.SubscriptionNodePhase {
+func profileNodePhase(value NodePhase) targetlibapi.ProfileNodePhase {
 	switch value {
 	case NodeDiscovered:
-		return targetlibapi.SubscriptionNodePhase_SUBSCRIPTION_NODE_PHASE_DISCOVERED
+		return targetlibapi.ProfileNodePhase_PROFILE_NODE_PHASE_DISCOVERED
 	case NodeNormalized:
-		return targetlibapi.SubscriptionNodePhase_SUBSCRIPTION_NODE_PHASE_NORMALIZED
+		return targetlibapi.ProfileNodePhase_PROFILE_NODE_PHASE_NORMALIZED
 	case NodeReady:
-		return targetlibapi.SubscriptionNodePhase_SUBSCRIPTION_NODE_PHASE_READY
+		return targetlibapi.ProfileNodePhase_PROFILE_NODE_PHASE_READY
 	case NodeFailed:
-		return targetlibapi.SubscriptionNodePhase_SUBSCRIPTION_NODE_PHASE_FAILED
+		return targetlibapi.ProfileNodePhase_PROFILE_NODE_PHASE_FAILED
 	default:
-		return targetlibapi.SubscriptionNodePhase_SUBSCRIPTION_NODE_PHASE_UNSPECIFIED
+		return targetlibapi.ProfileNodePhase_PROFILE_NODE_PHASE_UNSPECIFIED
 	}
 }
 

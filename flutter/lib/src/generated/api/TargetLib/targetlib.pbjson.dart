@@ -151,24 +151,24 @@ final $typed_data.Uint8List subscriptionUpdateStageDescriptor = $convert.base64D
     'BUSU9OX1VQREFURV9TVEFHRV9DT01QTEVURRAGEiQKIFNVQlNDUklQVElPTl9VUERBVEVfU1RB'
     'R0VfRkFJTEVEEAc=');
 
-@$core.Deprecated('Use subscriptionNodePhaseDescriptor instead')
-const SubscriptionNodePhase$json = {
-  '1': 'SubscriptionNodePhase',
+@$core.Deprecated('Use profileNodePhaseDescriptor instead')
+const ProfileNodePhase$json = {
+  '1': 'ProfileNodePhase',
   '2': [
-    {'1': 'SUBSCRIPTION_NODE_PHASE_UNSPECIFIED', '2': 0},
-    {'1': 'SUBSCRIPTION_NODE_PHASE_DISCOVERED', '2': 1},
-    {'1': 'SUBSCRIPTION_NODE_PHASE_NORMALIZED', '2': 2},
-    {'1': 'SUBSCRIPTION_NODE_PHASE_READY', '2': 3},
-    {'1': 'SUBSCRIPTION_NODE_PHASE_FAILED', '2': 4},
+    {'1': 'PROFILE_NODE_PHASE_UNSPECIFIED', '2': 0},
+    {'1': 'PROFILE_NODE_PHASE_DISCOVERED', '2': 1},
+    {'1': 'PROFILE_NODE_PHASE_NORMALIZED', '2': 2},
+    {'1': 'PROFILE_NODE_PHASE_READY', '2': 3},
+    {'1': 'PROFILE_NODE_PHASE_FAILED', '2': 4},
   ],
 };
 
-/// Descriptor for `SubscriptionNodePhase`. Decode as a `google.protobuf.EnumDescriptorProto`.
-final $typed_data.Uint8List subscriptionNodePhaseDescriptor = $convert.base64Decode(
-    'ChVTdWJzY3JpcHRpb25Ob2RlUGhhc2USJwojU1VCU0NSSVBUSU9OX05PREVfUEhBU0VfVU5TUE'
-    'VDSUZJRUQQABImCiJTVUJTQ1JJUFRJT05fTk9ERV9QSEFTRV9ESVNDT1ZFUkVEEAESJgoiU1VC'
-    'U0NSSVBUSU9OX05PREVfUEhBU0VfTk9STUFMSVpFRBACEiEKHVNVQlNDUklQVElPTl9OT0RFX1'
-    'BIQVNFX1JFQURZEAMSIgoeU1VCU0NSSVBUSU9OX05PREVfUEhBU0VfRkFJTEVEEAQ=');
+/// Descriptor for `ProfileNodePhase`. Decode as a `google.protobuf.EnumDescriptorProto`.
+final $typed_data.Uint8List profileNodePhaseDescriptor = $convert.base64Decode(
+    'ChBQcm9maWxlTm9kZVBoYXNlEiIKHlBST0ZJTEVfTk9ERV9QSEFTRV9VTlNQRUNJRklFRBAAEi'
+    'EKHVBST0ZJTEVfTk9ERV9QSEFTRV9ESVNDT1ZFUkVEEAESIQodUFJPRklMRV9OT0RFX1BIQVNF'
+    'X05PUk1BTElaRUQQAhIcChhQUk9GSUxFX05PREVfUEhBU0VfUkVBRFkQAxIdChlQUk9GSUxFX0'
+    '5PREVfUEhBU0VfRkFJTEVEEAQ=');
 
 @$core.Deprecated('Use subscriptionEventTypeDescriptor instead')
 const SubscriptionEventType$json = {
@@ -308,68 +308,6 @@ final $typed_data.Uint8List capabilitiesResponseDescriptor = $convert.base64Deco
     'xhdGZvcm1fdnBuGAMgASgIUgtwbGF0Zm9ybVZwbhI3ChdzdWJzY3JpcHRpb25fbWFuYWdlbWVu'
     'dBgFIAEoCFIWc3Vic2NyaXB0aW9uTWFuYWdlbWVudEoECAIQA0oECAQQBVIMc3lzdGVtX3Byb3'
     'h5');
-
-@$core.Deprecated('Use configRequestDescriptor instead')
-const ConfigRequest$json = {
-  '1': 'ConfigRequest',
-  '2': [
-    {'1': 'content', '3': 1, '4': 1, '5': 9, '10': 'content'},
-  ],
-};
-
-/// Descriptor for `ConfigRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List configRequestDescriptor = $convert
-    .base64Decode('Cg1Db25maWdSZXF1ZXN0EhgKB2NvbnRlbnQYASABKAlSB2NvbnRlbnQ=');
-
-@$core.Deprecated('Use checkConfigResponseDescriptor instead')
-const CheckConfigResponse$json = {
-  '1': 'CheckConfigResponse',
-  '2': [
-    {'1': 'valid', '3': 1, '4': 1, '5': 8, '10': 'valid'},
-    {'1': 'formatted_error', '3': 2, '4': 1, '5': 9, '10': 'formattedError'},
-  ],
-};
-
-/// Descriptor for `CheckConfigResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List checkConfigResponseDescriptor = $convert.base64Decode(
-    'ChNDaGVja0NvbmZpZ1Jlc3BvbnNlEhQKBXZhbGlkGAEgASgIUgV2YWxpZBInCg9mb3JtYXR0ZW'
-    'RfZXJyb3IYAiABKAlSDmZvcm1hdHRlZEVycm9y');
-
-@$core.Deprecated('Use startRequestDescriptor instead')
-const StartRequest$json = {
-  '1': 'StartRequest',
-  '2': [
-    {'1': 'config', '3': 1, '4': 1, '5': 9, '10': 'config'},
-  ],
-};
-
-/// Descriptor for `StartRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List startRequestDescriptor = $convert
-    .base64Decode('CgxTdGFydFJlcXVlc3QSFgoGY29uZmlnGAEgASgJUgZjb25maWc=');
-
-@$core.Deprecated('Use reloadRequestDescriptor instead')
-const ReloadRequest$json = {
-  '1': 'ReloadRequest',
-  '2': [
-    {'1': 'config', '3': 1, '4': 1, '5': 9, '10': 'config'},
-  ],
-};
-
-/// Descriptor for `ReloadRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List reloadRequestDescriptor = $convert
-    .base64Decode('Cg1SZWxvYWRSZXF1ZXN0EhYKBmNvbmZpZxgBIAEoCVIGY29uZmln');
-
-@$core.Deprecated('Use restartRequestDescriptor instead')
-const RestartRequest$json = {
-  '1': 'RestartRequest',
-  '2': [
-    {'1': 'config', '3': 1, '4': 1, '5': 9, '10': 'config'},
-  ],
-};
-
-/// Descriptor for `RestartRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List restartRequestDescriptor = $convert
-    .base64Decode('Cg5SZXN0YXJ0UmVxdWVzdBIWCgZjb25maWcYASABKAlSBmNvbmZpZw==');
 
 @$core.Deprecated('Use operationResponseDescriptor instead')
 const OperationResponse$json = {
@@ -625,12 +563,12 @@ const SubscriptionView$json = {
       '10': 'stage'
     },
     {
-      '1': 'nodes',
+      '1': 'profile',
       '3': 9,
-      '4': 3,
+      '4': 1,
       '5': 11,
-      '6': '.targetlib.SubscriptionNode',
-      '10': 'nodes'
+      '6': '.targetlib.ProfileView',
+      '10': 'profile'
     },
     {'1': 'error_code', '3': 10, '4': 1, '5': 9, '10': 'errorCode'},
     {'1': 'error_message', '3': 11, '4': 1, '5': 9, '10': 'errorMessage'},
@@ -678,47 +616,156 @@ final $typed_data.Uint8List subscriptionViewDescriptor = $convert.base64Decode(
     'b191cGRhdGUYBSABKAhSCmF1dG9VcGRhdGUSNgoXdXBkYXRlX2ludGVydmFsX3NlY29uZHMYBi'
     'ABKANSFXVwZGF0ZUludGVydmFsU2Vjb25kcxI1CgZzdGF0dXMYByABKA4yHS50YXJnZXRsaWIu'
     'U3Vic2NyaXB0aW9uU3RhdHVzUgZzdGF0dXMSOAoFc3RhZ2UYCCABKA4yIi50YXJnZXRsaWIuU3'
-    'Vic2NyaXB0aW9uVXBkYXRlU3RhZ2VSBXN0YWdlEjEKBW5vZGVzGAkgAygLMhsudGFyZ2V0bGli'
-    'LlN1YnNjcmlwdGlvbk5vZGVSBW5vZGVzEh0KCmVycm9yX2NvZGUYCiABKAlSCWVycm9yQ29kZR'
-    'IjCg1lcnJvcl9tZXNzYWdlGAsgASgJUgxlcnJvck1lc3NhZ2USKwoSdXBkYXRlZF9hdF91bml4'
-    'X21zGAwgASgDUg91cGRhdGVkQXRVbml4TXMSMgoWbmV4dF91cGRhdGVfYXRfdW5peF9tcxgNIA'
-    'EoA1ISbmV4dFVwZGF0ZUF0VW5peE1zEiEKDHVwbG9hZF9ieXRlcxgOIAEoA1ILdXBsb2FkQnl0'
-    'ZXMSJQoOZG93bmxvYWRfYnl0ZXMYDyABKANSDWRvd25sb2FkQnl0ZXMSHwoLdG90YWxfYnl0ZX'
-    'MYECABKANSCnRvdGFsQnl0ZXMSKwoSZXhwaXJlc19hdF91bml4X21zGBEgASgDUg9leHBpcmVz'
-    'QXRVbml4TXMSFAoFdGl0bGUYEiABKAlSBXRpdGxlEiAKDHdlYl9wYWdlX3VybBgTIAEoCVIKd2'
-    'ViUGFnZVVybBIfCgtzdXBwb3J0X3VybBgUIAEoCVIKc3VwcG9ydFVybBIwChRtb3ZlZF9wZXJt'
-    'YW5lbnRseV90bxgVIAEoCVISbW92ZWRQZXJtYW5lbnRseVRv');
+    'Vic2NyaXB0aW9uVXBkYXRlU3RhZ2VSBXN0YWdlEjAKB3Byb2ZpbGUYCSABKAsyFi50YXJnZXRs'
+    'aWIuUHJvZmlsZVZpZXdSB3Byb2ZpbGUSHQoKZXJyb3JfY29kZRgKIAEoCVIJZXJyb3JDb2RlEi'
+    'MKDWVycm9yX21lc3NhZ2UYCyABKAlSDGVycm9yTWVzc2FnZRIrChJ1cGRhdGVkX2F0X3VuaXhf'
+    'bXMYDCABKANSD3VwZGF0ZWRBdFVuaXhNcxIyChZuZXh0X3VwZGF0ZV9hdF91bml4X21zGA0gAS'
+    'gDUhJuZXh0VXBkYXRlQXRVbml4TXMSIQoMdXBsb2FkX2J5dGVzGA4gASgDUgt1cGxvYWRCeXRl'
+    'cxIlCg5kb3dubG9hZF9ieXRlcxgPIAEoA1INZG93bmxvYWRCeXRlcxIfCgt0b3RhbF9ieXRlcx'
+    'gQIAEoA1IKdG90YWxCeXRlcxIrChJleHBpcmVzX2F0X3VuaXhfbXMYESABKANSD2V4cGlyZXNB'
+    'dFVuaXhNcxIUCgV0aXRsZRgSIAEoCVIFdGl0bGUSIAoMd2ViX3BhZ2VfdXJsGBMgASgJUgp3ZW'
+    'JQYWdlVXJsEh8KC3N1cHBvcnRfdXJsGBQgASgJUgpzdXBwb3J0VXJsEjAKFG1vdmVkX3Blcm1h'
+    'bmVudGx5X3RvGBUgASgJUhJtb3ZlZFBlcm1hbmVudGx5VG8=');
 
-@$core.Deprecated('Use subscriptionNodeDescriptor instead')
-const SubscriptionNode$json = {
-  '1': 'SubscriptionNode',
+@$core.Deprecated('Use profileViewDescriptor instead')
+const ProfileView$json = {
+  '1': 'ProfileView',
   '2': [
-    {'1': 'id', '3': 1, '4': 1, '5': 9, '10': 'id'},
+    {
+      '1': 'nodes',
+      '3': 1,
+      '4': 3,
+      '5': 11,
+      '6': '.targetlib.ProfileNode',
+      '10': 'nodes'
+    },
+    {
+      '1': 'groups',
+      '3': 2,
+      '4': 3,
+      '5': 11,
+      '6': '.targetlib.ProfileGroup',
+      '10': 'groups'
+    },
+    {
+      '1': 'custom_outbounds',
+      '3': 3,
+      '4': 3,
+      '5': 11,
+      '6': '.targetlib.ProfileObject',
+      '10': 'customOutbounds'
+    },
+    {
+      '1': 'custom_inbounds',
+      '3': 4,
+      '4': 3,
+      '5': 11,
+      '6': '.targetlib.ProfileObject',
+      '10': 'customInbounds'
+    },
+    {'1': 'route_rule_count', '3': 5, '4': 1, '5': 13, '10': 'routeRuleCount'},
+    {
+      '1': 'dns',
+      '3': 6,
+      '4': 1,
+      '5': 11,
+      '6': '.targetlib.ProfileDns',
+      '10': 'dns'
+    },
+  ],
+};
+
+/// Descriptor for `ProfileView`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List profileViewDescriptor = $convert.base64Decode(
+    'CgtQcm9maWxlVmlldxIsCgVub2RlcxgBIAMoCzIWLnRhcmdldGxpYi5Qcm9maWxlTm9kZVIFbm'
+    '9kZXMSLwoGZ3JvdXBzGAIgAygLMhcudGFyZ2V0bGliLlByb2ZpbGVHcm91cFIGZ3JvdXBzEkMK'
+    'EGN1c3RvbV9vdXRib3VuZHMYAyADKAsyGC50YXJnZXRsaWIuUHJvZmlsZU9iamVjdFIPY3VzdG'
+    '9tT3V0Ym91bmRzEkEKD2N1c3RvbV9pbmJvdW5kcxgEIAMoCzIYLnRhcmdldGxpYi5Qcm9maWxl'
+    'T2JqZWN0Ug5jdXN0b21JbmJvdW5kcxIoChByb3V0ZV9ydWxlX2NvdW50GAUgASgNUg5yb3V0ZV'
+    'J1bGVDb3VudBInCgNkbnMYBiABKAsyFS50YXJnZXRsaWIuUHJvZmlsZURuc1IDZG5z');
+
+@$core.Deprecated('Use profileNodeDescriptor instead')
+const ProfileNode$json = {
+  '1': 'ProfileNode',
+  '2': [
+    {'1': 'tag', '3': 1, '4': 1, '5': 9, '10': 'tag'},
     {'1': 'name', '3': 2, '4': 1, '5': 9, '10': 'name'},
     {'1': 'type', '3': 3, '4': 1, '5': 9, '10': 'type'},
     {'1': 'server', '3': 4, '4': 1, '5': 9, '10': 'server'},
     {'1': 'port', '3': 5, '4': 1, '5': 5, '10': 'port'},
-    {'1': 'group', '3': 6, '4': 1, '5': 9, '10': 'group'},
-    {'1': 'groups', '3': 7, '4': 3, '5': 9, '10': 'groups'},
+    {'1': 'group_tags', '3': 6, '4': 3, '5': 9, '10': 'groupTags'},
     {
       '1': 'phase',
-      '3': 8,
+      '3': 7,
       '4': 1,
       '5': 14,
-      '6': '.targetlib.SubscriptionNodePhase',
+      '6': '.targetlib.ProfileNodePhase',
       '10': 'phase'
     },
-    {'1': 'error_message', '3': 9, '4': 1, '5': 9, '10': 'errorMessage'},
+    {'1': 'error_message', '3': 8, '4': 1, '5': 9, '10': 'errorMessage'},
   ],
 };
 
-/// Descriptor for `SubscriptionNode`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List subscriptionNodeDescriptor = $convert.base64Decode(
-    'ChBTdWJzY3JpcHRpb25Ob2RlEg4KAmlkGAEgASgJUgJpZBISCgRuYW1lGAIgASgJUgRuYW1lEh'
-    'IKBHR5cGUYAyABKAlSBHR5cGUSFgoGc2VydmVyGAQgASgJUgZzZXJ2ZXISEgoEcG9ydBgFIAEo'
-    'BVIEcG9ydBIUCgVncm91cBgGIAEoCVIFZ3JvdXASFgoGZ3JvdXBzGAcgAygJUgZncm91cHMSNg'
-    'oFcGhhc2UYCCABKA4yIC50YXJnZXRsaWIuU3Vic2NyaXB0aW9uTm9kZVBoYXNlUgVwaGFzZRIj'
-    'Cg1lcnJvcl9tZXNzYWdlGAkgASgJUgxlcnJvck1lc3NhZ2U=');
+/// Descriptor for `ProfileNode`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List profileNodeDescriptor = $convert.base64Decode(
+    'CgtQcm9maWxlTm9kZRIQCgN0YWcYASABKAlSA3RhZxISCgRuYW1lGAIgASgJUgRuYW1lEhIKBH'
+    'R5cGUYAyABKAlSBHR5cGUSFgoGc2VydmVyGAQgASgJUgZzZXJ2ZXISEgoEcG9ydBgFIAEoBVIE'
+    'cG9ydBIdCgpncm91cF90YWdzGAYgAygJUglncm91cFRhZ3MSMQoFcGhhc2UYByABKA4yGy50YX'
+    'JnZXRsaWIuUHJvZmlsZU5vZGVQaGFzZVIFcGhhc2USIwoNZXJyb3JfbWVzc2FnZRgIIAEoCVIM'
+    'ZXJyb3JNZXNzYWdl');
+
+@$core.Deprecated('Use profileGroupDescriptor instead')
+const ProfileGroup$json = {
+  '1': 'ProfileGroup',
+  '2': [
+    {'1': 'tag', '3': 1, '4': 1, '5': 9, '10': 'tag'},
+    {'1': 'type', '3': 2, '4': 1, '5': 9, '10': 'type'},
+    {'1': 'member_tags', '3': 3, '4': 3, '5': 9, '10': 'memberTags'},
+    {'1': 'default_tag', '3': 4, '4': 1, '5': 9, '10': 'defaultTag'},
+  ],
+};
+
+/// Descriptor for `ProfileGroup`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List profileGroupDescriptor = $convert.base64Decode(
+    'CgxQcm9maWxlR3JvdXASEAoDdGFnGAEgASgJUgN0YWcSEgoEdHlwZRgCIAEoCVIEdHlwZRIfCg'
+    'ttZW1iZXJfdGFncxgDIAMoCVIKbWVtYmVyVGFncxIfCgtkZWZhdWx0X3RhZxgEIAEoCVIKZGVm'
+    'YXVsdFRhZw==');
+
+@$core.Deprecated('Use profileObjectDescriptor instead')
+const ProfileObject$json = {
+  '1': 'ProfileObject',
+  '2': [
+    {'1': 'tag', '3': 1, '4': 1, '5': 9, '10': 'tag'},
+    {'1': 'type', '3': 2, '4': 1, '5': 9, '10': 'type'},
+  ],
+};
+
+/// Descriptor for `ProfileObject`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List profileObjectDescriptor = $convert.base64Decode(
+    'Cg1Qcm9maWxlT2JqZWN0EhAKA3RhZxgBIAEoCVIDdGFnEhIKBHR5cGUYAiABKAlSBHR5cGU=');
+
+@$core.Deprecated('Use profileDnsDescriptor instead')
+const ProfileDns$json = {
+  '1': 'ProfileDns',
+  '2': [
+    {
+      '1': 'servers',
+      '3': 1,
+      '4': 3,
+      '5': 11,
+      '6': '.targetlib.ProfileObject',
+      '10': 'servers'
+    },
+    {'1': 'rule_count', '3': 2, '4': 1, '5': 13, '10': 'ruleCount'},
+    {'1': 'final_server', '3': 3, '4': 1, '5': 9, '10': 'finalServer'},
+  ],
+};
+
+/// Descriptor for `ProfileDns`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List profileDnsDescriptor = $convert.base64Decode(
+    'CgpQcm9maWxlRG5zEjIKB3NlcnZlcnMYASADKAsyGC50YXJnZXRsaWIuUHJvZmlsZU9iamVjdF'
+    'IHc2VydmVycxIdCgpydWxlX2NvdW50GAIgASgNUglydWxlQ291bnQSIQoMZmluYWxfc2VydmVy'
+    'GAMgASgJUgtmaW5hbFNlcnZlcg==');
 
 @$core.Deprecated('Use subscriptionUpdateResultDescriptor instead')
 const SubscriptionUpdateResult$json = {
@@ -751,22 +798,9 @@ final $typed_data.Uint8List subscriptionUpdateResultDescriptor = $convert.base64
     'aGFuZ2VkEiEKDG5vdF9tb2RpZmllZBgDIAEoCFILbm90TW9kaWZpZWQSMwoVZHVyYXRpb25fbW'
     'lsbGlzZWNvbmRzGAQgASgDUhRkdXJhdGlvbk1pbGxpc2Vjb25kcw==');
 
-@$core.Deprecated('Use subscriptionConfigDescriptor instead')
-const SubscriptionConfig$json = {
-  '1': 'SubscriptionConfig',
-  '2': [
-    {'1': 'content', '3': 1, '4': 1, '5': 12, '10': 'content'},
-  ],
-};
-
-/// Descriptor for `SubscriptionConfig`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List subscriptionConfigDescriptor =
-    $convert.base64Decode(
-        'ChJTdWJzY3JpcHRpb25Db25maWcSGAoHY29udGVudBgBIAEoDFIHY29udGVudA==');
-
-@$core.Deprecated('Use buildConfigSettingsDescriptor instead')
-const BuildConfigSettings$json = {
-  '1': 'BuildConfigSettings',
+@$core.Deprecated('Use runtimeSettingsDescriptor instead')
+const RuntimeSettings$json = {
+  '1': 'RuntimeSettings',
   '2': [
     {'1': 'listen_address', '3': 1, '4': 1, '5': 9, '10': 'listenAddress'},
     {'1': 'mixed_port', '3': 2, '4': 1, '5': 13, '10': 'mixedPort'},
@@ -778,65 +812,65 @@ const BuildConfigSettings$json = {
       '6': '.targetlib.ProxyMode',
       '10': 'proxyMode'
     },
-    {'1': 'ipv6', '3': 5, '4': 1, '5': 8, '10': 'ipv6'},
-    {'1': 'cache_file_path', '3': 6, '4': 1, '5': 9, '10': 'cacheFilePath'},
+    {'1': 'ipv6', '3': 4, '4': 1, '5': 8, '10': 'ipv6'},
     {
       '1': 'route_mode',
-      '3': 7,
+      '3': 5,
       '4': 1,
       '5': 14,
       '6': '.targetlib.RouteMode',
       '10': 'routeMode'
     },
   ],
-  '9': [
-    {'1': 4, '2': 5},
-  ],
-  '10': ['system_proxy'],
 };
 
-/// Descriptor for `BuildConfigSettings`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List buildConfigSettingsDescriptor = $convert.base64Decode(
-    'ChNCdWlsZENvbmZpZ1NldHRpbmdzEiUKDmxpc3Rlbl9hZGRyZXNzGAEgASgJUg1saXN0ZW5BZG'
-    'RyZXNzEh0KCm1peGVkX3BvcnQYAiABKA1SCW1peGVkUG9ydBIzCgpwcm94eV9tb2RlGAMgASgO'
-    'MhQudGFyZ2V0bGliLlByb3h5TW9kZVIJcHJveHlNb2RlEhIKBGlwdjYYBSABKAhSBGlwdjYSJg'
-    'oPY2FjaGVfZmlsZV9wYXRoGAYgASgJUg1jYWNoZUZpbGVQYXRoEjMKCnJvdXRlX21vZGUYByAB'
-    'KA4yFC50YXJnZXRsaWIuUm91dGVNb2RlUglyb3V0ZU1vZGVKBAgEEAVSDHN5c3RlbV9wcm94eQ'
-    '==');
+/// Descriptor for `RuntimeSettings`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List runtimeSettingsDescriptor = $convert.base64Decode(
+    'Cg9SdW50aW1lU2V0dGluZ3MSJQoObGlzdGVuX2FkZHJlc3MYASABKAlSDWxpc3RlbkFkZHJlc3'
+    'MSHQoKbWl4ZWRfcG9ydBgCIAEoDVIJbWl4ZWRQb3J0EjMKCnByb3h5X21vZGUYAyABKA4yFC50'
+    'YXJnZXRsaWIuUHJveHlNb2RlUglwcm94eU1vZGUSEgoEaXB2NhgEIAEoCFIEaXB2NhIzCgpyb3'
+    'V0ZV9tb2RlGAUgASgOMhQudGFyZ2V0bGliLlJvdXRlTW9kZVIJcm91dGVNb2Rl');
 
-@$core.Deprecated('Use buildConfigRequestDescriptor instead')
-const BuildConfigRequest$json = {
-  '1': 'BuildConfigRequest',
+@$core.Deprecated('Use runtimeConfigDescriptor instead')
+const RuntimeConfig$json = {
+  '1': 'RuntimeConfig',
   '2': [
     {
       '1': 'settings',
       '3': 1,
       '4': 1,
       '5': 11,
-      '6': '.targetlib.BuildConfigSettings',
+      '6': '.targetlib.RuntimeSettings',
       '10': 'settings'
     },
-    {
-      '1': 'subscription_id',
-      '3': 2,
-      '4': 1,
-      '5': 9,
-      '9': 0,
-      '10': 'subscriptionId'
-    },
-    {'1': 'raw_config', '3': 3, '4': 1, '5': 12, '9': 0, '10': 'rawConfig'},
-  ],
-  '8': [
-    {'1': 'source'},
   ],
 };
 
-/// Descriptor for `BuildConfigRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List buildConfigRequestDescriptor = $convert.base64Decode(
-    'ChJCdWlsZENvbmZpZ1JlcXVlc3QSOgoIc2V0dGluZ3MYASABKAsyHi50YXJnZXRsaWIuQnVpbG'
-    'RDb25maWdTZXR0aW5nc1IIc2V0dGluZ3MSKQoPc3Vic2NyaXB0aW9uX2lkGAIgASgJSABSDnN1'
-    'YnNjcmlwdGlvbklkEh8KCnJhd19jb25maWcYAyABKAxIAFIJcmF3Q29uZmlnQggKBnNvdXJjZQ'
-    '==');
+/// Descriptor for `RuntimeConfig`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List runtimeConfigDescriptor = $convert.base64Decode(
+    'Cg1SdW50aW1lQ29uZmlnEjYKCHNldHRpbmdzGAEgASgLMhoudGFyZ2V0bGliLlJ1bnRpbWVTZX'
+    'R0aW5nc1IIc2V0dGluZ3M=');
+
+@$core.Deprecated('Use updateRuntimeConfigRequestDescriptor instead')
+const UpdateRuntimeConfigRequest$json = {
+  '1': 'UpdateRuntimeConfigRequest',
+  '2': [
+    {
+      '1': 'settings',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.targetlib.RuntimeSettings',
+      '10': 'settings'
+    },
+  ],
+};
+
+/// Descriptor for `UpdateRuntimeConfigRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List updateRuntimeConfigRequestDescriptor =
+    $convert.base64Decode(
+        'ChpVcGRhdGVSdW50aW1lQ29uZmlnUmVxdWVzdBI2CghzZXR0aW5ncxgBIAEoCzIaLnRhcmdldG'
+        'xpYi5SdW50aW1lU2V0dGluZ3NSCHNldHRpbmdz');
 
 @$core.Deprecated('Use testOutboundRequestDescriptor instead')
 const TestOutboundRequest$json = {

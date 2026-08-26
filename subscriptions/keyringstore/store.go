@@ -1,4 +1,4 @@
-// Package keyringstore provides the optional desktop credential-store adapter.
+// Package keyringstore 提供可选的桌面凭据存储适配器。
 package keyringstore
 
 import (
@@ -13,9 +13,8 @@ import (
 
 const account = "subscriptions-file-key-v1"
 
-// New uses Credential Manager on Windows, Keychain on macOS, and Secret
-// Service on desktop Linux. Android and iOS hosts should instead inject key
-// material into subscriptions.OpenBadgerStore.
+// New 在 Windows 使用 Credential Manager，在 macOS 使用 Keychain，在桌面 Linux 使用
+// Secret Service；Android 和 iOS 应改为向 subscriptions.OpenBadgerStore 注入密钥材料。
 func New(path, service string) (*subscriptions.BadgerStore, error) {
 	if service == "" {
 		service = "TargetLib"

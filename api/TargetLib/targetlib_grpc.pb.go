@@ -22,9 +22,7 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	TargetLib_GetVersion_FullMethodName                   = "/targetlib.TargetLib/GetVersion"
 	TargetLib_GetCapabilities_FullMethodName              = "/targetlib.TargetLib/GetCapabilities"
-	TargetLib_CheckConfig_FullMethodName                  = "/targetlib.TargetLib/CheckConfig"
 	TargetLib_Start_FullMethodName                        = "/targetlib.TargetLib/Start"
-	TargetLib_Reload_FullMethodName                       = "/targetlib.TargetLib/Reload"
 	TargetLib_Restart_FullMethodName                      = "/targetlib.TargetLib/Restart"
 	TargetLib_Stop_FullMethodName                         = "/targetlib.TargetLib/Stop"
 	TargetLib_GetState_FullMethodName                     = "/targetlib.TargetLib/GetState"
@@ -41,9 +39,8 @@ const (
 	TargetLib_SetSubscriptionEnabled_FullMethodName       = "/targetlib.TargetLib/SetSubscriptionEnabled"
 	TargetLib_ConfigureSubscriptionUpdates_FullMethodName = "/targetlib.TargetLib/ConfigureSubscriptionUpdates"
 	TargetLib_UpdateSubscription_FullMethodName           = "/targetlib.TargetLib/UpdateSubscription"
-	TargetLib_GetSubscriptionConfig_FullMethodName        = "/targetlib.TargetLib/GetSubscriptionConfig"
-	TargetLib_BuildConfig_FullMethodName                  = "/targetlib.TargetLib/BuildConfig"
-	TargetLib_ApplyRuntimeSettings_FullMethodName         = "/targetlib.TargetLib/ApplyRuntimeSettings"
+	TargetLib_GetRuntimeConfig_FullMethodName             = "/targetlib.TargetLib/GetRuntimeConfig"
+	TargetLib_UpdateRuntimeConfig_FullMethodName          = "/targetlib.TargetLib/UpdateRuntimeConfig"
 	TargetLib_TestOutbound_FullMethodName                 = "/targetlib.TargetLib/TestOutbound"
 	TargetLib_TestOutbounds_FullMethodName                = "/targetlib.TargetLib/TestOutbounds"
 	TargetLib_GetResolvedEndpoints_FullMethodName         = "/targetlib.TargetLib/GetResolvedEndpoints"
@@ -59,10 +56,8 @@ const (
 type TargetLibClient interface {
 	GetVersion(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*VersionResponse, error)
 	GetCapabilities(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*CapabilitiesResponse, error)
-	CheckConfig(ctx context.Context, in *ConfigRequest, opts ...grpc.CallOption) (*CheckConfigResponse, error)
-	Start(ctx context.Context, in *StartRequest, opts ...grpc.CallOption) (*OperationResponse, error)
-	Reload(ctx context.Context, in *ReloadRequest, opts ...grpc.CallOption) (*OperationResponse, error)
-	Restart(ctx context.Context, in *RestartRequest, opts ...grpc.CallOption) (*OperationResponse, error)
+	Start(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*OperationResponse, error)
+	Restart(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*OperationResponse, error)
 	Stop(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*OperationResponse, error)
 	GetState(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ServiceState, error)
 	SubscribeState(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ServiceState], error)
@@ -78,12 +73,11 @@ type TargetLibClient interface {
 	SetSubscriptionEnabled(ctx context.Context, in *SetSubscriptionEnabledRequest, opts ...grpc.CallOption) (*SubscriptionView, error)
 	ConfigureSubscriptionUpdates(ctx context.Context, in *ConfigureSubscriptionUpdatesRequest, opts ...grpc.CallOption) (*SubscriptionView, error)
 	UpdateSubscription(ctx context.Context, in *SubscriptionId, opts ...grpc.CallOption) (*SubscriptionUpdateResult, error)
-	GetSubscriptionConfig(ctx context.Context, in *SubscriptionId, opts ...grpc.CallOption) (*SubscriptionConfig, error)
-	BuildConfig(ctx context.Context, in *BuildConfigRequest, opts ...grpc.CallOption) (*SubscriptionConfig, error)
-	// Atomically builds, validates, and applies a runtime configuration. When
-	// the service is already running, a failed reload restores the last known
-	// good configuration before returning an error.
-	ApplyRuntimeSettings(ctx context.Context, in *BuildConfigRequest, opts ...grpc.CallOption) (*OperationResponse, error)
+	// Returns the backend-owned desired runtime configuration.
+	GetRuntimeConfig(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*RuntimeConfig, error)
+	// Validates and persists the desired configuration. If the core is running,
+	// it is reloaded immediately; otherwise it is used on the next start.
+	UpdateRuntimeConfig(ctx context.Context, in *UpdateRuntimeConfigRequest, opts ...grpc.CallOption) (*RuntimeConfig, error)
 	TestOutbound(ctx context.Context, in *TestOutboundRequest, opts ...grpc.CallOption) (*LatencyTestResult, error)
 	TestOutbounds(ctx context.Context, in *TestOutboundsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[LatencyTestResult], error)
 	GetResolvedEndpoints(ctx context.Context, in *ResolvedEndpointsRequest, opts ...grpc.CallOption) (*ResolvedEndpoints, error)
@@ -123,17 +117,7 @@ func (c *targetLibClient) GetCapabilities(ctx context.Context, in *emptypb.Empty
 	return out, nil
 }
 
-func (c *targetLibClient) CheckConfig(ctx context.Context, in *ConfigRequest, opts ...grpc.CallOption) (*CheckConfigResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CheckConfigResponse)
-	err := c.cc.Invoke(ctx, TargetLib_CheckConfig_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *targetLibClient) Start(ctx context.Context, in *StartRequest, opts ...grpc.CallOption) (*OperationResponse, error) {
+func (c *targetLibClient) Start(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*OperationResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(OperationResponse)
 	err := c.cc.Invoke(ctx, TargetLib_Start_FullMethodName, in, out, cOpts...)
@@ -143,17 +127,7 @@ func (c *targetLibClient) Start(ctx context.Context, in *StartRequest, opts ...g
 	return out, nil
 }
 
-func (c *targetLibClient) Reload(ctx context.Context, in *ReloadRequest, opts ...grpc.CallOption) (*OperationResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(OperationResponse)
-	err := c.cc.Invoke(ctx, TargetLib_Reload_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *targetLibClient) Restart(ctx context.Context, in *RestartRequest, opts ...grpc.CallOption) (*OperationResponse, error) {
+func (c *targetLibClient) Restart(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*OperationResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(OperationResponse)
 	err := c.cc.Invoke(ctx, TargetLib_Restart_FullMethodName, in, out, cOpts...)
@@ -331,30 +305,20 @@ func (c *targetLibClient) UpdateSubscription(ctx context.Context, in *Subscripti
 	return out, nil
 }
 
-func (c *targetLibClient) GetSubscriptionConfig(ctx context.Context, in *SubscriptionId, opts ...grpc.CallOption) (*SubscriptionConfig, error) {
+func (c *targetLibClient) GetRuntimeConfig(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*RuntimeConfig, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(SubscriptionConfig)
-	err := c.cc.Invoke(ctx, TargetLib_GetSubscriptionConfig_FullMethodName, in, out, cOpts...)
+	out := new(RuntimeConfig)
+	err := c.cc.Invoke(ctx, TargetLib_GetRuntimeConfig_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *targetLibClient) BuildConfig(ctx context.Context, in *BuildConfigRequest, opts ...grpc.CallOption) (*SubscriptionConfig, error) {
+func (c *targetLibClient) UpdateRuntimeConfig(ctx context.Context, in *UpdateRuntimeConfigRequest, opts ...grpc.CallOption) (*RuntimeConfig, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(SubscriptionConfig)
-	err := c.cc.Invoke(ctx, TargetLib_BuildConfig_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *targetLibClient) ApplyRuntimeSettings(ctx context.Context, in *BuildConfigRequest, opts ...grpc.CallOption) (*OperationResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(OperationResponse)
-	err := c.cc.Invoke(ctx, TargetLib_ApplyRuntimeSettings_FullMethodName, in, out, cOpts...)
+	out := new(RuntimeConfig)
+	err := c.cc.Invoke(ctx, TargetLib_UpdateRuntimeConfig_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -455,10 +419,8 @@ func (c *targetLibClient) GetIpInfo(ctx context.Context, in *emptypb.Empty, opts
 type TargetLibServer interface {
 	GetVersion(context.Context, *emptypb.Empty) (*VersionResponse, error)
 	GetCapabilities(context.Context, *emptypb.Empty) (*CapabilitiesResponse, error)
-	CheckConfig(context.Context, *ConfigRequest) (*CheckConfigResponse, error)
-	Start(context.Context, *StartRequest) (*OperationResponse, error)
-	Reload(context.Context, *ReloadRequest) (*OperationResponse, error)
-	Restart(context.Context, *RestartRequest) (*OperationResponse, error)
+	Start(context.Context, *emptypb.Empty) (*OperationResponse, error)
+	Restart(context.Context, *emptypb.Empty) (*OperationResponse, error)
 	Stop(context.Context, *emptypb.Empty) (*OperationResponse, error)
 	GetState(context.Context, *emptypb.Empty) (*ServiceState, error)
 	SubscribeState(*emptypb.Empty, grpc.ServerStreamingServer[ServiceState]) error
@@ -474,12 +436,11 @@ type TargetLibServer interface {
 	SetSubscriptionEnabled(context.Context, *SetSubscriptionEnabledRequest) (*SubscriptionView, error)
 	ConfigureSubscriptionUpdates(context.Context, *ConfigureSubscriptionUpdatesRequest) (*SubscriptionView, error)
 	UpdateSubscription(context.Context, *SubscriptionId) (*SubscriptionUpdateResult, error)
-	GetSubscriptionConfig(context.Context, *SubscriptionId) (*SubscriptionConfig, error)
-	BuildConfig(context.Context, *BuildConfigRequest) (*SubscriptionConfig, error)
-	// Atomically builds, validates, and applies a runtime configuration. When
-	// the service is already running, a failed reload restores the last known
-	// good configuration before returning an error.
-	ApplyRuntimeSettings(context.Context, *BuildConfigRequest) (*OperationResponse, error)
+	// Returns the backend-owned desired runtime configuration.
+	GetRuntimeConfig(context.Context, *emptypb.Empty) (*RuntimeConfig, error)
+	// Validates and persists the desired configuration. If the core is running,
+	// it is reloaded immediately; otherwise it is used on the next start.
+	UpdateRuntimeConfig(context.Context, *UpdateRuntimeConfigRequest) (*RuntimeConfig, error)
 	TestOutbound(context.Context, *TestOutboundRequest) (*LatencyTestResult, error)
 	TestOutbounds(*TestOutboundsRequest, grpc.ServerStreamingServer[LatencyTestResult]) error
 	GetResolvedEndpoints(context.Context, *ResolvedEndpointsRequest) (*ResolvedEndpoints, error)
@@ -505,16 +466,10 @@ func (UnimplementedTargetLibServer) GetVersion(context.Context, *emptypb.Empty) 
 func (UnimplementedTargetLibServer) GetCapabilities(context.Context, *emptypb.Empty) (*CapabilitiesResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetCapabilities not implemented")
 }
-func (UnimplementedTargetLibServer) CheckConfig(context.Context, *ConfigRequest) (*CheckConfigResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method CheckConfig not implemented")
-}
-func (UnimplementedTargetLibServer) Start(context.Context, *StartRequest) (*OperationResponse, error) {
+func (UnimplementedTargetLibServer) Start(context.Context, *emptypb.Empty) (*OperationResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Start not implemented")
 }
-func (UnimplementedTargetLibServer) Reload(context.Context, *ReloadRequest) (*OperationResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method Reload not implemented")
-}
-func (UnimplementedTargetLibServer) Restart(context.Context, *RestartRequest) (*OperationResponse, error) {
+func (UnimplementedTargetLibServer) Restart(context.Context, *emptypb.Empty) (*OperationResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Restart not implemented")
 }
 func (UnimplementedTargetLibServer) Stop(context.Context, *emptypb.Empty) (*OperationResponse, error) {
@@ -562,14 +517,11 @@ func (UnimplementedTargetLibServer) ConfigureSubscriptionUpdates(context.Context
 func (UnimplementedTargetLibServer) UpdateSubscription(context.Context, *SubscriptionId) (*SubscriptionUpdateResult, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateSubscription not implemented")
 }
-func (UnimplementedTargetLibServer) GetSubscriptionConfig(context.Context, *SubscriptionId) (*SubscriptionConfig, error) {
-	return nil, status.Error(codes.Unimplemented, "method GetSubscriptionConfig not implemented")
+func (UnimplementedTargetLibServer) GetRuntimeConfig(context.Context, *emptypb.Empty) (*RuntimeConfig, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetRuntimeConfig not implemented")
 }
-func (UnimplementedTargetLibServer) BuildConfig(context.Context, *BuildConfigRequest) (*SubscriptionConfig, error) {
-	return nil, status.Error(codes.Unimplemented, "method BuildConfig not implemented")
-}
-func (UnimplementedTargetLibServer) ApplyRuntimeSettings(context.Context, *BuildConfigRequest) (*OperationResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method ApplyRuntimeSettings not implemented")
+func (UnimplementedTargetLibServer) UpdateRuntimeConfig(context.Context, *UpdateRuntimeConfigRequest) (*RuntimeConfig, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateRuntimeConfig not implemented")
 }
 func (UnimplementedTargetLibServer) TestOutbound(context.Context, *TestOutboundRequest) (*LatencyTestResult, error) {
 	return nil, status.Error(codes.Unimplemented, "method TestOutbound not implemented")
@@ -649,26 +601,8 @@ func _TargetLib_GetCapabilities_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TargetLib_CheckConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ConfigRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TargetLibServer).CheckConfig(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TargetLib_CheckConfig_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TargetLibServer).CheckConfig(ctx, req.(*ConfigRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _TargetLib_Start_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(StartRequest)
+	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -680,31 +614,13 @@ func _TargetLib_Start_Handler(srv interface{}, ctx context.Context, dec func(int
 		FullMethod: TargetLib_Start_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TargetLibServer).Start(ctx, req.(*StartRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TargetLib_Reload_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ReloadRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TargetLibServer).Reload(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TargetLib_Reload_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TargetLibServer).Reload(ctx, req.(*ReloadRequest))
+		return srv.(TargetLibServer).Start(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _TargetLib_Restart_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RestartRequest)
+	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -716,7 +632,7 @@ func _TargetLib_Restart_Handler(srv interface{}, ctx context.Context, dec func(i
 		FullMethod: TargetLib_Restart_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TargetLibServer).Restart(ctx, req.(*RestartRequest))
+		return srv.(TargetLibServer).Restart(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -977,56 +893,38 @@ func _TargetLib_UpdateSubscription_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TargetLib_GetSubscriptionConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SubscriptionId)
+func _TargetLib_GetRuntimeConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TargetLibServer).GetSubscriptionConfig(ctx, in)
+		return srv.(TargetLibServer).GetRuntimeConfig(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: TargetLib_GetSubscriptionConfig_FullMethodName,
+		FullMethod: TargetLib_GetRuntimeConfig_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TargetLibServer).GetSubscriptionConfig(ctx, req.(*SubscriptionId))
+		return srv.(TargetLibServer).GetRuntimeConfig(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TargetLib_BuildConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(BuildConfigRequest)
+func _TargetLib_UpdateRuntimeConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateRuntimeConfigRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TargetLibServer).BuildConfig(ctx, in)
+		return srv.(TargetLibServer).UpdateRuntimeConfig(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: TargetLib_BuildConfig_FullMethodName,
+		FullMethod: TargetLib_UpdateRuntimeConfig_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TargetLibServer).BuildConfig(ctx, req.(*BuildConfigRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TargetLib_ApplyRuntimeSettings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(BuildConfigRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TargetLibServer).ApplyRuntimeSettings(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TargetLib_ApplyRuntimeSettings_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TargetLibServer).ApplyRuntimeSettings(ctx, req.(*BuildConfigRequest))
+		return srv.(TargetLibServer).UpdateRuntimeConfig(ctx, req.(*UpdateRuntimeConfigRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1159,16 +1057,8 @@ var TargetLib_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _TargetLib_GetCapabilities_Handler,
 		},
 		{
-			MethodName: "CheckConfig",
-			Handler:    _TargetLib_CheckConfig_Handler,
-		},
-		{
 			MethodName: "Start",
 			Handler:    _TargetLib_Start_Handler,
-		},
-		{
-			MethodName: "Reload",
-			Handler:    _TargetLib_Reload_Handler,
 		},
 		{
 			MethodName: "Restart",
@@ -1227,16 +1117,12 @@ var TargetLib_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _TargetLib_UpdateSubscription_Handler,
 		},
 		{
-			MethodName: "GetSubscriptionConfig",
-			Handler:    _TargetLib_GetSubscriptionConfig_Handler,
+			MethodName: "GetRuntimeConfig",
+			Handler:    _TargetLib_GetRuntimeConfig_Handler,
 		},
 		{
-			MethodName: "BuildConfig",
-			Handler:    _TargetLib_BuildConfig_Handler,
-		},
-		{
-			MethodName: "ApplyRuntimeSettings",
-			Handler:    _TargetLib_ApplyRuntimeSettings_Handler,
+			MethodName: "UpdateRuntimeConfig",
+			Handler:    _TargetLib_UpdateRuntimeConfig_Handler,
 		},
 		{
 			MethodName: "TestOutbound",

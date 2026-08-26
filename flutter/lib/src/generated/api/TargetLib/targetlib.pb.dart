@@ -439,288 +439,6 @@ class CapabilitiesResponse extends $pb.GeneratedMessage {
   void clearSubscriptionManagement() => $_clearField(5);
 }
 
-class ConfigRequest extends $pb.GeneratedMessage {
-  factory ConfigRequest({
-    $core.String? content,
-  }) {
-    final result = create();
-    if (content != null) result.content = content;
-    return result;
-  }
-
-  ConfigRequest._();
-
-  factory ConfigRequest.fromBuffer($core.List<$core.int> data,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
-  factory ConfigRequest.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'ConfigRequest',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'targetlib'),
-      createEmptyInstance: create)
-    ..aOS(1, _omitFieldNames ? '' : 'content')
-    ..hasRequiredFields = false;
-
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  ConfigRequest clone() => deepCopy();
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  ConfigRequest copyWith(void Function(ConfigRequest) updates) =>
-      super.copyWith((message) => updates(message as ConfigRequest))
-          as ConfigRequest;
-
-  @$core.override
-  $pb.BuilderInfo get info_ => _i;
-
-  @$core.pragma('dart2js:noInline')
-  static ConfigRequest create() => ConfigRequest._();
-  @$core.override
-  ConfigRequest createEmptyInstance() => create();
-  @$core.pragma('dart2js:noInline')
-  static ConfigRequest getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<ConfigRequest>(create);
-  static ConfigRequest? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  $core.String get content => $_getSZ(0);
-  @$pb.TagNumber(1)
-  set content($core.String value) => $_setString(0, value);
-  @$pb.TagNumber(1)
-  $core.bool hasContent() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearContent() => $_clearField(1);
-}
-
-class CheckConfigResponse extends $pb.GeneratedMessage {
-  factory CheckConfigResponse({
-    $core.bool? valid,
-    $core.String? formattedError,
-  }) {
-    final result = create();
-    if (valid != null) result.valid = valid;
-    if (formattedError != null) result.formattedError = formattedError;
-    return result;
-  }
-
-  CheckConfigResponse._();
-
-  factory CheckConfigResponse.fromBuffer($core.List<$core.int> data,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
-  factory CheckConfigResponse.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'CheckConfigResponse',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'targetlib'),
-      createEmptyInstance: create)
-    ..aOB(1, _omitFieldNames ? '' : 'valid')
-    ..aOS(2, _omitFieldNames ? '' : 'formattedError')
-    ..hasRequiredFields = false;
-
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  CheckConfigResponse clone() => deepCopy();
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  CheckConfigResponse copyWith(void Function(CheckConfigResponse) updates) =>
-      super.copyWith((message) => updates(message as CheckConfigResponse))
-          as CheckConfigResponse;
-
-  @$core.override
-  $pb.BuilderInfo get info_ => _i;
-
-  @$core.pragma('dart2js:noInline')
-  static CheckConfigResponse create() => CheckConfigResponse._();
-  @$core.override
-  CheckConfigResponse createEmptyInstance() => create();
-  @$core.pragma('dart2js:noInline')
-  static CheckConfigResponse getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<CheckConfigResponse>(create);
-  static CheckConfigResponse? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  $core.bool get valid => $_getBF(0);
-  @$pb.TagNumber(1)
-  set valid($core.bool value) => $_setBool(0, value);
-  @$pb.TagNumber(1)
-  $core.bool hasValid() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearValid() => $_clearField(1);
-
-  @$pb.TagNumber(2)
-  $core.String get formattedError => $_getSZ(1);
-  @$pb.TagNumber(2)
-  set formattedError($core.String value) => $_setString(1, value);
-  @$pb.TagNumber(2)
-  $core.bool hasFormattedError() => $_has(1);
-  @$pb.TagNumber(2)
-  void clearFormattedError() => $_clearField(2);
-}
-
-class StartRequest extends $pb.GeneratedMessage {
-  factory StartRequest({
-    $core.String? config,
-  }) {
-    final result = create();
-    if (config != null) result.config = config;
-    return result;
-  }
-
-  StartRequest._();
-
-  factory StartRequest.fromBuffer($core.List<$core.int> data,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
-  factory StartRequest.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'StartRequest',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'targetlib'),
-      createEmptyInstance: create)
-    ..aOS(1, _omitFieldNames ? '' : 'config')
-    ..hasRequiredFields = false;
-
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  StartRequest clone() => deepCopy();
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  StartRequest copyWith(void Function(StartRequest) updates) =>
-      super.copyWith((message) => updates(message as StartRequest))
-          as StartRequest;
-
-  @$core.override
-  $pb.BuilderInfo get info_ => _i;
-
-  @$core.pragma('dart2js:noInline')
-  static StartRequest create() => StartRequest._();
-  @$core.override
-  StartRequest createEmptyInstance() => create();
-  @$core.pragma('dart2js:noInline')
-  static StartRequest getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<StartRequest>(create);
-  static StartRequest? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  $core.String get config => $_getSZ(0);
-  @$pb.TagNumber(1)
-  set config($core.String value) => $_setString(0, value);
-  @$pb.TagNumber(1)
-  $core.bool hasConfig() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearConfig() => $_clearField(1);
-}
-
-class ReloadRequest extends $pb.GeneratedMessage {
-  factory ReloadRequest({
-    $core.String? config,
-  }) {
-    final result = create();
-    if (config != null) result.config = config;
-    return result;
-  }
-
-  ReloadRequest._();
-
-  factory ReloadRequest.fromBuffer($core.List<$core.int> data,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
-  factory ReloadRequest.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'ReloadRequest',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'targetlib'),
-      createEmptyInstance: create)
-    ..aOS(1, _omitFieldNames ? '' : 'config')
-    ..hasRequiredFields = false;
-
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  ReloadRequest clone() => deepCopy();
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  ReloadRequest copyWith(void Function(ReloadRequest) updates) =>
-      super.copyWith((message) => updates(message as ReloadRequest))
-          as ReloadRequest;
-
-  @$core.override
-  $pb.BuilderInfo get info_ => _i;
-
-  @$core.pragma('dart2js:noInline')
-  static ReloadRequest create() => ReloadRequest._();
-  @$core.override
-  ReloadRequest createEmptyInstance() => create();
-  @$core.pragma('dart2js:noInline')
-  static ReloadRequest getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<ReloadRequest>(create);
-  static ReloadRequest? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  $core.String get config => $_getSZ(0);
-  @$pb.TagNumber(1)
-  set config($core.String value) => $_setString(0, value);
-  @$pb.TagNumber(1)
-  $core.bool hasConfig() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearConfig() => $_clearField(1);
-}
-
-class RestartRequest extends $pb.GeneratedMessage {
-  factory RestartRequest({
-    $core.String? config,
-  }) {
-    final result = create();
-    if (config != null) result.config = config;
-    return result;
-  }
-
-  RestartRequest._();
-
-  factory RestartRequest.fromBuffer($core.List<$core.int> data,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
-  factory RestartRequest.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'RestartRequest',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'targetlib'),
-      createEmptyInstance: create)
-    ..aOS(1, _omitFieldNames ? '' : 'config')
-    ..hasRequiredFields = false;
-
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  RestartRequest clone() => deepCopy();
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  RestartRequest copyWith(void Function(RestartRequest) updates) =>
-      super.copyWith((message) => updates(message as RestartRequest))
-          as RestartRequest;
-
-  @$core.override
-  $pb.BuilderInfo get info_ => _i;
-
-  @$core.pragma('dart2js:noInline')
-  static RestartRequest create() => RestartRequest._();
-  @$core.override
-  RestartRequest createEmptyInstance() => create();
-  @$core.pragma('dart2js:noInline')
-  static RestartRequest getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<RestartRequest>(create);
-  static RestartRequest? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  $core.String get config => $_getSZ(0);
-  @$pb.TagNumber(1)
-  set config($core.String value) => $_setString(0, value);
-  @$pb.TagNumber(1)
-  $core.bool hasConfig() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearConfig() => $_clearField(1);
-}
-
 class OperationResponse extends $pb.GeneratedMessage {
   factory OperationResponse({
     ServiceState? state,
@@ -1407,7 +1125,7 @@ class SubscriptionView extends $pb.GeneratedMessage {
     $fixnum.Int64? updateIntervalSeconds,
     SubscriptionStatus? status,
     SubscriptionUpdateStage? stage,
-    $core.Iterable<SubscriptionNode>? nodes,
+    ProfileView? profile,
     $core.String? errorCode,
     $core.String? errorMessage,
     $fixnum.Int64? updatedAtUnixMs,
@@ -1431,7 +1149,7 @@ class SubscriptionView extends $pb.GeneratedMessage {
       result.updateIntervalSeconds = updateIntervalSeconds;
     if (status != null) result.status = status;
     if (stage != null) result.stage = stage;
-    if (nodes != null) result.nodes.addAll(nodes);
+    if (profile != null) result.profile = profile;
     if (errorCode != null) result.errorCode = errorCode;
     if (errorMessage != null) result.errorMessage = errorMessage;
     if (updatedAtUnixMs != null) result.updatedAtUnixMs = updatedAtUnixMs;
@@ -1472,8 +1190,8 @@ class SubscriptionView extends $pb.GeneratedMessage {
         enumValues: SubscriptionStatus.values)
     ..aE<SubscriptionUpdateStage>(8, _omitFieldNames ? '' : 'stage',
         enumValues: SubscriptionUpdateStage.values)
-    ..pPM<SubscriptionNode>(9, _omitFieldNames ? '' : 'nodes',
-        subBuilder: SubscriptionNode.create)
+    ..aOM<ProfileView>(9, _omitFieldNames ? '' : 'profile',
+        subBuilder: ProfileView.create)
     ..aOS(10, _omitFieldNames ? '' : 'errorCode')
     ..aOS(11, _omitFieldNames ? '' : 'errorMessage')
     ..aInt64(12, _omitFieldNames ? '' : 'updatedAtUnixMs')
@@ -1580,7 +1298,15 @@ class SubscriptionView extends $pb.GeneratedMessage {
   void clearStage() => $_clearField(8);
 
   @$pb.TagNumber(9)
-  $pb.PbList<SubscriptionNode> get nodes => $_getList(8);
+  ProfileView get profile => $_getN(8);
+  @$pb.TagNumber(9)
+  set profile(ProfileView value) => $_setField(9, value);
+  @$pb.TagNumber(9)
+  $core.bool hasProfile() => $_has(8);
+  @$pb.TagNumber(9)
+  void clearProfile() => $_clearField(9);
+  @$pb.TagNumber(9)
+  ProfileView ensureProfile() => $_ensure(8);
 
   @$pb.TagNumber(10)
   $core.String get errorCode => $_getSZ(9);
@@ -1692,83 +1418,178 @@ class SubscriptionView extends $pb.GeneratedMessage {
   void clearMovedPermanentlyTo() => $_clearField(21);
 }
 
-class SubscriptionNode extends $pb.GeneratedMessage {
-  factory SubscriptionNode({
-    $core.String? id,
-    $core.String? name,
-    $core.String? type,
-    $core.String? server,
-    $core.int? port,
-    $core.String? group,
-    $core.Iterable<$core.String>? groups,
-    SubscriptionNodePhase? phase,
-    $core.String? errorMessage,
+class ProfileView extends $pb.GeneratedMessage {
+  factory ProfileView({
+    $core.Iterable<ProfileNode>? nodes,
+    $core.Iterable<ProfileGroup>? groups,
+    $core.Iterable<ProfileObject>? customOutbounds,
+    $core.Iterable<ProfileObject>? customInbounds,
+    $core.int? routeRuleCount,
+    ProfileDns? dns,
   }) {
     final result = create();
-    if (id != null) result.id = id;
-    if (name != null) result.name = name;
-    if (type != null) result.type = type;
-    if (server != null) result.server = server;
-    if (port != null) result.port = port;
-    if (group != null) result.group = group;
+    if (nodes != null) result.nodes.addAll(nodes);
     if (groups != null) result.groups.addAll(groups);
-    if (phase != null) result.phase = phase;
-    if (errorMessage != null) result.errorMessage = errorMessage;
+    if (customOutbounds != null) result.customOutbounds.addAll(customOutbounds);
+    if (customInbounds != null) result.customInbounds.addAll(customInbounds);
+    if (routeRuleCount != null) result.routeRuleCount = routeRuleCount;
+    if (dns != null) result.dns = dns;
     return result;
   }
 
-  SubscriptionNode._();
+  ProfileView._();
 
-  factory SubscriptionNode.fromBuffer($core.List<$core.int> data,
+  factory ProfileView.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromBuffer(data, registry);
-  factory SubscriptionNode.fromJson($core.String json,
+  factory ProfileView.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'SubscriptionNode',
+      _omitMessageNames ? '' : 'ProfileView',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'targetlib'),
       createEmptyInstance: create)
-    ..aOS(1, _omitFieldNames ? '' : 'id')
-    ..aOS(2, _omitFieldNames ? '' : 'name')
-    ..aOS(3, _omitFieldNames ? '' : 'type')
-    ..aOS(4, _omitFieldNames ? '' : 'server')
-    ..aI(5, _omitFieldNames ? '' : 'port')
-    ..aOS(6, _omitFieldNames ? '' : 'group')
-    ..pPS(7, _omitFieldNames ? '' : 'groups')
-    ..aE<SubscriptionNodePhase>(8, _omitFieldNames ? '' : 'phase',
-        enumValues: SubscriptionNodePhase.values)
-    ..aOS(9, _omitFieldNames ? '' : 'errorMessage')
+    ..pPM<ProfileNode>(1, _omitFieldNames ? '' : 'nodes',
+        subBuilder: ProfileNode.create)
+    ..pPM<ProfileGroup>(2, _omitFieldNames ? '' : 'groups',
+        subBuilder: ProfileGroup.create)
+    ..pPM<ProfileObject>(3, _omitFieldNames ? '' : 'customOutbounds',
+        subBuilder: ProfileObject.create)
+    ..pPM<ProfileObject>(4, _omitFieldNames ? '' : 'customInbounds',
+        subBuilder: ProfileObject.create)
+    ..aI(5, _omitFieldNames ? '' : 'routeRuleCount',
+        fieldType: $pb.PbFieldType.OU3)
+    ..aOM<ProfileDns>(6, _omitFieldNames ? '' : 'dns',
+        subBuilder: ProfileDns.create)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  SubscriptionNode clone() => deepCopy();
+  ProfileView clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  SubscriptionNode copyWith(void Function(SubscriptionNode) updates) =>
-      super.copyWith((message) => updates(message as SubscriptionNode))
-          as SubscriptionNode;
+  ProfileView copyWith(void Function(ProfileView) updates) =>
+      super.copyWith((message) => updates(message as ProfileView))
+          as ProfileView;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
-  static SubscriptionNode create() => SubscriptionNode._();
+  static ProfileView create() => ProfileView._();
   @$core.override
-  SubscriptionNode createEmptyInstance() => create();
+  ProfileView createEmptyInstance() => create();
   @$core.pragma('dart2js:noInline')
-  static SubscriptionNode getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<SubscriptionNode>(create);
-  static SubscriptionNode? _defaultInstance;
+  static ProfileView getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ProfileView>(create);
+  static ProfileView? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.String get id => $_getSZ(0);
+  $pb.PbList<ProfileNode> get nodes => $_getList(0);
+
+  @$pb.TagNumber(2)
+  $pb.PbList<ProfileGroup> get groups => $_getList(1);
+
+  @$pb.TagNumber(3)
+  $pb.PbList<ProfileObject> get customOutbounds => $_getList(2);
+
+  @$pb.TagNumber(4)
+  $pb.PbList<ProfileObject> get customInbounds => $_getList(3);
+
+  @$pb.TagNumber(5)
+  $core.int get routeRuleCount => $_getIZ(4);
+  @$pb.TagNumber(5)
+  set routeRuleCount($core.int value) => $_setUnsignedInt32(4, value);
+  @$pb.TagNumber(5)
+  $core.bool hasRouteRuleCount() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearRouteRuleCount() => $_clearField(5);
+
+  @$pb.TagNumber(6)
+  ProfileDns get dns => $_getN(5);
+  @$pb.TagNumber(6)
+  set dns(ProfileDns value) => $_setField(6, value);
+  @$pb.TagNumber(6)
+  $core.bool hasDns() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearDns() => $_clearField(6);
+  @$pb.TagNumber(6)
+  ProfileDns ensureDns() => $_ensure(5);
+}
+
+class ProfileNode extends $pb.GeneratedMessage {
+  factory ProfileNode({
+    $core.String? tag,
+    $core.String? name,
+    $core.String? type,
+    $core.String? server,
+    $core.int? port,
+    $core.Iterable<$core.String>? groupTags,
+    ProfileNodePhase? phase,
+    $core.String? errorMessage,
+  }) {
+    final result = create();
+    if (tag != null) result.tag = tag;
+    if (name != null) result.name = name;
+    if (type != null) result.type = type;
+    if (server != null) result.server = server;
+    if (port != null) result.port = port;
+    if (groupTags != null) result.groupTags.addAll(groupTags);
+    if (phase != null) result.phase = phase;
+    if (errorMessage != null) result.errorMessage = errorMessage;
+    return result;
+  }
+
+  ProfileNode._();
+
+  factory ProfileNode.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory ProfileNode.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ProfileNode',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'targetlib'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'tag')
+    ..aOS(2, _omitFieldNames ? '' : 'name')
+    ..aOS(3, _omitFieldNames ? '' : 'type')
+    ..aOS(4, _omitFieldNames ? '' : 'server')
+    ..aI(5, _omitFieldNames ? '' : 'port')
+    ..pPS(6, _omitFieldNames ? '' : 'groupTags')
+    ..aE<ProfileNodePhase>(7, _omitFieldNames ? '' : 'phase',
+        enumValues: ProfileNodePhase.values)
+    ..aOS(8, _omitFieldNames ? '' : 'errorMessage')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ProfileNode clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ProfileNode copyWith(void Function(ProfileNode) updates) =>
+      super.copyWith((message) => updates(message as ProfileNode))
+          as ProfileNode;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static ProfileNode create() => ProfileNode._();
+  @$core.override
+  ProfileNode createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static ProfileNode getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ProfileNode>(create);
+  static ProfileNode? _defaultInstance;
+
   @$pb.TagNumber(1)
-  set id($core.String value) => $_setString(0, value);
+  $core.String get tag => $_getSZ(0);
   @$pb.TagNumber(1)
-  $core.bool hasId() => $_has(0);
+  set tag($core.String value) => $_setString(0, value);
   @$pb.TagNumber(1)
-  void clearId() => $_clearField(1);
+  $core.bool hasTag() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearTag() => $_clearField(1);
 
   @$pb.TagNumber(2)
   $core.String get name => $_getSZ(1);
@@ -1807,34 +1628,247 @@ class SubscriptionNode extends $pb.GeneratedMessage {
   void clearPort() => $_clearField(5);
 
   @$pb.TagNumber(6)
-  $core.String get group => $_getSZ(5);
-  @$pb.TagNumber(6)
-  set group($core.String value) => $_setString(5, value);
-  @$pb.TagNumber(6)
-  $core.bool hasGroup() => $_has(5);
-  @$pb.TagNumber(6)
-  void clearGroup() => $_clearField(6);
+  $pb.PbList<$core.String> get groupTags => $_getList(5);
 
   @$pb.TagNumber(7)
-  $pb.PbList<$core.String> get groups => $_getList(6);
+  ProfileNodePhase get phase => $_getN(6);
+  @$pb.TagNumber(7)
+  set phase(ProfileNodePhase value) => $_setField(7, value);
+  @$pb.TagNumber(7)
+  $core.bool hasPhase() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearPhase() => $_clearField(7);
 
   @$pb.TagNumber(8)
-  SubscriptionNodePhase get phase => $_getN(7);
+  $core.String get errorMessage => $_getSZ(7);
   @$pb.TagNumber(8)
-  set phase(SubscriptionNodePhase value) => $_setField(8, value);
+  set errorMessage($core.String value) => $_setString(7, value);
   @$pb.TagNumber(8)
-  $core.bool hasPhase() => $_has(7);
+  $core.bool hasErrorMessage() => $_has(7);
   @$pb.TagNumber(8)
-  void clearPhase() => $_clearField(8);
+  void clearErrorMessage() => $_clearField(8);
+}
 
-  @$pb.TagNumber(9)
-  $core.String get errorMessage => $_getSZ(8);
-  @$pb.TagNumber(9)
-  set errorMessage($core.String value) => $_setString(8, value);
-  @$pb.TagNumber(9)
-  $core.bool hasErrorMessage() => $_has(8);
-  @$pb.TagNumber(9)
-  void clearErrorMessage() => $_clearField(9);
+class ProfileGroup extends $pb.GeneratedMessage {
+  factory ProfileGroup({
+    $core.String? tag,
+    $core.String? type,
+    $core.Iterable<$core.String>? memberTags,
+    $core.String? defaultTag,
+  }) {
+    final result = create();
+    if (tag != null) result.tag = tag;
+    if (type != null) result.type = type;
+    if (memberTags != null) result.memberTags.addAll(memberTags);
+    if (defaultTag != null) result.defaultTag = defaultTag;
+    return result;
+  }
+
+  ProfileGroup._();
+
+  factory ProfileGroup.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory ProfileGroup.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ProfileGroup',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'targetlib'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'tag')
+    ..aOS(2, _omitFieldNames ? '' : 'type')
+    ..pPS(3, _omitFieldNames ? '' : 'memberTags')
+    ..aOS(4, _omitFieldNames ? '' : 'defaultTag')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ProfileGroup clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ProfileGroup copyWith(void Function(ProfileGroup) updates) =>
+      super.copyWith((message) => updates(message as ProfileGroup))
+          as ProfileGroup;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static ProfileGroup create() => ProfileGroup._();
+  @$core.override
+  ProfileGroup createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static ProfileGroup getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ProfileGroup>(create);
+  static ProfileGroup? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get tag => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set tag($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasTag() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearTag() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get type => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set type($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasType() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearType() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $pb.PbList<$core.String> get memberTags => $_getList(2);
+
+  @$pb.TagNumber(4)
+  $core.String get defaultTag => $_getSZ(3);
+  @$pb.TagNumber(4)
+  set defaultTag($core.String value) => $_setString(3, value);
+  @$pb.TagNumber(4)
+  $core.bool hasDefaultTag() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearDefaultTag() => $_clearField(4);
+}
+
+class ProfileObject extends $pb.GeneratedMessage {
+  factory ProfileObject({
+    $core.String? tag,
+    $core.String? type,
+  }) {
+    final result = create();
+    if (tag != null) result.tag = tag;
+    if (type != null) result.type = type;
+    return result;
+  }
+
+  ProfileObject._();
+
+  factory ProfileObject.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory ProfileObject.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ProfileObject',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'targetlib'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'tag')
+    ..aOS(2, _omitFieldNames ? '' : 'type')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ProfileObject clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ProfileObject copyWith(void Function(ProfileObject) updates) =>
+      super.copyWith((message) => updates(message as ProfileObject))
+          as ProfileObject;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static ProfileObject create() => ProfileObject._();
+  @$core.override
+  ProfileObject createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static ProfileObject getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ProfileObject>(create);
+  static ProfileObject? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get tag => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set tag($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasTag() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearTag() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get type => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set type($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasType() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearType() => $_clearField(2);
+}
+
+class ProfileDns extends $pb.GeneratedMessage {
+  factory ProfileDns({
+    $core.Iterable<ProfileObject>? servers,
+    $core.int? ruleCount,
+    $core.String? finalServer,
+  }) {
+    final result = create();
+    if (servers != null) result.servers.addAll(servers);
+    if (ruleCount != null) result.ruleCount = ruleCount;
+    if (finalServer != null) result.finalServer = finalServer;
+    return result;
+  }
+
+  ProfileDns._();
+
+  factory ProfileDns.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory ProfileDns.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ProfileDns',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'targetlib'),
+      createEmptyInstance: create)
+    ..pPM<ProfileObject>(1, _omitFieldNames ? '' : 'servers',
+        subBuilder: ProfileObject.create)
+    ..aI(2, _omitFieldNames ? '' : 'ruleCount', fieldType: $pb.PbFieldType.OU3)
+    ..aOS(3, _omitFieldNames ? '' : 'finalServer')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ProfileDns clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ProfileDns copyWith(void Function(ProfileDns) updates) =>
+      super.copyWith((message) => updates(message as ProfileDns)) as ProfileDns;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static ProfileDns create() => ProfileDns._();
+  @$core.override
+  ProfileDns createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static ProfileDns getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ProfileDns>(create);
+  static ProfileDns? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $pb.PbList<ProfileObject> get servers => $_getList(0);
+
+  @$pb.TagNumber(2)
+  $core.int get ruleCount => $_getIZ(1);
+  @$pb.TagNumber(2)
+  set ruleCount($core.int value) => $_setUnsignedInt32(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasRuleCount() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearRuleCount() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get finalServer => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set finalServer($core.String value) => $_setString(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasFinalServer() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearFinalServer() => $_clearField(3);
 }
 
 class SubscriptionUpdateResult extends $pb.GeneratedMessage {
@@ -1932,68 +1966,12 @@ class SubscriptionUpdateResult extends $pb.GeneratedMessage {
   void clearDurationMilliseconds() => $_clearField(4);
 }
 
-class SubscriptionConfig extends $pb.GeneratedMessage {
-  factory SubscriptionConfig({
-    $core.List<$core.int>? content,
-  }) {
-    final result = create();
-    if (content != null) result.content = content;
-    return result;
-  }
-
-  SubscriptionConfig._();
-
-  factory SubscriptionConfig.fromBuffer($core.List<$core.int> data,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
-  factory SubscriptionConfig.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'SubscriptionConfig',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'targetlib'),
-      createEmptyInstance: create)
-    ..a<$core.List<$core.int>>(
-        1, _omitFieldNames ? '' : 'content', $pb.PbFieldType.OY)
-    ..hasRequiredFields = false;
-
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  SubscriptionConfig clone() => deepCopy();
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  SubscriptionConfig copyWith(void Function(SubscriptionConfig) updates) =>
-      super.copyWith((message) => updates(message as SubscriptionConfig))
-          as SubscriptionConfig;
-
-  @$core.override
-  $pb.BuilderInfo get info_ => _i;
-
-  @$core.pragma('dart2js:noInline')
-  static SubscriptionConfig create() => SubscriptionConfig._();
-  @$core.override
-  SubscriptionConfig createEmptyInstance() => create();
-  @$core.pragma('dart2js:noInline')
-  static SubscriptionConfig getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<SubscriptionConfig>(create);
-  static SubscriptionConfig? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  $core.List<$core.int> get content => $_getN(0);
-  @$pb.TagNumber(1)
-  set content($core.List<$core.int> value) => $_setBytes(0, value);
-  @$pb.TagNumber(1)
-  $core.bool hasContent() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearContent() => $_clearField(1);
-}
-
-class BuildConfigSettings extends $pb.GeneratedMessage {
-  factory BuildConfigSettings({
+class RuntimeSettings extends $pb.GeneratedMessage {
+  factory RuntimeSettings({
     $core.String? listenAddress,
     $core.int? mixedPort,
     ProxyMode? proxyMode,
     $core.bool? ipv6,
-    $core.String? cacheFilePath,
     RouteMode? routeMode,
   }) {
     final result = create();
@@ -2001,52 +1979,50 @@ class BuildConfigSettings extends $pb.GeneratedMessage {
     if (mixedPort != null) result.mixedPort = mixedPort;
     if (proxyMode != null) result.proxyMode = proxyMode;
     if (ipv6 != null) result.ipv6 = ipv6;
-    if (cacheFilePath != null) result.cacheFilePath = cacheFilePath;
     if (routeMode != null) result.routeMode = routeMode;
     return result;
   }
 
-  BuildConfigSettings._();
+  RuntimeSettings._();
 
-  factory BuildConfigSettings.fromBuffer($core.List<$core.int> data,
+  factory RuntimeSettings.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromBuffer(data, registry);
-  factory BuildConfigSettings.fromJson($core.String json,
+  factory RuntimeSettings.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'BuildConfigSettings',
+      _omitMessageNames ? '' : 'RuntimeSettings',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'targetlib'),
       createEmptyInstance: create)
     ..aOS(1, _omitFieldNames ? '' : 'listenAddress')
     ..aI(2, _omitFieldNames ? '' : 'mixedPort', fieldType: $pb.PbFieldType.OU3)
     ..aE<ProxyMode>(3, _omitFieldNames ? '' : 'proxyMode',
         enumValues: ProxyMode.values)
-    ..aOB(5, _omitFieldNames ? '' : 'ipv6')
-    ..aOS(6, _omitFieldNames ? '' : 'cacheFilePath')
-    ..aE<RouteMode>(7, _omitFieldNames ? '' : 'routeMode',
+    ..aOB(4, _omitFieldNames ? '' : 'ipv6')
+    ..aE<RouteMode>(5, _omitFieldNames ? '' : 'routeMode',
         enumValues: RouteMode.values)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  BuildConfigSettings clone() => deepCopy();
+  RuntimeSettings clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  BuildConfigSettings copyWith(void Function(BuildConfigSettings) updates) =>
-      super.copyWith((message) => updates(message as BuildConfigSettings))
-          as BuildConfigSettings;
+  RuntimeSettings copyWith(void Function(RuntimeSettings) updates) =>
+      super.copyWith((message) => updates(message as RuntimeSettings))
+          as RuntimeSettings;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
-  static BuildConfigSettings create() => BuildConfigSettings._();
+  static RuntimeSettings create() => RuntimeSettings._();
   @$core.override
-  BuildConfigSettings createEmptyInstance() => create();
+  RuntimeSettings createEmptyInstance() => create();
   @$core.pragma('dart2js:noInline')
-  static BuildConfigSettings getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<BuildConfigSettings>(create);
-  static BuildConfigSettings? _defaultInstance;
+  static RuntimeSettings getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<RuntimeSettings>(create);
+  static RuntimeSettings? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.String get listenAddress => $_getSZ(0);
@@ -2075,133 +2051,139 @@ class BuildConfigSettings extends $pb.GeneratedMessage {
   @$pb.TagNumber(3)
   void clearProxyMode() => $_clearField(3);
 
-  @$pb.TagNumber(5)
+  @$pb.TagNumber(4)
   $core.bool get ipv6 => $_getBF(3);
-  @$pb.TagNumber(5)
+  @$pb.TagNumber(4)
   set ipv6($core.bool value) => $_setBool(3, value);
-  @$pb.TagNumber(5)
+  @$pb.TagNumber(4)
   $core.bool hasIpv6() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearIpv6() => $_clearField(4);
+
   @$pb.TagNumber(5)
-  void clearIpv6() => $_clearField(5);
-
-  @$pb.TagNumber(6)
-  $core.String get cacheFilePath => $_getSZ(4);
-  @$pb.TagNumber(6)
-  set cacheFilePath($core.String value) => $_setString(4, value);
-  @$pb.TagNumber(6)
-  $core.bool hasCacheFilePath() => $_has(4);
-  @$pb.TagNumber(6)
-  void clearCacheFilePath() => $_clearField(6);
-
-  @$pb.TagNumber(7)
-  RouteMode get routeMode => $_getN(5);
-  @$pb.TagNumber(7)
-  set routeMode(RouteMode value) => $_setField(7, value);
-  @$pb.TagNumber(7)
-  $core.bool hasRouteMode() => $_has(5);
-  @$pb.TagNumber(7)
-  void clearRouteMode() => $_clearField(7);
+  RouteMode get routeMode => $_getN(4);
+  @$pb.TagNumber(5)
+  set routeMode(RouteMode value) => $_setField(5, value);
+  @$pb.TagNumber(5)
+  $core.bool hasRouteMode() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearRouteMode() => $_clearField(5);
 }
 
-enum BuildConfigRequest_Source { subscriptionId, rawConfig, notSet }
-
-class BuildConfigRequest extends $pb.GeneratedMessage {
-  factory BuildConfigRequest({
-    BuildConfigSettings? settings,
-    $core.String? subscriptionId,
-    $core.List<$core.int>? rawConfig,
+class RuntimeConfig extends $pb.GeneratedMessage {
+  factory RuntimeConfig({
+    RuntimeSettings? settings,
   }) {
     final result = create();
     if (settings != null) result.settings = settings;
-    if (subscriptionId != null) result.subscriptionId = subscriptionId;
-    if (rawConfig != null) result.rawConfig = rawConfig;
     return result;
   }
 
-  BuildConfigRequest._();
+  RuntimeConfig._();
 
-  factory BuildConfigRequest.fromBuffer($core.List<$core.int> data,
+  factory RuntimeConfig.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromBuffer(data, registry);
-  factory BuildConfigRequest.fromJson($core.String json,
+  factory RuntimeConfig.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromJson(json, registry);
 
-  static const $core.Map<$core.int, BuildConfigRequest_Source>
-      _BuildConfigRequest_SourceByTag = {
-    2: BuildConfigRequest_Source.subscriptionId,
-    3: BuildConfigRequest_Source.rawConfig,
-    0: BuildConfigRequest_Source.notSet
-  };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'BuildConfigRequest',
+      _omitMessageNames ? '' : 'RuntimeConfig',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'targetlib'),
       createEmptyInstance: create)
-    ..oo(0, [2, 3])
-    ..aOM<BuildConfigSettings>(1, _omitFieldNames ? '' : 'settings',
-        subBuilder: BuildConfigSettings.create)
-    ..aOS(2, _omitFieldNames ? '' : 'subscriptionId')
-    ..a<$core.List<$core.int>>(
-        3, _omitFieldNames ? '' : 'rawConfig', $pb.PbFieldType.OY)
+    ..aOM<RuntimeSettings>(1, _omitFieldNames ? '' : 'settings',
+        subBuilder: RuntimeSettings.create)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  BuildConfigRequest clone() => deepCopy();
+  RuntimeConfig clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  BuildConfigRequest copyWith(void Function(BuildConfigRequest) updates) =>
-      super.copyWith((message) => updates(message as BuildConfigRequest))
-          as BuildConfigRequest;
+  RuntimeConfig copyWith(void Function(RuntimeConfig) updates) =>
+      super.copyWith((message) => updates(message as RuntimeConfig))
+          as RuntimeConfig;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
-  static BuildConfigRequest create() => BuildConfigRequest._();
+  static RuntimeConfig create() => RuntimeConfig._();
   @$core.override
-  BuildConfigRequest createEmptyInstance() => create();
+  RuntimeConfig createEmptyInstance() => create();
   @$core.pragma('dart2js:noInline')
-  static BuildConfigRequest getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<BuildConfigRequest>(create);
-  static BuildConfigRequest? _defaultInstance;
-
-  @$pb.TagNumber(2)
-  @$pb.TagNumber(3)
-  BuildConfigRequest_Source whichSource() =>
-      _BuildConfigRequest_SourceByTag[$_whichOneof(0)]!;
-  @$pb.TagNumber(2)
-  @$pb.TagNumber(3)
-  void clearSource() => $_clearField($_whichOneof(0));
+  static RuntimeConfig getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<RuntimeConfig>(create);
+  static RuntimeConfig? _defaultInstance;
 
   @$pb.TagNumber(1)
-  BuildConfigSettings get settings => $_getN(0);
+  RuntimeSettings get settings => $_getN(0);
   @$pb.TagNumber(1)
-  set settings(BuildConfigSettings value) => $_setField(1, value);
+  set settings(RuntimeSettings value) => $_setField(1, value);
   @$pb.TagNumber(1)
   $core.bool hasSettings() => $_has(0);
   @$pb.TagNumber(1)
   void clearSettings() => $_clearField(1);
   @$pb.TagNumber(1)
-  BuildConfigSettings ensureSettings() => $_ensure(0);
+  RuntimeSettings ensureSettings() => $_ensure(0);
+}
 
-  /// 基于订阅中间态节点合成配置（urltest/selector 包装 + 应用入站主权）。
-  @$pb.TagNumber(2)
-  $core.String get subscriptionId => $_getSZ(1);
-  @$pb.TagNumber(2)
-  set subscriptionId($core.String value) => $_setString(1, value);
-  @$pb.TagNumber(2)
-  $core.bool hasSubscriptionId() => $_has(1);
-  @$pb.TagNumber(2)
-  void clearSubscriptionId() => $_clearField(2);
+class UpdateRuntimeConfigRequest extends $pb.GeneratedMessage {
+  factory UpdateRuntimeConfigRequest({
+    RuntimeSettings? settings,
+  }) {
+    final result = create();
+    if (settings != null) result.settings = settings;
+    return result;
+  }
 
-  /// 透传原始配置：替换 inbounds、迁移遗留写法、注入 cache_file。
-  @$pb.TagNumber(3)
-  $core.List<$core.int> get rawConfig => $_getN(2);
-  @$pb.TagNumber(3)
-  set rawConfig($core.List<$core.int> value) => $_setBytes(2, value);
-  @$pb.TagNumber(3)
-  $core.bool hasRawConfig() => $_has(2);
-  @$pb.TagNumber(3)
-  void clearRawConfig() => $_clearField(3);
+  UpdateRuntimeConfigRequest._();
+
+  factory UpdateRuntimeConfigRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory UpdateRuntimeConfigRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'UpdateRuntimeConfigRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'targetlib'),
+      createEmptyInstance: create)
+    ..aOM<RuntimeSettings>(1, _omitFieldNames ? '' : 'settings',
+        subBuilder: RuntimeSettings.create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  UpdateRuntimeConfigRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  UpdateRuntimeConfigRequest copyWith(
+          void Function(UpdateRuntimeConfigRequest) updates) =>
+      super.copyWith(
+              (message) => updates(message as UpdateRuntimeConfigRequest))
+          as UpdateRuntimeConfigRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static UpdateRuntimeConfigRequest create() => UpdateRuntimeConfigRequest._();
+  @$core.override
+  UpdateRuntimeConfigRequest createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static UpdateRuntimeConfigRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<UpdateRuntimeConfigRequest>(create);
+  static UpdateRuntimeConfigRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  RuntimeSettings get settings => $_getN(0);
+  @$pb.TagNumber(1)
+  set settings(RuntimeSettings value) => $_setField(1, value);
+  @$pb.TagNumber(1)
+  $core.bool hasSettings() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSettings() => $_clearField(1);
+  @$pb.TagNumber(1)
+  RuntimeSettings ensureSettings() => $_ensure(0);
 }
 
 class TestOutboundRequest extends $pb.GeneratedMessage {
@@ -2550,8 +2532,8 @@ class SetActiveSubscriptionRequest extends $pb.GeneratedMessage {
       $pb.GeneratedMessage.$_defaultFor<SetActiveSubscriptionRequest>(create);
   static SetActiveSubscriptionRequest? _defaultInstance;
 
-  /// Empty id clears the active subscription (backend falls back to the
-  /// default direct-only configuration).
+  /// Empty id clears the active subscription and selects the explicit
+  /// direct-only runtime configuration.
   @$pb.TagNumber(1)
   $core.String get id => $_getSZ(0);
   @$pb.TagNumber(1)

@@ -17,8 +17,8 @@ func (r netResolver) LookupNetIP(ctx context.Context, network, host string) ([]n
 	return r.resolver.LookupNetIP(ctx, network, host)
 }
 
-// ResolveEndpoints returns concrete proxy server addresses. Platform code can
-// translate these addresses into routes, VPN exclusions, or socket protection.
+// ResolveEndpoints 返回具体的代理服务器地址；平台代码可将其转换为路由、VPN 排除项
+// 或 socket 保护规则。
 func ResolveEndpoints(ctx context.Context, resolver Resolver, nodes []Node) []string {
 	set := make(map[string]struct{})
 	for _, node := range nodes {

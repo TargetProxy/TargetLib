@@ -1,17 +1,17 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-  package="top.loafman.targetlib">
-  <uses-permission android:name="android.permission.INTERNET" />
-  <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-  <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED" />
-  <application>
-    <service
-      android:name=".TargetlibVpnService"
-      android:permission="android.permission.BIND_VPN_SERVICE"
-      android:foregroundServiceType="systemExempted"
-      android:exported="false">
-      <intent-filter>
-        <action android:name="android.net.VpnService" />
-      </intent-filter>
-    </service>
-  </application>
+          package="top.loafman.targetlib">
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED"/>
+    <application>
+        <service
+                android:name=".TargetlibVpnService"
+                android:permission="android.permission.BIND_VPN_SERVICE"
+                android:foregroundServiceType="systemExempted"
+                android:exported="false">
+            <intent-filter>
+                <action android:name="android.net.VpnService"/>
+            </intent-filter>
+        </service>
+    </application>
 </manifest>

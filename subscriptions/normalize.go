@@ -6,8 +6,7 @@ import (
 	"strings"
 )
 
-// nestedURLKeys are the query parameter names that commonly carry the real
-// subscription URL inside client import links (clash://, quantumult-x://...).
+// nestedURLKeys 是客户端导入链接（clash://、quantumult-x:// 等）中常见的真实订阅 URL 参数名。
 var nestedURLKeys = []string{
 	"url", "uri", "link", "subscription", "sub", "subscribe",
 	"remote-resource", "config", "target", "u",
@@ -20,14 +19,11 @@ var (
 	urlDecorations            = regexp.MustCompile(`^<+|>+$`)
 )
 
-// maxNormalizeDepth bounds recursion on nested/encoded inputs so hostile
-// payloads cannot induce unbounded work.
+// maxNormalizeDepth 限制嵌套或编码输入的递归深度，避免恶意载荷导致无界工作量。
 const maxNormalizeDepth = 8
 
-// NormalizeSubscriptionURL extracts a canonical subscription URL from raw
-// user input: nested import links, multi-layer percent-encoding, base64-free
-// decorations and embedded URLs are unwrapped before validation. It mirrors
-// the normalization the desktop client used to perform before AddSubscription.
+// NormalizeSubscriptionURL 从用户原始输入中提取规范订阅 URL：验证前会展开嵌套导入链接、
+// 多层百分号编码、无 base64 装饰和内嵌 URL，与桌面端 AddSubscription 前的行为一致。
 func NormalizeSubscriptionURL(input string) (string, error) {
 	normalized, ok := normalizeSubscriptionURL(input, 0)
 	if !ok {
@@ -61,9 +57,7 @@ func normalizeSubscriptionURL(input string, depth int) (string, bool) {
 				return normalized, true
 			}
 		}
-		// Go already percent-decodes Fragment once during Parse; decode a
-		// second time to match the legacy client behavior of decoding the
-		// already-decoded fragment component again.
+		// Parse 已对 Fragment 做过一次百分号解码；再次解码以兼容旧客户端行为。
 		if parsed.Fragment != "" {
 			if decoded, err := url.PathUnescape(parsed.Fragment); err == nil {
 				if normalized, ok := normalizeSubscriptionURL(decoded, depth+1); ok {

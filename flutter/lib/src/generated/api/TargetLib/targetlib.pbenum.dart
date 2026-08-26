@@ -240,38 +240,35 @@ class SubscriptionUpdateStage extends $pb.ProtobufEnum {
   const SubscriptionUpdateStage._(super.value, super.name);
 }
 
-class SubscriptionNodePhase extends $pb.ProtobufEnum {
-  static const SubscriptionNodePhase SUBSCRIPTION_NODE_PHASE_UNSPECIFIED =
-      SubscriptionNodePhase._(
-          0, _omitEnumNames ? '' : 'SUBSCRIPTION_NODE_PHASE_UNSPECIFIED');
-  static const SubscriptionNodePhase SUBSCRIPTION_NODE_PHASE_DISCOVERED =
-      SubscriptionNodePhase._(
-          1, _omitEnumNames ? '' : 'SUBSCRIPTION_NODE_PHASE_DISCOVERED');
-  static const SubscriptionNodePhase SUBSCRIPTION_NODE_PHASE_NORMALIZED =
-      SubscriptionNodePhase._(
-          2, _omitEnumNames ? '' : 'SUBSCRIPTION_NODE_PHASE_NORMALIZED');
-  static const SubscriptionNodePhase SUBSCRIPTION_NODE_PHASE_READY =
-      SubscriptionNodePhase._(
-          3, _omitEnumNames ? '' : 'SUBSCRIPTION_NODE_PHASE_READY');
-  static const SubscriptionNodePhase SUBSCRIPTION_NODE_PHASE_FAILED =
-      SubscriptionNodePhase._(
-          4, _omitEnumNames ? '' : 'SUBSCRIPTION_NODE_PHASE_FAILED');
+class ProfileNodePhase extends $pb.ProtobufEnum {
+  static const ProfileNodePhase PROFILE_NODE_PHASE_UNSPECIFIED =
+      ProfileNodePhase._(
+          0, _omitEnumNames ? '' : 'PROFILE_NODE_PHASE_UNSPECIFIED');
+  static const ProfileNodePhase PROFILE_NODE_PHASE_DISCOVERED =
+      ProfileNodePhase._(
+          1, _omitEnumNames ? '' : 'PROFILE_NODE_PHASE_DISCOVERED');
+  static const ProfileNodePhase PROFILE_NODE_PHASE_NORMALIZED =
+      ProfileNodePhase._(
+          2, _omitEnumNames ? '' : 'PROFILE_NODE_PHASE_NORMALIZED');
+  static const ProfileNodePhase PROFILE_NODE_PHASE_READY =
+      ProfileNodePhase._(3, _omitEnumNames ? '' : 'PROFILE_NODE_PHASE_READY');
+  static const ProfileNodePhase PROFILE_NODE_PHASE_FAILED =
+      ProfileNodePhase._(4, _omitEnumNames ? '' : 'PROFILE_NODE_PHASE_FAILED');
 
-  static const $core.List<SubscriptionNodePhase> values =
-      <SubscriptionNodePhase>[
-    SUBSCRIPTION_NODE_PHASE_UNSPECIFIED,
-    SUBSCRIPTION_NODE_PHASE_DISCOVERED,
-    SUBSCRIPTION_NODE_PHASE_NORMALIZED,
-    SUBSCRIPTION_NODE_PHASE_READY,
-    SUBSCRIPTION_NODE_PHASE_FAILED,
+  static const $core.List<ProfileNodePhase> values = <ProfileNodePhase>[
+    PROFILE_NODE_PHASE_UNSPECIFIED,
+    PROFILE_NODE_PHASE_DISCOVERED,
+    PROFILE_NODE_PHASE_NORMALIZED,
+    PROFILE_NODE_PHASE_READY,
+    PROFILE_NODE_PHASE_FAILED,
   ];
 
-  static final $core.List<SubscriptionNodePhase?> _byValue =
+  static final $core.List<ProfileNodePhase?> _byValue =
       $pb.ProtobufEnum.$_initByValueList(values, 4);
-  static SubscriptionNodePhase? valueOf($core.int value) =>
+  static ProfileNodePhase? valueOf($core.int value) =>
       value < 0 || value >= _byValue.length ? null : _byValue[value];
 
-  const SubscriptionNodePhase._(super.value, super.name);
+  const ProfileNodePhase._(super.value, super.name);
 }
 
 class SubscriptionEventType extends $pb.ProtobufEnum {

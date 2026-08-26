@@ -47,29 +47,15 @@ class TargetLibClient extends $grpc.Client {
     return $createUnaryCall(_$getCapabilities, request, options: options);
   }
 
-  $grpc.ResponseFuture<$1.CheckConfigResponse> checkConfig(
-    $1.ConfigRequest request, {
-    $grpc.CallOptions? options,
-  }) {
-    return $createUnaryCall(_$checkConfig, request, options: options);
-  }
-
   $grpc.ResponseFuture<$1.OperationResponse> start(
-    $1.StartRequest request, {
+    $0.Empty request, {
     $grpc.CallOptions? options,
   }) {
     return $createUnaryCall(_$start, request, options: options);
   }
 
-  $grpc.ResponseFuture<$1.OperationResponse> reload(
-    $1.ReloadRequest request, {
-    $grpc.CallOptions? options,
-  }) {
-    return $createUnaryCall(_$reload, request, options: options);
-  }
-
   $grpc.ResponseFuture<$1.OperationResponse> restart(
-    $1.RestartRequest request, {
+    $0.Empty request, {
     $grpc.CallOptions? options,
   }) {
     return $createUnaryCall(_$restart, request, options: options);
@@ -186,28 +172,21 @@ class TargetLibClient extends $grpc.Client {
     return $createUnaryCall(_$updateSubscription, request, options: options);
   }
 
-  $grpc.ResponseFuture<$1.SubscriptionConfig> getSubscriptionConfig(
-    $1.SubscriptionId request, {
+  /// Returns the backend-owned desired runtime configuration.
+  $grpc.ResponseFuture<$1.RuntimeConfig> getRuntimeConfig(
+    $0.Empty request, {
     $grpc.CallOptions? options,
   }) {
-    return $createUnaryCall(_$getSubscriptionConfig, request, options: options);
+    return $createUnaryCall(_$getRuntimeConfig, request, options: options);
   }
 
-  $grpc.ResponseFuture<$1.SubscriptionConfig> buildConfig(
-    $1.BuildConfigRequest request, {
+  /// Validates and persists the desired configuration. If the core is running,
+  /// it is reloaded immediately; otherwise it is used on the next start.
+  $grpc.ResponseFuture<$1.RuntimeConfig> updateRuntimeConfig(
+    $1.UpdateRuntimeConfigRequest request, {
     $grpc.CallOptions? options,
   }) {
-    return $createUnaryCall(_$buildConfig, request, options: options);
-  }
-
-  /// Atomically builds, validates, and applies a runtime configuration. When
-  /// the service is already running, a failed reload restores the last known
-  /// good configuration before returning an error.
-  $grpc.ResponseFuture<$1.OperationResponse> applyRuntimeSettings(
-    $1.BuildConfigRequest request, {
-    $grpc.CallOptions? options,
-  }) {
-    return $createUnaryCall(_$applyRuntimeSettings, request, options: options);
+    return $createUnaryCall(_$updateRuntimeConfig, request, options: options);
   }
 
   $grpc.ResponseFuture<$1.LatencyTestResult> testOutbound(
@@ -276,26 +255,14 @@ class TargetLibClient extends $grpc.Client {
           '/targetlib.TargetLib/GetCapabilities',
           ($0.Empty value) => value.writeToBuffer(),
           $1.CapabilitiesResponse.fromBuffer);
-  static final _$checkConfig =
-      $grpc.ClientMethod<$1.ConfigRequest, $1.CheckConfigResponse>(
-          '/targetlib.TargetLib/CheckConfig',
-          ($1.ConfigRequest value) => value.writeToBuffer(),
-          $1.CheckConfigResponse.fromBuffer);
-  static final _$start =
-      $grpc.ClientMethod<$1.StartRequest, $1.OperationResponse>(
-          '/targetlib.TargetLib/Start',
-          ($1.StartRequest value) => value.writeToBuffer(),
-          $1.OperationResponse.fromBuffer);
-  static final _$reload =
-      $grpc.ClientMethod<$1.ReloadRequest, $1.OperationResponse>(
-          '/targetlib.TargetLib/Reload',
-          ($1.ReloadRequest value) => value.writeToBuffer(),
-          $1.OperationResponse.fromBuffer);
-  static final _$restart =
-      $grpc.ClientMethod<$1.RestartRequest, $1.OperationResponse>(
-          '/targetlib.TargetLib/Restart',
-          ($1.RestartRequest value) => value.writeToBuffer(),
-          $1.OperationResponse.fromBuffer);
+  static final _$start = $grpc.ClientMethod<$0.Empty, $1.OperationResponse>(
+      '/targetlib.TargetLib/Start',
+      ($0.Empty value) => value.writeToBuffer(),
+      $1.OperationResponse.fromBuffer);
+  static final _$restart = $grpc.ClientMethod<$0.Empty, $1.OperationResponse>(
+      '/targetlib.TargetLib/Restart',
+      ($0.Empty value) => value.writeToBuffer(),
+      $1.OperationResponse.fromBuffer);
   static final _$stop = $grpc.ClientMethod<$0.Empty, $1.OperationResponse>(
       '/targetlib.TargetLib/Stop',
       ($0.Empty value) => value.writeToBuffer(),
@@ -366,21 +333,16 @@ class TargetLibClient extends $grpc.Client {
           '/targetlib.TargetLib/UpdateSubscription',
           ($1.SubscriptionId value) => value.writeToBuffer(),
           $1.SubscriptionUpdateResult.fromBuffer);
-  static final _$getSubscriptionConfig =
-      $grpc.ClientMethod<$1.SubscriptionId, $1.SubscriptionConfig>(
-          '/targetlib.TargetLib/GetSubscriptionConfig',
-          ($1.SubscriptionId value) => value.writeToBuffer(),
-          $1.SubscriptionConfig.fromBuffer);
-  static final _$buildConfig =
-      $grpc.ClientMethod<$1.BuildConfigRequest, $1.SubscriptionConfig>(
-          '/targetlib.TargetLib/BuildConfig',
-          ($1.BuildConfigRequest value) => value.writeToBuffer(),
-          $1.SubscriptionConfig.fromBuffer);
-  static final _$applyRuntimeSettings =
-      $grpc.ClientMethod<$1.BuildConfigRequest, $1.OperationResponse>(
-          '/targetlib.TargetLib/ApplyRuntimeSettings',
-          ($1.BuildConfigRequest value) => value.writeToBuffer(),
-          $1.OperationResponse.fromBuffer);
+  static final _$getRuntimeConfig =
+      $grpc.ClientMethod<$0.Empty, $1.RuntimeConfig>(
+          '/targetlib.TargetLib/GetRuntimeConfig',
+          ($0.Empty value) => value.writeToBuffer(),
+          $1.RuntimeConfig.fromBuffer);
+  static final _$updateRuntimeConfig =
+      $grpc.ClientMethod<$1.UpdateRuntimeConfigRequest, $1.RuntimeConfig>(
+          '/targetlib.TargetLib/UpdateRuntimeConfig',
+          ($1.UpdateRuntimeConfigRequest value) => value.writeToBuffer(),
+          $1.RuntimeConfig.fromBuffer);
   static final _$testOutbound =
       $grpc.ClientMethod<$1.TestOutboundRequest, $1.LatencyTestResult>(
           '/targetlib.TargetLib/TestOutbound',
@@ -436,33 +398,19 @@ abstract class TargetLibServiceBase extends $grpc.Service {
         false,
         ($core.List<$core.int> value) => $0.Empty.fromBuffer(value),
         ($1.CapabilitiesResponse value) => value.writeToBuffer()));
-    $addMethod($grpc.ServiceMethod<$1.ConfigRequest, $1.CheckConfigResponse>(
-        'CheckConfig',
-        checkConfig_Pre,
-        false,
-        false,
-        ($core.List<$core.int> value) => $1.ConfigRequest.fromBuffer(value),
-        ($1.CheckConfigResponse value) => value.writeToBuffer()));
-    $addMethod($grpc.ServiceMethod<$1.StartRequest, $1.OperationResponse>(
+    $addMethod($grpc.ServiceMethod<$0.Empty, $1.OperationResponse>(
         'Start',
         start_Pre,
         false,
         false,
-        ($core.List<$core.int> value) => $1.StartRequest.fromBuffer(value),
+        ($core.List<$core.int> value) => $0.Empty.fromBuffer(value),
         ($1.OperationResponse value) => value.writeToBuffer()));
-    $addMethod($grpc.ServiceMethod<$1.ReloadRequest, $1.OperationResponse>(
-        'Reload',
-        reload_Pre,
-        false,
-        false,
-        ($core.List<$core.int> value) => $1.ReloadRequest.fromBuffer(value),
-        ($1.OperationResponse value) => value.writeToBuffer()));
-    $addMethod($grpc.ServiceMethod<$1.RestartRequest, $1.OperationResponse>(
+    $addMethod($grpc.ServiceMethod<$0.Empty, $1.OperationResponse>(
         'Restart',
         restart_Pre,
         false,
         false,
-        ($core.List<$core.int> value) => $1.RestartRequest.fromBuffer(value),
+        ($core.List<$core.int> value) => $0.Empty.fromBuffer(value),
         ($1.OperationResponse value) => value.writeToBuffer()));
     $addMethod($grpc.ServiceMethod<$0.Empty, $1.OperationResponse>(
         'Stop',
@@ -581,30 +529,22 @@ abstract class TargetLibServiceBase extends $grpc.Service {
             ($core.List<$core.int> value) =>
                 $1.SubscriptionId.fromBuffer(value),
             ($1.SubscriptionUpdateResult value) => value.writeToBuffer()));
-    $addMethod($grpc.ServiceMethod<$1.SubscriptionId, $1.SubscriptionConfig>(
-        'GetSubscriptionConfig',
-        getSubscriptionConfig_Pre,
+    $addMethod($grpc.ServiceMethod<$0.Empty, $1.RuntimeConfig>(
+        'GetRuntimeConfig',
+        getRuntimeConfig_Pre,
         false,
         false,
-        ($core.List<$core.int> value) => $1.SubscriptionId.fromBuffer(value),
-        ($1.SubscriptionConfig value) => value.writeToBuffer()));
+        ($core.List<$core.int> value) => $0.Empty.fromBuffer(value),
+        ($1.RuntimeConfig value) => value.writeToBuffer()));
     $addMethod(
-        $grpc.ServiceMethod<$1.BuildConfigRequest, $1.SubscriptionConfig>(
-            'BuildConfig',
-            buildConfig_Pre,
+        $grpc.ServiceMethod<$1.UpdateRuntimeConfigRequest, $1.RuntimeConfig>(
+            'UpdateRuntimeConfig',
+            updateRuntimeConfig_Pre,
             false,
             false,
             ($core.List<$core.int> value) =>
-                $1.BuildConfigRequest.fromBuffer(value),
-            ($1.SubscriptionConfig value) => value.writeToBuffer()));
-    $addMethod($grpc.ServiceMethod<$1.BuildConfigRequest, $1.OperationResponse>(
-        'ApplyRuntimeSettings',
-        applyRuntimeSettings_Pre,
-        false,
-        false,
-        ($core.List<$core.int> value) =>
-            $1.BuildConfigRequest.fromBuffer(value),
-        ($1.OperationResponse value) => value.writeToBuffer()));
+                $1.UpdateRuntimeConfigRequest.fromBuffer(value),
+            ($1.RuntimeConfig value) => value.writeToBuffer()));
     $addMethod(
         $grpc.ServiceMethod<$1.TestOutboundRequest, $1.LatencyTestResult>(
             'TestOutbound',
@@ -679,37 +619,21 @@ abstract class TargetLibServiceBase extends $grpc.Service {
   $async.Future<$1.CapabilitiesResponse> getCapabilities(
       $grpc.ServiceCall call, $0.Empty request);
 
-  $async.Future<$1.CheckConfigResponse> checkConfig_Pre(
-      $grpc.ServiceCall $call, $async.Future<$1.ConfigRequest> $request) async {
-    return checkConfig($call, await $request);
-  }
-
-  $async.Future<$1.CheckConfigResponse> checkConfig(
-      $grpc.ServiceCall call, $1.ConfigRequest request);
-
   $async.Future<$1.OperationResponse> start_Pre(
-      $grpc.ServiceCall $call, $async.Future<$1.StartRequest> $request) async {
+      $grpc.ServiceCall $call, $async.Future<$0.Empty> $request) async {
     return start($call, await $request);
   }
 
   $async.Future<$1.OperationResponse> start(
-      $grpc.ServiceCall call, $1.StartRequest request);
+      $grpc.ServiceCall call, $0.Empty request);
 
-  $async.Future<$1.OperationResponse> reload_Pre(
-      $grpc.ServiceCall $call, $async.Future<$1.ReloadRequest> $request) async {
-    return reload($call, await $request);
-  }
-
-  $async.Future<$1.OperationResponse> reload(
-      $grpc.ServiceCall call, $1.ReloadRequest request);
-
-  $async.Future<$1.OperationResponse> restart_Pre($grpc.ServiceCall $call,
-      $async.Future<$1.RestartRequest> $request) async {
+  $async.Future<$1.OperationResponse> restart_Pre(
+      $grpc.ServiceCall $call, $async.Future<$0.Empty> $request) async {
     return restart($call, await $request);
   }
 
   $async.Future<$1.OperationResponse> restart(
-      $grpc.ServiceCall call, $1.RestartRequest request);
+      $grpc.ServiceCall call, $0.Empty request);
 
   $async.Future<$1.OperationResponse> stop_Pre(
       $grpc.ServiceCall $call, $async.Future<$0.Empty> $request) async {
@@ -837,31 +761,22 @@ abstract class TargetLibServiceBase extends $grpc.Service {
   $async.Future<$1.SubscriptionUpdateResult> updateSubscription(
       $grpc.ServiceCall call, $1.SubscriptionId request);
 
-  $async.Future<$1.SubscriptionConfig> getSubscriptionConfig_Pre(
+  $async.Future<$1.RuntimeConfig> getRuntimeConfig_Pre(
+      $grpc.ServiceCall $call, $async.Future<$0.Empty> $request) async {
+    return getRuntimeConfig($call, await $request);
+  }
+
+  $async.Future<$1.RuntimeConfig> getRuntimeConfig(
+      $grpc.ServiceCall call, $0.Empty request);
+
+  $async.Future<$1.RuntimeConfig> updateRuntimeConfig_Pre(
       $grpc.ServiceCall $call,
-      $async.Future<$1.SubscriptionId> $request) async {
-    return getSubscriptionConfig($call, await $request);
+      $async.Future<$1.UpdateRuntimeConfigRequest> $request) async {
+    return updateRuntimeConfig($call, await $request);
   }
 
-  $async.Future<$1.SubscriptionConfig> getSubscriptionConfig(
-      $grpc.ServiceCall call, $1.SubscriptionId request);
-
-  $async.Future<$1.SubscriptionConfig> buildConfig_Pre($grpc.ServiceCall $call,
-      $async.Future<$1.BuildConfigRequest> $request) async {
-    return buildConfig($call, await $request);
-  }
-
-  $async.Future<$1.SubscriptionConfig> buildConfig(
-      $grpc.ServiceCall call, $1.BuildConfigRequest request);
-
-  $async.Future<$1.OperationResponse> applyRuntimeSettings_Pre(
-      $grpc.ServiceCall $call,
-      $async.Future<$1.BuildConfigRequest> $request) async {
-    return applyRuntimeSettings($call, await $request);
-  }
-
-  $async.Future<$1.OperationResponse> applyRuntimeSettings(
-      $grpc.ServiceCall call, $1.BuildConfigRequest request);
+  $async.Future<$1.RuntimeConfig> updateRuntimeConfig(
+      $grpc.ServiceCall call, $1.UpdateRuntimeConfigRequest request);
 
   $async.Future<$1.LatencyTestResult> testOutbound_Pre($grpc.ServiceCall $call,
       $async.Future<$1.TestOutboundRequest> $request) async {

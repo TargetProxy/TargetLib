@@ -9,10 +9,8 @@ import "google/protobuf/empty.proto";
 service TargetLib {
   rpc GetVersion(google.protobuf.Empty) returns (VersionResponse);
   rpc GetCapabilities(google.protobuf.Empty) returns (CapabilitiesResponse);
-  rpc CheckConfig(ConfigRequest) returns (CheckConfigResponse);
-  rpc Start(StartRequest) returns (OperationResponse);
-  rpc Reload(ReloadRequest) returns (OperationResponse);
-  rpc Restart(RestartRequest) returns (OperationResponse);
+  rpc Start(google.protobuf.Empty) returns (OperationResponse);
+  rpc Restart(google.protobuf.Empty) returns (OperationResponse);
   rpc Stop(google.protobuf.Empty) returns (OperationResponse);
   rpc GetState(google.protobuf.Empty) returns (ServiceState);
   rpc SubscribeState(google.protobuf.Empty) returns (stream ServiceState);
@@ -29,12 +27,11 @@ service TargetLib {
   rpc SetSubscriptionEnabled(SetSubscriptionEnabledRequest) returns (SubscriptionView);
   rpc ConfigureSubscriptionUpdates(ConfigureSubscriptionUpdatesRequest) returns (SubscriptionView);
   rpc UpdateSubscription(SubscriptionId) returns (SubscriptionUpdateResult);
-  rpc GetSubscriptionConfig(SubscriptionId) returns (SubscriptionConfig);
-  rpc BuildConfig(BuildConfigRequest) returns (SubscriptionConfig);
-  // Atomically builds, validates, and applies a runtime configuration. When
-  // the service is already running, a failed reload restores the last known
-  // good configuration before returning an error.
-  rpc ApplyRuntimeSettings(BuildConfigRequest) returns (OperationResponse);
+  // Returns the backend-owned desired runtime configuration.
+  rpc GetRuntimeConfig(google.protobuf.Empty) returns (RuntimeConfig);
+  // Validates and persists the desired configuration. If the core is running,
+  // it is reloaded immediately; otherwise it is used on the next start.
+  rpc UpdateRuntimeConfig(UpdateRuntimeConfigRequest) returns (RuntimeConfig);
   rpc TestOutbound(TestOutboundRequest) returns (LatencyTestResult);
   rpc TestOutbounds(TestOutboundsRequest) returns (stream LatencyTestResult);
   rpc GetResolvedEndpoints(ResolvedEndpointsRequest) returns (ResolvedEndpoints);
@@ -92,27 +89,6 @@ message CapabilitiesResponse {
   bool platform_vpn = 3;
   reserved 4;
   bool subscription_management = 5;
-}
-
-message ConfigRequest {
-  string content = 1;
-}
-
-message CheckConfigResponse {
-  bool valid = 1;
-  string formatted_error = 2;
-}
-
-message StartRequest {
-  string config = 1;
-}
-
-message ReloadRequest {
-  string config = 1;
-}
-
-message RestartRequest {
-  string config = 1;
 }
 
 message OperationResponse {
@@ -184,7 +160,7 @@ message SubscriptionView {
   int64 update_interval_seconds = 6;
   SubscriptionStatus status = 7;
   SubscriptionUpdateStage stage = 8;
-  repeated SubscriptionNode nodes = 9;
+  ProfileView profile = 9;
   string error_code = 10;
   string error_message = 11;
   int64 updated_at_unix_ms = 12;
@@ -200,16 +176,42 @@ message SubscriptionView {
   string moved_permanently_to = 21;
 }
 
-message SubscriptionNode {
-  string id = 1;
+message ProfileView {
+  repeated ProfileNode nodes = 1;
+  repeated ProfileGroup groups = 2;
+  repeated ProfileObject custom_outbounds = 3;
+  repeated ProfileObject custom_inbounds = 4;
+  uint32 route_rule_count = 5;
+  ProfileDns dns = 6;
+}
+
+message ProfileNode {
+  string tag = 1;
   string name = 2;
   string type = 3;
   string server = 4;
   int32 port = 5;
-  string group = 6;
-  repeated string groups = 7;
-  SubscriptionNodePhase phase = 8;
-  string error_message = 9;
+  repeated string group_tags = 6;
+  ProfileNodePhase phase = 7;
+  string error_message = 8;
+}
+
+message ProfileGroup {
+  string tag = 1;
+  string type = 2;
+  repeated string member_tags = 3;
+  string default_tag = 4;
+}
+
+message ProfileObject {
+  string tag = 1;
+  string type = 2;
+}
+
+message ProfileDns {
+  repeated ProfileObject servers = 1;
+  uint32 rule_count = 2;
+  string final_server = 3;
 }
 
 message SubscriptionUpdateResult {
@@ -217,10 +219,6 @@ message SubscriptionUpdateResult {
   bool changed = 2;
   bool not_modified = 3;
   int64 duration_milliseconds = 4;
-}
-
-message SubscriptionConfig {
-  bytes content = 1;
 }
 
 enum ProxyMode {
@@ -236,27 +234,20 @@ enum RouteMode {
   ROUTE_MODE_ALL = 3;
 }
 
-message BuildConfigSettings {
+message RuntimeSettings {
   string listen_address = 1;
   uint32 mixed_port = 2;
   ProxyMode proxy_mode = 3;
-  reserved 4;
-  reserved "system_proxy";
-  bool ipv6 = 5;
-  string cache_file_path = 6;
-  RouteMode route_mode = 7;
+  bool ipv6 = 4;
+  RouteMode route_mode = 5;
 }
 
-message BuildConfigRequest {
-  BuildConfigSettings settings = 1;
-  oneof source {
-    // 基于订阅中间态节点合成配置（urltest/selector 包装 + 应用入站主权）。
-    string subscription_id = 2;
-    // 透传原始配置：替换 inbounds、迁移遗留写法、注入 cache_file。
-    bytes raw_config = 3;
-  }
-  // When source is unset, the backend uses the persisted active subscription;
-  // if none exists, it falls back to a default direct-only configuration.
+message RuntimeConfig {
+  RuntimeSettings settings = 1;
+}
+
+message UpdateRuntimeConfigRequest {
+  RuntimeSettings settings = 1;
 }
 
 message TestOutboundRequest {
@@ -295,8 +286,8 @@ message ResolvedEndpoints {
 }
 
 message SetActiveSubscriptionRequest {
-  // Empty id clears the active subscription (backend falls back to the
-  // default direct-only configuration).
+  // Empty id clears the active subscription and selects the explicit
+  // direct-only runtime configuration.
   string id = 1;
 }
 
@@ -340,12 +331,12 @@ enum SubscriptionUpdateStage {
   SUBSCRIPTION_UPDATE_STAGE_FAILED = 7;
 }
 
-enum SubscriptionNodePhase {
-  SUBSCRIPTION_NODE_PHASE_UNSPECIFIED = 0;
-  SUBSCRIPTION_NODE_PHASE_DISCOVERED = 1;
-  SUBSCRIPTION_NODE_PHASE_NORMALIZED = 2;
-  SUBSCRIPTION_NODE_PHASE_READY = 3;
-  SUBSCRIPTION_NODE_PHASE_FAILED = 4;
+enum ProfileNodePhase {
+  PROFILE_NODE_PHASE_UNSPECIFIED = 0;
+  PROFILE_NODE_PHASE_DISCOVERED = 1;
+  PROFILE_NODE_PHASE_NORMALIZED = 2;
+  PROFILE_NODE_PHASE_READY = 3;
+  PROFILE_NODE_PHASE_FAILED = 4;
 }
 
 enum SubscriptionEventType {

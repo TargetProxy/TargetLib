@@ -209,9 +209,8 @@ func (m *Manager) testLatencyGroup(
 	}
 }
 
-// sing-box exposes URLTest history timestamps at one-second resolution. Wait
-// for the next boundary when necessary so a fresh result is distinguishable
-// from the baseline without relying on delay changes.
+// sing-box 的 URLTest 历史时间戳精度为一秒；必要时等待下一个时间边界，
+// 使新结果可与基线区分，而不依赖延迟数值变化。
 func waitForFreshLatencyTimestamp(ctx context.Context, targets []latencyTarget) error {
 	var latest int64
 	for _, target := range targets {

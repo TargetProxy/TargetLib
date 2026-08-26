@@ -6,44 +6,108 @@ import 'package:protobuf/well_known_types/google/protobuf/empty.pb.dart';
 
 import '../generated/api/TargetLib/targetlib.pbgrpc.dart';
 
-/// Owns the authenticated local TargetLib command connection.
+/// Owns the local TargetLib command connection.
 ///
-/// The socket transport and readiness handshake are deliberately kept in the
-/// plugin so applications do not duplicate gRPC setup or retry behavior.
+/// Socket-first transport selection and the readiness handshake live in the
+/// plugin so applications do not duplicate gRPC setup or fallback behavior.
 final class TargetLibConnection {
-  TargetLibConnection._(this.channel, this.client, this.options);
+  TargetLibConnection._(
+    this.channel,
+    this.client,
+    this.options,
+    this.transport,
+  );
 
   final ClientChannel channel;
   final TargetLibClient client;
   final CallOptions options;
+  final String transport;
 
-  static Future<TargetLibConnection> connect(
-    String socketPath, {
+  static const String host = '127.0.0.1';
+  static const int port = 19090;
+  static const String socketName = 'targetlib.sock';
+
+  static Future<TargetLibConnection> connect({
+    required String socketPath,
     Duration timeout = const Duration(seconds: 5),
   }) async {
-    final channel = ClientChannel(
-      InternetAddress(socketPath, type: InternetAddressType.unix),
-      port: 0,
-      options: const ChannelOptions(credentials: ChannelCredentials.insecure()),
-    );
-    final options = CallOptions();
-    final client = TargetLibClient(channel);
+    final channels = <({String transport, ClientChannel channel})>[];
     Object? lastError;
+    try {
+      channels.add((
+        transport: 'unix',
+        channel: ClientChannel(
+          InternetAddress(socketPath, type: InternetAddressType.unix),
+          port: 0,
+          options: const ChannelOptions(
+            credentials: ChannelCredentials.insecure(),
+          ),
+        ),
+      ));
+    } on Object catch (error) {
+      lastError = error;
+    }
+    channels.add((
+      transport: 'tcp',
+      channel: ClientChannel(
+        host,
+        port: port,
+        options: const ChannelOptions(
+          credentials: ChannelCredentials.insecure(),
+        ),
+      ),
+    ));
+    final options = CallOptions();
     final deadline = DateTime.now().add(timeout);
     while (DateTime.now().isBefore(deadline)) {
-      try {
-        await client
-            .getVersion(Empty(), options: options)
-            .timeout(const Duration(seconds: 1));
-        return TargetLibConnection._(channel, client, options);
-      } on Object catch (error) {
-        lastError = error;
-        await Future<void>.delayed(const Duration(milliseconds: 100));
+      for (final candidate in channels) {
+        final client = TargetLibClient(candidate.channel);
+        try {
+          await client
+              .getVersion(Empty(), options: options)
+              .timeout(const Duration(milliseconds: 250));
+          for (final unused in channels) {
+            if (!identical(unused.channel, candidate.channel)) {
+              await unused.channel.shutdown();
+            }
+          }
+          return TargetLibConnection._(
+            candidate.channel,
+            client,
+            options,
+            candidate.transport,
+          );
+        } on Object catch (error) {
+          lastError = error;
+        }
       }
+      await Future<void>.delayed(const Duration(milliseconds: 100));
     }
-    await channel.shutdown();
-    throw StateError('TargetLib command server did not become ready: $lastError');
+    for (final candidate in channels) {
+      await candidate.channel.shutdown();
+    }
+    throw StateError(
+      'TargetLib command server did not become ready: $lastError',
+    );
   }
 
   Future<void> close() => channel.shutdown();
+
+  Future<OperationResponse> start() => client.start(Empty(), options: options);
+
+  Future<OperationResponse> restart() =>
+      client.restart(Empty(), options: options);
+
+  Future<OperationResponse> stop() => client.stop(Empty(), options: options);
+
+  Future<ServiceState> state() => client.getState(Empty(), options: options);
+
+  Future<RuntimeConfig> getRuntimeConfig() =>
+      client.getRuntimeConfig(Empty(), options: options);
+
+  Future<RuntimeConfig> updateRuntimeConfig(RuntimeSettings settings) =>
+      client.updateRuntimeConfig(
+        UpdateRuntimeConfigRequest(settings: settings),
+        options: options,
+      );
 }

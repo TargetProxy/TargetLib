@@ -13,12 +13,10 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-// ipInfoEndpoint mirrors the ip-api.com query the desktop client used
-// before the lookup moved to the backend egress.
+// ipInfoEndpoint 对应桌面端在查询迁移到后端出口前使用的 ip-api.com 地址。
 const ipInfoEndpoint = "http://ip-api.com/json/?fields=query,country,countryCode,city,isp,org,as"
 
-// GetIpInfo queries the egress IP geolocation from the backend so the result
-// reflects the proxy path when the core is running.
+// GetIpInfo 从后端出口查询 IP 地理位置，使核心运行时结果反映代理链路。
 func (m *Manager) GetIpInfo(ctx context.Context, _ *emptypb.Empty) (*targetlibapi.IpInfoResponse, error) {
 	request, err := http.NewRequestWithContext(ctx, http.MethodGet, ipInfoEndpoint, nil)
 	if err != nil {

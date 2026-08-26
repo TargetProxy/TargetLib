@@ -66,9 +66,8 @@ func (mobilePlatform) MyInterfaceAddress() []netip.Addr             { return nil
 
 var _ adapter.PlatformInterface = mobilePlatform{}
 
-// Android's active network is managed by VpnService. sing-tun has no native
-// network monitor for GOOS=android, but sing-box requires a non-nil monitor
-// whenever a platform interface is registered.
+// Android 的活动网络由 VpnService 管理。GOOS=android 下 sing-tun 没有原生网络监视器，
+// 但 sing-box 注册平台接口时要求监视器不能为空。
 type mobileInterfaceMonitor struct{}
 
 func (*mobileInterfaceMonitor) Start() error                         { return nil }

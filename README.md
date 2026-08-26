@@ -1,177 +1,74 @@
 # TargetLib
 
-> **全平台统一架构** — TargetLib 为 Windows、Linux、macOS、Android 和 iOS 提供统一的 sing-box 管理能力。所有宿主共享同一份
-> TargetLib gRPC 协议；native FFI 仅负责启动和释放本地 gRPC 服务，不维护独立的业务接口。
+TargetLib 是跨平台的 sing-box 管理库。Windows、Linux、macOS、Android 和 iOS 共享同一份 Go 核心与 gRPC 协议；native FFI
+只负责启动本地服务。
 
-TargetLib 是基于 `sing-box` 的轻量封装，统一管理 sing-box 的启动、重载、状态、日志和订阅。
+控制面只监听本机，通过 `<basePath>/targetlib.sock` 提供 gRPC，TCP 回退地址为 `127.0.0.1:19090`。不启用 TLS 或鉴权，也不监听局域网接口。
 
-## 平台支持
+## 目录
 
-| 平台                    | 接入方式                  | 说明                                      |
-|-------------------------|---------------------------|-------------------------------------------|
-| Windows                 | daemon / native + gRPC   | 可作为 Windows Service 运行               |
-| Linux                   | daemon / native + gRPC   | 使用 Unix socket                          |
-| macOS                   | daemon / native + gRPC   | 使用 Unix socket                          |
-| Android                 | native + gRPC             | FFI 仅负责启动本地服务                    |
-| iOS                     | native + gRPC             | FFI 仅负责启动本地服务                    |
-
-## 功能
-
-- 跨平台 sing-box 管控层，仅暴露 TargetLib 自有能力
-- 统一 gRPC 服务：运行时生命周期管理，以及完整的订阅 CRUD、更新、端点查询、日志和事件流
-- 轻量 C ABI（`targetlib` native library）仅用于启动、停止和释放 gRPC 服务
-- 每个宿主进程维护一个运行时实例，支持并发安全的配置热重载
-- 跨平台 Go 订阅服务：加密持久化、条件更新、自动调度、节点中间态及代理端点解析
-
-## 目录结构
-
-```
-TargetLib/
-├── api/TargetLib/                   # 聚合的 TargetLib gRPC 定义
-├── cmd/TargetLib/                   # 独立守护进程 (go build)
-├── ffi/native/                      # C ABI 导出 (c-shared / c-archive)
-├── manager/                         # 核心管理逻辑 (Setup/New/Server)
-├── config/                          # sing-box 配置构建
-├── subscriptions/                   # 订阅生命周期、gRPC 适配与代理端点解析
-├── scripts/                         # 构建脚本
-└── build/                           # 构建产物 (gitignored)
+```text
+api/TargetLib/   gRPC 协议
+cmd/TargetLib/   桌面 daemon
+ffi/native/      C ABI
+manager/         生命周期与运行时状态
+profile/         订阅配置中间态（IR）
+config/          Profile + Settings -> sing-box 配置
+subscriptions/   订阅存储、更新与节点解析
+flutter/         Flutter 插件与示例
+scripts/         桌面构建和 Windows 服务重装脚本
 ```
 
-## 快速开始
+配置生成采用一次规划、一次输出的流程：
 
-### 依赖
-
-- Go >= 1.26
-- protoc >= 3.x (仅改 proto 时需要)
-- `protoc-gen-go` / `protoc-gen-go-grpc`
-
-### 构建 daemon
-
-```sh
-go build -o build/TargetLib ./cmd/TargetLib
+```text
+Profile + Settings -> config.Plan -> Blueprint -> config.Emit -> sing-box JSON
 ```
+
+订阅运行配置只提供节点数据。DNS、路由规则、rule-set、入站和运行时选项均由 TargetLib 从零生成；`direct`、`urltest`、`proxy` 由 TargetLib 统一生成。
+
+## 开发
+
+依赖 Go 1.26 或更高版本。修改 proto 时还需要 protoc、protoc-gen-go 和 protoc-gen-go-grpc。
+
+sing-box 的 HTTP/2 transport 需要测试标签 `http2legacy with_clash_api`，不要直接运行不带标签的 `go test ./...`。
+
+构建桌面 daemon：
 
 ```powershell
 .\scripts\build.ps1
-# 输出 build/TargetLib.exe
-# 如果同级 Target 已有 Windows 构建，同时刷新其 Debug/Release/Profile 副本
-# 自定义输出
+```
+
+默认输出 `build/TargetLib.exe`。也可以指定路径或跳过 Windows Target 同步：
+
+```powershell
 .\scripts\build.ps1 -OutputPath dist/TargetLib.exe -DebugBuild
-# CI 或仅构建 TargetLib 时跳过 Target 同步
 .\scripts\build.ps1 -SkipTargetSync
 ```
 
-Windows Service 管理和目标同步脚本仅适用于 Windows：
+Windows 开发时可用一条命令构建并重装服务。脚本会迁移现有服务参数、自动请求一次 UAC，
+并在安装失败时尝试恢复旧二进制和服务：
 
 ```powershell
-.\scripts\update-installed-service.ps1
+.\scripts\reinstall-service.ps1
 ```
 
-运行 daemon：
+常用选项：
+
+```powershell
+.\scripts\reinstall-service.ps1 -WhatIf             # 只查看重装计划
+.\scripts\reinstall-service.ps1 -SkipBuild          # 使用 build/TargetLib.exe
+.\scripts\reinstall-service.ps1 -NoStart -KeepBackup
+```
+
+## 运行
 
 ```powershell
 .\build\TargetLib.exe --base-path ./run --log-max-lines 300
-# 服务控制 (Windows service)
-.\build\TargetLib.exe install
-.\build\TargetLib.exe start
-.\build\TargetLib.exe status
 ```
 
-Android 使用 NDK Clang 交叉编译 Go C-shared 库和 JNI 适配库，不依赖 gomobile：
-
-```powershell
-.\scripts\build-android.ps1 -NdkPath "$env:LOCALAPPDATA\Android\Sdk\ndk\<version>"
-```
-
-产物写入 `flutter/android/src/main/jniLibs/<abi>/`，包括 `libtargetlib.so` 和
-`libtargetlib_jni.so`。脚本默认构建 `arm64-v8a` 与 `x86_64`，可通过 `-Abis` 调整。
-
-C 调用示例：
-
-```c
-#include "targetlib.h"
-targetlib_init_options opts = { .base_path = "./run", .log_max_lines = 300 };
-char *err = NULL;
-targetlib_init(&opts, &err);
-
-targetlib_handle h;
-targetlib_start("{\"log\":{...}}", &h, &err);
-targetlib_stop(h, &err);
-targetlib_free_handle(h);
-targetlib_free_string(err);
-```
-
-所有平台的宿主均使用同一份 `api/TargetLib/targetlib.proto`。native 宿主调用
-`targetlib_start` 后，通过 `<base_path>/command.sock` 连接 TargetLib gRPC；重载、状态、日志、订阅和测试等能力全部通过
-gRPC 完成，不在 C ABI 中重复实现。
-
-### 重新生成 proto
-
-```powershell
-.\scripts\generate.ps1
-# 生成 api/TargetLib/*.pb.go
-```
-
-## gRPC API
-
-`service TargetLib` (`api/TargetLib/targetlib.proto`) 聚合运行时和订阅管理：
-
-所有平台的 daemon/native library 对外提供完全一致的 `TargetLib` service。sing-box 原始
-`daemon.StartedService` 不对外注册。
-
-| RPC                       | 说明                                           |
-|---------------------------|------------------------------------------------|
-| GetVersion                | 返回 TargetLib / sing-box / Go / protocol 版本 |
-| GetCapabilities           | 平台信息                                       |
-| CheckConfig               | 校验 JSON 配置                                 |
-| Start/Reload/Restart/Stop | 生命周期控制                                   |
-| ApplyRuntimeSettings      | 原子构建、校验并启动或重载运行配置             |
-| TestOutbound              | 测试单个 outbound 并返回结构化延迟结果          |
-| TestOutbounds             | 合并 URLTest group 后并发测试并流式返回结果     |
-| GetState / SubscribeState | 查询 / 订阅 `ServiceState`                     |
-| SubscribeLogs             | 订阅过滤后的运行日志（仅 INFO 及以上）         |
-| SelectOutbound            | 在运行中的选择器中动态切换出站，不重载配置       |
-| CloseConnection            | 关闭指定连接                                  |
-| CloseAllConnections        | 关闭当前全部连接                              |
-
-`BuildConfigSettings.route_mode` 支持 `DIRECT`（全部直连）、`RULE`（使用配置路由规则）和 `ALL`（全部使用代理主 outbound）；未设置时默认为 `RULE`。通过 `ApplyRuntimeSettings` 可在运行时原子切换。
-
-`ServiceState`: `IDLE` / `STARTING` / `RUNNING` / `STOPPING` / `FAILED`
-
-| RPC                                                       | 说明                                    |
-|-----------------------------------------------------------|-----------------------------------------|
-| ListSubscriptions / GetSubscription                       | 获取脱敏订阅视图和节点中间态            |
-| AddSubscription / RemoveSubscription / RenameSubscription | 订阅 CRUD                               |
-| SetSubscriptionEnabled / ConfigureSubscriptionUpdates     | 启用和自动更新配置                      |
-| UpdateSubscription                                        | 下载、解析、解析端点并持久化            |
-| GetSubscriptionConfig                                     | 显式读取完整 sing-box 配置              |
-| GetResolvedEndpoints                                      | 返回供宿主处理的代理节点 IP，不修改 TUN |
-| SubscribeSubscriptionEvents                               | 订阅新增、更新、删除和阶段事件          |
-
-列表、单项和事件响应不会包含订阅 URL、请求头、缓存校验器或节点原始配置。
-
-## 配置
-
-`manager.Options`:
-
-```go
-type Options struct {
-    BasePath    string // 运行时根目录 (含 command.sock)
-    WorkingPath string // sing-box 工作目录，默认 BasePath
-    TempPath    string // 临时目录，默认 WorkingPath
-    Locale      string
-    LogMaxLines int    // 默认 300
-    Debug       bool
-    SubscriptionStore subscriptions.Store // nil 时使用内存存储
-}
-```
-
-`TargetLib` 默认使用系统凭据库保护的加密 BadgerDB。Android/iOS 宿主可从 Keystore/Keychain 取得 32 字节密钥后注入
-`subscriptions.OpenBadgerStore(path, key)`。
-
-## 协议版本
-
-`manager.ProtocolVersion = 5`
+宿主调用 `targetlib_start` 后连接 gRPC；运行配置、生命周期、日志、订阅和端点查询均通过 `api/TargetLib/targetlib.proto` 定义的
+`TargetLib` service 完成。
 
 ## 许可证
 

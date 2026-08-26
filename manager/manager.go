@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"os"
+	"path/filepath"
 	"runtime"
 	"runtime/debug"
 	"sync"
@@ -21,17 +22,20 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/emptypb"
 
 	targetlibapi "github.com/loafman1120/TargetLib/api/TargetLib"
 	subscriptioncore "github.com/loafman1120/TargetLib/subscriptions"
 )
 
-// Manager owns the single StartedService used by the TargetLib gRPC API.
+// Manager 持有 TargetLib gRPC API 使用的唯一 StartedService 实例。
 type Manager struct {
 	*subscriptioncore.Handler
 
 	started            *daemon.StartedService
+	daemon             *daemonAdapter
+	runtimeController  *runtimeController
 	subscriptions      *subscriptioncore.Manager
 	subscriptionCancel context.CancelFunc
 	subscriptionDone   chan struct{}
@@ -40,7 +44,10 @@ type Manager struct {
 	opMu          sync.Mutex
 	configMu      sync.RWMutex
 	config        string
-	lastSettings  *targetlibapi.BuildConfigSettings
+	runtimeConfig *targetlibapi.RuntimeConfig
+	runtimeStore  runtimeConfigStore
+	cacheFilePath string
+	applyConfig   func(string) error
 	latency       latencyService
 	latencyMu     sync.Mutex
 	latencyGroups map[string]chan struct{}
@@ -66,20 +73,55 @@ func New(ctx context.Context, options Options) (*Manager, error) {
 	if err := Setup(options); err != nil {
 		return nil, err
 	}
-	subscriptionManager := subscriptioncore.NewManager(subscriptioncore.Options{Store: options.SubscriptionStore})
+	sharedStore := options.SubscriptionStore
+	if sharedStore == nil {
+		sharedStore = &subscriptioncore.MemoryStore{}
+	}
+	subscriptionManager := subscriptioncore.NewManager(subscriptioncore.Options{Store: sharedStore})
 	if err := subscriptionManager.Load(ctx); err != nil {
-		if closer, ok := options.SubscriptionStore.(io.Closer); ok {
+		subscriptionManager.Close()
+		if closer, ok := sharedStore.(io.Closer); ok {
 			_ = closer.Close()
 		}
 		return nil, err
 	}
 	subscriptionContext, cancelSubscriptions := context.WithCancel(ctx)
+	runtimeStore := runtimeConfigStore{store: sharedStore}
+	runtimeConfig, err := runtimeStore.Load(ctx)
+	if err != nil {
+		cancelSubscriptions()
+		subscriptionManager.Close()
+		return nil, err
+	}
+	if runtimeConfig == nil {
+		runtimeConfig = defaultRuntimeConfig()
+		if err := runtimeStore.Save(ctx, runtimeConfig); err != nil {
+			cancelSubscriptions()
+			subscriptionManager.Close()
+			return nil, err
+		}
+	}
+	canonicalSettings := canonicalRuntimeSettings(runtimeConfig.GetSettings())
+	if !proto.Equal(canonicalSettings, runtimeConfig.GetSettings()) {
+		runtimeConfig.Settings = canonicalSettings
+		if err := runtimeStore.Save(ctx, runtimeConfig); err != nil {
+			cancelSubscriptions()
+			subscriptionManager.Close()
+			return nil, err
+		}
+	}
+	if _, err := buildSettings(runtimeConfig.GetSettings(), filepath.Join(options.BasePath, "cache.db")); err != nil {
+		cancelSubscriptions()
+		subscriptionManager.Close()
+		return nil, err
+	}
 	m := &Manager{
 		Handler: subscriptioncore.NewHandler(subscriptionManager), subscriptions: subscriptionManager,
 		subscriptionCancel: cancelSubscriptions, subscriptionDone: make(chan struct{}),
+		runtimeConfig: runtimeConfig, runtimeStore: runtimeStore,
+		cacheFilePath: filepath.Join(options.BasePath, "cache.db"),
 	}
-	m.Handler.SetActiveChangedCallback(m.reloadActiveSubscription)
-	if closer, ok := options.SubscriptionStore.(io.Closer); ok {
+	if closer, ok := sharedStore.(io.Closer); ok {
 		m.subscriptionStore = closer
 	}
 	m.started = daemon.NewStartedService(daemon.ServiceOptions{
@@ -89,7 +131,13 @@ func New(ctx context.Context, options Options) (*Manager, error) {
 		LogMaxLines: options.LogMaxLines,
 		OOMKiller:   options.OOMKiller,
 	})
-	m.latency = m.started
+	m.applyConfig = func(content string) error {
+		return m.started.StartOrReloadService(content, &daemon.OverrideOptions{})
+	}
+	m.daemon = newDaemonAdapter(m.started)
+	m.runtimeController = newRuntimeController(m)
+	m.subscriptions.SetRuntimeChangedCallback(m.reloadActiveSubscription)
+	m.latency = m.daemon
 	go func() {
 		defer close(m.subscriptionDone)
 		_ = subscriptionManager.Run(subscriptionContext)
@@ -125,8 +173,6 @@ func serviceContext(ctx context.Context, options Options) context.Context {
 	return ctx
 }
 
-func (m *Manager) StartedService() *daemon.StartedService { return m.started }
-
 func (m *Manager) GetVersion(context.Context, *emptypb.Empty) (*targetlibapi.VersionResponse, error) {
 	return &targetlibapi.VersionResponse{
 		TargetlibVersion: projectVersion(),
@@ -144,48 +190,19 @@ func (m *Manager) GetCapabilities(context.Context, *emptypb.Empty) (*targetlibap
 	}, nil
 }
 
-func (m *Manager) CheckConfig(_ context.Context, request *targetlibapi.ConfigRequest) (*targetlibapi.CheckConfigResponse, error) {
-	if request.GetContent() == "" {
-		return &targetlibapi.CheckConfigResponse{Valid: false, FormattedError: "config is empty"}, nil
-	}
-	if err := libbox.CheckConfig(request.GetContent()); err != nil {
-		return &targetlibapi.CheckConfigResponse{Valid: false, FormattedError: err.Error()}, nil
-	}
-	return &targetlibapi.CheckConfigResponse{Valid: true}, nil
+func (m *Manager) Start(_ context.Context, _ *emptypb.Empty) (*targetlibapi.OperationResponse, error) {
+	return m.runtimeController.Start()
 }
 
-func (m *Manager) Start(_ context.Context, request *targetlibapi.StartRequest) (*targetlibapi.OperationResponse, error) {
-	if err := m.StartConfig(request.GetConfig()); err != nil {
-		return nil, err
-	}
-	return m.operationResponse()
-}
-
-func (m *Manager) Reload(_ context.Context, request *targetlibapi.ReloadRequest) (*targetlibapi.OperationResponse, error) {
-	if err := m.ReloadConfig(request.GetConfig()); err != nil {
-		return nil, err
-	}
-	return m.operationResponse()
-}
-
-func (m *Manager) Restart(_ context.Context, request *targetlibapi.RestartRequest) (*targetlibapi.OperationResponse, error) {
-	if err := m.RestartConfig(request.GetConfig()); err != nil {
-		return nil, err
-	}
-	return m.operationResponse()
+func (m *Manager) Restart(_ context.Context, _ *emptypb.Empty) (*targetlibapi.OperationResponse, error) {
+	return m.runtimeController.Restart()
 }
 
 func (m *Manager) Stop(context.Context, *emptypb.Empty) (*targetlibapi.OperationResponse, error) {
-	if err := m.StopService(); err != nil {
-		return nil, err
-	}
-	return m.operationResponse()
+	return m.runtimeController.Stop()
 }
 
-func (m *Manager) StartConfig(config string) error {
-	if config == "" {
-		return status.Error(codes.InvalidArgument, "config is empty")
-	}
+func (m *Manager) startRuntime() error {
 	m.opMu.Lock()
 	defer m.opMu.Unlock()
 	current, err := m.currentStatus()
@@ -195,32 +212,21 @@ func (m *Manager) StartConfig(config string) error {
 	if current.Status == daemon.ServiceStatus_STARTED || current.Status == daemon.ServiceStatus_STARTING {
 		return status.Error(codes.FailedPrecondition, "service is already running")
 	}
-	return m.startOrReload(config)
+	content, err := m.buildRuntimeConfig()
+	if err != nil {
+		return err
+	}
+	return m.startOrReload(string(content))
 }
 
-func (m *Manager) ReloadConfig(config string) error {
-	if config == "" {
-		return status.Error(codes.InvalidArgument, "config is empty")
-	}
+func (m *Manager) restartRuntime() error {
 	m.opMu.Lock()
 	defer m.opMu.Unlock()
 	current, err := m.currentStatus()
 	if err != nil {
 		return err
 	}
-	if current.Status != daemon.ServiceStatus_STARTED {
-		return status.Error(codes.FailedPrecondition, "service is not running")
-	}
-	return m.startOrReload(config)
-}
-
-func (m *Manager) RestartConfig(config string) error {
-	if config == "" {
-		return status.Error(codes.InvalidArgument, "config is empty")
-	}
-	m.opMu.Lock()
-	defer m.opMu.Unlock()
-	current, err := m.currentStatus()
+	content, err := m.buildRuntimeConfig()
 	if err != nil {
 		return err
 	}
@@ -229,7 +235,7 @@ func (m *Manager) RestartConfig(config string) error {
 			return status.Error(codes.Internal, err.Error())
 		}
 	}
-	return m.startOrReload(config)
+	return m.startOrReload(string(content))
 }
 
 func (m *Manager) StopService() error {
@@ -249,7 +255,7 @@ func (m *Manager) StopService() error {
 }
 
 func (m *Manager) startOrReload(config string) error {
-	if err := m.started.StartOrReloadService(config, &daemon.OverrideOptions{}); err != nil {
+	if err := m.applyConfig(config); err != nil {
 		return status.Error(codes.Internal, err.Error())
 	}
 	m.configMu.Lock()
@@ -307,11 +313,20 @@ func (m *Manager) ServiceReload() error {
 	if config == "" {
 		return status.Error(codes.FailedPrecondition, "no active configuration")
 	}
-	return m.ReloadConfig(config)
+	m.opMu.Lock()
+	defer m.opMu.Unlock()
+	current, err := m.currentStatus()
+	if err != nil {
+		return err
+	}
+	if current.Status != daemon.ServiceStatus_STARTED {
+		return status.Error(codes.FailedPrecondition, "service is not running")
+	}
+	return m.startOrReload(config)
 }
 
-// platformHandler exists only to satisfy sing-box's internal daemon contract.
-// System proxy ownership stays in the user-session UI process.
+// platformHandler 仅用于满足 sing-box 的内部 daemon 契约。
+// 系统代理仍由用户会话中的 UI 进程负责。
 type platformHandler struct {
 	manager *Manager
 }
@@ -334,13 +349,14 @@ func (m *Manager) Close() {
 	m.close.Do(func() {
 		m.subscriptionCancel()
 		<-m.subscriptionDone
+		m.subscriptions.Close()
 		m.opMu.Lock()
 		defer m.opMu.Unlock()
 		current, err := m.currentStatus()
 		if err == nil && (current.Status == daemon.ServiceStatus_STARTED || current.Status == daemon.ServiceStatus_STARTING) {
 			_ = m.started.CloseService()
 		}
-		m.started.Close()
+		m.daemon.Close()
 		if m.subscriptionStore != nil {
 			_ = m.subscriptionStore.Close()
 		}
@@ -435,8 +451,7 @@ func newLogRelay(server grpc.ServerStreamingServer[targetlibapi.LogBatch]) *logR
 func (r *logRelay) Send(value *daemon.Log) error {
 	batch := &targetlibapi.LogBatch{Reset_: value.GetReset_()}
 	for _, message := range value.GetMessages() {
-		// sing-box forwards platform logs below its configured level. Keep
-		// the public TargetLib stream at info and above.
+		// sing-box 会转发低于配置级别的平台日志；公开 TargetLib 流只保留 INFO 及以上。
 		if message == nil || message.GetLevel() > daemon.LogLevel_INFO {
 			continue
 		}

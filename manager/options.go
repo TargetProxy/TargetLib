@@ -2,7 +2,7 @@ package manager
 
 import "github.com/loafman1120/TargetLib/subscriptions"
 
-const ProtocolVersion uint32 = 5
+const ProtocolVersion uint32 = 8
 
 type Options struct {
 	BasePath    string
@@ -12,8 +12,8 @@ type Options struct {
 	LogMaxLines int
 	Debug       bool
 	OOMKiller   bool
-	// SubscriptionStore is owned and closed by Manager when it implements io.Closer.
-	// A nil store selects in-memory storage, which is suitable for mobile hosts that
-	// have not injected an Android Keystore or Apple Keychain backed Badger store.
+	// Manager 负责拥有并关闭实现 io.Closer 的 SubscriptionStore。
+	// store 为 nil 时使用内存存储，适合尚未注入 Android Keystore 或 Apple Keychain
+	// 支持的 Badger 存储的移动端宿主。
 	SubscriptionStore subscriptions.Store
 }

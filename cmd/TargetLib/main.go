@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"sync"
 
@@ -28,9 +29,8 @@ type commandOptions struct {
 }
 
 type program struct {
-	options    manager.Options
-	socketPath string
-	logger     service.Logger
+	options manager.Options
+	logger  service.Logger
 
 	mu     sync.Mutex
 	server *manager.Server
@@ -44,7 +44,6 @@ func main() {
 		}
 		fatal(err)
 	}
-
 	program := &program{
 		options: manager.Options{
 			BasePath:    options.basePath,
@@ -54,7 +53,6 @@ func main() {
 			LogMaxLines: options.logMaxLines,
 			Debug:       options.debug,
 		},
-		socketPath: filepath.Join(options.basePath, "command.sock"),
 	}
 	serviceConfig := &service.Config{
 		Name:        serviceName,
@@ -87,6 +85,7 @@ func main() {
 }
 
 func (p *program) Start(service.Service) error {
+	// service 回调可能被重复触发；已有服务实例时保持幂等。
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	if p.server != nil {
@@ -98,7 +97,7 @@ func (p *program) Start(service.Service) error {
 	}
 	options := p.options
 	options.SubscriptionStore = store
-	_, server, err := manager.NewLocal(context.Background(), options, p.socketPath)
+	_, server, err := manager.NewLocal(context.Background(), options)
 	if err != nil {
 		return err
 	}
@@ -113,6 +112,7 @@ func (p *program) Start(service.Service) error {
 }
 
 func (p *program) Stop(service.Service) error {
+	// 先从程序状态中摘除服务，再关闭实例，避免并发启动看到半关闭状态。
 	p.mu.Lock()
 	server := p.server
 	p.server = nil
@@ -162,12 +162,7 @@ func parseCommandLine(arguments []string) (string, commandOptions, error) {
 }
 
 func isServiceAction(value string) bool {
-	for _, action := range append(service.ControlAction[:], "status") {
-		if value == action {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(append(service.ControlAction[:], "status"), value)
 }
 
 func serviceArguments(options commandOptions) []string {

@@ -2,7 +2,9 @@ package subscriptions
 
 import (
 	"context"
+	"crypto/sha256"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
@@ -10,12 +12,16 @@ import (
 	"github.com/dgraph-io/badger/v4"
 	badgeroptions "github.com/dgraph-io/badger/v4/options"
 	"github.com/fxamacker/cbor/v2"
+	targetprofile "github.com/loafman1120/TargetLib/profile"
+	"github.com/sagernet/sing-box/option"
+	singjson "github.com/sagernet/sing/common/json"
 )
 
 const (
-	badgerSchemaVersion byte = 1
-	badgerPrefix             = "subscription/"
-	badgerActiveIDKey        = "meta/active_subscription_id"
+	badgerSchemaVersion  byte = 2
+	badgerPrefix              = "subscription/"
+	badgerActiveIDKey         = "meta/active_subscription_id"
+	badgerMetadataPrefix      = "meta/runtime/"
 )
 
 type BadgerStore struct {
@@ -24,8 +30,8 @@ type BadgerStore struct {
 	decode cbor.DecMode
 }
 
-// OpenBadgerStore opens the mobile-sized encrypted subscription database.
-// The 32-byte key comes from Android Keystore or Apple Keychain integration.
+// OpenBadgerStore 打开适合移动端的加密订阅数据库。
+// 32 字节密钥来自 Android Keystore 或 Apple Keychain 集成。
 func OpenBadgerStore(path string, key []byte) (*BadgerStore, error) {
 	if path == "" {
 		return nil, errors.New("Badger path is required")
@@ -69,8 +75,8 @@ func OpenBadgerStore(path string, key []byte) (*BadgerStore, error) {
 
 func (s *BadgerStore) Close() error { return s.db.Close() }
 
-func (s *BadgerStore) Load(ctx context.Context) ([]Subscription, error) {
-	var result []Subscription
+func (s *BadgerStore) Load(ctx context.Context) (StoredState, error) {
+	var result StoredState
 	err := s.db.View(func(transaction *badger.Txn) error {
 		options := badger.DefaultIteratorOptions
 		options.Prefix = []byte(badgerPrefix)
@@ -88,46 +94,8 @@ func (s *BadgerStore) Load(ctx context.Context) ([]Subscription, error) {
 			if err != nil {
 				return err
 			}
-			result = append(result, item)
+			result.Subscriptions = append(result.Subscriptions, item)
 		}
-		return nil
-	})
-	return result, err
-}
-
-func (s *BadgerStore) Put(ctx context.Context, item Subscription) error {
-	if err := ctx.Err(); err != nil {
-		return err
-	}
-	if item.ID == "" {
-		return ErrIDRequired
-	}
-	stored := cloneSubscription(item)
-	stored.Nodes = nil
-	encoded, err := s.encode.Marshal(stored)
-	if err != nil {
-		return err
-	}
-	value := append([]byte{badgerSchemaVersion}, encoded...)
-	if int64(len(value)) >= s.db.MaxBatchSize() {
-		return fmt.Errorf("subscription record exceeds %d bytes", s.db.MaxBatchSize())
-	}
-	return s.db.Update(func(transaction *badger.Txn) error { return transaction.Set(badgerKey(item.ID), value) })
-}
-
-func (s *BadgerStore) Delete(ctx context.Context, id string) error {
-	if err := ctx.Err(); err != nil {
-		return err
-	}
-	return s.db.Update(func(transaction *badger.Txn) error { return transaction.Delete(badgerKey(id)) })
-}
-
-func (s *BadgerStore) GetActiveID(ctx context.Context) (string, error) {
-	if err := ctx.Err(); err != nil {
-		return "", err
-	}
-	var id string
-	err := s.db.View(func(transaction *badger.Txn) error {
 		item, err := transaction.Get([]byte(badgerActiveIDKey))
 		if errors.Is(err, badger.ErrKeyNotFound) {
 			return nil
@@ -136,23 +104,85 @@ func (s *BadgerStore) GetActiveID(ctx context.Context) (string, error) {
 			return err
 		}
 		return item.Value(func(value []byte) error {
-			id = string(value)
+			result.ActiveID = string(value)
 			return nil
 		})
 	})
-	return id, err
+	return result, err
 }
 
-func (s *BadgerStore) SetActiveID(ctx context.Context, id string) error {
+func (s *BadgerStore) encodeSubscription(item Subscription) ([]byte, error) {
+	if item.ID == "" {
+		return nil, ErrIDRequired
+	}
+	stored := cloneSubscription(item)
+	encoded, err := s.encode.Marshal(stored)
+	if err != nil {
+		return nil, err
+	}
+	value := append([]byte{badgerSchemaVersion}, encoded...)
+	if int64(len(value)) >= s.db.MaxBatchSize() {
+		return nil, fmt.Errorf("subscription record exceeds %d bytes", s.db.MaxBatchSize())
+	}
+	return value, nil
+}
+
+func (s *BadgerStore) Update(ctx context.Context, update func(StoreTx) error) error {
 	if err := ctx.Err(); err != nil {
 		return err
 	}
 	return s.db.Update(func(transaction *badger.Txn) error {
-		if id == "" {
-			return transaction.Delete([]byte(badgerActiveIDKey))
-		}
-		return transaction.Set([]byte(badgerActiveIDKey), []byte(id))
+		return update(badgerStoreTx{store: s, tx: transaction})
 	})
+}
+
+func (s *BadgerStore) GetMetadata(ctx context.Context, key string) ([]byte, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	var value []byte
+	err := s.db.View(func(transaction *badger.Txn) error {
+		item, err := transaction.Get(metadataKey(key))
+		if errors.Is(err, badger.ErrKeyNotFound) {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		value, err = item.ValueCopy(nil)
+		return err
+	})
+	return value, err
+}
+
+type badgerStoreTx struct {
+	store *BadgerStore
+	tx    *badger.Txn
+}
+
+func (tx badgerStoreTx) Put(item Subscription) error {
+	value, err := tx.store.encodeSubscription(item)
+	if err != nil {
+		return err
+	}
+	return tx.tx.Set(badgerKey(item.ID), value)
+}
+
+func (tx badgerStoreTx) Delete(id string) error { return tx.tx.Delete(badgerKey(id)) }
+
+func (tx badgerStoreTx) SetActiveID(id string) error {
+	if id == "" {
+		return tx.tx.Delete([]byte(badgerActiveIDKey))
+	}
+	return tx.tx.Set([]byte(badgerActiveIDKey), []byte(id))
+}
+
+func (tx badgerStoreTx) SetMetadata(key string, value []byte) error {
+	return tx.tx.Set(metadataKey(key), append([]byte(nil), value...))
+}
+
+func metadataKey(key string) []byte {
+	return []byte(badgerMetadataPrefix + base64.RawURLEncoding.EncodeToString([]byte(key)))
 }
 
 func (s *BadgerStore) decodeSubscription(value []byte) (Subscription, error) {
@@ -163,14 +193,37 @@ func (s *BadgerStore) decodeSubscription(value []byte) (Subscription, error) {
 	if err := s.decode.Unmarshal(value[1:], &item); err != nil {
 		return Subscription{}, err
 	}
-	if len(item.RawConfig) > 0 {
-		profile, err := ParseProfile(item.RawConfig)
-		if err != nil {
-			return Subscription{}, fmt.Errorf("restore subscription %q: %w", item.ID, err)
-		}
-		item.Nodes = profile.Nodes
+	if err := restoreNodeOutbounds(&item.Profile); err != nil {
+		return Subscription{}, fmt.Errorf("restore subscription %q: %w", item.ID, err)
+	}
+	if item.NodesHash == "" {
+		item.NodesHash = nodesHash(item.Profile.Nodes)
 	}
 	return item, nil
+}
+
+func restoreNodeOutbounds(profile *targetprofile.Profile) error {
+	if profile == nil {
+		return nil
+	}
+	for index := range profile.Nodes {
+		node := &profile.Nodes[index]
+		if node.Outbound != nil || len(node.OutboundJSON) == 0 {
+			continue
+		}
+		outbound, err := singjson.UnmarshalExtendedContext[option.Outbound](targetprofile.Context(), node.OutboundJSON)
+		if err != nil {
+			return err
+		}
+		node.Outbound = &outbound
+	}
+	return nil
+}
+
+func nodesHash(nodes []targetprofile.Node) string {
+	content, _ := json.Marshal(nodes)
+	sum := sha256.Sum256(content)
+	return fmt.Sprintf("%x", sum[:])
 }
 
 func badgerKey(id string) []byte {

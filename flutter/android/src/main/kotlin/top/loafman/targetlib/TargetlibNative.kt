@@ -8,7 +8,7 @@ object TargetlibNative {
     }
 
     @JvmStatic
-    external fun init(
+    external fun start(
         basePath: String,
         workingPath: String = "",
         tempPath: String = "",
@@ -20,17 +20,8 @@ object TargetlibNative {
     )
 
     @JvmStatic
-    external fun start(configJson: String): Long
-
-    @JvmStatic
-    external fun serve(): Long
-
-    @JvmStatic
     external fun setTunFd(fd: Int)
 
     @JvmStatic
-    external fun stop(handle: Long)
-
-    @JvmStatic
-    external fun freeHandle(handle: Long)
+    external fun stop()
 }

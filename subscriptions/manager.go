@@ -11,9 +11,14 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/google/uuid"
+	"golang.org/x/sync/errgroup"
+	"golang.org/x/sync/singleflight"
+
+	targetprofile "github.com/loafman1120/TargetLib/profile"
 )
 
 const (
@@ -28,24 +33,32 @@ type Options struct {
 	Now                   func() time.Time
 	DefaultUpdateInterval time.Duration
 	SchedulerTick         time.Duration
-	// Legacy HTTP injection fields.
+	// 兼容旧版的 HTTP 注入字段。
 	Client    *http.Client
 	UserAgent string
 }
 
 type Manager struct {
-	mu                             sync.RWMutex
 	fetcher                        Fetcher
 	store                          Store
 	resolver                       Resolver
 	now                            func() time.Time
 	defaultInterval, schedulerTick time.Duration
-	items                          map[string]Subscription
-	updating                       map[string]struct{}
+	snapshot                       atomic.Pointer[managerState]
+	commands                       chan stateCommand
+	coordinatorContext             context.Context
+	coordinatorCancel              context.CancelFunc
+	coordinatorDone                chan struct{}
+	runtimeCallback                atomic.Pointer[runtimeCallback]
+	updates                        singleflight.Group
+	subscribersMu                  sync.RWMutex
 	subscribers                    map[uint64]chan Event
 	nextSubscriber                 uint64
-	schedulerUpdates               sync.WaitGroup
-	activeID                       string
+	closeOnce                      sync.Once
+}
+
+type runtimeCallback struct {
+	apply func(context.Context, *Subscription) error
 }
 
 func NewManager(options Options) *Manager {
@@ -73,45 +86,51 @@ func NewManager(options Options) *Manager {
 	if tick <= 0 {
 		tick = time.Minute
 	}
-	return &Manager{fetcher: fetcher, store: store, resolver: resolver, now: now, defaultInterval: interval, schedulerTick: tick, items: make(map[string]Subscription), updating: make(map[string]struct{}), subscribers: make(map[uint64]chan Event)}
+	coordinatorContext, coordinatorCancel := context.WithCancel(context.Background())
+	m := &Manager{
+		fetcher: fetcher, store: store, resolver: resolver, now: now,
+		defaultInterval: interval, schedulerTick: tick,
+		commands: make(chan stateCommand), coordinatorContext: coordinatorContext,
+		coordinatorCancel: coordinatorCancel, coordinatorDone: make(chan struct{}),
+		subscribers: make(map[uint64]chan Event),
+	}
+	m.snapshot.Store(&managerState{items: make(map[string]Subscription)})
+	go m.runCoordinator(coordinatorContext)
+	return m
 }
 
 func (m *Manager) Load(ctx context.Context) error {
-	items, err := m.store.Load(ctx)
+	stored, err := m.store.Load(ctx)
 	if err != nil {
 		return fmt.Errorf("load subscriptions: %w", err)
 	}
-	activeID, err := m.store.GetActiveID(ctx)
-	if err != nil {
-		return fmt.Errorf("load active subscription: %w", err)
-	}
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	m.items = make(map[string]Subscription, len(items))
-	for _, item := range items {
-		if item.ID == "" {
-			continue
+	return m.submit(ctx, func(*managerState) (stateMutation, error) {
+		next := &managerState{items: make(map[string]Subscription, len(stored.Subscriptions)), activeID: stored.ActiveID}
+		for _, item := range stored.Subscriptions {
+			if item.ID == "" {
+				continue
+			}
+			if item.Status == StatusUpdating {
+				item.Status, item.Stage = StatusIdle, StageIdle
+			}
+			next.items[item.ID] = cloneSubscription(item)
 		}
-		if item.Status == StatusUpdating {
-			item.Status, item.Stage = StatusIdle, StageIdle
+		if _, ok := next.items[next.activeID]; !ok {
+			next.activeID = ""
 		}
-		m.items[item.ID] = cloneSubscription(item)
-	}
-	// Drop stale references so a removed subscription cannot stay active.
-	if activeID != "" {
-		if _, ok := m.items[activeID]; !ok {
-			activeID = ""
-		}
-	}
-	m.activeID = activeID
-	return nil
+		return stateMutation{next: next}, nil
+	})
 }
 
-func (m *Manager) Add(id, name, rawURL string) (Subscription, error) {
-	return m.AddRequest(AddRequest{ID: id, Name: name, URL: rawURL, Enabled: true, AutoUpdate: true})
+func (m *Manager) SetRuntimeChangedCallback(callback func(context.Context, *Subscription) error) {
+	if callback == nil {
+		m.runtimeCallback.Store(nil)
+		return
+	}
+	m.runtimeCallback.Store(&runtimeCallback{apply: callback})
 }
 
-func (m *Manager) AddRequest(request AddRequest) (Subscription, error) {
+func (m *Manager) AddRequest(ctx context.Context, request AddRequest) (Subscription, error) {
 	if strings.TrimSpace(request.ID) == "" {
 		request.ID = uuid.NewString()
 	}
@@ -134,70 +153,76 @@ func (m *Manager) AddRequest(request AddRequest) (Subscription, error) {
 	}
 	now := m.now()
 	item := Subscription{ID: request.ID, Name: strings.TrimSpace(request.Name), URL: request.URL, Enabled: request.Enabled, AutoUpdate: request.AutoUpdate, UpdateInterval: request.UpdateInterval, Headers: cloneStringMap(request.Headers), Status: StatusIdle, Stage: StageIdle, NextUpdateAt: now}
-	m.mu.Lock()
-	if _, exists := m.items[item.ID]; exists {
-		m.mu.Unlock()
-		return Subscription{}, fmt.Errorf("%s: %w", item.ID, ErrAlreadyExists)
-	}
-	m.items[item.ID] = item
-	err = m.store.Put(context.Background(), cloneSubscription(item))
+	err = m.submit(ctx, func(current *managerState) (stateMutation, error) {
+		if _, exists := current.items[item.ID]; exists {
+			return unchangedState(current), fmt.Errorf("%s: %w", item.ID, ErrAlreadyExists)
+		}
+		next := cloneManagerState(current)
+		next.items[item.ID] = cloneSubscription(item)
+		return stateMutation{
+			next:    next,
+			persist: func(tx StoreTx) error { return tx.Put(item) },
+			events:  []pendingEvent{{type_: EventAdded, item: item}},
+		}, nil
+	})
 	if err != nil {
-		delete(m.items, item.ID)
-		m.mu.Unlock()
 		return Subscription{}, err
 	}
-	m.mu.Unlock()
-	m.publish(EventAdded, item)
 	return cloneSubscription(item), nil
 }
 
-func (m *Manager) Remove(id string) bool {
-	m.mu.Lock()
-	item, ok := m.items[id]
-	if !ok {
-		m.mu.Unlock()
-		return false
-	}
-	delete(m.items, id)
-	err := m.store.Delete(context.Background(), id)
-	if err != nil {
-		m.items[id] = item
-		m.mu.Unlock()
-		return false
-	}
-	// Removing the active subscription clears the persisted active state.
-	if m.activeID == id {
-		m.activeID = ""
-		_ = m.store.SetActiveID(context.Background(), "")
-	}
-	m.mu.Unlock()
-	m.publish(EventRemoved, item)
-	return true
+func (m *Manager) Remove(ctx context.Context, id string) error {
+	return m.submit(ctx, func(current *managerState) (stateMutation, error) {
+		item, ok := current.items[id]
+		if !ok {
+			return unchangedState(current), fmt.Errorf("%s: %w", id, ErrNotFound)
+		}
+		next := cloneManagerState(current)
+		delete(next.items, id)
+		wasActive := next.activeID == id
+		if wasActive {
+			next.activeID = ""
+		}
+		return stateMutation{
+			next: next, runtimeChanged: wasActive,
+			persist: func(tx StoreTx) error {
+				if err := tx.Delete(id); err != nil {
+					return err
+				}
+				if wasActive {
+					return tx.SetActiveID("")
+				}
+				return nil
+			},
+			events: []pendingEvent{{type_: EventRemoved, item: item}},
+		}, nil
+	})
 }
 
-// SetActive persists which subscription is currently active. An empty id
-// clears the active subscription.
+// SetActive 持久化当前活动订阅；传入空 ID 会清除活动订阅。
 func (m *Manager) SetActive(ctx context.Context, id string) error {
 	id = strings.TrimSpace(id)
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	if id != "" {
-		if _, ok := m.items[id]; !ok {
-			return fmt.Errorf("%s: %w", id, ErrNotFound)
+	return m.submit(ctx, func(current *managerState) (stateMutation, error) {
+		if id != "" {
+			if _, ok := current.items[id]; !ok {
+				return unchangedState(current), fmt.Errorf("%s: %w", id, ErrNotFound)
+			}
 		}
-	}
-	if err := m.store.SetActiveID(ctx, id); err != nil {
-		return err
-	}
-	m.activeID = id
-	return nil
+		if current.activeID == id {
+			return unchangedState(current), nil
+		}
+		next := cloneManagerState(current)
+		next.activeID = id
+		return stateMutation{
+			next: next, runtimeChanged: true,
+			persist: func(tx StoreTx) error { return tx.SetActiveID(id) },
+		}, nil
+	})
 }
 
-// ActiveID returns the persisted active subscription id, or "" when none.
+// ActiveID 返回持久化的活动订阅 ID；没有活动订阅时返回空字符串。
 func (m *Manager) ActiveID() string {
-	m.mu.RLock()
-	defer m.mu.RUnlock()
-	return m.activeID
+	return m.snapshot.Load().activeID
 }
 
 func (m *Manager) Rename(ctx context.Context, id, name string) error {
@@ -227,16 +252,6 @@ func (m *Manager) SetEnabled(ctx context.Context, id string, enabled bool) error
 	return m.modify(ctx, id, func(item *Subscription) { item.Enabled = enabled })
 }
 
-func (m *Manager) Config(id string) ([]byte, bool) {
-	m.mu.RLock()
-	defer m.mu.RUnlock()
-	item, ok := m.items[id]
-	if !ok || len(item.RawConfig) == 0 {
-		return nil, false
-	}
-	return append([]byte(nil), item.RawConfig...), true
-}
-
 func (m *Manager) ResolvedEndpoints(enabledOnly bool) []string {
 	set := make(map[string]struct{})
 	for _, item := range m.List() {
@@ -256,17 +271,14 @@ func (m *Manager) ResolvedEndpoints(enabledOnly bool) []string {
 }
 
 func (m *Manager) Get(id string) (Subscription, bool) {
-	m.mu.RLock()
-	defer m.mu.RUnlock()
-	item, ok := m.items[id]
+	item, ok := m.snapshot.Load().items[id]
 	return cloneSubscription(item), ok
 }
 
 func (m *Manager) List() []Subscription {
-	m.mu.RLock()
-	defer m.mu.RUnlock()
-	out := make([]Subscription, 0, len(m.items))
-	for _, item := range m.items {
+	state := m.snapshot.Load()
+	out := make([]Subscription, 0, len(state.items))
+	for _, item := range state.items {
 		out = append(out, cloneSubscription(item))
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
@@ -291,20 +303,28 @@ func (m *Manager) Views() []View {
 }
 
 func (m *Manager) Update(ctx context.Context, id string) (UpdateResult, error) {
-	started := m.now()
-	current, err := m.beginUpdate(id)
-	if err != nil {
-		return UpdateResult{}, err
+	result := m.updates.DoChan(id, func() (any, error) {
+		started := m.now()
+		current, err := m.beginUpdate(ctx, id)
+		if err != nil {
+			return UpdateResult{}, err
+		}
+		return m.updateClaimed(ctx, id, current, started)
+	})
+	select {
+	case <-ctx.Done():
+		return UpdateResult{}, ctx.Err()
+	case completed := <-result:
+		if completed.Val == nil {
+			return UpdateResult{}, completed.Err
+		}
+		return completed.Val.(UpdateResult), completed.Err
 	}
-	return m.updateClaimed(ctx, id, current, started)
 }
 
-// updateClaimed runs an update after the caller has atomically claimed the
-// subscription in m.updating. This lets the scheduler claim work before
-// starting a goroutine, avoiding duplicate goroutines on each scheduler tick.
 func (m *Manager) updateClaimed(ctx context.Context, id string, current Subscription, started time.Time) (UpdateResult, error) {
-	defer m.endUpdate(id)
-	m.setStage(id, StageFetching)
+	previous := cloneSubscription(current)
+	m.setStage(ctx, id, StageFetching)
 	fetched, err := m.fetcher.Fetch(ctx, current)
 	if err != nil {
 		return m.failUpdate(ctx, current, "fetch", err, started)
@@ -320,28 +340,28 @@ func (m *Manager) updateClaimed(ctx context.Context, id string, current Subscrip
 		m.applyHeaderMetadata(&current, fetched)
 		current.UpdatedAt = m.now()
 		current.NextUpdateAt = current.UpdatedAt.Add(current.UpdateInterval)
-		if err = m.commit(ctx, current); err != nil {
+		if err = m.commit(ctx, current, previous); err != nil {
 			return UpdateResult{}, err
 		}
 		return UpdateResult{Subscription: cloneSubscription(current), NotModified: true, Duration: m.now().Sub(started)}, nil
 	}
-	m.setStage(id, StageParsing)
+	m.setStage(ctx, id, StageParsing)
 	profile, err := ParseProfile(fetched.Body)
 	if err != nil {
 		return m.failUpdate(ctx, current, "parse", err, started)
 	}
-	m.setStage(id, StageResolving)
+	m.setStage(ctx, id, StageResolving)
 	endpoints := ResolveEndpoints(ctx, m.resolver, profile.Nodes)
-	changed := current.RawHash != profile.RawHash
-	current.Nodes, current.RawConfig, current.RawHash = profile.Nodes, profile.RawConfig, profile.RawHash
+	changed := current.NodesHash != profile.NodesHash
+	current.Profile, current.NodesHash = profile.Profile, profile.NodesHash
 	current.ResolvedEndpoints = endpoints
 	current.ETag, current.LastModified = fetched.ETag, fetched.LastModified
 	current.Status, current.Stage, current.Error, current.ErrorCode = StatusReady, StageComplete, "", ""
 	m.applyHeaderMetadata(&current, fetched)
 	current.UpdatedAt = m.now()
 	current.NextUpdateAt = current.UpdatedAt.Add(current.UpdateInterval)
-	m.setStage(id, StagePersisting)
-	if err = m.commit(ctx, current); err != nil {
+	m.setStage(ctx, id, StagePersisting)
+	if err = m.commit(ctx, current, previous); err != nil {
 		return UpdateResult{}, err
 	}
 	return UpdateResult{Subscription: cloneSubscription(current), Changed: changed, Duration: m.now().Sub(started)}, nil
@@ -375,16 +395,18 @@ func (m *Manager) applyHeaderMetadata(item *Subscription, fetched FetchResponse)
 }
 
 func (m *Manager) Run(ctx context.Context) error {
+	group, groupContext := errgroup.WithContext(ctx)
+	group.SetLimit(4)
 	ticker := time.NewTicker(m.schedulerTick)
 	defer ticker.Stop()
-	m.updateDue(ctx)
+	m.updateDue(groupContext, group)
 	for {
 		select {
-		case <-ctx.Done():
-			m.schedulerUpdates.Wait()
-			return ctx.Err()
+		case <-groupContext.Done():
+			_ = group.Wait()
+			return groupContext.Err()
 		case <-ticker.C:
-			m.updateDue(ctx)
+			m.updateDue(groupContext, group)
 		}
 	}
 }
@@ -394,124 +416,110 @@ func (m *Manager) Subscribe(buffer int) (<-chan Event, func()) {
 		buffer = 1
 	}
 	channel := make(chan Event, buffer)
-	m.mu.Lock()
+	m.subscribersMu.Lock()
 	id := m.nextSubscriber
 	m.nextSubscriber++
 	m.subscribers[id] = channel
-	m.mu.Unlock()
+	m.subscribersMu.Unlock()
 	var once sync.Once
 	return channel, func() {
 		once.Do(func() {
-			m.mu.Lock()
+			m.subscribersMu.Lock()
 			if existing, ok := m.subscribers[id]; ok {
 				delete(m.subscribers, id)
 				close(existing)
 			}
-			m.mu.Unlock()
+			m.subscribersMu.Unlock()
 		})
 	}
 }
 
-func (m *Manager) beginUpdate(id string) (Subscription, error) {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	item, ok := m.items[id]
-	if !ok {
-		return Subscription{}, fmt.Errorf("%s: %w", id, ErrNotFound)
-	}
-	if _, busy := m.updating[id]; busy {
-		return Subscription{}, fmt.Errorf("%s: %w", id, ErrAlreadyUpdating)
-	}
-	current := cloneSubscription(item)
-	m.updating[id] = struct{}{}
-	item.Status, item.Stage, item.Error = StatusUpdating, StageFetching, ""
-	m.items[id] = item
-	return current, nil
-}
-func (m *Manager) endUpdate(id string) { m.mu.Lock(); delete(m.updating, id); m.mu.Unlock() }
-func (m *Manager) setStage(id string, stage UpdateStage) {
-	m.mu.Lock()
-	item, ok := m.items[id]
-	if ok {
-		item.Stage = stage
-		m.items[id] = item
-	}
-	m.mu.Unlock()
-	if ok {
-		m.publish(EventStage, item)
-	}
-}
-func (m *Manager) commit(ctx context.Context, item Subscription) error {
-	m.mu.Lock()
-	previous, existed := m.items[item.ID]
-	m.items[item.ID] = cloneSubscription(item)
-	if err := m.store.Put(ctx, cloneSubscription(item)); err != nil {
-		if existed {
-			m.items[item.ID] = previous
-		} else {
-			delete(m.items, item.ID)
+func (m *Manager) beginUpdate(ctx context.Context, id string) (Subscription, error) {
+	var result Subscription
+	err := m.submit(ctx, func(current *managerState) (stateMutation, error) {
+		item, ok := current.items[id]
+		if !ok {
+			return unchangedState(current), fmt.Errorf("%s: %w", id, ErrNotFound)
 		}
-		m.mu.Unlock()
-		return fmt.Errorf("persist subscription: %w", err)
-	}
-	m.mu.Unlock()
-	m.publish(EventUpdated, item)
-	return nil
+		result = cloneSubscription(item)
+		next := cloneManagerState(current)
+		item.Status, item.Stage, item.Error = StatusUpdating, StageFetching, ""
+		next.items[id] = item
+		return stateMutation{next: next, events: []pendingEvent{{type_: EventStage, item: item}}}, nil
+	})
+	return result, err
+}
+func (m *Manager) setStage(ctx context.Context, id string, stage UpdateStage) {
+	_ = m.submit(ctx, func(current *managerState) (stateMutation, error) {
+		item, ok := current.items[id]
+		if !ok {
+			return unchangedState(current), nil
+		}
+		next := cloneManagerState(current)
+		item.Stage = stage
+		next.items[id] = item
+		return stateMutation{next: next, events: []pendingEvent{{type_: EventStage, item: item}}}, nil
+	})
+}
+func (m *Manager) commit(ctx context.Context, item, persisted Subscription) error {
+	return m.submit(context.WithoutCancel(ctx), func(current *managerState) (stateMutation, error) {
+		previous, existed := current.items[item.ID]
+		next := cloneManagerState(current)
+		next.items[item.ID] = cloneSubscription(item)
+		failure := cloneManagerState(current)
+		failure.items[item.ID] = cloneSubscription(persisted)
+		return stateMutation{
+			next:           next,
+			failure:        failure,
+			runtimeChanged: existed && current.activeID == item.ID && previous.NodesHash != item.NodesHash,
+			persist:        func(tx StoreTx) error { return tx.Put(item) },
+			events:         []pendingEvent{{type_: EventUpdated, item: item}},
+		}, nil
+	})
 }
 func (m *Manager) failUpdate(ctx context.Context, item Subscription, code string, cause error, started time.Time) (UpdateResult, error) {
 	previous := cloneSubscription(item)
 	item.Status, item.Stage, item.ErrorCode, item.Error = StatusFailed, StageFailed, code, cause.Error()
 	item.UpdatedAt = m.now()
 	item.NextUpdateAt = item.UpdatedAt.Add(failureDelay(item.UpdateInterval))
-	if err := m.commit(ctx, item); err != nil {
+	if err := m.commit(ctx, item, previous); err != nil {
 		cause = errors.Join(cause, err)
-		m.mu.Lock()
-		m.items[item.ID] = previous
-		m.mu.Unlock()
 		item = previous
 	}
 	return UpdateResult{Subscription: cloneSubscription(item), Duration: m.now().Sub(started)}, cause
 }
 func (m *Manager) modify(ctx context.Context, id string, change func(*Subscription)) error {
-	m.mu.Lock()
-	item, ok := m.items[id]
-	if !ok {
-		m.mu.Unlock()
-		return fmt.Errorf("%s: %w", id, ErrNotFound)
-	}
-	previous := cloneSubscription(item)
-	change(&item)
-	m.items[id] = item
-	if err := m.store.Put(ctx, cloneSubscription(item)); err != nil {
-		m.items[id] = previous
-		m.mu.Unlock()
-		return err
-	}
-	m.mu.Unlock()
-	m.publish(EventUpdated, item)
-	return nil
+	return m.submit(ctx, func(current *managerState) (stateMutation, error) {
+		item, ok := current.items[id]
+		if !ok {
+			return unchangedState(current), fmt.Errorf("%s: %w", id, ErrNotFound)
+		}
+		change(&item)
+		next := cloneManagerState(current)
+		next.items[id] = item
+		return stateMutation{
+			next:    next,
+			persist: func(tx StoreTx) error { return tx.Put(item) },
+			events:  []pendingEvent{{type_: EventUpdated, item: item}},
+		}, nil
+	})
 }
-func (m *Manager) updateDue(ctx context.Context) {
+func (m *Manager) updateDue(ctx context.Context, group *errgroup.Group) {
 	now := m.now()
 	for _, item := range m.List() {
 		if item.Enabled && item.AutoUpdate && !item.NextUpdateAt.After(now) {
-			current, err := m.beginUpdate(item.ID)
-			if err != nil {
-				// A manual update or an already-running scheduled update owns it.
-				continue
-			}
-			m.schedulerUpdates.Add(1)
-			go func(id string, current Subscription) {
-				defer m.schedulerUpdates.Done()
-				_, _ = m.updateClaimed(ctx, id, current, m.now())
-			}(item.ID, current)
+			id := item.ID
+			group.Go(func() error {
+				_, _ = m.Update(ctx, id)
+				return nil
+			})
 		}
 	}
 }
 func (m *Manager) publish(eventType EventType, item Subscription) {
 	event := Event{Type: eventType, Subscription: subscriptionView(item), At: m.now()}
-	m.mu.RLock()
-	defer m.mu.RUnlock()
+	m.subscribersMu.RLock()
+	defer m.subscribersMu.RUnlock()
 	for _, channel := range m.subscribers {
 		select {
 		case channel <- event:
@@ -520,11 +528,35 @@ func (m *Manager) publish(eventType EventType, item Subscription) {
 	}
 }
 
+func (m *Manager) Close() {
+	m.closeOnce.Do(func() {
+		m.coordinatorCancel()
+		<-m.coordinatorDone
+	})
+}
+
 func subscriptionView(item Subscription) View {
-	view := View{ID: item.ID, Name: item.Name, Source: sourceHost(item.URL), Enabled: item.Enabled, AutoUpdate: item.AutoUpdate, UpdateInterval: item.UpdateInterval, Status: item.Status, Stage: item.Stage, ErrorCode: item.ErrorCode, Error: item.Error, UpdatedAt: item.UpdatedAt, NextUpdateAt: item.NextUpdateAt, UploadBytes: item.UploadBytes, DownloadBytes: item.DownloadBytes, TotalBytes: item.TotalBytes, ExpiresAt: item.ExpiresAt, Title: item.Title, WebPageURL: item.WebPageURL, SupportURL: item.SupportURL, MovedPermanentlyTo: item.MovedPermanentlyTo, Nodes: make([]NodeView, len(item.Nodes))}
-	for index, node := range item.Nodes {
-		view.Nodes[index] = NodeView{ID: node.ID, Name: node.Name, Type: node.Type, Server: node.Server, Port: node.Port, Group: node.Group, Groups: append([]string(nil), node.Groups...), Phase: node.Phase, Error: node.Error}
+	return View{ID: item.ID, Name: item.Name, Source: sourceHost(item.URL), Enabled: item.Enabled, AutoUpdate: item.AutoUpdate, UpdateInterval: item.UpdateInterval, Status: item.Status, Stage: item.Stage, ErrorCode: item.ErrorCode, Error: item.Error, UpdatedAt: item.UpdatedAt, NextUpdateAt: item.NextUpdateAt, UploadBytes: item.UploadBytes, DownloadBytes: item.DownloadBytes, TotalBytes: item.TotalBytes, ExpiresAt: item.ExpiresAt, Title: item.Title, WebPageURL: item.WebPageURL, SupportURL: item.SupportURL, MovedPermanentlyTo: item.MovedPermanentlyTo, Profile: profileView(item.Profile)}
+}
+
+func profileView(source targetprofile.Profile) ProfileView {
+	nodes := make([]NodeView, len(source.Nodes))
+	for index, node := range source.Nodes {
+		nodes[index] = NodeView{Tag: node.Name, Name: node.Name, Type: node.Type, Server: node.Server, Port: node.Port, Phase: node.Phase, Error: node.Error}
 	}
+	sort.Slice(nodes, func(i, j int) bool {
+		if nodes[i].Name != nodes[j].Name {
+			return nodes[i].Name < nodes[j].Name
+		}
+		if nodes[i].Type != nodes[j].Type {
+			return nodes[i].Type < nodes[j].Type
+		}
+		if nodes[i].Server != nodes[j].Server {
+			return nodes[i].Server < nodes[j].Server
+		}
+		return nodes[i].Port < nodes[j].Port
+	})
+	view := ProfileView{Nodes: nodes}
 	return view
 }
 

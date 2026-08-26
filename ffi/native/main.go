@@ -5,8 +5,6 @@ package main
 #include <stdint.h>
 #include <stdlib.h>
 
-typedef uint64_t targetlib_handle;
-
 typedef struct {
 	const char *base_path;
 	const char *working_path;
@@ -23,10 +21,8 @@ import "C"
 
 import (
 	"context"
-	"path/filepath"
 	"runtime"
 	"sync"
-	"sync/atomic"
 	"unsafe"
 
 	libbox "github.com/sagernet/sing-box/experimental/libbox"
@@ -35,18 +31,9 @@ import (
 	"github.com/loafman1120/TargetLib/manager"
 )
 
-type nativeService struct {
-	manager *manager.Manager
-	server  *manager.Server
-}
-
 var (
-	optionsMu   sync.RWMutex
-	currentInit manager.Options
-	initialized bool
-	nextHandle  atomic.Uint64
-	servicesMu  sync.RWMutex
-	services    = make(map[uint64]*nativeService)
+	serviceMu    sync.Mutex
+	activeServer *manager.Server
 )
 
 func main() {}
@@ -64,11 +51,16 @@ func targetlib_free_string(ptr *C.char) {
 	}
 }
 
-//export targetlib_init
-func targetlib_init(raw *C.targetlib_init_options, errOut **C.char) C.int32_t {
+//export targetlib_start
+func targetlib_start(raw *C.targetlib_init_options, errOut **C.char) C.int32_t {
 	clearErr(errOut)
 	if raw == nil {
-		return fail(errOut, "targetlib_init: nil options")
+		return fail(errOut, "targetlib_start: nil options")
+	}
+	serviceMu.Lock()
+	defer serviceMu.Unlock()
+	if activeServer != nil {
+		return fail(errOut, "targetlib_start: service is already running")
 	}
 	options := manager.Options{
 		BasePath:    cstr(raw.base_path),
@@ -79,86 +71,12 @@ func targetlib_init(raw *C.targetlib_init_options, errOut **C.char) C.int32_t {
 		Debug:       bool(raw.debug),
 		OOMKiller:   bool(raw.oom_killer_enabled) && !bool(raw.oom_killer_disabled),
 	}
-	if err := manager.Setup(options); err != nil {
-		return fail(errOut, err.Error())
-	}
-	optionsMu.Lock()
-	currentInit = options
-	initialized = true
-	optionsMu.Unlock()
-	return 0
-}
-
-//export targetlib_start
-func targetlib_start(configJSON *C.char, out *C.targetlib_handle, errOut **C.char) C.int32_t {
-	clearErr(errOut)
-	if out != nil {
-		*out = 0
-	}
-	if configJSON == nil {
-		return fail(errOut, "targetlib_start: nil config")
-	}
-	if out == nil {
-		return fail(errOut, "targetlib_start: nil handle output")
-	}
-	config := C.GoString(configJSON)
-	if config == "" {
-		return fail(errOut, "targetlib_start: empty config")
-	}
-
-	optionsMu.RLock()
-	if !initialized {
-		optionsMu.RUnlock()
-		return fail(errOut, "targetlib_start: not initialized")
-	}
-	options := currentInit
-	optionsMu.RUnlock()
-	serviceManager, server, err := manager.NewLocal(
-		context.Background(), options, filepath.Join(options.BasePath, "command.sock"),
-	)
+	_, server, err := manager.NewLocal(context.Background(), options)
 	if err != nil {
 		return fail(errOut, err.Error())
 	}
-	go func() { _ = server.Serve() }()
-	if err := serviceManager.StartConfig(config); err != nil {
-		server.Close()
-		return fail(errOut, err.Error())
-	}
-
-	handle := nextHandle.Add(1)
-	servicesMu.Lock()
-	services[handle] = &nativeService{manager: serviceManager, server: server}
-	servicesMu.Unlock()
-	*out = C.targetlib_handle(handle)
-	return 0
-}
-
-//export targetlib_serve
-func targetlib_serve(out *C.targetlib_handle, errOut **C.char) C.int32_t {
-	clearErr(errOut)
-	if out == nil {
-		return fail(errOut, "targetlib_serve: nil handle output")
-	}
-	*out = 0
-	optionsMu.RLock()
-	if !initialized {
-		optionsMu.RUnlock()
-		return fail(errOut, "targetlib_serve: not initialized")
-	}
-	options := currentInit
-	optionsMu.RUnlock()
-	serviceManager, server, err := manager.NewLocal(
-		context.Background(), options, filepath.Join(options.BasePath, "command.sock"),
-	)
-	if err != nil {
-		return fail(errOut, err.Error())
-	}
-	go func() { _ = server.Serve() }()
-	handle := nextHandle.Add(1)
-	servicesMu.Lock()
-	services[handle] = &nativeService{manager: serviceManager, server: server}
-	servicesMu.Unlock()
-	*out = C.targetlib_handle(handle)
+	activeServer = server
+	go serve(server)
 	return 0
 }
 
@@ -177,38 +95,27 @@ func targetlib_set_tun_fd(fd C.int32_t) C.int32_t {
 }
 
 //export targetlib_stop
-func targetlib_stop(handle C.targetlib_handle, errOut **C.char) C.int32_t {
+func targetlib_stop(errOut **C.char) C.int32_t {
 	clearErr(errOut)
-	service, ok := getService(uint64(handle))
-	if !ok {
-		return fail(errOut, "targetlib_stop: invalid handle")
+	serviceMu.Lock()
+	server := activeServer
+	activeServer = nil
+	serviceMu.Unlock()
+	if server == nil {
+		return 0
 	}
-	if err := service.manager.StopService(); err != nil {
-		return fail(errOut, err.Error())
-	}
+	server.Close()
 	return 0
 }
 
-//export targetlib_free_handle
-func targetlib_free_handle(handle C.targetlib_handle) C.int32_t {
-	servicesMu.Lock()
-	service, ok := services[uint64(handle)]
-	if ok {
-		delete(services, uint64(handle))
+func serve(server *manager.Server) {
+	_ = server.Serve()
+	serviceMu.Lock()
+	if activeServer == server {
+		activeServer = nil
 	}
-	servicesMu.Unlock()
-	if !ok {
-		return -1
-	}
-	service.server.Close()
-	return 0
-}
-
-func getService(handle uint64) (*nativeService, bool) {
-	servicesMu.RLock()
-	service, ok := services[handle]
-	servicesMu.RUnlock()
-	return service, ok
+	serviceMu.Unlock()
+	server.Close()
 }
 
 func cstr(value *C.char) string {
