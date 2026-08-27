@@ -365,12 +365,14 @@ class CapabilitiesResponse extends $pb.GeneratedMessage {
     $core.String? platform,
     $core.bool? platformVpn,
     $core.bool? subscriptionManagement,
+    $core.bool? realTimeTraffic,
   }) {
     final result = create();
     if (platform != null) result.platform = platform;
     if (platformVpn != null) result.platformVpn = platformVpn;
     if (subscriptionManagement != null)
       result.subscriptionManagement = subscriptionManagement;
+    if (realTimeTraffic != null) result.realTimeTraffic = realTimeTraffic;
     return result;
   }
 
@@ -390,6 +392,7 @@ class CapabilitiesResponse extends $pb.GeneratedMessage {
     ..aOS(1, _omitFieldNames ? '' : 'platform')
     ..aOB(3, _omitFieldNames ? '' : 'platformVpn')
     ..aOB(5, _omitFieldNames ? '' : 'subscriptionManagement')
+    ..aOB(6, _omitFieldNames ? '' : 'realTimeTraffic')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -437,6 +440,15 @@ class CapabilitiesResponse extends $pb.GeneratedMessage {
   $core.bool hasSubscriptionManagement() => $_has(2);
   @$pb.TagNumber(5)
   void clearSubscriptionManagement() => $_clearField(5);
+
+  @$pb.TagNumber(6)
+  $core.bool get realTimeTraffic => $_getBF(3);
+  @$pb.TagNumber(6)
+  set realTimeTraffic($core.bool value) => $_setBool(3, value);
+  @$pb.TagNumber(6)
+  $core.bool hasRealTimeTraffic() => $_has(3);
+  @$pb.TagNumber(6)
+  void clearRealTimeTraffic() => $_clearField(6);
 }
 
 class OperationResponse extends $pb.GeneratedMessage {
@@ -573,6 +585,222 @@ class ServiceState extends $pb.GeneratedMessage {
   $core.bool hasChangedAtUnixMs() => $_has(2);
   @$pb.TagNumber(3)
   void clearChangedAtUnixMs() => $_clearField(3);
+}
+
+class TrafficRequest extends $pb.GeneratedMessage {
+  factory TrafficRequest({
+    $core.int? intervalMilliseconds,
+  }) {
+    final result = create();
+    if (intervalMilliseconds != null)
+      result.intervalMilliseconds = intervalMilliseconds;
+    return result;
+  }
+
+  TrafficRequest._();
+
+  factory TrafficRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory TrafficRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'TrafficRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'targetlib'),
+      createEmptyInstance: create)
+    ..aI(1, _omitFieldNames ? '' : 'intervalMilliseconds',
+        fieldType: $pb.PbFieldType.OU3)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  TrafficRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  TrafficRequest copyWith(void Function(TrafficRequest) updates) =>
+      super.copyWith((message) => updates(message as TrafficRequest))
+          as TrafficRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static TrafficRequest create() => TrafficRequest._();
+  @$core.override
+  TrafficRequest createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static TrafficRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<TrafficRequest>(create);
+  static TrafficRequest? _defaultInstance;
+
+  /// Zero uses one second. The accepted range is 250-5000 milliseconds.
+  @$pb.TagNumber(1)
+  $core.int get intervalMilliseconds => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set intervalMilliseconds($core.int value) => $_setUnsignedInt32(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasIntervalMilliseconds() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearIntervalMilliseconds() => $_clearField(1);
+}
+
+class TrafficStatus extends $pb.GeneratedMessage {
+  factory TrafficStatus({
+    $core.bool? available,
+    $fixnum.Int64? uploadBytesPerSecond,
+    $fixnum.Int64? downloadBytesPerSecond,
+    $fixnum.Int64? uploadTotalBytes,
+    $fixnum.Int64? downloadTotalBytes,
+    $core.int? inboundConnections,
+    $core.int? outboundConnections,
+    $fixnum.Int64? sampledAtUnixMs,
+    $core.int? intervalMilliseconds,
+  }) {
+    final result = create();
+    if (available != null) result.available = available;
+    if (uploadBytesPerSecond != null)
+      result.uploadBytesPerSecond = uploadBytesPerSecond;
+    if (downloadBytesPerSecond != null)
+      result.downloadBytesPerSecond = downloadBytesPerSecond;
+    if (uploadTotalBytes != null) result.uploadTotalBytes = uploadTotalBytes;
+    if (downloadTotalBytes != null)
+      result.downloadTotalBytes = downloadTotalBytes;
+    if (inboundConnections != null)
+      result.inboundConnections = inboundConnections;
+    if (outboundConnections != null)
+      result.outboundConnections = outboundConnections;
+    if (sampledAtUnixMs != null) result.sampledAtUnixMs = sampledAtUnixMs;
+    if (intervalMilliseconds != null)
+      result.intervalMilliseconds = intervalMilliseconds;
+    return result;
+  }
+
+  TrafficStatus._();
+
+  factory TrafficStatus.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory TrafficStatus.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'TrafficStatus',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'targetlib'),
+      createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'available')
+    ..aInt64(2, _omitFieldNames ? '' : 'uploadBytesPerSecond')
+    ..aInt64(3, _omitFieldNames ? '' : 'downloadBytesPerSecond')
+    ..aInt64(4, _omitFieldNames ? '' : 'uploadTotalBytes')
+    ..aInt64(5, _omitFieldNames ? '' : 'downloadTotalBytes')
+    ..aI(6, _omitFieldNames ? '' : 'inboundConnections')
+    ..aI(7, _omitFieldNames ? '' : 'outboundConnections')
+    ..aInt64(8, _omitFieldNames ? '' : 'sampledAtUnixMs')
+    ..aI(9, _omitFieldNames ? '' : 'intervalMilliseconds',
+        fieldType: $pb.PbFieldType.OU3)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  TrafficStatus clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  TrafficStatus copyWith(void Function(TrafficStatus) updates) =>
+      super.copyWith((message) => updates(message as TrafficStatus))
+          as TrafficStatus;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static TrafficStatus create() => TrafficStatus._();
+  @$core.override
+  TrafficStatus createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static TrafficStatus getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<TrafficStatus>(create);
+  static TrafficStatus? _defaultInstance;
+
+  /// False when the runtime is stopped or its traffic manager is unavailable.
+  @$pb.TagNumber(1)
+  $core.bool get available => $_getBF(0);
+  @$pb.TagNumber(1)
+  set available($core.bool value) => $_setBool(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasAvailable() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearAvailable() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $fixnum.Int64 get uploadBytesPerSecond => $_getI64(1);
+  @$pb.TagNumber(2)
+  set uploadBytesPerSecond($fixnum.Int64 value) => $_setInt64(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasUploadBytesPerSecond() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearUploadBytesPerSecond() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $fixnum.Int64 get downloadBytesPerSecond => $_getI64(2);
+  @$pb.TagNumber(3)
+  set downloadBytesPerSecond($fixnum.Int64 value) => $_setInt64(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasDownloadBytesPerSecond() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearDownloadBytesPerSecond() => $_clearField(3);
+
+  /// Totals belong to the current sing-box runtime and reset when it restarts.
+  @$pb.TagNumber(4)
+  $fixnum.Int64 get uploadTotalBytes => $_getI64(3);
+  @$pb.TagNumber(4)
+  set uploadTotalBytes($fixnum.Int64 value) => $_setInt64(3, value);
+  @$pb.TagNumber(4)
+  $core.bool hasUploadTotalBytes() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearUploadTotalBytes() => $_clearField(4);
+
+  @$pb.TagNumber(5)
+  $fixnum.Int64 get downloadTotalBytes => $_getI64(4);
+  @$pb.TagNumber(5)
+  set downloadTotalBytes($fixnum.Int64 value) => $_setInt64(4, value);
+  @$pb.TagNumber(5)
+  $core.bool hasDownloadTotalBytes() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearDownloadTotalBytes() => $_clearField(5);
+
+  @$pb.TagNumber(6)
+  $core.int get inboundConnections => $_getIZ(5);
+  @$pb.TagNumber(6)
+  set inboundConnections($core.int value) => $_setSignedInt32(5, value);
+  @$pb.TagNumber(6)
+  $core.bool hasInboundConnections() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearInboundConnections() => $_clearField(6);
+
+  @$pb.TagNumber(7)
+  $core.int get outboundConnections => $_getIZ(6);
+  @$pb.TagNumber(7)
+  set outboundConnections($core.int value) => $_setSignedInt32(6, value);
+  @$pb.TagNumber(7)
+  $core.bool hasOutboundConnections() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearOutboundConnections() => $_clearField(7);
+
+  @$pb.TagNumber(8)
+  $fixnum.Int64 get sampledAtUnixMs => $_getI64(7);
+  @$pb.TagNumber(8)
+  set sampledAtUnixMs($fixnum.Int64 value) => $_setInt64(7, value);
+  @$pb.TagNumber(8)
+  $core.bool hasSampledAtUnixMs() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearSampledAtUnixMs() => $_clearField(8);
+
+  @$pb.TagNumber(9)
+  $core.int get intervalMilliseconds => $_getIZ(8);
+  @$pb.TagNumber(9)
+  set intervalMilliseconds($core.int value) => $_setUnsignedInt32(8, value);
+  @$pb.TagNumber(9)
+  $core.bool hasIntervalMilliseconds() => $_has(8);
+  @$pb.TagNumber(9)
+  void clearIntervalMilliseconds() => $_clearField(9);
 }
 
 class SubscriptionId extends $pb.GeneratedMessage {

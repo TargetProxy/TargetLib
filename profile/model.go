@@ -17,6 +17,8 @@ const (
 	NodeFailed     NodePhase = "failed"
 )
 
+// Node 同时保存规范化后的持久化表示和运行时类型表示；OutboundJSON
+// 不保留供应商 ALPN 等被 TargetLib 接管的字段。
 type Node struct {
 	ID           string          `json:"id"`
 	Name         string          `json:"name"`

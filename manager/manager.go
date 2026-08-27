@@ -187,6 +187,7 @@ func (m *Manager) GetCapabilities(context.Context, *emptypb.Empty) (*targetlibap
 		Platform:               runtime.GOOS,
 		PlatformVpn:            runtime.GOOS == "android" || runtime.GOOS == "ios",
 		SubscriptionManagement: true,
+		RealTimeTraffic:        true,
 	}, nil
 }
 
@@ -282,6 +283,17 @@ func (m *Manager) SubscribeState(_ *emptypb.Empty, stream grpc.ServerStreamingSe
 
 func (m *Manager) SubscribeLogs(_ *emptypb.Empty, stream grpc.ServerStreamingServer[targetlibapi.LogBatch]) error {
 	return m.started.SubscribeLog(&emptypb.Empty{}, newLogRelay(stream))
+}
+
+func (m *Manager) SubscribeTraffic(request *targetlibapi.TrafficRequest, stream grpc.ServerStreamingServer[targetlibapi.TrafficStatus]) error {
+	interval, err := trafficInterval(request.GetIntervalMilliseconds())
+	if err != nil {
+		return err
+	}
+	return m.started.SubscribeStatus(
+		&daemon.SubscribeStatusRequest{Interval: int64(interval)},
+		newTrafficRelay(stream, interval),
+	)
 }
 
 // UpdateSubscription adds a one-shot generated configuration to the update
@@ -470,8 +482,18 @@ type logRelay struct {
 	server grpc.ServerStreamingServer[targetlibapi.LogBatch]
 }
 
+type trafficRelay struct {
+	streamRelay
+	server   grpc.ServerStreamingServer[targetlibapi.TrafficStatus]
+	interval time.Duration
+}
+
 func newLogRelay(server grpc.ServerStreamingServer[targetlibapi.LogBatch]) *logRelay {
 	return &logRelay{streamRelay: streamRelay{target: server}, server: server}
+}
+
+func newTrafficRelay(server grpc.ServerStreamingServer[targetlibapi.TrafficStatus], interval time.Duration) *trafficRelay {
+	return &trafficRelay{streamRelay: streamRelay{target: server}, server: server, interval: interval}
 }
 
 func (r *logRelay) Send(value *daemon.Log) error {
@@ -494,6 +516,48 @@ func (r *logRelay) Send(value *daemon.Log) error {
 
 func (r *statusRelay) Send(value *daemon.ServiceStatus) error {
 	return r.server.Send(managerState(value))
+}
+
+func (r *trafficRelay) Send(value *daemon.Status) error {
+	return r.server.Send(trafficStatus(value, r.interval, time.Now()))
+}
+
+const (
+	defaultTrafficInterval = time.Second
+	minimumTrafficInterval = 250 * time.Millisecond
+	maximumTrafficInterval = 5 * time.Second
+)
+
+func trafficInterval(milliseconds uint32) (time.Duration, error) {
+	if milliseconds == 0 {
+		return defaultTrafficInterval, nil
+	}
+	interval := time.Duration(milliseconds) * time.Millisecond
+	if interval < minimumTrafficInterval || interval > maximumTrafficInterval {
+		return 0, status.Errorf(codes.InvalidArgument, "interval_milliseconds must be between %d and %d", minimumTrafficInterval.Milliseconds(), maximumTrafficInterval.Milliseconds())
+	}
+	return interval, nil
+}
+
+func trafficStatus(source *daemon.Status, interval time.Duration, sampledAt time.Time) *targetlibapi.TrafficStatus {
+	return &targetlibapi.TrafficStatus{
+		Available:              source.GetTrafficAvailable(),
+		UploadBytesPerSecond:   bytesPerSecond(source.GetUplink(), interval),
+		DownloadBytesPerSecond: bytesPerSecond(source.GetDownlink(), interval),
+		UploadTotalBytes:       source.GetUplinkTotal(),
+		DownloadTotalBytes:     source.GetDownlinkTotal(),
+		InboundConnections:     source.GetConnectionsIn(),
+		OutboundConnections:    source.GetConnectionsOut(),
+		SampledAtUnixMs:        sampledAt.UnixMilli(),
+		IntervalMilliseconds:   uint32(interval.Milliseconds()),
+	}
+}
+
+func bytesPerSecond(bytes int64, interval time.Duration) int64 {
+	if bytes <= 0 || interval <= 0 {
+		return 0
+	}
+	return int64(float64(bytes) / interval.Seconds())
 }
 
 func projectVersion() string {

@@ -1,8 +1,6 @@
 package config
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"net/netip"
 	"os"
@@ -107,40 +105,10 @@ func Emit(plan Blueprint) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	content, err = stripALPN(content)
-	if err != nil {
-		return nil, fmt.Errorf("strip ALPN from generated config: %w", err)
-	}
 	if err := validateConfig(content); err != nil {
 		return nil, fmt.Errorf("validate generated config: %w", err)
 	}
 	return content, nil
-}
-
-// stripALPN removes provider ALPN restrictions from every generated section.
-func stripALPN(content []byte) ([]byte, error) {
-	var document any
-	decoder := json.NewDecoder(bytes.NewReader(content))
-	decoder.UseNumber()
-	if err := decoder.Decode(&document); err != nil {
-		return nil, err
-	}
-	deleteJSONField(document, "alpn")
-	return json.Marshal(document)
-}
-
-func deleteJSONField(value any, field string) {
-	switch typed := value.(type) {
-	case map[string]any:
-		delete(typed, field)
-		for _, child := range typed {
-			deleteJSONField(child, field)
-		}
-	case []any:
-		for _, child := range typed {
-			deleteJSONField(child, field)
-		}
-	}
 }
 
 // Build 保留稳定的公开入口。

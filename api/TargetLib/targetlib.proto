@@ -15,6 +15,7 @@ service TargetLib {
   rpc GetState(google.protobuf.Empty) returns (ServiceState);
   rpc SubscribeState(google.protobuf.Empty) returns (stream ServiceState);
   rpc SubscribeLogs(google.protobuf.Empty) returns (stream LogBatch);
+  rpc SubscribeTraffic(TrafficRequest) returns (stream TrafficStatus);
   rpc SelectOutbound(SelectOutboundRequest) returns (google.protobuf.Empty);
   rpc CloseConnection(CloseConnectionRequest) returns (google.protobuf.Empty);
   rpc CloseAllConnections(google.protobuf.Empty) returns (google.protobuf.Empty);
@@ -89,6 +90,7 @@ message CapabilitiesResponse {
   bool platform_vpn = 3;
   reserved 4;
   bool subscription_management = 5;
+  bool real_time_traffic = 6;
 }
 
 message OperationResponse {
@@ -108,6 +110,25 @@ message ServiceState {
   ServiceStateType state = 1;
   string error_message = 2;
   int64 changed_at_unix_ms = 3;
+}
+
+message TrafficRequest {
+  // Zero uses one second. The accepted range is 250-5000 milliseconds.
+  uint32 interval_milliseconds = 1;
+}
+
+message TrafficStatus {
+  // False when the runtime is stopped or its traffic manager is unavailable.
+  bool available = 1;
+  int64 upload_bytes_per_second = 2;
+  int64 download_bytes_per_second = 3;
+  // Totals belong to the current sing-box runtime and reset when it restarts.
+  int64 upload_total_bytes = 4;
+  int64 download_total_bytes = 5;
+  int32 inbound_connections = 6;
+  int32 outbound_connections = 7;
+  int64 sampled_at_unix_ms = 8;
+  uint32 interval_milliseconds = 9;
 }
 
 message SubscriptionId {

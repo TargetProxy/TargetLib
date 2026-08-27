@@ -294,6 +294,7 @@ const CapabilitiesResponse$json = {
       '5': 8,
       '10': 'subscriptionManagement'
     },
+    {'1': 'real_time_traffic', '3': 6, '4': 1, '5': 8, '10': 'realTimeTraffic'},
   ],
   '9': [
     {'1': 2, '2': 3},
@@ -306,8 +307,8 @@ const CapabilitiesResponse$json = {
 final $typed_data.Uint8List capabilitiesResponseDescriptor = $convert.base64Decode(
     'ChRDYXBhYmlsaXRpZXNSZXNwb25zZRIaCghwbGF0Zm9ybRgBIAEoCVIIcGxhdGZvcm0SIQoMcG'
     'xhdGZvcm1fdnBuGAMgASgIUgtwbGF0Zm9ybVZwbhI3ChdzdWJzY3JpcHRpb25fbWFuYWdlbWVu'
-    'dBgFIAEoCFIWc3Vic2NyaXB0aW9uTWFuYWdlbWVudEoECAIQA0oECAQQBVIMc3lzdGVtX3Byb3'
-    'h5');
+    'dBgFIAEoCFIWc3Vic2NyaXB0aW9uTWFuYWdlbWVudBIqChFyZWFsX3RpbWVfdHJhZmZpYxgGIA'
+    'EoCFIPcmVhbFRpbWVUcmFmZmljSgQIAhADSgQIBBAFUgxzeXN0ZW1fcHJveHk=');
 
 @$core.Deprecated('Use operationResponseDescriptor instead')
 const OperationResponse$json = {
@@ -357,6 +358,101 @@ final $typed_data.Uint8List serviceStateDescriptor = $convert.base64Decode(
     'CgxTZXJ2aWNlU3RhdGUSMQoFc3RhdGUYASABKA4yGy50YXJnZXRsaWIuU2VydmljZVN0YXRlVH'
     'lwZVIFc3RhdGUSIwoNZXJyb3JfbWVzc2FnZRgCIAEoCVIMZXJyb3JNZXNzYWdlEisKEmNoYW5n'
     'ZWRfYXRfdW5peF9tcxgDIAEoA1IPY2hhbmdlZEF0VW5peE1z');
+
+@$core.Deprecated('Use trafficRequestDescriptor instead')
+const TrafficRequest$json = {
+  '1': 'TrafficRequest',
+  '2': [
+    {
+      '1': 'interval_milliseconds',
+      '3': 1,
+      '4': 1,
+      '5': 13,
+      '10': 'intervalMilliseconds'
+    },
+  ],
+};
+
+/// Descriptor for `TrafficRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List trafficRequestDescriptor = $convert.base64Decode(
+    'Cg5UcmFmZmljUmVxdWVzdBIzChVpbnRlcnZhbF9taWxsaXNlY29uZHMYASABKA1SFGludGVydm'
+    'FsTWlsbGlzZWNvbmRz');
+
+@$core.Deprecated('Use trafficStatusDescriptor instead')
+const TrafficStatus$json = {
+  '1': 'TrafficStatus',
+  '2': [
+    {'1': 'available', '3': 1, '4': 1, '5': 8, '10': 'available'},
+    {
+      '1': 'upload_bytes_per_second',
+      '3': 2,
+      '4': 1,
+      '5': 3,
+      '10': 'uploadBytesPerSecond'
+    },
+    {
+      '1': 'download_bytes_per_second',
+      '3': 3,
+      '4': 1,
+      '5': 3,
+      '10': 'downloadBytesPerSecond'
+    },
+    {
+      '1': 'upload_total_bytes',
+      '3': 4,
+      '4': 1,
+      '5': 3,
+      '10': 'uploadTotalBytes'
+    },
+    {
+      '1': 'download_total_bytes',
+      '3': 5,
+      '4': 1,
+      '5': 3,
+      '10': 'downloadTotalBytes'
+    },
+    {
+      '1': 'inbound_connections',
+      '3': 6,
+      '4': 1,
+      '5': 5,
+      '10': 'inboundConnections'
+    },
+    {
+      '1': 'outbound_connections',
+      '3': 7,
+      '4': 1,
+      '5': 5,
+      '10': 'outboundConnections'
+    },
+    {
+      '1': 'sampled_at_unix_ms',
+      '3': 8,
+      '4': 1,
+      '5': 3,
+      '10': 'sampledAtUnixMs'
+    },
+    {
+      '1': 'interval_milliseconds',
+      '3': 9,
+      '4': 1,
+      '5': 13,
+      '10': 'intervalMilliseconds'
+    },
+  ],
+};
+
+/// Descriptor for `TrafficStatus`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List trafficStatusDescriptor = $convert.base64Decode(
+    'Cg1UcmFmZmljU3RhdHVzEhwKCWF2YWlsYWJsZRgBIAEoCFIJYXZhaWxhYmxlEjUKF3VwbG9hZF'
+    '9ieXRlc19wZXJfc2Vjb25kGAIgASgDUhR1cGxvYWRCeXRlc1BlclNlY29uZBI5Chlkb3dubG9h'
+    'ZF9ieXRlc19wZXJfc2Vjb25kGAMgASgDUhZkb3dubG9hZEJ5dGVzUGVyU2Vjb25kEiwKEnVwbG'
+    '9hZF90b3RhbF9ieXRlcxgEIAEoA1IQdXBsb2FkVG90YWxCeXRlcxIwChRkb3dubG9hZF90b3Rh'
+    'bF9ieXRlcxgFIAEoA1ISZG93bmxvYWRUb3RhbEJ5dGVzEi8KE2luYm91bmRfY29ubmVjdGlvbn'
+    'MYBiABKAVSEmluYm91bmRDb25uZWN0aW9ucxIxChRvdXRib3VuZF9jb25uZWN0aW9ucxgHIAEo'
+    'BVITb3V0Ym91bmRDb25uZWN0aW9ucxIrChJzYW1wbGVkX2F0X3VuaXhfbXMYCCABKANSD3NhbX'
+    'BsZWRBdFVuaXhNcxIzChVpbnRlcnZhbF9taWxsaXNlY29uZHMYCSABKA1SFGludGVydmFsTWls'
+    'bGlzZWNvbmRz');
 
 @$core.Deprecated('Use subscriptionIdDescriptor instead')
 const SubscriptionId$json = {

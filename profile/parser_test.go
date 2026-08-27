@@ -3,6 +3,8 @@ package profile
 import (
 	"strings"
 	"testing"
+
+	"github.com/sagernet/sing-box/option"
 )
 
 func TestParseProducesNodeOnlyProfile(t *testing.T) {
@@ -113,6 +115,33 @@ func TestParseSkipsRemovedOutboundsAndSanitizesLegacyTLS(t *testing.T) {
 	}
 	if got := string(node.OutboundJSON); strings.Contains(got, "pq_signature_schemes_enabled") || strings.Contains(got, "chrome_pq") {
 		t.Fatalf("legacy TLS fields were not sanitized: %s", got)
+	}
+}
+
+func TestParseRemovesProviderALPNFromPersistedAndTypedOutbounds(t *testing.T) {
+	parsed, err := Parse([]byte(`{
+		"outbounds":[{
+			"type":"anytls",
+			"tag":"Hong Kong",
+			"server":"example.com",
+			"server_port":443,
+			"password":"secret",
+			"tls":{"enabled":true,"server_name":"example.com","alpn":["h3"]}
+		}]
+	}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	node := parsed.Profile.Nodes[0]
+	if strings.Contains(string(node.OutboundJSON), `"alpn"`) {
+		t.Fatalf("persisted outbound still contains ALPN: %s", node.OutboundJSON)
+	}
+	wrapper, ok := node.Outbound.Options.(option.OutboundTLSOptionsWrapper)
+	if !ok {
+		t.Fatalf("typed outbound %T does not expose TLS options", node.Outbound.Options)
+	}
+	if tls := wrapper.TakeOutboundTLSOptions(); tls == nil || tls.ALPN != nil {
+		t.Fatalf("typed outbound ALPN was not cleared: %+v", tls)
 	}
 }
 

@@ -102,6 +102,13 @@ final class TargetLibConnection {
 
   Future<ServiceState> state() => client.getState(Empty(), options: options);
 
+  ResponseStream<TrafficStatus> subscribeTraffic({
+    Duration interval = const Duration(seconds: 1),
+  }) => client.subscribeTraffic(
+    TrafficRequest(intervalMilliseconds: interval.inMilliseconds),
+    options: options,
+  );
+
   Future<RuntimeConfig> getRuntimeConfig() =>
       client.getRuntimeConfig(Empty(), options: options);
 

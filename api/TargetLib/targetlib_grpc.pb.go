@@ -28,6 +28,7 @@ const (
 	TargetLib_GetState_FullMethodName                     = "/targetlib.TargetLib/GetState"
 	TargetLib_SubscribeState_FullMethodName               = "/targetlib.TargetLib/SubscribeState"
 	TargetLib_SubscribeLogs_FullMethodName                = "/targetlib.TargetLib/SubscribeLogs"
+	TargetLib_SubscribeTraffic_FullMethodName             = "/targetlib.TargetLib/SubscribeTraffic"
 	TargetLib_SelectOutbound_FullMethodName               = "/targetlib.TargetLib/SelectOutbound"
 	TargetLib_CloseConnection_FullMethodName              = "/targetlib.TargetLib/CloseConnection"
 	TargetLib_CloseAllConnections_FullMethodName          = "/targetlib.TargetLib/CloseAllConnections"
@@ -62,6 +63,7 @@ type TargetLibClient interface {
 	GetState(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ServiceState, error)
 	SubscribeState(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ServiceState], error)
 	SubscribeLogs(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[LogBatch], error)
+	SubscribeTraffic(ctx context.Context, in *TrafficRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[TrafficStatus], error)
 	SelectOutbound(ctx context.Context, in *SelectOutboundRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	CloseConnection(ctx context.Context, in *CloseConnectionRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	CloseAllConnections(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
@@ -194,6 +196,25 @@ func (c *targetLibClient) SubscribeLogs(ctx context.Context, in *emptypb.Empty, 
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type TargetLib_SubscribeLogsClient = grpc.ServerStreamingClient[LogBatch]
+
+func (c *targetLibClient) SubscribeTraffic(ctx context.Context, in *TrafficRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[TrafficStatus], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &TargetLib_ServiceDesc.Streams[2], TargetLib_SubscribeTraffic_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[TrafficRequest, TrafficStatus]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type TargetLib_SubscribeTrafficClient = grpc.ServerStreamingClient[TrafficStatus]
 
 func (c *targetLibClient) SelectOutbound(ctx context.Context, in *SelectOutboundRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
@@ -337,7 +358,7 @@ func (c *targetLibClient) TestOutbound(ctx context.Context, in *TestOutboundRequ
 
 func (c *targetLibClient) TestOutbounds(ctx context.Context, in *TestOutboundsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[LatencyTestResult], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &TargetLib_ServiceDesc.Streams[2], TargetLib_TestOutbounds_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &TargetLib_ServiceDesc.Streams[3], TargetLib_TestOutbounds_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -366,7 +387,7 @@ func (c *targetLibClient) GetResolvedEndpoints(ctx context.Context, in *Resolved
 
 func (c *targetLibClient) SubscribeSubscriptionEvents(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[SubscriptionEvent], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &TargetLib_ServiceDesc.Streams[3], TargetLib_SubscribeSubscriptionEvents_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &TargetLib_ServiceDesc.Streams[4], TargetLib_SubscribeSubscriptionEvents_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -425,6 +446,7 @@ type TargetLibServer interface {
 	GetState(context.Context, *emptypb.Empty) (*ServiceState, error)
 	SubscribeState(*emptypb.Empty, grpc.ServerStreamingServer[ServiceState]) error
 	SubscribeLogs(*emptypb.Empty, grpc.ServerStreamingServer[LogBatch]) error
+	SubscribeTraffic(*TrafficRequest, grpc.ServerStreamingServer[TrafficStatus]) error
 	SelectOutbound(context.Context, *SelectOutboundRequest) (*emptypb.Empty, error)
 	CloseConnection(context.Context, *CloseConnectionRequest) (*emptypb.Empty, error)
 	CloseAllConnections(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
@@ -483,6 +505,9 @@ func (UnimplementedTargetLibServer) SubscribeState(*emptypb.Empty, grpc.ServerSt
 }
 func (UnimplementedTargetLibServer) SubscribeLogs(*emptypb.Empty, grpc.ServerStreamingServer[LogBatch]) error {
 	return status.Error(codes.Unimplemented, "method SubscribeLogs not implemented")
+}
+func (UnimplementedTargetLibServer) SubscribeTraffic(*TrafficRequest, grpc.ServerStreamingServer[TrafficStatus]) error {
+	return status.Error(codes.Unimplemented, "method SubscribeTraffic not implemented")
 }
 func (UnimplementedTargetLibServer) SelectOutbound(context.Context, *SelectOutboundRequest) (*emptypb.Empty, error) {
 	return nil, status.Error(codes.Unimplemented, "method SelectOutbound not implemented")
@@ -694,6 +719,17 @@ func _TargetLib_SubscribeLogs_Handler(srv interface{}, stream grpc.ServerStream)
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type TargetLib_SubscribeLogsServer = grpc.ServerStreamingServer[LogBatch]
+
+func _TargetLib_SubscribeTraffic_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(TrafficRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(TargetLibServer).SubscribeTraffic(m, &grpc.GenericServerStream[TrafficRequest, TrafficStatus]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type TargetLib_SubscribeTrafficServer = grpc.ServerStreamingServer[TrafficStatus]
 
 func _TargetLib_SelectOutbound_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(SelectOutboundRequest)
@@ -1154,6 +1190,11 @@ var TargetLib_ServiceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "SubscribeLogs",
 			Handler:       _TargetLib_SubscribeLogs_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "SubscribeTraffic",
+			Handler:       _TargetLib_SubscribeTraffic_Handler,
 			ServerStreams: true,
 		},
 		{

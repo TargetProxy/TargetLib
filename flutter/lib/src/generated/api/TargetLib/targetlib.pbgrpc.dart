@@ -93,6 +93,15 @@ class TargetLibClient extends $grpc.Client {
         options: options);
   }
 
+  $grpc.ResponseStream<$1.TrafficStatus> subscribeTraffic(
+    $1.TrafficRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createStreamingCall(
+        _$subscribeTraffic, $async.Stream.fromIterable([request]),
+        options: options);
+  }
+
   $grpc.ResponseFuture<$0.Empty> selectOutbound(
     $1.SelectOutboundRequest request, {
     $grpc.CallOptions? options,
@@ -279,6 +288,11 @@ class TargetLibClient extends $grpc.Client {
       '/targetlib.TargetLib/SubscribeLogs',
       ($0.Empty value) => value.writeToBuffer(),
       $1.LogBatch.fromBuffer);
+  static final _$subscribeTraffic =
+      $grpc.ClientMethod<$1.TrafficRequest, $1.TrafficStatus>(
+          '/targetlib.TargetLib/SubscribeTraffic',
+          ($1.TrafficRequest value) => value.writeToBuffer(),
+          $1.TrafficStatus.fromBuffer);
   static final _$selectOutbound =
       $grpc.ClientMethod<$1.SelectOutboundRequest, $0.Empty>(
           '/targetlib.TargetLib/SelectOutbound',
@@ -440,6 +454,13 @@ abstract class TargetLibServiceBase extends $grpc.Service {
         true,
         ($core.List<$core.int> value) => $0.Empty.fromBuffer(value),
         ($1.LogBatch value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$1.TrafficRequest, $1.TrafficStatus>(
+        'SubscribeTraffic',
+        subscribeTraffic_Pre,
+        false,
+        true,
+        ($core.List<$core.int> value) => $1.TrafficRequest.fromBuffer(value),
+        ($1.TrafficStatus value) => value.writeToBuffer()));
     $addMethod($grpc.ServiceMethod<$1.SelectOutboundRequest, $0.Empty>(
         'SelectOutbound',
         selectOutbound_Pre,
@@ -666,6 +687,14 @@ abstract class TargetLibServiceBase extends $grpc.Service {
 
   $async.Stream<$1.LogBatch> subscribeLogs(
       $grpc.ServiceCall call, $0.Empty request);
+
+  $async.Stream<$1.TrafficStatus> subscribeTraffic_Pre($grpc.ServiceCall $call,
+      $async.Future<$1.TrafficRequest> $request) async* {
+    yield* subscribeTraffic($call, await $request);
+  }
+
+  $async.Stream<$1.TrafficStatus> subscribeTraffic(
+      $grpc.ServiceCall call, $1.TrafficRequest request);
 
   $async.Future<$0.Empty> selectOutbound_Pre($grpc.ServiceCall $call,
       $async.Future<$1.SelectOutboundRequest> $request) async {

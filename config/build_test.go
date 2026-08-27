@@ -6,6 +6,8 @@ import (
 	"testing"
 
 	targetprofile "github.com/loafman1120/TargetLib/profile"
+	"github.com/sagernet/sing-box/option"
+	"github.com/sagernet/sing/common/json/badoption"
 )
 
 func TestTunModeDoesNotCreateMixedInbound(t *testing.T) {
@@ -324,12 +326,22 @@ func TestBuildRemovesALPNFromAnyTLS(t *testing.T) {
 	}
 }
 
-func TestStripALPNRecursively(t *testing.T) {
-	content, err := stripALPN([]byte(`{
-		"outbounds":[{"tls":{"alpn":["h3"],"enabled":true}}],
-		"endpoints":[{"nested":{"alpn":"h2"}}],
-		"alpn":["http/1.1"]
-	}`))
+func TestEmitPreservesTargetOwnedALPN(t *testing.T) {
+	content, err := Emit(Blueprint{
+		Outbounds: []option.Outbound{{
+			Type: "anytls",
+			Tag:  "target-owned",
+			Options: &option.AnyTLSOutboundOptions{
+				ServerOptions: option.ServerOptions{Server: "example.com", ServerPort: 443},
+				OutboundTLSOptionsContainer: option.OutboundTLSOptionsContainer{TLS: &option.OutboundTLSOptions{
+					Enabled: true, ServerName: "example.com", ALPN: badoption.Listable[string]{"h3"},
+				}},
+				Password: "secret",
+			},
+		}},
+		Route:   RoutePlan{Final: "target-owned"},
+		Runtime: planRuntime(Settings{}),
+	})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -337,8 +349,8 @@ func TestStripALPNRecursively(t *testing.T) {
 	if err := json.Unmarshal(content, &document); err != nil {
 		t.Fatal(err)
 	}
-	if hasJSONField(document, "alpn") {
-		t.Fatalf("nested ALPN survived: %s", content)
+	if !hasJSONField(document, "alpn") {
+		t.Fatalf("Emit rewrote TargetLib-owned ALPN: %s", content)
 	}
 }
 

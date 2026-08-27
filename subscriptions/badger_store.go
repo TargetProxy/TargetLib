@@ -13,8 +13,6 @@ import (
 	badgeroptions "github.com/dgraph-io/badger/v4/options"
 	"github.com/fxamacker/cbor/v2"
 	targetprofile "github.com/loafman1120/TargetLib/profile"
-	"github.com/sagernet/sing-box/option"
-	singjson "github.com/sagernet/sing/common/json"
 )
 
 const (
@@ -193,31 +191,33 @@ func (s *BadgerStore) decodeSubscription(value []byte) (Subscription, error) {
 	if err := s.decode.Unmarshal(value[1:], &item); err != nil {
 		return Subscription{}, err
 	}
-	if err := restoreNodeOutbounds(&item.Profile); err != nil {
+	normalized, err := restoreNodeOutbounds(&item.Profile)
+	if err != nil {
 		return Subscription{}, fmt.Errorf("restore subscription %q: %w", item.ID, err)
 	}
-	if item.NodesHash == "" {
+	if normalized || item.NodesHash == "" {
 		item.NodesHash = nodesHash(item.Profile.Nodes)
 	}
 	return item, nil
 }
 
-func restoreNodeOutbounds(profile *targetprofile.Profile) error {
+func restoreNodeOutbounds(profile *targetprofile.Profile) (bool, error) {
 	if profile == nil {
-		return nil
+		return false, nil
 	}
+	normalized := false
 	for index := range profile.Nodes {
 		node := &profile.Nodes[index]
 		if node.Outbound != nil || len(node.OutboundJSON) == 0 {
 			continue
 		}
-		outbound, err := singjson.UnmarshalExtendedContext[option.Outbound](targetprofile.Context(), node.OutboundJSON)
+		changed, err := targetprofile.RestoreNodeOutbound(node)
 		if err != nil {
-			return err
+			return false, err
 		}
-		node.Outbound = &outbound
+		normalized = normalized || changed
 	}
-	return nil
+	return normalized, nil
 }
 
 func nodesHash(nodes []targetprofile.Node) string {

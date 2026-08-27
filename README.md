@@ -1,81 +1,42 @@
-# TargetLib
+# 🎯 TargetLib
 
-TargetLib 是跨平台的 sing-box 管理库。Windows、Linux、macOS、Android 和 iOS 共享同一份 Go 核心与 gRPC 协议；native FFI
-只负责启动本地服务。
+![License: GPL](https://img.shields.io/badge/License-GPL-blue.svg)
+![Platform: Cross-platform](https://img.shields.io/badge/Platform-Win%20%7C%20Mac%20%7C%20Linux%20%7C%20iOS%20%7C%20Android-lightgrey.svg)
+![Tech Stack: Go & Flutter](https://img.shields.io/badge/Tech-Go%20%7C%20gRPC%20%7C%20Flutter-00ADD8.svg)
 
-控制面只监听本机，通过 `<basePath>/targetlib.sock` 提供 gRPC，TCP 回退地址为 `127.0.0.1:19090`。不启用 TLS 或鉴权，也不监听局域网接口。
+**TargetLib** 是一个专为 `sing-box` 打造的跨平台核心管理库。它通过统一的 **Go 语言核心**、高效的 **gRPC 控制接口**以及完善的 **Flutter 绑定**，为 Windows、Linux、macOS、Android 和 iOS 提供了一套无缝衔接的解决方案。
 
-## 目录
+---
 
-```text
-api/TargetLib/   gRPC 协议
-cmd/TargetLib/   桌面 daemon
-ffi/native/      C ABI
-manager/         生命周期与运行时状态
-profile/         订阅配置中间态（IR）
-config/          Profile + Settings -> sing-box 配置
-subscriptions/   订阅存储、更新与节点解析
-flutter/         Flutter 插件与示例
-scripts/         桌面构建和 Windows 服务重装脚本
-```
+## ✨ 核心职责
 
-配置生成采用一次规划、一次输出的流程：
+TargetLib 全面接管了底层网络代理的复杂性，为您提供开箱即用的运行时能力：
 
-```text
-Profile + Settings -> config.Plan -> Blueprint -> config.Emit -> sing-box JSON
-```
+*   📦 **订阅管理**：负责订阅配置的添加、更新、本地持久化以及节点信息的深度解析。
+*   ⚙️ **配置引擎**：根据应用设置与解析出的订阅节点，动态生成安全、受控的 `sing-box` 配置文件。
+*   🚀 **生命周期与监控**：全面管理 `sing-box` 的启动、停止与配置热加载（Hot-Reload），并实时接管运行状态、日志输出和流量统计。
+*   🌐 **跨平台一致性**：抹平系统差异，确保无论是桌面端还是移动端，都能获得完全一致的 API 体验与运行时能力。
 
-订阅运行配置只提供节点数据。DNS、路由规则、rule-set、入站、服务商 selector/urltest 分组和运行时选项均不透传，
-而是由 TargetLib 从零生成；`direct`、`urltest`、`proxy` 由 TargetLib 统一构建。前端看到的国家、协议、延迟等分组
-都应该是基于节点列表的视图分组，而不是服务商配置里的真实 group。
+---
 
-`ProfileView` 是面向前端的 node-only 读模型。每个节点会尽量从节点名推断 ISO 3166-1 alpha-2 `country_code`：
-优先识别国旗 emoji，其次匹配常见国家、地区和城市别名；无法判断时保持为空，由前端决定是否展示为未知地区。
-`ProfileNode.tag` 暴露稳定的节点 ID，并且运行时 outbound tag 也使用同一个 ID；`name` 只作为展示名使用。
+## 💡 架构理念：配置隔离
 
-## 开发
+> **核心原则：订阅仅用于提供代理节点。**
 
-依赖 Go 1.26 或更高版本。修改 proto 时还需要 protoc、protoc-gen-go、protoc-gen-go-grpc 和 protoc-gen-dart。
+为了确保客户端行为的绝对受控与纯净，TargetLib 采用了**“配置隔离”**的设计哲学：
+所有的入站（Inbounds）、DNS 解析、路由规则（Routing）、以及 `direct`、`urltest`、`proxy` 等运行时策略，均由 TargetLib **自主接管并生成**。本库**绝不直接透传**服务商下发的原始配置，从而避免未知规则对本地环境的污染。
 
-sing-box 的 HTTP/2 transport 需要测试标签 `http2legacy with_clash_api`，不要直接运行不带标签的 `go test ./...`。
+供应商节点在进入持久化中间态前会统一规范化，包括移除供应商限定的 ALPN；最终配置输出只执行一次序列化和一次 sing-box 配置校验。
 
-构建桌面 daemon：
+---
 
-```powershell
-.\scripts\build.ps1
-```
+## 📖 文档与设计
 
-默认输出 `build/TargetLib.exe`。也可以指定路径或跳过 Windows Target 同步：
+关于详细的系统架构图与完整的订阅处理流程，请参阅设计文档：
+👉 **[docs/DESIGN.md](docs/DESIGN.md)**
 
-```powershell
-.\scripts\build.ps1 -OutputPath dist/TargetLib.exe -DebugBuild
-.\scripts\build.ps1 -SkipTargetSync
-```
+---
 
-Windows 开发时可用一条命令构建并重装服务。脚本会迁移现有服务参数、自动请求一次 UAC，
-并在安装失败时尝试恢复旧二进制和服务：
+## 📄 开源协议
 
-```powershell
-.\scripts\reinstall-service.ps1
-```
-
-常用选项：
-
-```powershell
-.\scripts\reinstall-service.ps1 -WhatIf             # 只查看重装计划
-.\scripts\reinstall-service.ps1 -SkipBuild          # 使用 build/TargetLib.exe
-.\scripts\reinstall-service.ps1 -NoStart -KeepBackup
-```
-
-## 运行
-
-```powershell
-.\build\TargetLib.exe --base-path ./run --log-max-lines 300
-```
-
-宿主调用 `targetlib_start` 后连接 gRPC；运行配置、生命周期、日志、订阅和端点查询均通过 `api/TargetLib/targetlib.proto` 定义的
-`TargetLib` service 完成。
-
-## 许可证
-
-GPL
+本项目基于 **GPL** (GNU General Public License) 协议开源。
