@@ -32,55 +32,52 @@ func Parse(raw []byte) (Parsed, error) {
 		return Parsed{}, errors.New("parse profile JSON: not a JSON object")
 	}
 
-	typedContent, err := json.Marshal(map[string]any{
-		"outbounds": document["outbounds"],
-	})
-	if err != nil {
-		return Parsed{}, fmt.Errorf("normalize profile JSON: %w", err)
-	}
-	options, err := singjson.UnmarshalExtendedContext[option.Options](Context(), typedContent)
-	if err != nil {
-		return Parsed{}, fmt.Errorf("decode sing-box profile: %w", err)
-	}
-
 	result := Profile{}
 	rawOutbounds, _ := document["outbounds"].([]any)
-	nodes := make([]Node, 0, len(options.Outbounds))
+	nodes := make([]Node, 0, len(rawOutbounds))
 	seen := make(map[string]int)
-	for index := range options.Outbounds {
-		outbound := options.Outbounds[index]
-		if outbound.Type == "selector" || outbound.Type == "urltest" || !isNodeType(outbound.Type) {
+	for _, rawEntry := range rawOutbounds {
+		rawOutbound, _ := rawEntry.(map[string]any)
+		outboundType := strings.TrimSpace(valueToString(valueFrom(rawOutbound, "type")))
+		if outboundType == "" || outboundType == "selector" || outboundType == "urltest" || !isNodeType(outboundType) {
 			continue
 		}
-		rawOutbound, _ := rawOutbounds[index].(map[string]any)
-		name := strings.TrimSpace(outbound.Tag)
+
+		name := strings.TrimSpace(valueToString(valueFrom(rawOutbound, "tag")))
 		if name == "" {
-			name = outbound.Type
+			name = outboundType
 		}
 		server := valueToString(valueFrom(rawOutbound, "server", "address"))
 		port, _ := toInt(valueFrom(rawOutbound, "server_port", "port"))
-		baseID := nodeID(outbound.Type + "\x00" + name)
+		baseID := nodeID(outboundType + "\x00" + name)
 		id := baseID
 		if seen[baseID] > 0 {
 			id = fmt.Sprintf("%s-%d", baseID, seen[baseID]+1)
 		}
 		seen[baseID]++
-		typedOutbound := outbound
+
+		sanitizeOutboundJSON(outboundType, rawOutbound)
 		outboundJSON, _ := json.Marshal(rawOutbound)
-		if len(outboundJSON) == 0 || string(outboundJSON) == "null" {
-			outboundJSON, _ = json.Marshal(outbound)
-		}
 		node := Node{
 			ID:           id,
 			Name:         name,
-			Type:         outbound.Type,
+			Type:         outboundType,
+			CountryCode:  inferCountryCode(name),
 			Server:       server,
 			Port:         port,
 			Phase:        NodeNormalized,
 			OutboundJSON: outboundJSON,
-			Outbound:     &typedOutbound,
 		}
-		if requiresServerEndpoint(outbound.Type) && (server == "" || port < 1 || port > 65535) {
+
+		typedOutbound, err := singjson.UnmarshalExtendedContext[option.Outbound](Context(), outboundJSON)
+		if err != nil {
+			node.Phase = NodeFailed
+			node.Error = "decode outbound: " + err.Error()
+			nodes = append(nodes, node)
+			continue
+		}
+		node.Outbound = &typedOutbound
+		if requiresServerEndpoint(outboundType) && (server == "" || port < 1 || port > 65535) {
 			node.Phase = NodeFailed
 			node.Error = "server or server_port is invalid"
 		} else {
@@ -109,10 +106,40 @@ func isNodeType(value string) bool {
 		C.TypeSSH,
 		C.TypeShadowTLS,
 		C.TypeAnyTLS,
-		C.TypeShadowsocksR,
 		C.TypeVLESS,
 		C.TypeTUIC,
 		C.TypeHysteria2:
+		return true
+	default:
+		return false
+	}
+}
+
+func sanitizeOutboundJSON(outboundType string, outbound map[string]any) {
+	if outboundType == C.TypeTrojan && outbound["transport"] != nil && outbound["network"] == nil {
+		outbound["network"] = "tcp"
+	}
+
+	tlsOptions, _ := outbound["tls"].(map[string]any)
+	if tlsOptions == nil {
+		return
+	}
+	echOptions, _ := tlsOptions["ech"].(map[string]any)
+	if echOptions != nil {
+		delete(echOptions, "pq_signature_schemes_enabled")
+		delete(echOptions, "dynamic_record_sizing_disabled")
+	}
+	utlsOptions, _ := tlsOptions["utls"].(map[string]any)
+	if utlsOptions != nil {
+		if fingerprint, _ := utlsOptions["fingerprint"].(string); isRemovedChromeFingerprint(fingerprint) {
+			utlsOptions["fingerprint"] = "chrome"
+		}
+	}
+}
+
+func isRemovedChromeFingerprint(value string) bool {
+	switch strings.ToLower(strings.TrimSpace(value)) {
+	case "chrome_psk", "chrome_psk_shuffle", "chrome_padding_psk_shuffle", "chrome_pq", "chrome_pq_psk":
 		return true
 	default:
 		return false

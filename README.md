@@ -25,11 +25,17 @@ scripts/         桌面构建和 Windows 服务重装脚本
 Profile + Settings -> config.Plan -> Blueprint -> config.Emit -> sing-box JSON
 ```
 
-订阅运行配置只提供节点数据。DNS、路由规则、rule-set、入站和运行时选项均由 TargetLib 从零生成；`direct`、`urltest`、`proxy` 由 TargetLib 统一生成。
+订阅运行配置只提供节点数据。DNS、路由规则、rule-set、入站、服务商 selector/urltest 分组和运行时选项均不透传，
+而是由 TargetLib 从零生成；`direct`、`urltest`、`proxy` 由 TargetLib 统一构建。前端看到的国家、协议、延迟等分组
+都应该是基于节点列表的视图分组，而不是服务商配置里的真实 group。
+
+`ProfileView` 是面向前端的 node-only 读模型。每个节点会尽量从节点名推断 ISO 3166-1 alpha-2 `country_code`：
+优先识别国旗 emoji，其次匹配常见国家、地区和城市别名；无法判断时保持为空，由前端决定是否展示为未知地区。
+`ProfileNode.tag` 暴露稳定的节点 ID，并且运行时 outbound tag 也使用同一个 ID；`name` 只作为展示名使用。
 
 ## 开发
 
-依赖 Go 1.26 或更高版本。修改 proto 时还需要 protoc、protoc-gen-go 和 protoc-gen-go-grpc。
+依赖 Go 1.26 或更高版本。修改 proto 时还需要 protoc、protoc-gen-go、protoc-gen-go-grpc 和 protoc-gen-dart。
 
 sing-box 的 HTTP/2 transport 需要测试标签 `http2legacy with_clash_api`，不要直接运行不带标签的 `go test ./...`。
 

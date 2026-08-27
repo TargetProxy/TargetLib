@@ -1,6 +1,8 @@
 package config
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"net/netip"
 	"os"
@@ -105,10 +107,40 @@ func Emit(plan Blueprint) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	content, err = stripALPN(content)
+	if err != nil {
+		return nil, fmt.Errorf("strip ALPN from generated config: %w", err)
+	}
 	if err := validateConfig(content); err != nil {
 		return nil, fmt.Errorf("validate generated config: %w", err)
 	}
 	return content, nil
+}
+
+// stripALPN removes provider ALPN restrictions from every generated section.
+func stripALPN(content []byte) ([]byte, error) {
+	var document any
+	decoder := json.NewDecoder(bytes.NewReader(content))
+	decoder.UseNumber()
+	if err := decoder.Decode(&document); err != nil {
+		return nil, err
+	}
+	deleteJSONField(document, "alpn")
+	return json.Marshal(document)
+}
+
+func deleteJSONField(value any, field string) {
+	switch typed := value.(type) {
+	case map[string]any:
+		delete(typed, field)
+		for _, child := range typed {
+			deleteJSONField(child, field)
+		}
+	case []any:
+		for _, child := range typed {
+			deleteJSONField(child, field)
+		}
+	}
 }
 
 // Build 保留稳定的公开入口。
@@ -128,10 +160,7 @@ func planOutbounds(nodes []targetprofile.Node) ([]option.Outbound, string, error
 		if node.Phase == targetprofile.NodeFailed || node.Outbound == nil {
 			continue
 		}
-		tag := strings.TrimSpace(node.Name)
-		if tag == "" {
-			tag = node.ID
-		}
+		tag := strings.TrimSpace(node.ID)
 		if tag == "" {
 			continue
 		}
@@ -188,25 +217,32 @@ func tunDNSHijackRule() option.Rule {
 	}
 }
 
+func sniffRule() option.Rule {
+	return option.Rule{
+		Type: C.RuleTypeDefault,
+		DefaultOptions: option.DefaultRule{
+			RuleAction: option.RuleAction{Action: C.RuleActionTypeSniff},
+		},
+	}
+}
+
 func planRoute(finalOutbound string, settings Settings) RoutePlan {
 	// Route starts empty. In particular, never retain provider rule_set entries
 	// or rules that refer to provider-owned outbound tags.
 	base := option.RouteOptions{}
-	var rules []option.Rule
+	rules := []option.Rule{sniffRule()}
 	final := finalOutbound
 	switch settings.RouteMode {
 	case RouteModeDirect:
-		rules = nil
 		final = "direct"
 	case RouteModeAll:
-		rules = nil
 		final = finalOutbound
 	case RouteModeRule:
 		// No provider rules are imported. Applications can add owned rules in a
 		// future settings/API layer without changing this isolation boundary.
 	}
 	if settings.ProxyMode == ProxyModeTun {
-		rules = append([]option.Rule{tunDNSHijackRule()}, rules...)
+		rules = append(rules, tunDNSHijackRule())
 	}
 	return RoutePlan{Base: base, Rules: rules, Final: final, AutoDetectInterface: true}
 }

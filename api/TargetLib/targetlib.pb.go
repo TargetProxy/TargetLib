@@ -1579,15 +1579,10 @@ func (x *SubscriptionView) GetMovedPermanentlyTo() string {
 }
 
 type ProfileView struct {
-	state           protoimpl.MessageState `protogen:"open.v1"`
-	Nodes           []*ProfileNode         `protobuf:"bytes,1,rep,name=nodes,proto3" json:"nodes,omitempty"`
-	Groups          []*ProfileGroup        `protobuf:"bytes,2,rep,name=groups,proto3" json:"groups,omitempty"`
-	CustomOutbounds []*ProfileObject       `protobuf:"bytes,3,rep,name=custom_outbounds,json=customOutbounds,proto3" json:"custom_outbounds,omitempty"`
-	CustomInbounds  []*ProfileObject       `protobuf:"bytes,4,rep,name=custom_inbounds,json=customInbounds,proto3" json:"custom_inbounds,omitempty"`
-	RouteRuleCount  uint32                 `protobuf:"varint,5,opt,name=route_rule_count,json=routeRuleCount,proto3" json:"route_rule_count,omitempty"`
-	Dns             *ProfileDns            `protobuf:"bytes,6,opt,name=dns,proto3" json:"dns,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Nodes         []*ProfileNode         `protobuf:"bytes,1,rep,name=nodes,proto3" json:"nodes,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ProfileView) Reset() {
@@ -1627,41 +1622,6 @@ func (x *ProfileView) GetNodes() []*ProfileNode {
 	return nil
 }
 
-func (x *ProfileView) GetGroups() []*ProfileGroup {
-	if x != nil {
-		return x.Groups
-	}
-	return nil
-}
-
-func (x *ProfileView) GetCustomOutbounds() []*ProfileObject {
-	if x != nil {
-		return x.CustomOutbounds
-	}
-	return nil
-}
-
-func (x *ProfileView) GetCustomInbounds() []*ProfileObject {
-	if x != nil {
-		return x.CustomInbounds
-	}
-	return nil
-}
-
-func (x *ProfileView) GetRouteRuleCount() uint32 {
-	if x != nil {
-		return x.RouteRuleCount
-	}
-	return 0
-}
-
-func (x *ProfileView) GetDns() *ProfileDns {
-	if x != nil {
-		return x.Dns
-	}
-	return nil
-}
-
 type ProfileNode struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Tag           string                 `protobuf:"bytes,1,opt,name=tag,proto3" json:"tag,omitempty"`
@@ -1669,9 +1629,9 @@ type ProfileNode struct {
 	Type          string                 `protobuf:"bytes,3,opt,name=type,proto3" json:"type,omitempty"`
 	Server        string                 `protobuf:"bytes,4,opt,name=server,proto3" json:"server,omitempty"`
 	Port          int32                  `protobuf:"varint,5,opt,name=port,proto3" json:"port,omitempty"`
-	GroupTags     []string               `protobuf:"bytes,6,rep,name=group_tags,json=groupTags,proto3" json:"group_tags,omitempty"`
 	Phase         ProfileNodePhase       `protobuf:"varint,7,opt,name=phase,proto3,enum=targetlib.ProfileNodePhase" json:"phase,omitempty"`
 	ErrorMessage  string                 `protobuf:"bytes,8,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
+	CountryCode   string                 `protobuf:"bytes,9,opt,name=country_code,json=countryCode,proto3" json:"country_code,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1741,13 +1701,6 @@ func (x *ProfileNode) GetPort() int32 {
 	return 0
 }
 
-func (x *ProfileNode) GetGroupTags() []string {
-	if x != nil {
-		return x.GroupTags
-	}
-	return nil
-}
-
 func (x *ProfileNode) GetPhase() ProfileNodePhase {
 	if x != nil {
 		return x.Phase
@@ -1762,182 +1715,9 @@ func (x *ProfileNode) GetErrorMessage() string {
 	return ""
 }
 
-type ProfileGroup struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Tag           string                 `protobuf:"bytes,1,opt,name=tag,proto3" json:"tag,omitempty"`
-	Type          string                 `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
-	MemberTags    []string               `protobuf:"bytes,3,rep,name=member_tags,json=memberTags,proto3" json:"member_tags,omitempty"`
-	DefaultTag    string                 `protobuf:"bytes,4,opt,name=default_tag,json=defaultTag,proto3" json:"default_tag,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ProfileGroup) Reset() {
-	*x = ProfileGroup{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[18]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ProfileGroup) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ProfileGroup) ProtoMessage() {}
-
-func (x *ProfileGroup) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[18]
+func (x *ProfileNode) GetCountryCode() string {
 	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ProfileGroup.ProtoReflect.Descriptor instead.
-func (*ProfileGroup) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{18}
-}
-
-func (x *ProfileGroup) GetTag() string {
-	if x != nil {
-		return x.Tag
-	}
-	return ""
-}
-
-func (x *ProfileGroup) GetType() string {
-	if x != nil {
-		return x.Type
-	}
-	return ""
-}
-
-func (x *ProfileGroup) GetMemberTags() []string {
-	if x != nil {
-		return x.MemberTags
-	}
-	return nil
-}
-
-func (x *ProfileGroup) GetDefaultTag() string {
-	if x != nil {
-		return x.DefaultTag
-	}
-	return ""
-}
-
-type ProfileObject struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Tag           string                 `protobuf:"bytes,1,opt,name=tag,proto3" json:"tag,omitempty"`
-	Type          string                 `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ProfileObject) Reset() {
-	*x = ProfileObject{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[19]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ProfileObject) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ProfileObject) ProtoMessage() {}
-
-func (x *ProfileObject) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[19]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ProfileObject.ProtoReflect.Descriptor instead.
-func (*ProfileObject) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{19}
-}
-
-func (x *ProfileObject) GetTag() string {
-	if x != nil {
-		return x.Tag
-	}
-	return ""
-}
-
-func (x *ProfileObject) GetType() string {
-	if x != nil {
-		return x.Type
-	}
-	return ""
-}
-
-type ProfileDns struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Servers       []*ProfileObject       `protobuf:"bytes,1,rep,name=servers,proto3" json:"servers,omitempty"`
-	RuleCount     uint32                 `protobuf:"varint,2,opt,name=rule_count,json=ruleCount,proto3" json:"rule_count,omitempty"`
-	FinalServer   string                 `protobuf:"bytes,3,opt,name=final_server,json=finalServer,proto3" json:"final_server,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ProfileDns) Reset() {
-	*x = ProfileDns{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[20]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ProfileDns) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ProfileDns) ProtoMessage() {}
-
-func (x *ProfileDns) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[20]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ProfileDns.ProtoReflect.Descriptor instead.
-func (*ProfileDns) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{20}
-}
-
-func (x *ProfileDns) GetServers() []*ProfileObject {
-	if x != nil {
-		return x.Servers
-	}
-	return nil
-}
-
-func (x *ProfileDns) GetRuleCount() uint32 {
-	if x != nil {
-		return x.RuleCount
-	}
-	return 0
-}
-
-func (x *ProfileDns) GetFinalServer() string {
-	if x != nil {
-		return x.FinalServer
+		return x.CountryCode
 	}
 	return ""
 }
@@ -1948,13 +1728,16 @@ type SubscriptionUpdateResult struct {
 	Changed              bool                   `protobuf:"varint,2,opt,name=changed,proto3" json:"changed,omitempty"`
 	NotModified          bool                   `protobuf:"varint,3,opt,name=not_modified,json=notModified,proto3" json:"not_modified,omitempty"`
 	DurationMilliseconds int64                  `protobuf:"varint,4,opt,name=duration_milliseconds,json=durationMilliseconds,proto3" json:"duration_milliseconds,omitempty"`
-	unknownFields        protoimpl.UnknownFields
-	sizeCache            protoimpl.SizeCache
+	// One-shot diagnostics for an explicit update. These bytes are not persisted.
+	OriginalConfig  []byte `protobuf:"bytes,5,opt,name=original_config,json=originalConfig,proto3" json:"original_config,omitempty"`
+	GeneratedConfig []byte `protobuf:"bytes,6,opt,name=generated_config,json=generatedConfig,proto3" json:"generated_config,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *SubscriptionUpdateResult) Reset() {
 	*x = SubscriptionUpdateResult{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[21]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1966,7 +1749,7 @@ func (x *SubscriptionUpdateResult) String() string {
 func (*SubscriptionUpdateResult) ProtoMessage() {}
 
 func (x *SubscriptionUpdateResult) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[21]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1979,7 +1762,7 @@ func (x *SubscriptionUpdateResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SubscriptionUpdateResult.ProtoReflect.Descriptor instead.
 func (*SubscriptionUpdateResult) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{21}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *SubscriptionUpdateResult) GetSubscription() *SubscriptionView {
@@ -2010,6 +1793,20 @@ func (x *SubscriptionUpdateResult) GetDurationMilliseconds() int64 {
 	return 0
 }
 
+func (x *SubscriptionUpdateResult) GetOriginalConfig() []byte {
+	if x != nil {
+		return x.OriginalConfig
+	}
+	return nil
+}
+
+func (x *SubscriptionUpdateResult) GetGeneratedConfig() []byte {
+	if x != nil {
+		return x.GeneratedConfig
+	}
+	return nil
+}
+
 type RuntimeSettings struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ListenAddress string                 `protobuf:"bytes,1,opt,name=listen_address,json=listenAddress,proto3" json:"listen_address,omitempty"`
@@ -2023,7 +1820,7 @@ type RuntimeSettings struct {
 
 func (x *RuntimeSettings) Reset() {
 	*x = RuntimeSettings{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[22]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2035,7 +1832,7 @@ func (x *RuntimeSettings) String() string {
 func (*RuntimeSettings) ProtoMessage() {}
 
 func (x *RuntimeSettings) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[22]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2048,7 +1845,7 @@ func (x *RuntimeSettings) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RuntimeSettings.ProtoReflect.Descriptor instead.
 func (*RuntimeSettings) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{22}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *RuntimeSettings) GetListenAddress() string {
@@ -2095,7 +1892,7 @@ type RuntimeConfig struct {
 
 func (x *RuntimeConfig) Reset() {
 	*x = RuntimeConfig{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[23]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2107,7 +1904,7 @@ func (x *RuntimeConfig) String() string {
 func (*RuntimeConfig) ProtoMessage() {}
 
 func (x *RuntimeConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[23]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2120,7 +1917,7 @@ func (x *RuntimeConfig) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RuntimeConfig.ProtoReflect.Descriptor instead.
 func (*RuntimeConfig) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{23}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *RuntimeConfig) GetSettings() *RuntimeSettings {
@@ -2139,7 +1936,7 @@ type UpdateRuntimeConfigRequest struct {
 
 func (x *UpdateRuntimeConfigRequest) Reset() {
 	*x = UpdateRuntimeConfigRequest{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[24]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2151,7 +1948,7 @@ func (x *UpdateRuntimeConfigRequest) String() string {
 func (*UpdateRuntimeConfigRequest) ProtoMessage() {}
 
 func (x *UpdateRuntimeConfigRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[24]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2164,7 +1961,7 @@ func (x *UpdateRuntimeConfigRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateRuntimeConfigRequest.ProtoReflect.Descriptor instead.
 func (*UpdateRuntimeConfigRequest) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{24}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *UpdateRuntimeConfigRequest) GetSettings() *RuntimeSettings {
@@ -2185,7 +1982,7 @@ type TestOutboundRequest struct {
 
 func (x *TestOutboundRequest) Reset() {
 	*x = TestOutboundRequest{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[25]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2197,7 +1994,7 @@ func (x *TestOutboundRequest) String() string {
 func (*TestOutboundRequest) ProtoMessage() {}
 
 func (x *TestOutboundRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[25]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2210,7 +2007,7 @@ func (x *TestOutboundRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TestOutboundRequest.ProtoReflect.Descriptor instead.
 func (*TestOutboundRequest) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{25}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *TestOutboundRequest) GetOutboundTag() string {
@@ -2241,7 +2038,7 @@ type TestOutboundsRequest struct {
 
 func (x *TestOutboundsRequest) Reset() {
 	*x = TestOutboundsRequest{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[26]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2253,7 +2050,7 @@ func (x *TestOutboundsRequest) String() string {
 func (*TestOutboundsRequest) ProtoMessage() {}
 
 func (x *TestOutboundsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[26]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2266,7 +2063,7 @@ func (x *TestOutboundsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TestOutboundsRequest.ProtoReflect.Descriptor instead.
 func (*TestOutboundsRequest) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{26}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *TestOutboundsRequest) GetOutboundTags() []string {
@@ -2303,7 +2100,7 @@ type LatencyTestResult struct {
 
 func (x *LatencyTestResult) Reset() {
 	*x = LatencyTestResult{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[27]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2315,7 +2112,7 @@ func (x *LatencyTestResult) String() string {
 func (*LatencyTestResult) ProtoMessage() {}
 
 func (x *LatencyTestResult) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[27]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2328,7 +2125,7 @@ func (x *LatencyTestResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LatencyTestResult.ProtoReflect.Descriptor instead.
 func (*LatencyTestResult) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{27}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *LatencyTestResult) GetOutboundTag() string {
@@ -2375,7 +2172,7 @@ type ResolvedEndpoints struct {
 
 func (x *ResolvedEndpoints) Reset() {
 	*x = ResolvedEndpoints{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[28]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2387,7 +2184,7 @@ func (x *ResolvedEndpoints) String() string {
 func (*ResolvedEndpoints) ProtoMessage() {}
 
 func (x *ResolvedEndpoints) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[28]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2400,7 +2197,7 @@ func (x *ResolvedEndpoints) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ResolvedEndpoints.ProtoReflect.Descriptor instead.
 func (*ResolvedEndpoints) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{28}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *ResolvedEndpoints) GetAddresses() []string {
@@ -2421,7 +2218,7 @@ type SetActiveSubscriptionRequest struct {
 
 func (x *SetActiveSubscriptionRequest) Reset() {
 	*x = SetActiveSubscriptionRequest{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[29]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2433,7 +2230,7 @@ func (x *SetActiveSubscriptionRequest) String() string {
 func (*SetActiveSubscriptionRequest) ProtoMessage() {}
 
 func (x *SetActiveSubscriptionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[29]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2446,7 +2243,7 @@ func (x *SetActiveSubscriptionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetActiveSubscriptionRequest.ProtoReflect.Descriptor instead.
 func (*SetActiveSubscriptionRequest) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{29}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *SetActiveSubscriptionRequest) GetId() string {
@@ -2466,7 +2263,7 @@ type ActiveSubscriptionResponse struct {
 
 func (x *ActiveSubscriptionResponse) Reset() {
 	*x = ActiveSubscriptionResponse{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[30]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2478,7 +2275,7 @@ func (x *ActiveSubscriptionResponse) String() string {
 func (*ActiveSubscriptionResponse) ProtoMessage() {}
 
 func (x *ActiveSubscriptionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[30]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2491,7 +2288,7 @@ func (x *ActiveSubscriptionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ActiveSubscriptionResponse.ProtoReflect.Descriptor instead.
 func (*ActiveSubscriptionResponse) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{30}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *ActiveSubscriptionResponse) GetId() string {
@@ -2516,7 +2313,7 @@ type IpInfoResponse struct {
 
 func (x *IpInfoResponse) Reset() {
 	*x = IpInfoResponse{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[31]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2528,7 +2325,7 @@ func (x *IpInfoResponse) String() string {
 func (*IpInfoResponse) ProtoMessage() {}
 
 func (x *IpInfoResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[31]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2541,7 +2338,7 @@ func (x *IpInfoResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IpInfoResponse.ProtoReflect.Descriptor instead.
 func (*IpInfoResponse) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{31}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *IpInfoResponse) GetIp() string {
@@ -2604,7 +2401,7 @@ type SubscriptionEvent struct {
 
 func (x *SubscriptionEvent) Reset() {
 	*x = SubscriptionEvent{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[32]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2616,7 +2413,7 @@ func (x *SubscriptionEvent) String() string {
 func (*SubscriptionEvent) ProtoMessage() {}
 
 func (x *SubscriptionEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[32]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2629,7 +2426,7 @@ func (x *SubscriptionEvent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SubscriptionEvent.ProtoReflect.Descriptor instead.
 func (*SubscriptionEvent) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{32}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *SubscriptionEvent) GetType() SubscriptionEventType {
@@ -2748,45 +2545,26 @@ const file_api_TargetLib_targetlib_proto_rawDesc = "" +
 	"webPageUrl\x12\x1f\n" +
 	"\vsupport_url\x18\x14 \x01(\tR\n" +
 	"supportUrl\x120\n" +
-	"\x14moved_permanently_to\x18\x15 \x01(\tR\x12movedPermanentlyTo\"\xc7\x02\n" +
+	"\x14moved_permanently_to\x18\x15 \x01(\tR\x12movedPermanentlyTo\"\x83\x01\n" +
 	"\vProfileView\x12,\n" +
-	"\x05nodes\x18\x01 \x03(\v2\x16.targetlib.ProfileNodeR\x05nodes\x12/\n" +
-	"\x06groups\x18\x02 \x03(\v2\x17.targetlib.ProfileGroupR\x06groups\x12C\n" +
-	"\x10custom_outbounds\x18\x03 \x03(\v2\x18.targetlib.ProfileObjectR\x0fcustomOutbounds\x12A\n" +
-	"\x0fcustom_inbounds\x18\x04 \x03(\v2\x18.targetlib.ProfileObjectR\x0ecustomInbounds\x12(\n" +
-	"\x10route_rule_count\x18\x05 \x01(\rR\x0erouteRuleCount\x12'\n" +
-	"\x03dns\x18\x06 \x01(\v2\x15.targetlib.ProfileDnsR\x03dns\"\xea\x01\n" +
+	"\x05nodes\x18\x01 \x03(\v2\x16.targetlib.ProfileNodeR\x05nodesJ\x04\b\x02\x10\aR\x06groupsR\x10custom_outboundsR\x0fcustom_inboundsR\x10route_rule_countR\x03dns\"\x80\x02\n" +
 	"\vProfileNode\x12\x10\n" +
 	"\x03tag\x18\x01 \x01(\tR\x03tag\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x12\n" +
 	"\x04type\x18\x03 \x01(\tR\x04type\x12\x16\n" +
 	"\x06server\x18\x04 \x01(\tR\x06server\x12\x12\n" +
-	"\x04port\x18\x05 \x01(\x05R\x04port\x12\x1d\n" +
-	"\n" +
-	"group_tags\x18\x06 \x03(\tR\tgroupTags\x121\n" +
+	"\x04port\x18\x05 \x01(\x05R\x04port\x121\n" +
 	"\x05phase\x18\a \x01(\x0e2\x1b.targetlib.ProfileNodePhaseR\x05phase\x12#\n" +
-	"\rerror_message\x18\b \x01(\tR\ferrorMessage\"v\n" +
-	"\fProfileGroup\x12\x10\n" +
-	"\x03tag\x18\x01 \x01(\tR\x03tag\x12\x12\n" +
-	"\x04type\x18\x02 \x01(\tR\x04type\x12\x1f\n" +
-	"\vmember_tags\x18\x03 \x03(\tR\n" +
-	"memberTags\x12\x1f\n" +
-	"\vdefault_tag\x18\x04 \x01(\tR\n" +
-	"defaultTag\"5\n" +
-	"\rProfileObject\x12\x10\n" +
-	"\x03tag\x18\x01 \x01(\tR\x03tag\x12\x12\n" +
-	"\x04type\x18\x02 \x01(\tR\x04type\"\x82\x01\n" +
-	"\n" +
-	"ProfileDns\x122\n" +
-	"\aservers\x18\x01 \x03(\v2\x18.targetlib.ProfileObjectR\aservers\x12\x1d\n" +
-	"\n" +
-	"rule_count\x18\x02 \x01(\rR\truleCount\x12!\n" +
-	"\ffinal_server\x18\x03 \x01(\tR\vfinalServer\"\xcd\x01\n" +
+	"\rerror_message\x18\b \x01(\tR\ferrorMessage\x12!\n" +
+	"\fcountry_code\x18\t \x01(\tR\vcountryCodeJ\x04\b\x06\x10\aR\n" +
+	"group_tags\"\xa1\x02\n" +
 	"\x18SubscriptionUpdateResult\x12?\n" +
 	"\fsubscription\x18\x01 \x01(\v2\x1b.targetlib.SubscriptionViewR\fsubscription\x12\x18\n" +
 	"\achanged\x18\x02 \x01(\bR\achanged\x12!\n" +
 	"\fnot_modified\x18\x03 \x01(\bR\vnotModified\x123\n" +
-	"\x15duration_milliseconds\x18\x04 \x01(\x03R\x14durationMilliseconds\"\xd5\x01\n" +
+	"\x15duration_milliseconds\x18\x04 \x01(\x03R\x14durationMilliseconds\x12'\n" +
+	"\x0foriginal_config\x18\x05 \x01(\fR\x0eoriginalConfig\x12)\n" +
+	"\x10generated_config\x18\x06 \x01(\fR\x0fgeneratedConfig\"\xd5\x01\n" +
 	"\x0fRuntimeSettings\x12%\n" +
 	"\x0elisten_address\x18\x01 \x01(\tR\rlistenAddress\x12\x1d\n" +
 	"\n" +
@@ -2933,7 +2711,7 @@ func file_api_TargetLib_targetlib_proto_rawDescGZIP() []byte {
 }
 
 var file_api_TargetLib_targetlib_proto_enumTypes = make([]protoimpl.EnumInfo, 9)
-var file_api_TargetLib_targetlib_proto_msgTypes = make([]protoimpl.MessageInfo, 34)
+var file_api_TargetLib_targetlib_proto_msgTypes = make([]protoimpl.MessageInfo, 31)
 var file_api_TargetLib_targetlib_proto_goTypes = []any{
 	(LogLevel)(0),                               // 0: targetlib.LogLevel
 	(ServiceStateType)(0),                       // 1: targetlib.ServiceStateType
@@ -2962,110 +2740,102 @@ var file_api_TargetLib_targetlib_proto_goTypes = []any{
 	(*SubscriptionView)(nil),                    // 24: targetlib.SubscriptionView
 	(*ProfileView)(nil),                         // 25: targetlib.ProfileView
 	(*ProfileNode)(nil),                         // 26: targetlib.ProfileNode
-	(*ProfileGroup)(nil),                        // 27: targetlib.ProfileGroup
-	(*ProfileObject)(nil),                       // 28: targetlib.ProfileObject
-	(*ProfileDns)(nil),                          // 29: targetlib.ProfileDns
-	(*SubscriptionUpdateResult)(nil),            // 30: targetlib.SubscriptionUpdateResult
-	(*RuntimeSettings)(nil),                     // 31: targetlib.RuntimeSettings
-	(*RuntimeConfig)(nil),                       // 32: targetlib.RuntimeConfig
-	(*UpdateRuntimeConfigRequest)(nil),          // 33: targetlib.UpdateRuntimeConfigRequest
-	(*TestOutboundRequest)(nil),                 // 34: targetlib.TestOutboundRequest
-	(*TestOutboundsRequest)(nil),                // 35: targetlib.TestOutboundsRequest
-	(*LatencyTestResult)(nil),                   // 36: targetlib.LatencyTestResult
-	(*ResolvedEndpoints)(nil),                   // 37: targetlib.ResolvedEndpoints
-	(*SetActiveSubscriptionRequest)(nil),        // 38: targetlib.SetActiveSubscriptionRequest
-	(*ActiveSubscriptionResponse)(nil),          // 39: targetlib.ActiveSubscriptionResponse
-	(*IpInfoResponse)(nil),                      // 40: targetlib.IpInfoResponse
-	(*SubscriptionEvent)(nil),                   // 41: targetlib.SubscriptionEvent
-	nil,                                         // 42: targetlib.AddSubscriptionRequest.HeadersEntry
-	(*emptypb.Empty)(nil),                       // 43: google.protobuf.Empty
+	(*SubscriptionUpdateResult)(nil),            // 27: targetlib.SubscriptionUpdateResult
+	(*RuntimeSettings)(nil),                     // 28: targetlib.RuntimeSettings
+	(*RuntimeConfig)(nil),                       // 29: targetlib.RuntimeConfig
+	(*UpdateRuntimeConfigRequest)(nil),          // 30: targetlib.UpdateRuntimeConfigRequest
+	(*TestOutboundRequest)(nil),                 // 31: targetlib.TestOutboundRequest
+	(*TestOutboundsRequest)(nil),                // 32: targetlib.TestOutboundsRequest
+	(*LatencyTestResult)(nil),                   // 33: targetlib.LatencyTestResult
+	(*ResolvedEndpoints)(nil),                   // 34: targetlib.ResolvedEndpoints
+	(*SetActiveSubscriptionRequest)(nil),        // 35: targetlib.SetActiveSubscriptionRequest
+	(*ActiveSubscriptionResponse)(nil),          // 36: targetlib.ActiveSubscriptionResponse
+	(*IpInfoResponse)(nil),                      // 37: targetlib.IpInfoResponse
+	(*SubscriptionEvent)(nil),                   // 38: targetlib.SubscriptionEvent
+	nil,                                         // 39: targetlib.AddSubscriptionRequest.HeadersEntry
+	(*emptypb.Empty)(nil),                       // 40: google.protobuf.Empty
 }
 var file_api_TargetLib_targetlib_proto_depIdxs = []int32{
 	0,  // 0: targetlib.LogMessage.level:type_name -> targetlib.LogLevel
 	9,  // 1: targetlib.LogBatch.messages:type_name -> targetlib.LogMessage
 	16, // 2: targetlib.OperationResponse.state:type_name -> targetlib.ServiceState
 	1,  // 3: targetlib.ServiceState.state:type_name -> targetlib.ServiceStateType
-	42, // 4: targetlib.AddSubscriptionRequest.headers:type_name -> targetlib.AddSubscriptionRequest.HeadersEntry
+	39, // 4: targetlib.AddSubscriptionRequest.headers:type_name -> targetlib.AddSubscriptionRequest.HeadersEntry
 	24, // 5: targetlib.SubscriptionList.subscriptions:type_name -> targetlib.SubscriptionView
 	5,  // 6: targetlib.SubscriptionView.status:type_name -> targetlib.SubscriptionStatus
 	6,  // 7: targetlib.SubscriptionView.stage:type_name -> targetlib.SubscriptionUpdateStage
 	25, // 8: targetlib.SubscriptionView.profile:type_name -> targetlib.ProfileView
 	26, // 9: targetlib.ProfileView.nodes:type_name -> targetlib.ProfileNode
-	27, // 10: targetlib.ProfileView.groups:type_name -> targetlib.ProfileGroup
-	28, // 11: targetlib.ProfileView.custom_outbounds:type_name -> targetlib.ProfileObject
-	28, // 12: targetlib.ProfileView.custom_inbounds:type_name -> targetlib.ProfileObject
-	29, // 13: targetlib.ProfileView.dns:type_name -> targetlib.ProfileDns
-	7,  // 14: targetlib.ProfileNode.phase:type_name -> targetlib.ProfileNodePhase
-	28, // 15: targetlib.ProfileDns.servers:type_name -> targetlib.ProfileObject
-	24, // 16: targetlib.SubscriptionUpdateResult.subscription:type_name -> targetlib.SubscriptionView
-	2,  // 17: targetlib.RuntimeSettings.proxy_mode:type_name -> targetlib.ProxyMode
-	3,  // 18: targetlib.RuntimeSettings.route_mode:type_name -> targetlib.RouteMode
-	31, // 19: targetlib.RuntimeConfig.settings:type_name -> targetlib.RuntimeSettings
-	31, // 20: targetlib.UpdateRuntimeConfigRequest.settings:type_name -> targetlib.RuntimeSettings
-	4,  // 21: targetlib.LatencyTestResult.status:type_name -> targetlib.LatencyTestStatus
-	8,  // 22: targetlib.SubscriptionEvent.type:type_name -> targetlib.SubscriptionEventType
-	24, // 23: targetlib.SubscriptionEvent.subscription:type_name -> targetlib.SubscriptionView
-	43, // 24: targetlib.TargetLib.GetVersion:input_type -> google.protobuf.Empty
-	43, // 25: targetlib.TargetLib.GetCapabilities:input_type -> google.protobuf.Empty
-	43, // 26: targetlib.TargetLib.Start:input_type -> google.protobuf.Empty
-	43, // 27: targetlib.TargetLib.Restart:input_type -> google.protobuf.Empty
-	43, // 28: targetlib.TargetLib.Stop:input_type -> google.protobuf.Empty
-	43, // 29: targetlib.TargetLib.GetState:input_type -> google.protobuf.Empty
-	43, // 30: targetlib.TargetLib.SubscribeState:input_type -> google.protobuf.Empty
-	43, // 31: targetlib.TargetLib.SubscribeLogs:input_type -> google.protobuf.Empty
-	11, // 32: targetlib.TargetLib.SelectOutbound:input_type -> targetlib.SelectOutboundRequest
-	12, // 33: targetlib.TargetLib.CloseConnection:input_type -> targetlib.CloseConnectionRequest
-	43, // 34: targetlib.TargetLib.CloseAllConnections:input_type -> google.protobuf.Empty
-	43, // 35: targetlib.TargetLib.ListSubscriptions:input_type -> google.protobuf.Empty
-	17, // 36: targetlib.TargetLib.GetSubscription:input_type -> targetlib.SubscriptionId
-	18, // 37: targetlib.TargetLib.AddSubscription:input_type -> targetlib.AddSubscriptionRequest
-	17, // 38: targetlib.TargetLib.RemoveSubscription:input_type -> targetlib.SubscriptionId
-	19, // 39: targetlib.TargetLib.RenameSubscription:input_type -> targetlib.RenameSubscriptionRequest
-	20, // 40: targetlib.TargetLib.SetSubscriptionEnabled:input_type -> targetlib.SetSubscriptionEnabledRequest
-	21, // 41: targetlib.TargetLib.ConfigureSubscriptionUpdates:input_type -> targetlib.ConfigureSubscriptionUpdatesRequest
-	17, // 42: targetlib.TargetLib.UpdateSubscription:input_type -> targetlib.SubscriptionId
-	43, // 43: targetlib.TargetLib.GetRuntimeConfig:input_type -> google.protobuf.Empty
-	33, // 44: targetlib.TargetLib.UpdateRuntimeConfig:input_type -> targetlib.UpdateRuntimeConfigRequest
-	34, // 45: targetlib.TargetLib.TestOutbound:input_type -> targetlib.TestOutboundRequest
-	35, // 46: targetlib.TargetLib.TestOutbounds:input_type -> targetlib.TestOutboundsRequest
-	22, // 47: targetlib.TargetLib.GetResolvedEndpoints:input_type -> targetlib.ResolvedEndpointsRequest
-	43, // 48: targetlib.TargetLib.SubscribeSubscriptionEvents:input_type -> google.protobuf.Empty
-	38, // 49: targetlib.TargetLib.SetActiveSubscription:input_type -> targetlib.SetActiveSubscriptionRequest
-	43, // 50: targetlib.TargetLib.GetActiveSubscription:input_type -> google.protobuf.Empty
-	43, // 51: targetlib.TargetLib.GetIpInfo:input_type -> google.protobuf.Empty
-	13, // 52: targetlib.TargetLib.GetVersion:output_type -> targetlib.VersionResponse
-	14, // 53: targetlib.TargetLib.GetCapabilities:output_type -> targetlib.CapabilitiesResponse
-	15, // 54: targetlib.TargetLib.Start:output_type -> targetlib.OperationResponse
-	15, // 55: targetlib.TargetLib.Restart:output_type -> targetlib.OperationResponse
-	15, // 56: targetlib.TargetLib.Stop:output_type -> targetlib.OperationResponse
-	16, // 57: targetlib.TargetLib.GetState:output_type -> targetlib.ServiceState
-	16, // 58: targetlib.TargetLib.SubscribeState:output_type -> targetlib.ServiceState
-	10, // 59: targetlib.TargetLib.SubscribeLogs:output_type -> targetlib.LogBatch
-	43, // 60: targetlib.TargetLib.SelectOutbound:output_type -> google.protobuf.Empty
-	43, // 61: targetlib.TargetLib.CloseConnection:output_type -> google.protobuf.Empty
-	43, // 62: targetlib.TargetLib.CloseAllConnections:output_type -> google.protobuf.Empty
-	23, // 63: targetlib.TargetLib.ListSubscriptions:output_type -> targetlib.SubscriptionList
-	24, // 64: targetlib.TargetLib.GetSubscription:output_type -> targetlib.SubscriptionView
-	24, // 65: targetlib.TargetLib.AddSubscription:output_type -> targetlib.SubscriptionView
-	43, // 66: targetlib.TargetLib.RemoveSubscription:output_type -> google.protobuf.Empty
-	24, // 67: targetlib.TargetLib.RenameSubscription:output_type -> targetlib.SubscriptionView
-	24, // 68: targetlib.TargetLib.SetSubscriptionEnabled:output_type -> targetlib.SubscriptionView
-	24, // 69: targetlib.TargetLib.ConfigureSubscriptionUpdates:output_type -> targetlib.SubscriptionView
-	30, // 70: targetlib.TargetLib.UpdateSubscription:output_type -> targetlib.SubscriptionUpdateResult
-	32, // 71: targetlib.TargetLib.GetRuntimeConfig:output_type -> targetlib.RuntimeConfig
-	32, // 72: targetlib.TargetLib.UpdateRuntimeConfig:output_type -> targetlib.RuntimeConfig
-	36, // 73: targetlib.TargetLib.TestOutbound:output_type -> targetlib.LatencyTestResult
-	36, // 74: targetlib.TargetLib.TestOutbounds:output_type -> targetlib.LatencyTestResult
-	37, // 75: targetlib.TargetLib.GetResolvedEndpoints:output_type -> targetlib.ResolvedEndpoints
-	41, // 76: targetlib.TargetLib.SubscribeSubscriptionEvents:output_type -> targetlib.SubscriptionEvent
-	43, // 77: targetlib.TargetLib.SetActiveSubscription:output_type -> google.protobuf.Empty
-	39, // 78: targetlib.TargetLib.GetActiveSubscription:output_type -> targetlib.ActiveSubscriptionResponse
-	40, // 79: targetlib.TargetLib.GetIpInfo:output_type -> targetlib.IpInfoResponse
-	52, // [52:80] is the sub-list for method output_type
-	24, // [24:52] is the sub-list for method input_type
-	24, // [24:24] is the sub-list for extension type_name
-	24, // [24:24] is the sub-list for extension extendee
-	0,  // [0:24] is the sub-list for field type_name
+	7,  // 10: targetlib.ProfileNode.phase:type_name -> targetlib.ProfileNodePhase
+	24, // 11: targetlib.SubscriptionUpdateResult.subscription:type_name -> targetlib.SubscriptionView
+	2,  // 12: targetlib.RuntimeSettings.proxy_mode:type_name -> targetlib.ProxyMode
+	3,  // 13: targetlib.RuntimeSettings.route_mode:type_name -> targetlib.RouteMode
+	28, // 14: targetlib.RuntimeConfig.settings:type_name -> targetlib.RuntimeSettings
+	28, // 15: targetlib.UpdateRuntimeConfigRequest.settings:type_name -> targetlib.RuntimeSettings
+	4,  // 16: targetlib.LatencyTestResult.status:type_name -> targetlib.LatencyTestStatus
+	8,  // 17: targetlib.SubscriptionEvent.type:type_name -> targetlib.SubscriptionEventType
+	24, // 18: targetlib.SubscriptionEvent.subscription:type_name -> targetlib.SubscriptionView
+	40, // 19: targetlib.TargetLib.GetVersion:input_type -> google.protobuf.Empty
+	40, // 20: targetlib.TargetLib.GetCapabilities:input_type -> google.protobuf.Empty
+	40, // 21: targetlib.TargetLib.Start:input_type -> google.protobuf.Empty
+	40, // 22: targetlib.TargetLib.Restart:input_type -> google.protobuf.Empty
+	40, // 23: targetlib.TargetLib.Stop:input_type -> google.protobuf.Empty
+	40, // 24: targetlib.TargetLib.GetState:input_type -> google.protobuf.Empty
+	40, // 25: targetlib.TargetLib.SubscribeState:input_type -> google.protobuf.Empty
+	40, // 26: targetlib.TargetLib.SubscribeLogs:input_type -> google.protobuf.Empty
+	11, // 27: targetlib.TargetLib.SelectOutbound:input_type -> targetlib.SelectOutboundRequest
+	12, // 28: targetlib.TargetLib.CloseConnection:input_type -> targetlib.CloseConnectionRequest
+	40, // 29: targetlib.TargetLib.CloseAllConnections:input_type -> google.protobuf.Empty
+	40, // 30: targetlib.TargetLib.ListSubscriptions:input_type -> google.protobuf.Empty
+	17, // 31: targetlib.TargetLib.GetSubscription:input_type -> targetlib.SubscriptionId
+	18, // 32: targetlib.TargetLib.AddSubscription:input_type -> targetlib.AddSubscriptionRequest
+	17, // 33: targetlib.TargetLib.RemoveSubscription:input_type -> targetlib.SubscriptionId
+	19, // 34: targetlib.TargetLib.RenameSubscription:input_type -> targetlib.RenameSubscriptionRequest
+	20, // 35: targetlib.TargetLib.SetSubscriptionEnabled:input_type -> targetlib.SetSubscriptionEnabledRequest
+	21, // 36: targetlib.TargetLib.ConfigureSubscriptionUpdates:input_type -> targetlib.ConfigureSubscriptionUpdatesRequest
+	17, // 37: targetlib.TargetLib.UpdateSubscription:input_type -> targetlib.SubscriptionId
+	40, // 38: targetlib.TargetLib.GetRuntimeConfig:input_type -> google.protobuf.Empty
+	30, // 39: targetlib.TargetLib.UpdateRuntimeConfig:input_type -> targetlib.UpdateRuntimeConfigRequest
+	31, // 40: targetlib.TargetLib.TestOutbound:input_type -> targetlib.TestOutboundRequest
+	32, // 41: targetlib.TargetLib.TestOutbounds:input_type -> targetlib.TestOutboundsRequest
+	22, // 42: targetlib.TargetLib.GetResolvedEndpoints:input_type -> targetlib.ResolvedEndpointsRequest
+	40, // 43: targetlib.TargetLib.SubscribeSubscriptionEvents:input_type -> google.protobuf.Empty
+	35, // 44: targetlib.TargetLib.SetActiveSubscription:input_type -> targetlib.SetActiveSubscriptionRequest
+	40, // 45: targetlib.TargetLib.GetActiveSubscription:input_type -> google.protobuf.Empty
+	40, // 46: targetlib.TargetLib.GetIpInfo:input_type -> google.protobuf.Empty
+	13, // 47: targetlib.TargetLib.GetVersion:output_type -> targetlib.VersionResponse
+	14, // 48: targetlib.TargetLib.GetCapabilities:output_type -> targetlib.CapabilitiesResponse
+	15, // 49: targetlib.TargetLib.Start:output_type -> targetlib.OperationResponse
+	15, // 50: targetlib.TargetLib.Restart:output_type -> targetlib.OperationResponse
+	15, // 51: targetlib.TargetLib.Stop:output_type -> targetlib.OperationResponse
+	16, // 52: targetlib.TargetLib.GetState:output_type -> targetlib.ServiceState
+	16, // 53: targetlib.TargetLib.SubscribeState:output_type -> targetlib.ServiceState
+	10, // 54: targetlib.TargetLib.SubscribeLogs:output_type -> targetlib.LogBatch
+	40, // 55: targetlib.TargetLib.SelectOutbound:output_type -> google.protobuf.Empty
+	40, // 56: targetlib.TargetLib.CloseConnection:output_type -> google.protobuf.Empty
+	40, // 57: targetlib.TargetLib.CloseAllConnections:output_type -> google.protobuf.Empty
+	23, // 58: targetlib.TargetLib.ListSubscriptions:output_type -> targetlib.SubscriptionList
+	24, // 59: targetlib.TargetLib.GetSubscription:output_type -> targetlib.SubscriptionView
+	24, // 60: targetlib.TargetLib.AddSubscription:output_type -> targetlib.SubscriptionView
+	40, // 61: targetlib.TargetLib.RemoveSubscription:output_type -> google.protobuf.Empty
+	24, // 62: targetlib.TargetLib.RenameSubscription:output_type -> targetlib.SubscriptionView
+	24, // 63: targetlib.TargetLib.SetSubscriptionEnabled:output_type -> targetlib.SubscriptionView
+	24, // 64: targetlib.TargetLib.ConfigureSubscriptionUpdates:output_type -> targetlib.SubscriptionView
+	27, // 65: targetlib.TargetLib.UpdateSubscription:output_type -> targetlib.SubscriptionUpdateResult
+	29, // 66: targetlib.TargetLib.GetRuntimeConfig:output_type -> targetlib.RuntimeConfig
+	29, // 67: targetlib.TargetLib.UpdateRuntimeConfig:output_type -> targetlib.RuntimeConfig
+	33, // 68: targetlib.TargetLib.TestOutbound:output_type -> targetlib.LatencyTestResult
+	33, // 69: targetlib.TargetLib.TestOutbounds:output_type -> targetlib.LatencyTestResult
+	34, // 70: targetlib.TargetLib.GetResolvedEndpoints:output_type -> targetlib.ResolvedEndpoints
+	38, // 71: targetlib.TargetLib.SubscribeSubscriptionEvents:output_type -> targetlib.SubscriptionEvent
+	40, // 72: targetlib.TargetLib.SetActiveSubscription:output_type -> google.protobuf.Empty
+	36, // 73: targetlib.TargetLib.GetActiveSubscription:output_type -> targetlib.ActiveSubscriptionResponse
+	37, // 74: targetlib.TargetLib.GetIpInfo:output_type -> targetlib.IpInfoResponse
+	47, // [47:75] is the sub-list for method output_type
+	19, // [19:47] is the sub-list for method input_type
+	19, // [19:19] is the sub-list for extension type_name
+	19, // [19:19] is the sub-list for extension extendee
+	0,  // [0:19] is the sub-list for field type_name
 }
 
 func init() { file_api_TargetLib_targetlib_proto_init() }
@@ -3080,7 +2850,7 @@ func file_api_TargetLib_targetlib_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_TargetLib_targetlib_proto_rawDesc), len(file_api_TargetLib_targetlib_proto_rawDesc)),
 			NumEnums:      9,
-			NumMessages:   34,
+			NumMessages:   31,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

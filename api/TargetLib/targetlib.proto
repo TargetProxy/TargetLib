@@ -178,11 +178,8 @@ message SubscriptionView {
 
 message ProfileView {
   repeated ProfileNode nodes = 1;
-  repeated ProfileGroup groups = 2;
-  repeated ProfileObject custom_outbounds = 3;
-  repeated ProfileObject custom_inbounds = 4;
-  uint32 route_rule_count = 5;
-  ProfileDns dns = 6;
+  reserved 2 to 6;
+  reserved "groups", "custom_outbounds", "custom_inbounds", "route_rule_count", "dns";
 }
 
 message ProfileNode {
@@ -191,27 +188,11 @@ message ProfileNode {
   string type = 3;
   string server = 4;
   int32 port = 5;
-  repeated string group_tags = 6;
+  reserved 6;
+  reserved "group_tags";
   ProfileNodePhase phase = 7;
   string error_message = 8;
-}
-
-message ProfileGroup {
-  string tag = 1;
-  string type = 2;
-  repeated string member_tags = 3;
-  string default_tag = 4;
-}
-
-message ProfileObject {
-  string tag = 1;
-  string type = 2;
-}
-
-message ProfileDns {
-  repeated ProfileObject servers = 1;
-  uint32 rule_count = 2;
-  string final_server = 3;
+  string country_code = 9;
 }
 
 message SubscriptionUpdateResult {
@@ -219,6 +200,9 @@ message SubscriptionUpdateResult {
   bool changed = 2;
   bool not_modified = 3;
   int64 duration_milliseconds = 4;
+  // One-shot diagnostics for an explicit update. These bytes are not persisted.
+  bytes original_config = 5;
+  bytes generated_config = 6;
 }
 
 enum ProxyMode {

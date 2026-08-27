@@ -31,13 +31,6 @@ func TestTunModeDoesNotCreateMixedInbound(t *testing.T) {
 }
 
 func TestBuildTunRouteModesKeepDNSHijackAndUpstream(t *testing.T) {
-	parsed, err := targetprofile.Parse([]byte(`{
-		"dns":{"servers":[{"type":"local","tag":"system-dns"}],"final":"system-dns"},
-		"outbounds":[{"type":"direct","tag":"direct"}]
-	}`))
-	if err != nil {
-		t.Fatal(err)
-	}
 	for _, mode := range []RouteMode{RouteModeDirect, RouteModeAll} {
 		t.Run(string(mode), func(t *testing.T) {
 			content, err := Build(Settings{
@@ -45,7 +38,7 @@ func TestBuildTunRouteModesKeepDNSHijackAndUpstream(t *testing.T) {
 				MixedPort:     2080,
 				ProxyMode:     ProxyModeTun,
 				RouteMode:     mode,
-			}, parsed.Profile)
+			}, targetprofile.Profile{})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -75,29 +68,48 @@ func TestBuildTunRouteModesKeepDNSHijackAndUpstream(t *testing.T) {
 				document.DNS.Final != tunDNSPublicTag {
 				t.Fatalf("unexpected TUN DNS: %+v", document.DNS)
 			}
-			if len(document.Route.Rules) == 0 ||
-				document.Route.Rules[0].Action != "hijack-dns" ||
-				document.Route.Rules[0].Port != 53 {
+			if len(document.Route.Rules) != 2 ||
+				document.Route.Rules[0].Action != "sniff" ||
+				document.Route.Rules[1].Action != "hijack-dns" ||
+				document.Route.Rules[1].Port != 53 {
 				t.Fatalf("TUN DNS hijack rule missing: %+v", document.Route.Rules)
 			}
 		})
 	}
 }
 
-func TestBuildAlwaysUsesInfoLoggingWithoutFileOutput(t *testing.T) {
-	parsed, err := targetprofile.Parse([]byte(`{
-		"log":{"level":"trace","output":"trace.log"},
-		"outbounds":[{"type":"direct","tag":"direct"}]
-	}`))
+func TestBuildEnablesSniffForMixedInbound(t *testing.T) {
+	content, err := Build(Settings{
+		ListenAddress: "127.0.0.1",
+		MixedPort:     2080,
+		ProxyMode:     ProxyModeMixed,
+		RouteMode:     RouteModeRule,
+	}, targetprofile.Profile{})
 	if err != nil {
 		t.Fatal(err)
 	}
+	var document struct {
+		Route struct {
+			Rules []struct {
+				Action string `json:"action"`
+			} `json:"rules"`
+		} `json:"route"`
+	}
+	if err := json.Unmarshal(content, &document); err != nil {
+		t.Fatal(err)
+	}
+	if len(document.Route.Rules) == 0 || document.Route.Rules[0].Action != "sniff" {
+		t.Fatalf("sniff rule missing: %+v", document.Route.Rules)
+	}
+}
+
+func TestBuildAlwaysUsesInfoLoggingWithoutFileOutput(t *testing.T) {
 	content, err := Build(Settings{
 		ListenAddress: "127.0.0.1",
 		MixedPort:     2080,
 		ProxyMode:     ProxyModeTun,
 		RouteMode:     RouteModeDirect,
-	}, parsed.Profile)
+	}, targetprofile.Profile{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -188,18 +200,59 @@ func TestBuildUsesNodesOnlyFromProfile(t *testing.T) {
 	if len(document.Inbounds) != 1 || document.Inbounds[0].Tag != "mixed" || document.Inbounds[0].ListenPort != 2080 {
 		t.Fatalf("source inbounds were not replaced: %+v", document.Inbounds)
 	}
-	if document.Route.Final != "proxy" || len(document.Route.Rules) != 0 {
+	if document.Route.Final != "proxy" ||
+		len(document.Route.Rules) != 1 ||
+		document.Route.Rules[0]["action"] != "sniff" {
 		t.Fatalf("provider route was unexpectedly included: %+v", document.Route)
 	}
-	wantTags := map[string]bool{"direct": true, "node-a": true, "proxy": true, "urltest": true}
+	wantTags := map[string]bool{"direct": true, parsed.Profile.Nodes[0].ID: true, "proxy": true, "urltest": true}
 	for _, outbound := range document.Outbounds {
-		if outbound.Tag == "node-a" && !outbound.TCPFastOpen {
+		if outbound.Tag == parsed.Profile.Nodes[0].ID && !outbound.TCPFastOpen {
 			t.Fatal("typed node outbound field was dropped")
 		}
 		delete(wantTags, outbound.Tag)
 	}
 	if len(wantTags) != 0 {
 		t.Fatalf("outbounds missing after Profile build: %v", wantTags)
+	}
+}
+
+func TestBuildUsesStableNodeIDsAsRuntimeTags(t *testing.T) {
+	parsed, err := targetprofile.Parse([]byte(`{
+		"outbounds":[
+			{"type":"shadowsocks","tag":"Singapore A","server":"127.0.0.1","server_port":8388,"method":"aes-128-gcm","password":"secret-a"},
+			{"type":"shadowsocks","tag":"Singapore B","server":"127.0.0.2","server_port":8389,"method":"aes-128-gcm","password":"secret-b"}
+		]
+	}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	parsed.Profile.Nodes[0].Name = "Singapore"
+	parsed.Profile.Nodes[1].Name = "Singapore"
+	content, err := Build(Settings{ListenAddress: "127.0.0.1", MixedPort: 2080, ProxyMode: ProxyModeMixed, RouteMode: RouteModeRule}, parsed.Profile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var document struct {
+		Outbounds []struct {
+			Tag string `json:"tag"`
+		} `json:"outbounds"`
+	}
+	if err := json.Unmarshal(content, &document); err != nil {
+		t.Fatal(err)
+	}
+	wantTags := map[string]bool{
+		parsed.Profile.Nodes[0].ID: true,
+		parsed.Profile.Nodes[1].ID: true,
+	}
+	for _, outbound := range document.Outbounds {
+		delete(wantTags, outbound.Tag)
+		if outbound.Tag == "Singapore" {
+			t.Fatal("runtime tag used display name instead of stable node ID")
+		}
+	}
+	if len(wantTags) != 0 {
+		t.Fatalf("stable node IDs missing from runtime outbounds: %v", wantTags)
 	}
 }
 
@@ -221,17 +274,93 @@ func TestBuildDropsProviderRuleSetsAndRules(t *testing.T) {
 	}
 	var document struct {
 		Route struct {
-			RuleSet []any  `json:"rule_set"`
-			Rules   []any  `json:"rules"`
-			Final   string `json:"final"`
+			RuleSet []any `json:"rule_set"`
+			Rules   []struct {
+				Action string `json:"action"`
+			} `json:"rules"`
+			Final string `json:"final"`
 		} `json:"route"`
 	}
 	if err := json.Unmarshal(content, &document); err != nil {
 		t.Fatal(err)
 	}
-	if len(document.Route.RuleSet) != 0 || len(document.Route.Rules) != 0 || document.Route.Final != "proxy" {
+	if len(document.Route.RuleSet) != 0 ||
+		len(document.Route.Rules) != 1 ||
+		document.Route.Rules[0].Action != "sniff" ||
+		document.Route.Final != "proxy" {
 		t.Fatalf("provider routing data was unexpectedly included: %+v", document.Route)
 	}
+}
+
+func TestBuildRemovesALPNFromAnyTLS(t *testing.T) {
+	parsed, err := targetprofile.Parse([]byte(`{
+		"outbounds":[{
+			"type":"anytls",
+			"tag":"Hong Kong",
+			"server":"example.com",
+			"server_port":443,
+			"password":"secret",
+			"tls":{"enabled":true,"server_name":"example.com","insecure":true,"alpn":["h3"]}
+		}]
+	}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	content, err := Build(Settings{
+		ListenAddress: "127.0.0.1",
+		MixedPort:     2080,
+		ProxyMode:     ProxyModeMixed,
+		RouteMode:     RouteModeRule,
+	}, parsed.Profile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var document any
+	if err := json.Unmarshal(content, &document); err != nil {
+		t.Fatal(err)
+	}
+	if hasJSONField(document, "alpn") {
+		t.Fatalf("generated config still contains ALPN: %s", content)
+	}
+}
+
+func TestStripALPNRecursively(t *testing.T) {
+	content, err := stripALPN([]byte(`{
+		"outbounds":[{"tls":{"alpn":["h3"],"enabled":true}}],
+		"endpoints":[{"nested":{"alpn":"h2"}}],
+		"alpn":["http/1.1"]
+	}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var document any
+	if err := json.Unmarshal(content, &document); err != nil {
+		t.Fatal(err)
+	}
+	if hasJSONField(document, "alpn") {
+		t.Fatalf("nested ALPN survived: %s", content)
+	}
+}
+
+func hasJSONField(value any, field string) bool {
+	switch typed := value.(type) {
+	case map[string]any:
+		if _, exists := typed[field]; exists {
+			return true
+		}
+		for _, child := range typed {
+			if hasJSONField(child, field) {
+				return true
+			}
+		}
+	case []any:
+		for _, child := range typed {
+			if hasJSONField(child, field) {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func TestBuildDropsUpstreamDNS(t *testing.T) {

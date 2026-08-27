@@ -364,7 +364,12 @@ func (m *Manager) updateClaimed(ctx context.Context, id string, current Subscrip
 	if err = m.commit(ctx, current, previous); err != nil {
 		return UpdateResult{}, err
 	}
-	return UpdateResult{Subscription: cloneSubscription(current), Changed: changed, Duration: m.now().Sub(started)}, nil
+	return UpdateResult{
+		Subscription:   cloneSubscription(current),
+		Changed:        changed,
+		Duration:       m.now().Sub(started),
+		OriginalConfig: append([]byte(nil), fetched.Body...),
+	}, nil
 }
 
 // applyHeaderMetadata 把响应头元数据应用到订阅（Dart 端 `??` 语义：
@@ -542,7 +547,7 @@ func subscriptionView(item Subscription) View {
 func profileView(source targetprofile.Profile) ProfileView {
 	nodes := make([]NodeView, len(source.Nodes))
 	for index, node := range source.Nodes {
-		nodes[index] = NodeView{Tag: node.Name, Name: node.Name, Type: node.Type, Server: node.Server, Port: node.Port, Phase: node.Phase, Error: node.Error}
+		nodes[index] = NodeView{Tag: node.ID, Name: node.Name, Type: node.Type, CountryCode: node.CountryCode, Server: node.Server, Port: node.Port, Phase: node.Phase, Error: node.Error}
 	}
 	sort.Slice(nodes, func(i, j int) bool {
 		if nodes[i].Name != nodes[j].Name {

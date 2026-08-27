@@ -284,6 +284,32 @@ func (m *Manager) SubscribeLogs(_ *emptypb.Empty, stream grpc.ServerStreamingSer
 	return m.started.SubscribeLog(&emptypb.Empty{}, newLogRelay(stream))
 }
 
+// UpdateSubscription adds a one-shot generated configuration to the update
+// response so clients can compare it with the fetched provider document.
+func (m *Manager) UpdateSubscription(ctx context.Context, request *targetlibapi.SubscriptionId) (*targetlibapi.SubscriptionUpdateResult, error) {
+	result, err := m.Handler.UpdateSubscription(ctx, request)
+	if err != nil || len(result.GetOriginalConfig()) == 0 {
+		return result, err
+	}
+	subscription, ok := m.subscriptions.Get(request.GetId())
+	if !ok {
+		return nil, status.Errorf(codes.NotFound, "subscription %q not found", request.GetId())
+	}
+	m.configMu.RLock()
+	settingsProto := cloneRuntimeSettings(m.runtimeConfig.GetSettings())
+	m.configMu.RUnlock()
+	settings, err := buildSettings(settingsProto, m.cacheFilePath)
+	if err != nil {
+		return nil, err
+	}
+	content, err := buildRuntimeConfigForSubscription(settings, &subscription)
+	if err != nil {
+		return nil, err
+	}
+	result.GeneratedConfig = content
+	return result, nil
+}
+
 func (m *Manager) SelectOutbound(ctx context.Context, request *targetlibapi.SelectOutboundRequest) (*emptypb.Empty, error) {
 	if request == nil || request.GetGroupTag() == "" || request.GetOutboundTag() == "" {
 		return nil, status.Error(codes.InvalidArgument, "group_tag and outbound_tag are required")

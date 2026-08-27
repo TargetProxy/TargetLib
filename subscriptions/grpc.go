@@ -152,6 +152,7 @@ func (s *Handler) UpdateSubscription(ctx context.Context, request *targetlibapi.
 	return &targetlibapi.SubscriptionUpdateResult{
 		Subscription: grpcSubscriptionView(view), Changed: result.Changed,
 		NotModified: result.NotModified, DurationMilliseconds: result.Duration.Milliseconds(),
+		OriginalConfig: result.OriginalConfig,
 	}, nil
 }
 
@@ -252,6 +253,7 @@ func grpcProfileView(view ProfileView) *targetlibapi.ProfileView {
 		nodes[i] = &targetlibapi.ProfileNode{
 			Tag: node.Tag, Name: node.Name, Type: node.Type, Server: node.Server,
 			Port: int32(node.Port), Phase: profileNodePhase(node.Phase), ErrorMessage: node.Error,
+			CountryCode: node.CountryCode,
 		}
 	}
 	return &targetlibapi.ProfileView{Nodes: nodes}

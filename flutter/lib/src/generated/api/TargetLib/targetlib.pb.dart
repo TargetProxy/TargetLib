@@ -1421,19 +1421,9 @@ class SubscriptionView extends $pb.GeneratedMessage {
 class ProfileView extends $pb.GeneratedMessage {
   factory ProfileView({
     $core.Iterable<ProfileNode>? nodes,
-    $core.Iterable<ProfileGroup>? groups,
-    $core.Iterable<ProfileObject>? customOutbounds,
-    $core.Iterable<ProfileObject>? customInbounds,
-    $core.int? routeRuleCount,
-    ProfileDns? dns,
   }) {
     final result = create();
     if (nodes != null) result.nodes.addAll(nodes);
-    if (groups != null) result.groups.addAll(groups);
-    if (customOutbounds != null) result.customOutbounds.addAll(customOutbounds);
-    if (customInbounds != null) result.customInbounds.addAll(customInbounds);
-    if (routeRuleCount != null) result.routeRuleCount = routeRuleCount;
-    if (dns != null) result.dns = dns;
     return result;
   }
 
@@ -1452,16 +1442,6 @@ class ProfileView extends $pb.GeneratedMessage {
       createEmptyInstance: create)
     ..pPM<ProfileNode>(1, _omitFieldNames ? '' : 'nodes',
         subBuilder: ProfileNode.create)
-    ..pPM<ProfileGroup>(2, _omitFieldNames ? '' : 'groups',
-        subBuilder: ProfileGroup.create)
-    ..pPM<ProfileObject>(3, _omitFieldNames ? '' : 'customOutbounds',
-        subBuilder: ProfileObject.create)
-    ..pPM<ProfileObject>(4, _omitFieldNames ? '' : 'customInbounds',
-        subBuilder: ProfileObject.create)
-    ..aI(5, _omitFieldNames ? '' : 'routeRuleCount',
-        fieldType: $pb.PbFieldType.OU3)
-    ..aOM<ProfileDns>(6, _omitFieldNames ? '' : 'dns',
-        subBuilder: ProfileDns.create)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -1485,35 +1465,6 @@ class ProfileView extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(1)
   $pb.PbList<ProfileNode> get nodes => $_getList(0);
-
-  @$pb.TagNumber(2)
-  $pb.PbList<ProfileGroup> get groups => $_getList(1);
-
-  @$pb.TagNumber(3)
-  $pb.PbList<ProfileObject> get customOutbounds => $_getList(2);
-
-  @$pb.TagNumber(4)
-  $pb.PbList<ProfileObject> get customInbounds => $_getList(3);
-
-  @$pb.TagNumber(5)
-  $core.int get routeRuleCount => $_getIZ(4);
-  @$pb.TagNumber(5)
-  set routeRuleCount($core.int value) => $_setUnsignedInt32(4, value);
-  @$pb.TagNumber(5)
-  $core.bool hasRouteRuleCount() => $_has(4);
-  @$pb.TagNumber(5)
-  void clearRouteRuleCount() => $_clearField(5);
-
-  @$pb.TagNumber(6)
-  ProfileDns get dns => $_getN(5);
-  @$pb.TagNumber(6)
-  set dns(ProfileDns value) => $_setField(6, value);
-  @$pb.TagNumber(6)
-  $core.bool hasDns() => $_has(5);
-  @$pb.TagNumber(6)
-  void clearDns() => $_clearField(6);
-  @$pb.TagNumber(6)
-  ProfileDns ensureDns() => $_ensure(5);
 }
 
 class ProfileNode extends $pb.GeneratedMessage {
@@ -1523,9 +1474,9 @@ class ProfileNode extends $pb.GeneratedMessage {
     $core.String? type,
     $core.String? server,
     $core.int? port,
-    $core.Iterable<$core.String>? groupTags,
     ProfileNodePhase? phase,
     $core.String? errorMessage,
+    $core.String? countryCode,
   }) {
     final result = create();
     if (tag != null) result.tag = tag;
@@ -1533,9 +1484,9 @@ class ProfileNode extends $pb.GeneratedMessage {
     if (type != null) result.type = type;
     if (server != null) result.server = server;
     if (port != null) result.port = port;
-    if (groupTags != null) result.groupTags.addAll(groupTags);
     if (phase != null) result.phase = phase;
     if (errorMessage != null) result.errorMessage = errorMessage;
+    if (countryCode != null) result.countryCode = countryCode;
     return result;
   }
 
@@ -1557,10 +1508,10 @@ class ProfileNode extends $pb.GeneratedMessage {
     ..aOS(3, _omitFieldNames ? '' : 'type')
     ..aOS(4, _omitFieldNames ? '' : 'server')
     ..aI(5, _omitFieldNames ? '' : 'port')
-    ..pPS(6, _omitFieldNames ? '' : 'groupTags')
     ..aE<ProfileNodePhase>(7, _omitFieldNames ? '' : 'phase',
         enumValues: ProfileNodePhase.values)
     ..aOS(8, _omitFieldNames ? '' : 'errorMessage')
+    ..aOS(9, _omitFieldNames ? '' : 'countryCode')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -1627,248 +1578,32 @@ class ProfileNode extends $pb.GeneratedMessage {
   @$pb.TagNumber(5)
   void clearPort() => $_clearField(5);
 
-  @$pb.TagNumber(6)
-  $pb.PbList<$core.String> get groupTags => $_getList(5);
-
   @$pb.TagNumber(7)
-  ProfileNodePhase get phase => $_getN(6);
+  ProfileNodePhase get phase => $_getN(5);
   @$pb.TagNumber(7)
   set phase(ProfileNodePhase value) => $_setField(7, value);
   @$pb.TagNumber(7)
-  $core.bool hasPhase() => $_has(6);
+  $core.bool hasPhase() => $_has(5);
   @$pb.TagNumber(7)
   void clearPhase() => $_clearField(7);
 
   @$pb.TagNumber(8)
-  $core.String get errorMessage => $_getSZ(7);
+  $core.String get errorMessage => $_getSZ(6);
   @$pb.TagNumber(8)
-  set errorMessage($core.String value) => $_setString(7, value);
+  set errorMessage($core.String value) => $_setString(6, value);
   @$pb.TagNumber(8)
-  $core.bool hasErrorMessage() => $_has(7);
+  $core.bool hasErrorMessage() => $_has(6);
   @$pb.TagNumber(8)
   void clearErrorMessage() => $_clearField(8);
-}
 
-class ProfileGroup extends $pb.GeneratedMessage {
-  factory ProfileGroup({
-    $core.String? tag,
-    $core.String? type,
-    $core.Iterable<$core.String>? memberTags,
-    $core.String? defaultTag,
-  }) {
-    final result = create();
-    if (tag != null) result.tag = tag;
-    if (type != null) result.type = type;
-    if (memberTags != null) result.memberTags.addAll(memberTags);
-    if (defaultTag != null) result.defaultTag = defaultTag;
-    return result;
-  }
-
-  ProfileGroup._();
-
-  factory ProfileGroup.fromBuffer($core.List<$core.int> data,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
-  factory ProfileGroup.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'ProfileGroup',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'targetlib'),
-      createEmptyInstance: create)
-    ..aOS(1, _omitFieldNames ? '' : 'tag')
-    ..aOS(2, _omitFieldNames ? '' : 'type')
-    ..pPS(3, _omitFieldNames ? '' : 'memberTags')
-    ..aOS(4, _omitFieldNames ? '' : 'defaultTag')
-    ..hasRequiredFields = false;
-
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  ProfileGroup clone() => deepCopy();
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  ProfileGroup copyWith(void Function(ProfileGroup) updates) =>
-      super.copyWith((message) => updates(message as ProfileGroup))
-          as ProfileGroup;
-
-  @$core.override
-  $pb.BuilderInfo get info_ => _i;
-
-  @$core.pragma('dart2js:noInline')
-  static ProfileGroup create() => ProfileGroup._();
-  @$core.override
-  ProfileGroup createEmptyInstance() => create();
-  @$core.pragma('dart2js:noInline')
-  static ProfileGroup getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<ProfileGroup>(create);
-  static ProfileGroup? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  $core.String get tag => $_getSZ(0);
-  @$pb.TagNumber(1)
-  set tag($core.String value) => $_setString(0, value);
-  @$pb.TagNumber(1)
-  $core.bool hasTag() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearTag() => $_clearField(1);
-
-  @$pb.TagNumber(2)
-  $core.String get type => $_getSZ(1);
-  @$pb.TagNumber(2)
-  set type($core.String value) => $_setString(1, value);
-  @$pb.TagNumber(2)
-  $core.bool hasType() => $_has(1);
-  @$pb.TagNumber(2)
-  void clearType() => $_clearField(2);
-
-  @$pb.TagNumber(3)
-  $pb.PbList<$core.String> get memberTags => $_getList(2);
-
-  @$pb.TagNumber(4)
-  $core.String get defaultTag => $_getSZ(3);
-  @$pb.TagNumber(4)
-  set defaultTag($core.String value) => $_setString(3, value);
-  @$pb.TagNumber(4)
-  $core.bool hasDefaultTag() => $_has(3);
-  @$pb.TagNumber(4)
-  void clearDefaultTag() => $_clearField(4);
-}
-
-class ProfileObject extends $pb.GeneratedMessage {
-  factory ProfileObject({
-    $core.String? tag,
-    $core.String? type,
-  }) {
-    final result = create();
-    if (tag != null) result.tag = tag;
-    if (type != null) result.type = type;
-    return result;
-  }
-
-  ProfileObject._();
-
-  factory ProfileObject.fromBuffer($core.List<$core.int> data,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
-  factory ProfileObject.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'ProfileObject',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'targetlib'),
-      createEmptyInstance: create)
-    ..aOS(1, _omitFieldNames ? '' : 'tag')
-    ..aOS(2, _omitFieldNames ? '' : 'type')
-    ..hasRequiredFields = false;
-
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  ProfileObject clone() => deepCopy();
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  ProfileObject copyWith(void Function(ProfileObject) updates) =>
-      super.copyWith((message) => updates(message as ProfileObject))
-          as ProfileObject;
-
-  @$core.override
-  $pb.BuilderInfo get info_ => _i;
-
-  @$core.pragma('dart2js:noInline')
-  static ProfileObject create() => ProfileObject._();
-  @$core.override
-  ProfileObject createEmptyInstance() => create();
-  @$core.pragma('dart2js:noInline')
-  static ProfileObject getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<ProfileObject>(create);
-  static ProfileObject? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  $core.String get tag => $_getSZ(0);
-  @$pb.TagNumber(1)
-  set tag($core.String value) => $_setString(0, value);
-  @$pb.TagNumber(1)
-  $core.bool hasTag() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearTag() => $_clearField(1);
-
-  @$pb.TagNumber(2)
-  $core.String get type => $_getSZ(1);
-  @$pb.TagNumber(2)
-  set type($core.String value) => $_setString(1, value);
-  @$pb.TagNumber(2)
-  $core.bool hasType() => $_has(1);
-  @$pb.TagNumber(2)
-  void clearType() => $_clearField(2);
-}
-
-class ProfileDns extends $pb.GeneratedMessage {
-  factory ProfileDns({
-    $core.Iterable<ProfileObject>? servers,
-    $core.int? ruleCount,
-    $core.String? finalServer,
-  }) {
-    final result = create();
-    if (servers != null) result.servers.addAll(servers);
-    if (ruleCount != null) result.ruleCount = ruleCount;
-    if (finalServer != null) result.finalServer = finalServer;
-    return result;
-  }
-
-  ProfileDns._();
-
-  factory ProfileDns.fromBuffer($core.List<$core.int> data,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
-  factory ProfileDns.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'ProfileDns',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'targetlib'),
-      createEmptyInstance: create)
-    ..pPM<ProfileObject>(1, _omitFieldNames ? '' : 'servers',
-        subBuilder: ProfileObject.create)
-    ..aI(2, _omitFieldNames ? '' : 'ruleCount', fieldType: $pb.PbFieldType.OU3)
-    ..aOS(3, _omitFieldNames ? '' : 'finalServer')
-    ..hasRequiredFields = false;
-
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  ProfileDns clone() => deepCopy();
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  ProfileDns copyWith(void Function(ProfileDns) updates) =>
-      super.copyWith((message) => updates(message as ProfileDns)) as ProfileDns;
-
-  @$core.override
-  $pb.BuilderInfo get info_ => _i;
-
-  @$core.pragma('dart2js:noInline')
-  static ProfileDns create() => ProfileDns._();
-  @$core.override
-  ProfileDns createEmptyInstance() => create();
-  @$core.pragma('dart2js:noInline')
-  static ProfileDns getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<ProfileDns>(create);
-  static ProfileDns? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  $pb.PbList<ProfileObject> get servers => $_getList(0);
-
-  @$pb.TagNumber(2)
-  $core.int get ruleCount => $_getIZ(1);
-  @$pb.TagNumber(2)
-  set ruleCount($core.int value) => $_setUnsignedInt32(1, value);
-  @$pb.TagNumber(2)
-  $core.bool hasRuleCount() => $_has(1);
-  @$pb.TagNumber(2)
-  void clearRuleCount() => $_clearField(2);
-
-  @$pb.TagNumber(3)
-  $core.String get finalServer => $_getSZ(2);
-  @$pb.TagNumber(3)
-  set finalServer($core.String value) => $_setString(2, value);
-  @$pb.TagNumber(3)
-  $core.bool hasFinalServer() => $_has(2);
-  @$pb.TagNumber(3)
-  void clearFinalServer() => $_clearField(3);
+  @$pb.TagNumber(9)
+  $core.String get countryCode => $_getSZ(7);
+  @$pb.TagNumber(9)
+  set countryCode($core.String value) => $_setString(7, value);
+  @$pb.TagNumber(9)
+  $core.bool hasCountryCode() => $_has(7);
+  @$pb.TagNumber(9)
+  void clearCountryCode() => $_clearField(9);
 }
 
 class SubscriptionUpdateResult extends $pb.GeneratedMessage {
@@ -1877,6 +1612,8 @@ class SubscriptionUpdateResult extends $pb.GeneratedMessage {
     $core.bool? changed,
     $core.bool? notModified,
     $fixnum.Int64? durationMilliseconds,
+    $core.List<$core.int>? originalConfig,
+    $core.List<$core.int>? generatedConfig,
   }) {
     final result = create();
     if (subscription != null) result.subscription = subscription;
@@ -1884,6 +1621,8 @@ class SubscriptionUpdateResult extends $pb.GeneratedMessage {
     if (notModified != null) result.notModified = notModified;
     if (durationMilliseconds != null)
       result.durationMilliseconds = durationMilliseconds;
+    if (originalConfig != null) result.originalConfig = originalConfig;
+    if (generatedConfig != null) result.generatedConfig = generatedConfig;
     return result;
   }
 
@@ -1905,6 +1644,10 @@ class SubscriptionUpdateResult extends $pb.GeneratedMessage {
     ..aOB(2, _omitFieldNames ? '' : 'changed')
     ..aOB(3, _omitFieldNames ? '' : 'notModified')
     ..aInt64(4, _omitFieldNames ? '' : 'durationMilliseconds')
+    ..a<$core.List<$core.int>>(
+        5, _omitFieldNames ? '' : 'originalConfig', $pb.PbFieldType.OY)
+    ..a<$core.List<$core.int>>(
+        6, _omitFieldNames ? '' : 'generatedConfig', $pb.PbFieldType.OY)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -1964,6 +1707,25 @@ class SubscriptionUpdateResult extends $pb.GeneratedMessage {
   $core.bool hasDurationMilliseconds() => $_has(3);
   @$pb.TagNumber(4)
   void clearDurationMilliseconds() => $_clearField(4);
+
+  /// One-shot diagnostics for an explicit update. These bytes are not persisted.
+  @$pb.TagNumber(5)
+  $core.List<$core.int> get originalConfig => $_getN(4);
+  @$pb.TagNumber(5)
+  set originalConfig($core.List<$core.int> value) => $_setBytes(4, value);
+  @$pb.TagNumber(5)
+  $core.bool hasOriginalConfig() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearOriginalConfig() => $_clearField(5);
+
+  @$pb.TagNumber(6)
+  $core.List<$core.int> get generatedConfig => $_getN(5);
+  @$pb.TagNumber(6)
+  set generatedConfig($core.List<$core.int> value) => $_setBytes(5, value);
+  @$pb.TagNumber(6)
+  $core.bool hasGeneratedConfig() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearGeneratedConfig() => $_clearField(6);
 }
 
 class RuntimeSettings extends $pb.GeneratedMessage {

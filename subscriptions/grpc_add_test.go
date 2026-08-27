@@ -51,7 +51,39 @@ func TestAddSubscriptionReturnsUpdatedActiveProfile(t *testing.T) {
 	if manager.ActiveID() != "youtu" {
 		t.Fatalf("active ID = %q, want youtu", manager.ActiveID())
 	}
-	if len(view.GetProfile().GetNodes()) != 1 || view.GetProfile().GetNodes()[0].GetTag() != "youtu" {
+	if len(view.GetProfile().GetNodes()) != 1 ||
+		view.GetProfile().GetNodes()[0].GetTag() == "" ||
+		view.GetProfile().GetNodes()[0].GetName() != "youtu" {
 		t.Fatalf("updated profile was not returned: %+v", view.GetProfile())
+	}
+}
+
+func TestUpdateSubscriptionReturnsFetchedConfigWithoutPersistingIt(t *testing.T) {
+	body := []byte(`{"outbounds":[{"type":"ssh","tag":"youtu","server":"127.0.0.1","server_port":22,"user":"test","password":"secret"}]}`)
+	manager := NewManager(Options{
+		Fetcher: fixedFetcher{body: body},
+		Store:   &MemoryStore{},
+	})
+	t.Cleanup(manager.Close)
+	handler := NewHandler(manager)
+	if _, err := manager.AddRequest(context.Background(), AddRequest{
+		ID: "youtu", Name: "youtu", URL: "https://example.com/sub", Enabled: true,
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	result, err := handler.UpdateSubscription(context.Background(), &targetlibapi.SubscriptionId{Id: "youtu"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(result.GetOriginalConfig()) != string(body) {
+		t.Fatalf("original config = %q, want %q", result.GetOriginalConfig(), body)
+	}
+	stored, ok := manager.Get("youtu")
+	if !ok {
+		t.Fatal("updated subscription was not stored")
+	}
+	if encoded := string(stored.Profile.Nodes[0].OutboundJSON); encoded == string(body) {
+		t.Fatal("full original document was persisted in the profile")
 	}
 }

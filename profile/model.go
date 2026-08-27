@@ -21,6 +21,7 @@ type Node struct {
 	ID           string          `json:"id"`
 	Name         string          `json:"name"`
 	Type         string          `json:"type"`
+	CountryCode  string          `json:"country_code,omitempty"`
 	Server       string          `json:"server,omitempty"`
 	Port         int             `json:"port,omitempty"`
 	Phase        NodePhase       `json:"phase"`

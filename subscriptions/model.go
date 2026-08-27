@@ -91,6 +91,9 @@ type UpdateResult struct {
 	Changed      bool
 	NotModified  bool
 	Duration     time.Duration
+	// OriginalConfig is returned only for the fetch that produced this result.
+	// It is intentionally not stored in Subscription.
+	OriginalConfig []byte
 }
 
 type EventType string
@@ -128,10 +131,10 @@ type View struct {
 }
 
 type NodeView struct {
-	Tag, Name, Type, Server string
-	Port                    int
-	Phase                   NodePhase
-	Error                   string
+	Tag, Name, Type, CountryCode, Server string
+	Port                                 int
+	Phase                                NodePhase
+	Error                                string
 }
 
 type ProfileView struct {
