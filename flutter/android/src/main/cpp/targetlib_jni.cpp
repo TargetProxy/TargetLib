@@ -9,9 +9,7 @@ struct targetlib_init_options {
   const char* locale;
   int32_t log_max_lines;
   bool debug;
-  bool oom_killer_enabled;
-  bool oom_killer_disabled;
-  int64_t oom_memory_limit;
+  bool oom_killer;
 };
 
 int32_t targetlib_start(const targetlib_init_options*, char**);
@@ -33,7 +31,7 @@ extern "C" JNIEXPORT void JNICALL
 Java_top_loafman_targetlib_TargetlibNative_start(
     JNIEnv* env, jclass, jstring base_path, jstring working_path,
     jstring temp_path, jstring locale, jint log_max_lines, jboolean debug,
-    jboolean oom_killer_enabled, jboolean oom_killer_disabled) {
+    jboolean oom_killer) {
   const char* base = env->GetStringUTFChars(base_path, nullptr);
   const char* working = env->GetStringUTFChars(working_path, nullptr);
   const char* temp = env->GetStringUTFChars(temp_path, nullptr);
@@ -45,9 +43,7 @@ Java_top_loafman_targetlib_TargetlibNative_start(
       language,
       log_max_lines,
       static_cast<bool>(debug),
-      static_cast<bool>(oom_killer_enabled),
-      static_cast<bool>(oom_killer_disabled),
-      0};
+      static_cast<bool>(oom_killer)};
   char* error = nullptr;
   const int32_t status = targetlib_start(&options, &error);
   env->ReleaseStringUTFChars(base_path, base);

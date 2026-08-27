@@ -8,10 +8,9 @@ import '../targetlib_logger.dart';
 enum TargetLibServiceStatus { running, stopped, unknown, notInstalled }
 
 class TargetLibServiceResult {
-  const TargetLibServiceResult(this.status, {this.output = ''});
+  const TargetLibServiceResult(this.status);
 
   final TargetLibServiceStatus status;
-  final String output;
 }
 
 /// Controls the standalone TargetLib executable. This deliberately uses the
@@ -180,7 +179,7 @@ class TargetLibServiceManager {
       final status = action == 'status'
           ? _parseStatus(output)
           : TargetLibServiceStatus.unknown;
-      return TargetLibServiceResult(status, output: output);
+      return TargetLibServiceResult(status);
     } on Object catch (error, stackTrace) {
       TargetLibLog.error(
         'Service action failed: action=$action '
@@ -249,10 +248,7 @@ class TargetLibServiceManager {
           result.exitCode,
         );
       }
-      return TargetLibServiceResult(
-        TargetLibServiceStatus.running,
-        output: output,
-      );
+      return const TargetLibServiceResult(TargetLibServiceStatus.running);
     } on Object catch (error, stackTrace) {
       TargetLibLog.error(
         'Service install+start failed: '
@@ -436,7 +432,7 @@ class TargetLibServiceManager {
         '(elapsedMs=${stopwatch.elapsedMilliseconds})',
         source: 'TargetLib',
       );
-      return TargetLibServiceResult(status, output: output);
+      return TargetLibServiceResult(status);
     } on Object catch (error, stackTrace) {
       TargetLibLog.error(
         'Service status query failed',

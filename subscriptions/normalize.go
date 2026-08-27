@@ -57,14 +57,6 @@ func normalizeSubscriptionURL(input string, depth int) (string, bool) {
 				return normalized, true
 			}
 		}
-		// Parse 已对 Fragment 做过一次百分号解码；再次解码以兼容旧客户端行为。
-		if parsed.Fragment != "" {
-			if decoded, err := url.PathUnescape(parsed.Fragment); err == nil {
-				if normalized, ok := normalizeSubscriptionURL(decoded, depth+1); ok {
-					return normalized, true
-				}
-			}
-		}
 	}
 
 	return extractEmbeddedURL(trimmed, depth)

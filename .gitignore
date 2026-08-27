@@ -2,6 +2,7 @@
 .workbuddy
 
 /build/
+flutter/android/src/main/jniLibs/
 **/.dart_tool/
 **/build/
 

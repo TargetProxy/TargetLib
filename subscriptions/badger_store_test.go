@@ -4,11 +4,9 @@ import (
 	"context"
 	"errors"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	targetprofile "github.com/loafman1120/TargetLib/profile"
-	"github.com/sagernet/sing-box/option"
 )
 
 func TestBadgerStoreUpdateIsAtomic(t *testing.T) {
@@ -64,28 +62,28 @@ func TestBadgerStoreUpdateIsAtomic(t *testing.T) {
 	}
 }
 
-func TestBadgerStoreNormalizesLegacyALPNWhenRestoringOutbound(t *testing.T) {
+func TestBadgerStoreRestoresTypedOutbound(t *testing.T) {
 	store, err := OpenBadgerStore(filepath.Join(t.TempDir(), "subscriptions"), make([]byte, 32))
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { _ = store.Close() })
 
-	legacyJSON := []byte(`{
+	outboundJSON := []byte(`{
 		"type":"anytls",
-		"tag":"legacy",
+		"tag":"node",
 		"server":"example.com",
 		"server_port":443,
 		"password":"secret",
-		"tls":{"enabled":true,"server_name":"example.com","alpn":["h3"]}
+		"tls":{"enabled":true,"server_name":"example.com"}
 	}`)
 	err = store.Update(context.Background(), func(tx StoreTx) error {
 		return tx.Put(Subscription{
-			ID:        "legacy",
-			NodesHash: "legacy-hash",
+			ID:        "subscription",
+			NodesHash: "stored-hash",
 			Profile: targetprofile.Profile{Nodes: []targetprofile.Node{{
-				ID: "legacy", Name: "Legacy", Type: "anytls", Phase: targetprofile.NodeReady,
-				OutboundJSON: legacyJSON,
+				ID: "node", Name: "Node", Type: "anytls", Phase: targetprofile.NodeReady,
+				OutboundJSON: outboundJSON,
 			}}},
 		})
 	})
@@ -99,17 +97,13 @@ func TestBadgerStoreNormalizesLegacyALPNWhenRestoringOutbound(t *testing.T) {
 	}
 	item := state.Subscriptions[0]
 	node := item.Profile.Nodes[0]
-	if strings.Contains(string(node.OutboundJSON), `"alpn"`) {
-		t.Fatalf("restored outbound still contains ALPN: %s", node.OutboundJSON)
-	}
 	if node.Outbound == nil {
 		t.Fatal("typed outbound was not restored")
 	}
-	wrapper, ok := node.Outbound.Options.(option.OutboundTLSOptionsWrapper)
-	if !ok || wrapper.TakeOutboundTLSOptions().ALPN != nil {
-		t.Fatalf("restored typed outbound still contains ALPN: %T", node.Outbound.Options)
+	if string(node.OutboundJSON) != string(outboundJSON) {
+		t.Fatalf("persisted outbound was mutated: %s", node.OutboundJSON)
 	}
-	if item.NodesHash == "legacy-hash" || item.NodesHash != nodesHash(item.Profile.Nodes) {
-		t.Fatalf("nodes hash was not refreshed after normalization: %q", item.NodesHash)
+	if item.NodesHash != "stored-hash" {
+		t.Fatalf("nodes hash was mutated: %q", item.NodesHash)
 	}
 }

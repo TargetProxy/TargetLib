@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"net"
-	"net/http"
 	"net/url"
 	"sort"
 	"strconv"
@@ -33,9 +32,6 @@ type Options struct {
 	Now                   func() time.Time
 	DefaultUpdateInterval time.Duration
 	SchedulerTick         time.Duration
-	// 兼容旧版的 HTTP 注入字段。
-	Client    *http.Client
-	UserAgent string
 }
 
 type Manager struct {
@@ -64,7 +60,7 @@ type runtimeCallback struct {
 func NewManager(options Options) *Manager {
 	fetcher := options.Fetcher
 	if fetcher == nil {
-		fetcher = NewHTTPFetcher(HTTPFetcherOptions{Client: options.Client, UserAgent: options.UserAgent})
+		fetcher = NewHTTPFetcher(HTTPFetcherOptions{})
 	}
 	store := options.Store
 	if store == nil {

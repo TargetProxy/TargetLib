@@ -2,8 +2,8 @@ package manager
 
 import targetlibapi "github.com/loafman1120/TargetLib/api/TargetLib"
 
-// runtimeController is the lifecycle boundary. The compatibility methods on
-// Manager delegate here so gRPC transport code does not own runtime policy.
+// runtimeController is the lifecycle boundary. Manager's gRPC methods delegate
+// here so transport code does not own runtime policy.
 type runtimeController struct{ manager *Manager }
 
 func newRuntimeController(manager *Manager) *runtimeController {
@@ -30,5 +30,3 @@ func (r *runtimeController) Stop() (*targetlibapi.OperationResponse, error) {
 	}
 	return r.manager.operationResponse()
 }
-
-func (r *runtimeController) State() (*targetlibapi.ServiceState, error) { return r.manager.State() }

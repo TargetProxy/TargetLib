@@ -12,9 +12,7 @@ typedef struct {
 	const char *locale;
 	int32_t log_max_lines;
 	bool debug;
-	bool oom_killer_enabled;
-	bool oom_killer_disabled;
-	int64_t oom_memory_limit;
+	bool oom_killer;
 } targetlib_init_options;
 */
 import "C"
@@ -69,7 +67,7 @@ func targetlib_start(raw *C.targetlib_init_options, errOut **C.char) C.int32_t {
 		Locale:      cstr(raw.locale),
 		LogMaxLines: int(raw.log_max_lines),
 		Debug:       bool(raw.debug),
-		OOMKiller:   bool(raw.oom_killer_enabled) && !bool(raw.oom_killer_disabled),
+		OOMKiller:   bool(raw.oom_killer),
 	}
 	_, server, err := manager.NewLocal(context.Background(), options)
 	if err != nil {

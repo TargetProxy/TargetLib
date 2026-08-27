@@ -15,8 +15,7 @@ object TargetlibNative {
         locale: String = "",
         logMaxLines: Int = 0,
         debug: Boolean = false,
-        oomKillerEnabled: Boolean = false,
-        oomKillerDisabled: Boolean = false,
+        oomKiller: Boolean = false,
     )
 
     @JvmStatic

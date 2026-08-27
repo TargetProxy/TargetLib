@@ -304,9 +304,9 @@ if ($unknownArguments.Count -gt 0) {
 }
 
 if (-not $SkipBuild -and $PSCmdlet.ShouldProcess($SourcePath, 'Build TargetLib daemon')) {
-    $buildParameters = @{ OutputPath = $SourcePath; SkipTargetSync = $true }
+    $buildParameters = @{ OutputPath = $SourcePath }
     if ($DebugBuild) { $buildParameters.DebugBuild = $true }
-    & (Join-Path $PSScriptRoot 'build.ps1') @buildParameters
+    & (Join-Path $PSScriptRoot 'service.ps1') @buildParameters
 }
 if (-not $WhatIfPreference -and -not (Test-Path -LiteralPath $SourcePath -PathType Leaf)) {
     throw "TargetLib executable not found: $SourcePath"

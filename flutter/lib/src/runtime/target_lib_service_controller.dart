@@ -22,7 +22,6 @@ final class TargetLibServiceController {
       _manager.run(
         'status',
         basePath: await _basePath(basePath),
-        elevated: false,
       );
 
   Future<TargetLibServiceResult> start({
@@ -51,6 +50,4 @@ final class TargetLibServiceController {
         tempPath: tempPath,
         locale: locale,
       );
-
-  TargetLibServiceManager get manager => _manager;
 }

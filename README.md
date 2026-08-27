@@ -30,10 +30,34 @@ TargetLib 全面接管了底层网络代理的复杂性，为您提供开箱即�
 
 ---
 
+## 🛠️ 构建脚本
+
+本地开发与 CI 使用相同的 PowerShell 入口：
+
+```powershell
+# 重新生成 Go 与 Dart protobuf 代码
+.\scripts\generate.ps1
+
+# 为当前平台或指定目标构建 gRPC service
+.\scripts\service.ps1
+.\scripts\service.ps1 -GOOS linux -GOARCH amd64
+
+# 构建 Flutter Android 原生库
+.\scripts\build-mobile.ps1
+.\scripts\build-mobile.ps1 -OutputDir build\mobile\android
+```
+
+生成的原生库属于构建产物，不纳入 Git 版本管理。
+
+---
+
 ## 📖 文档与设计
 
 关于详细的系统架构图与完整的订阅处理流程，请参阅设计文档：
 👉 **[docs/DESIGN.md](docs/DESIGN.md)**
+
+gRPC 提供的控制与数据能力见：
+👉 **[docs/GRPC.md](docs/GRPC.md)**
 
 ---
 

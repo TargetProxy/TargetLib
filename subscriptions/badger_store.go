@@ -2,9 +2,7 @@ package subscriptions
 
 import (
 	"context"
-	"crypto/sha256"
 	"encoding/base64"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
@@ -191,39 +189,26 @@ func (s *BadgerStore) decodeSubscription(value []byte) (Subscription, error) {
 	if err := s.decode.Unmarshal(value[1:], &item); err != nil {
 		return Subscription{}, err
 	}
-	normalized, err := restoreNodeOutbounds(&item.Profile)
-	if err != nil {
+	if err := restoreNodeOutbounds(&item.Profile); err != nil {
 		return Subscription{}, fmt.Errorf("restore subscription %q: %w", item.ID, err)
-	}
-	if normalized || item.NodesHash == "" {
-		item.NodesHash = nodesHash(item.Profile.Nodes)
 	}
 	return item, nil
 }
 
-func restoreNodeOutbounds(profile *targetprofile.Profile) (bool, error) {
+func restoreNodeOutbounds(profile *targetprofile.Profile) error {
 	if profile == nil {
-		return false, nil
+		return nil
 	}
-	normalized := false
 	for index := range profile.Nodes {
 		node := &profile.Nodes[index]
 		if node.Outbound != nil || len(node.OutboundJSON) == 0 {
 			continue
 		}
-		changed, err := targetprofile.RestoreNodeOutbound(node)
-		if err != nil {
-			return false, err
+		if err := targetprofile.RestoreNodeOutbound(node); err != nil {
+			return err
 		}
-		normalized = normalized || changed
 	}
-	return normalized, nil
-}
-
-func nodesHash(nodes []targetprofile.Node) string {
-	content, _ := json.Marshal(nodes)
-	sum := sha256.Sum256(content)
-	return fmt.Sprintf("%x", sum[:])
+	return nil
 }
 
 func badgerKey(id string) []byte {

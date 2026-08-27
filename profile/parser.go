@@ -115,70 +115,41 @@ func isNodeType(value string) bool {
 	}
 }
 
-func sanitizeOutboundJSON(outboundType string, outbound map[string]any) bool {
-	changed := false
+func sanitizeOutboundJSON(outboundType string, outbound map[string]any) {
 	if outboundType == C.TypeTrojan && outbound["transport"] != nil && outbound["network"] == nil {
 		outbound["network"] = "tcp"
-		changed = true
 	}
 
 	tlsOptions, _ := outbound["tls"].(map[string]any)
 	if tlsOptions == nil {
-		return changed
+		return
 	}
-	if _, exists := tlsOptions["alpn"]; exists {
-		delete(tlsOptions, "alpn")
-		changed = true
-	}
+	delete(tlsOptions, "alpn")
 	echOptions, _ := tlsOptions["ech"].(map[string]any)
 	if echOptions != nil {
 		for _, field := range []string{"pq_signature_schemes_enabled", "dynamic_record_sizing_disabled"} {
-			if _, exists := echOptions[field]; exists {
-				delete(echOptions, field)
-				changed = true
-			}
+			delete(echOptions, field)
 		}
 	}
 	utlsOptions, _ := tlsOptions["utls"].(map[string]any)
 	if utlsOptions != nil {
 		if fingerprint, _ := utlsOptions["fingerprint"].(string); isRemovedChromeFingerprint(fingerprint) {
 			utlsOptions["fingerprint"] = "chrome"
-			changed = true
 		}
 	}
-	return changed
 }
 
-// RestoreNodeOutbound rebuilds the runtime-only typed outbound from its
-// persisted representation and applies the same normalization as a new import.
-func RestoreNodeOutbound(node *Node) (bool, error) {
+// RestoreNodeOutbound rebuilds the runtime-only typed outbound from its persisted representation.
+func RestoreNodeOutbound(node *Node) error {
 	if node == nil || len(node.OutboundJSON) == 0 {
-		return false, nil
+		return nil
 	}
-	var rawOutbound map[string]any
-	if err := decodeJSONNumber(node.OutboundJSON, &rawOutbound); err != nil {
-		return false, err
-	}
-	outboundType := strings.TrimSpace(valueToString(valueFrom(rawOutbound, "type")))
-	if outboundType == "" {
-		outboundType = node.Type
-	}
-	changed := sanitizeOutboundJSON(outboundType, rawOutbound)
-	outboundJSON := node.OutboundJSON
-	if changed {
-		var err error
-		outboundJSON, err = json.Marshal(rawOutbound)
-		if err != nil {
-			return false, err
-		}
-	}
-	typedOutbound, err := singjson.UnmarshalExtendedContext[option.Outbound](Context(), outboundJSON)
+	typedOutbound, err := singjson.UnmarshalExtendedContext[option.Outbound](Context(), node.OutboundJSON)
 	if err != nil {
-		return false, err
+		return err
 	}
-	node.OutboundJSON = outboundJSON
 	node.Outbound = &typedOutbound
-	return changed, nil
+	return nil
 }
 
 func isRemovedChromeFingerprint(value string) bool {

@@ -104,9 +104,9 @@ flowchart TB
 `profile.Parse` 在生成 `Node.OutboundJSON` 和类型化 `Node.Outbound` 之前执行节点规范化。供应商指定的 ALPN、
 已移除的 ECH 字段和过期的 uTLS 指纹在这一边界被处理，因此持久化表示与运行时表示保持同一不变量。
 
-Badger 中的历史节点在加载时也通过 `profile.RestoreNodeOutbound` 执行相同规范化。若历史内容发生变化，内存中的
-`OutboundJSON` 和 `NodesHash` 会同步刷新，避免重启后旧 ALPN 回流。完成上述处理后，`config.Emit` 无需构造
-`map[string]any` 遍历整份配置，其固定流程为一次 `MarshalContext` 和一次最终 `validateConfig`。
+Badger 加载节点时通过 `profile.RestoreNodeOutbound` 从已规范化的持久化表示重建仅供运行时使用的类型化出站。
+完成上述处理后，`config.Emit` 无需构造 `map[string]any` 遍历整份配置，其固定流程为一次 `MarshalContext`
+和一次最终 `validateConfig`。
 
 ## 一致性与失败处理
 
