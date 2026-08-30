@@ -9,18 +9,16 @@ import 'target_lib_service_manager.dart';
 import '../../targetlib_platform_interface.dart';
 import '../generated/api/TargetLib/targetlib.pb.dart';
 
-/// Cross-platform TargetLib process and local gRPC runtime.
+/// Cross-platform connection to the installer-managed TargetLib service.
 final class TargetLibRuntime {
   TargetLibRuntime({TargetLibServiceManager? serviceManager})
     : _serviceManager = serviceManager ?? TargetLibServiceManager();
 
   final TargetLibServiceManager _serviceManager;
   TargetLibConnection? _connection;
-  Process? _process;
   bool _androidServiceStarted = false;
 
   TargetLibConnection? get connection => _connection;
-  TargetLibServiceManager get serviceManager => _serviceManager;
   static bool get isSupported =>
       Platform.isWindows ||
       Platform.isLinux ||
@@ -39,34 +37,8 @@ final class TargetLibRuntime {
     return '${support.path}${Platform.pathSeparator}core';
   }
 
-  Future<String> resolveTempPath(String override) async {
-    if (override.trim().isNotEmpty) return override.trim();
-    try {
-      final cache = await getApplicationCacheDirectory();
-      if (cache.path.trim().isNotEmpty) {
-        final target = Directory(
-          '${cache.path}${Platform.pathSeparator}Target',
-        );
-        await target.create(recursive: true);
-        return target.path;
-      }
-    } on Object catch (_) {}
-    try {
-      final temp = await getTemporaryDirectory();
-      if (temp.path.trim().isNotEmpty) {
-        final target = Directory('${temp.path}${Platform.pathSeparator}Target');
-        await target.create(recursive: true);
-        return target.path;
-      }
-    } on Object catch (_) {}
-    return '';
-  }
-
   Future<TargetLibConnection> ensureConnected({
     required String basePath,
-    required String workingPath,
-    required String tempPath,
-    required String locale,
   }) async {
     final current = _connection;
     if (current != null) return current;
@@ -91,47 +63,26 @@ final class TargetLibRuntime {
         );
         _androidServiceStarted = true;
       } else {
-        _process ??= await _serviceManager.launch(
-          basePath: base.path,
-          workingPath: workingPath,
-          tempPath: tempPath,
-          locale: locale,
-        );
+        final service = await _serviceManager.status();
+        if (service.status == TargetLibServiceStatus.notInstalled) {
+          throw StateError('TargetLib service is not installed.');
+        }
+        if (service.status != TargetLibServiceStatus.running) {
+          await _serviceManager.start();
+        }
       }
     }
-    try {
-      _connection = await TargetLibConnection.connect(socketPath: socketPath);
-      TargetLibLog.info(
-        'Connected via ${_connection!.transport}',
-        source: 'TargetLib',
-      );
-      return _connection!;
-    } on Object {
-      final failedProcess = _process;
-      _process = null;
-      if (failedProcess != null) {
-        failedProcess.kill();
-        await failedProcess.exitCode.timeout(
-          const Duration(seconds: 2),
-          onTimeout: () => -1,
-        );
-      }
-      rethrow;
-    }
+    _connection = await TargetLibConnection.connect(socketPath: socketPath);
+    TargetLibLog.info(
+      'Connected via ${_connection!.transport}',
+      source: 'TargetLib',
+    );
+    return _connection!;
   }
 
   Future<void> close() async {
     await _connection?.close();
     _connection = null;
-    final process = _process;
-    _process = null;
-    if (process != null) {
-      process.kill();
-      await process.exitCode.timeout(
-        const Duration(seconds: 2),
-        onTimeout: () => -1,
-      );
-    }
     if (Platform.isAndroid && _androidServiceStarted) {
       await TargetlibPlatform.instance.stopAndroidService();
       _androidServiceStarted = false;

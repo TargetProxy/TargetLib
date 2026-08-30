@@ -499,8 +499,8 @@ func newTrafficRelay(server grpc.ServerStreamingServer[targetlibapi.TrafficStatu
 func (r *logRelay) Send(value *daemon.Log) error {
 	batch := &targetlibapi.LogBatch{Reset_: value.GetReset_()}
 	for _, message := range value.GetMessages() {
-		// sing-box 会转发低于配置级别的平台日志；公开 TargetLib 流只保留 INFO 及以上。
-		if message == nil || message.GetLevel() > daemon.LogLevel_INFO {
+		// sing-box 会转发低于配置级别的平台日志；公开 TargetLib 流只保留 ERROR 及以上。
+		if message == nil || message.GetLevel() > daemon.LogLevel_ERROR {
 			continue
 		}
 		batch.Messages = append(batch.Messages, &targetlibapi.LogMessage{

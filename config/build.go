@@ -3,7 +3,6 @@ package config
 import (
 	"fmt"
 	"net/netip"
-	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -18,13 +17,15 @@ import (
 )
 
 const (
-	urlTestURL       = "https://www.gstatic.com/generate_204"
-	urlTestInterval  = 5 * time.Minute
-	urlTestTolerance = 50
-	tunInterfaceName = "target0"
-	tunMTU           = 1500
-	tunDNSPublicTag  = "public-dns"
-	tunDNSPublicAddr = "119.29.29.29"
+	urlTestURL         = "https://www.gstatic.com/generate_204"
+	urlTestInterval    = 5 * time.Minute
+	urlTestTolerance   = 50
+	geoIPCNRuleSetTag  = "geoip-cn"
+	geoIPCNRuleSetPath = "cn.srs"
+	tunInterfaceName   = "target0"
+	tunMTU             = 1500
+	tunDNSPublicTag    = "public-dns"
+	tunDNSPublicAddr   = "119.29.29.29"
 )
 
 // TUN 前缀是全平台唯一的地址来源。Android 的 VpnService 在 establish()
@@ -44,6 +45,7 @@ func TunIPv4PrefixBits() int32 { return tunIPv4PrefixBits }
 type RoutePlan struct {
 	Base                option.RouteOptions
 	Rules               []option.Rule
+	RuleSets            []option.RuleSet
 	Final               string
 	AutoDetectInterface bool
 }
@@ -194,11 +196,37 @@ func sniffRule() option.Rule {
 	}
 }
 
+func geoIPCNRule() option.Rule {
+	return option.Rule{
+		Type: C.RuleTypeDefault,
+		DefaultOptions: option.DefaultRule{
+			RawDefaultRule: option.RawDefaultRule{RuleSet: badoption.Listable[string]{geoIPCNRuleSetTag}},
+			RuleAction: option.RuleAction{
+				Action:       C.RuleActionTypeRoute,
+				RouteOptions: option.RouteActionOptions{Outbound: "direct"},
+			},
+		},
+	}
+}
+
+func geoIPCNRuleSet() option.RuleSet {
+	return option.RuleSet{
+		Type:         C.RuleSetTypeLocal,
+		Tag:          geoIPCNRuleSetTag,
+		Format:       C.RuleSetFormatBinary,
+		LocalOptions: option.LocalRuleSet{Path: geoIPCNRuleSetPath},
+	}
+}
+
 func planRoute(finalOutbound string, settings Settings) RoutePlan {
 	// Route starts empty. In particular, never retain provider rule_set entries
 	// or rules that refer to provider-owned outbound tags.
 	base := option.RouteOptions{}
 	rules := []option.Rule{sniffRule()}
+	if settings.ProxyMode == ProxyModeTun {
+		rules = append(rules, tunDNSHijackRule())
+	}
+	var ruleSets []option.RuleSet
 	final := finalOutbound
 	switch settings.RouteMode {
 	case RouteModeDirect:
@@ -206,19 +234,19 @@ func planRoute(finalOutbound string, settings Settings) RoutePlan {
 	case RouteModeAll:
 		final = finalOutbound
 	case RouteModeRule:
-		// No provider rules are imported. Applications can add owned rules in a
-		// future settings/API layer without changing this isolation boundary.
+		// Provider rules remain isolated. Rule mode only applies TargetLib's
+		// runtime-directory-local China GeoIP rule set.
+		ruleSets = append(ruleSets, geoIPCNRuleSet())
+		rules = append(rules, geoIPCNRule())
 	}
-	if settings.ProxyMode == ProxyModeTun {
-		rules = append(rules, tunDNSHijackRule())
-	}
-	return RoutePlan{Base: base, Rules: rules, Final: final, AutoDetectInterface: true}
+	return RoutePlan{Base: base, Rules: rules, RuleSets: ruleSets, Final: final, AutoDetectInterface: true}
 }
 
 // emitRoute 将已完成决策的路由计划映射为 sing-box 对象。
 func emitRoute(plan RoutePlan) *option.RouteOptions {
 	route := plan.Base
 	route.Rules = plan.Rules
+	route.RuleSet = plan.RuleSets
 	route.Final = plan.Final
 	route.AutoDetectInterface = plan.AutoDetectInterface
 	return &route
@@ -232,7 +260,7 @@ func planRuntime(settings Settings) RuntimePlan {
 		experimental.CacheFile = &option.CacheFileOptions{Enabled: true, Path: singBoxPath(path)}
 	}
 	return RuntimePlan{
-		Log: option.LogOptions{Level: "info", Output: os.DevNull}, Experimental: experimental,
+		Log: option.LogOptions{Level: "error", Output: "target.log", Timestamp: true}, Experimental: experimental,
 	}
 }
 

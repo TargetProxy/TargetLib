@@ -2,7 +2,6 @@ package config
 
 import (
 	"encoding/json"
-	"os"
 	"testing"
 
 	targetprofile "github.com/loafman1120/TargetLib/profile"
@@ -92,20 +91,65 @@ func TestBuildEnablesSniffForMixedInbound(t *testing.T) {
 	}
 	var document struct {
 		Route struct {
+			RuleSet []struct {
+				Type string `json:"type"`
+				Tag  string `json:"tag"`
+				Path string `json:"path"`
+			} `json:"rule_set"`
 			Rules []struct {
-				Action string `json:"action"`
+				RuleSet  string `json:"rule_set"`
+				Action   string `json:"action"`
+				Outbound string `json:"outbound"`
 			} `json:"rules"`
 		} `json:"route"`
 	}
 	if err := json.Unmarshal(content, &document); err != nil {
 		t.Fatal(err)
 	}
-	if len(document.Route.Rules) == 0 || document.Route.Rules[0].Action != "sniff" {
-		t.Fatalf("sniff rule missing: %+v", document.Route.Rules)
+	if len(document.Route.RuleSet) != 1 ||
+		document.Route.RuleSet[0].Type != "local" ||
+		document.Route.RuleSet[0].Tag != geoIPCNRuleSetTag ||
+		document.Route.RuleSet[0].Path != geoIPCNRuleSetPath {
+		t.Fatalf("unexpected China GeoIP rule set: %+v", document.Route.RuleSet)
+	}
+	if len(document.Route.Rules) != 2 ||
+		document.Route.Rules[0].Action != "sniff" ||
+		document.Route.Rules[1].RuleSet != geoIPCNRuleSetTag ||
+		document.Route.Rules[1].Outbound != "direct" {
+		t.Fatalf("unexpected rule-mode rules: %+v", document.Route.Rules)
 	}
 }
 
-func TestBuildAlwaysUsesInfoLoggingWithoutFileOutput(t *testing.T) {
+func TestBuildTunRuleModeHijacksDNSBeforeGeoIP(t *testing.T) {
+	content, err := Build(Settings{
+		ListenAddress: "127.0.0.1",
+		MixedPort:     2080,
+		ProxyMode:     ProxyModeTun,
+		RouteMode:     RouteModeRule,
+	}, targetprofile.Profile{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var document struct {
+		Route struct {
+			Rules []struct {
+				RuleSet string `json:"rule_set"`
+				Action  string `json:"action"`
+			} `json:"rules"`
+		} `json:"route"`
+	}
+	if err := json.Unmarshal(content, &document); err != nil {
+		t.Fatal(err)
+	}
+	if len(document.Route.Rules) != 3 ||
+		document.Route.Rules[0].Action != "sniff" ||
+		document.Route.Rules[1].Action != "hijack-dns" ||
+		document.Route.Rules[2].RuleSet != geoIPCNRuleSetTag {
+		t.Fatalf("unexpected TUN rule order: %+v", document.Route.Rules)
+	}
+}
+
+func TestBuildAlwaysUsesErrorLoggingWithFileOutput(t *testing.T) {
 	content, err := Build(Settings{
 		ListenAddress: "127.0.0.1",
 		MixedPort:     2080,
@@ -117,16 +161,17 @@ func TestBuildAlwaysUsesInfoLoggingWithoutFileOutput(t *testing.T) {
 	}
 	var document struct {
 		Log struct {
-			Disabled bool   `json:"disabled"`
-			Level    string `json:"level"`
-			Output   string `json:"output"`
+			Disabled  bool   `json:"disabled"`
+			Level     string `json:"level"`
+			Output    string `json:"output"`
+			Timestamp bool   `json:"timestamp"`
 		} `json:"log"`
 	}
 	if err := json.Unmarshal(content, &document); err != nil {
 		t.Fatal(err)
 	}
-	if document.Log.Disabled || document.Log.Level != "info" || document.Log.Output != os.DevNull {
-		t.Fatalf("core logging was not normalized to non-persistent info: %+v", document.Log)
+	if document.Log.Disabled || document.Log.Level != "error" || document.Log.Output != "target.log" || !document.Log.Timestamp {
+		t.Fatalf("core logging was not normalized to persistent errors: %+v", document.Log)
 	}
 }
 
@@ -203,8 +248,10 @@ func TestBuildUsesNodesOnlyFromProfile(t *testing.T) {
 		t.Fatalf("source inbounds were not replaced: %+v", document.Inbounds)
 	}
 	if document.Route.Final != "proxy" ||
-		len(document.Route.Rules) != 1 ||
-		document.Route.Rules[0]["action"] != "sniff" {
+		len(document.Route.Rules) != 2 ||
+		document.Route.Rules[0]["action"] != "sniff" ||
+		document.Route.Rules[1]["rule_set"] != geoIPCNRuleSetTag ||
+		document.Route.Rules[1]["outbound"] != "direct" {
 		t.Fatalf("provider route was unexpectedly included: %+v", document.Route)
 	}
 	wantTags := map[string]bool{"direct": true, parsed.Profile.Nodes[0].ID: true, "proxy": true, "urltest": true}
@@ -258,7 +305,7 @@ func TestBuildUsesStableNodeIDsAsRuntimeTags(t *testing.T) {
 	}
 }
 
-func TestBuildDropsProviderRuleSetsAndRules(t *testing.T) {
+func TestBuildDropsProviderRuleSetsAndRulesButKeepsLocalGeoIP(t *testing.T) {
 	parsed, err := targetprofile.Parse([]byte(`{
 		"outbounds":[{"type":"shadowsocks","tag":"node-a","server":"127.0.0.1","server_port":8388,"method":"aes-128-gcm","password":"secret"}],
 		"route":{
@@ -276,9 +323,14 @@ func TestBuildDropsProviderRuleSetsAndRules(t *testing.T) {
 	}
 	var document struct {
 		Route struct {
-			RuleSet []any `json:"rule_set"`
-			Rules   []struct {
-				Action string `json:"action"`
+			RuleSet []struct {
+				Tag  string `json:"tag"`
+				Path string `json:"path"`
+			} `json:"rule_set"`
+			Rules []struct {
+				RuleSet  string `json:"rule_set"`
+				Action   string `json:"action"`
+				Outbound string `json:"outbound"`
 			} `json:"rules"`
 			Final string `json:"final"`
 		} `json:"route"`
@@ -286,9 +338,13 @@ func TestBuildDropsProviderRuleSetsAndRules(t *testing.T) {
 	if err := json.Unmarshal(content, &document); err != nil {
 		t.Fatal(err)
 	}
-	if len(document.Route.RuleSet) != 0 ||
-		len(document.Route.Rules) != 1 ||
+	if len(document.Route.RuleSet) != 1 ||
+		document.Route.RuleSet[0].Tag != geoIPCNRuleSetTag ||
+		document.Route.RuleSet[0].Path != geoIPCNRuleSetPath ||
+		len(document.Route.Rules) != 2 ||
 		document.Route.Rules[0].Action != "sniff" ||
+		document.Route.Rules[1].RuleSet != geoIPCNRuleSetTag ||
+		document.Route.Rules[1].Outbound != "direct" ||
 		document.Route.Final != "proxy" {
 		t.Fatalf("provider routing data was unexpectedly included: %+v", document.Route)
 	}

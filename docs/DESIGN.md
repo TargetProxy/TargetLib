@@ -23,6 +23,7 @@ flowchart LR
     PROFILE --> CONFIG["config.Plan + config.Emit"]
     MANAGER --> SETTINGS["runtime Settings"]
     SETTINGS --> CONFIG
+    SRS["本地 cn.srs<br/>Loyalsoldier GeoIP"] --> CONFIG
     CONFIG --> BOX["sing-box runtime"]
     SUB <--> STORE["encrypted subscription store"]
     MANAGER <--> RSTORE["runtime settings store"]
@@ -34,6 +35,7 @@ flowchart LR
 - 原始订阅配置只作为解析输入，运行时只消费节点中间态 `profile.Profile`。
 - `profile` 在持久化前统一规范化供应商节点；供应商 ALPN 和已移除的 TLS 字段不会进入节点中间态。
 - 服务商提供的 DNS、路由、rule set、入站、selector/urltest 分组和运行时选项不会透传。
+- `rule` 路由模式只使用 TargetLib 随运行目录提供的本地 [`cn.srs`](https://github.com/Loyalsoldier/geoip/tree/release/srs)，中国大陆目标 IP 直连，其余流量使用 `proxy`。
 - `config.Build(settings, profile)` 是最终 sing-box 配置的唯一生成入口。
 - `config.Emit` 只序列化 Blueprint 并校验结果，不再解析和重写完整 JSON 文档。
 - TUN、系统密钥、私有存储路径和 socket protect 等平台能力由宿主实现。
@@ -41,7 +43,7 @@ flowchart LR
 配置生成分为一次规划和一次输出：
 
 ```text
-Profile + Settings -> config.Plan -> Blueprint -> config.Emit -> sing-box JSON
+Profile + Settings + local cn.srs -> config.Plan -> Blueprint -> config.Emit -> sing-box JSON
 ```
 
 ## 订阅到 sing-box
@@ -75,12 +77,13 @@ flowchart TB
     O -->|是| Q["Runtime changed callback"]
 
     subgraph BUILD["sing-box 配置生成"]
-        Q --> R["活动 Profile + Runtime Settings"]
+        SRS["运行目录中的 cn.srs"] --> R
+        Q --> R["活动 Profile + Runtime Settings<br/>+ 本地 GeoIP 规则"]
         R --> S["config.Plan"]
         S --> T["Blueprint"]
         T --> T1["应用入站<br/>Mixed / TUN"]
         T --> T2["节点出站<br/>+ direct + urltest + proxy"]
-        T --> T3["应用 DNS 与路由"]
+        T --> T3["应用 DNS、路由<br/>与本地 cn.srs rule set"]
         T --> T4["日志、缓存、Clash API"]
         T1 --> U["config.Emit"]
         T2 --> U

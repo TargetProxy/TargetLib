@@ -1,9 +1,8 @@
 # targetlib
 
-Flutter-facing TargetLib runtime package. The generated TargetLib gRPC API and the cross-platform executable/service
-manager live here so applications share one implementation. Filesystem locations continue to come from
-`path_provider`; platform-specific process details remain isolated inside the manager rather than being duplicated in
-each Flutter runner.
+Flutter-facing TargetLib runtime package. The generated TargetLib gRPC API and the cross-platform service status/start
+manager live here so applications share one implementation. Desktop service installation and executable deployment
+belong to each platform's installer.
 
 The public Dart exports include `TargetLibClient`, the generated TargetLib messages, `TargetLibServiceManager`, and
 `TargetLibLog`.
