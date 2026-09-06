@@ -20,7 +20,7 @@ func newDaemonAdapter(service *daemon.StartedService) *daemonAdapter {
 }
 
 func (d *daemonAdapter) Apply(content string) error {
-	return d.service.StartOrReloadService(content, &daemon.OverrideOptions{})
+	return d.service.StartOrReloadService(context.Background(), content, &daemon.OverrideOptions{})
 }
 
 func (d *daemonAdapter) Stop() error { return d.service.CloseService() }

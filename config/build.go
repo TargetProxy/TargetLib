@@ -115,14 +115,44 @@ func Emit(plan Blueprint) ([]byte, error) {
 
 // Build 保留稳定的公开入口。
 func Build(settings Settings, source targetprofile.Profile) ([]byte, error) {
-	plan, err := Plan(settings, source)
+	return BuildRuntime(settings, RuntimeModelFromProfile(source))
+}
+
+// BuildRuntime generates configuration from the complete P0 runtime model.
+// It never selects an alternative node or configuration when the model is invalid.
+func BuildRuntime(settings Settings, model RuntimeModel) ([]byte, error) {
+	plan, err := planRuntimeModel(settings, model)
 	if err != nil {
 		return nil, err
 	}
 	return Emit(plan)
 }
 
+func planRuntimeModel(settings Settings, model RuntimeModel) (Blueprint, error) {
+	if err := settings.Validate(); err != nil {
+		return Blueprint{}, err
+	}
+	inbounds, err := buildInbounds(settings)
+	if err != nil {
+		return Blueprint{}, err
+	}
+	outbounds, finalOutbound, err := planOutboundsWithSelectors(model.NodePool.Nodes, model.Selectors)
+	if err != nil {
+		return Blueprint{}, err
+	}
+	route := planRoute(finalOutbound, settings)
+	dns, err := planDNS(settings.ProxyMode == ProxyModeTun)
+	if err != nil {
+		return Blueprint{}, err
+	}
+	return Blueprint{Inbounds: inbounds, Outbounds: outbounds, DNS: dns, Route: route, Runtime: planRuntime(settings)}, nil
+}
+
 func planOutbounds(nodes []targetprofile.Node) ([]option.Outbound, string, error) {
+	return planOutboundsWithSelectors(nodes, nil)
+}
+
+func planOutboundsWithSelectors(nodes []targetprofile.Node, selectors []Selector) ([]option.Outbound, string, error) {
 	outbounds := make([]option.Outbound, 0, len(nodes)+3)
 	nodeTags := make([]string, 0, len(nodes))
 	used := map[string]bool{"direct": true, "urltest": true, "proxy": true}
@@ -153,6 +183,43 @@ func planOutbounds(nodes []targetprofile.Node) ([]option.Outbound, string, error
 	members := append([]string{"urltest"}, nodeTags...)
 	members = append(members, "direct")
 	outbounds = append(outbounds, option.Outbound{Type: "selector", Tag: "proxy", Options: option.SelectorOutboundOptions{Outbounds: members, Default: "urltest"}})
+	if len(selectors) == 0 {
+		return outbounds, "proxy", nil
+	}
+	known := map[string]bool{}
+	for _, tag := range nodeTags {
+		known[tag] = true
+	}
+	for _, selector := range selectors {
+		tag := strings.TrimSpace(selector.Tag)
+		if tag == "" || used[tag] {
+			return nil, "", fmt.Errorf("%w: invalid selector tag %q", ErrInvalidSource, tag)
+		}
+		members := make([]string, 0, len(selector.NodeIDs))
+		for _, id := range selector.NodeIDs {
+			if known[id] {
+				members = append(members, id)
+			}
+		}
+		if len(members) == 0 {
+			return nil, "", fmt.Errorf("%w: selector %q has no valid nodes", ErrInvalidSource, tag)
+		}
+		selected := selector.Selected
+		if selected == "" {
+			selected = members[0]
+		}
+		valid := false
+		for _, member := range members {
+			if member == selected {
+				valid = true
+			}
+		}
+		if !valid {
+			return nil, "", fmt.Errorf("%w: selector %q selected outbound is not a member", ErrInvalidSource, tag)
+		}
+		outbounds = append(outbounds, option.Outbound{Type: "selector", Tag: tag, Options: option.SelectorOutboundOptions{Outbounds: members, Default: selected}})
+		used[tag] = true
+	}
 	return outbounds, "proxy", nil
 }
 
@@ -212,7 +279,7 @@ func geoIPCNRule() option.Rule {
 func geoIPCNRuleSet() option.RuleSet {
 	return option.RuleSet{
 		Type:         C.RuleSetTypeLocal,
-		Tag:          geoIPCNRuleSetTag,
+		Tag:          badoption.Listable[string]{geoIPCNRuleSetTag},
 		Format:       C.RuleSetFormatBinary,
 		LocalOptions: option.LocalRuleSet{Path: geoIPCNRuleSetPath},
 	}

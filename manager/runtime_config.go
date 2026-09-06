@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/sagernet/sing-box/daemon"
-	"github.com/sagernet/sing-box/experimental/libbox"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
@@ -74,7 +73,7 @@ func (m *Manager) UpdateRuntimeConfig(ctx context.Context, request *targetlibapi
 	if err != nil {
 		return nil, err
 	}
-	if err := libbox.CheckConfig(string(content)); err != nil {
+	if err := m.started.CheckConfig(ctx, string(content)); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 	current, err := m.waitForStableStatus(ctx)
@@ -171,7 +170,7 @@ func (m *Manager) reloadActiveSubscription(ctx context.Context, active *subscrip
 	if err != nil {
 		return err
 	}
-	if err := libbox.CheckConfig(string(content)); err != nil {
+	if err := m.started.CheckConfig(ctx, string(content)); err != nil {
 		return status.Error(codes.InvalidArgument, err.Error())
 	}
 	if err := m.applyConfig(string(content)); err != nil {

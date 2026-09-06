@@ -24,6 +24,7 @@ func Context() context.Context {
 			include.EndpointRegistry(),
 			include.DNSTransportRegistry(),
 			include.ServiceRegistry(),
+			include.CertificateProviderRegistry(),
 		)
 	})
 	return contextValue

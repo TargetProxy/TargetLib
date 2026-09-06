@@ -3,9 +3,10 @@
 Builds and reinstalls the TargetLib Windows service.
 
 .DESCRIPTION
-Builds TargetLib.exe, requests elevation, replaces the registered binary,
-reinstalls the service, starts it, and verifies its state. Supported arguments
-are migrated from an existing service; obsolete arguments are reported and removed.
+Builds TargetLib.exe and cn.srs, requests elevation, replaces the registered
+runtime files, reinstalls the service, starts it, and verifies its state.
+Supported arguments are migrated from an existing service; obsolete arguments
+are reported and removed.
 
 .EXAMPLE
 .\scripts\reinstall-service.ps1
@@ -19,6 +20,7 @@ are migrated from an existing service; obsolete arguments are reported and remov
 [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
 param(
     [string]$SourcePath,
+    [string]$RuleSetPath,
     [string]$InstallPath,
     [string]$BasePath,
     [string]$WorkingPath,
@@ -241,6 +243,7 @@ if ($env:OS -ne 'Windows_NT') { throw 'This script only supports Windows service
 if ($RuntimeDebug -and $NoRuntimeDebug) { throw '-RuntimeDebug and -NoRuntimeDebug cannot be combined.' }
 
 $SourcePath = Resolve-RepositoryPath -Path $SourcePath -DefaultPath (Join-Path $repositoryRoot 'build\TargetLib.exe')
+$RuleSetPath = Resolve-RepositoryPath -Path $RuleSetPath -DefaultPath (Join-Path (Split-Path -Parent $SourcePath) 'cn.srs')
 $registeredService = Get-Service -Name $serviceName -ErrorAction SilentlyContinue
 $oldServiceExisted = $null -ne $registeredService
 $oldExecutable = $null
@@ -276,10 +279,16 @@ $effectiveRuntimeDebug = if ($RuntimeDebug) { $true } elseif ($NoRuntimeDebug) {
 
 if ([string]::IsNullOrWhiteSpace($effectiveBasePath)) { throw 'BasePath cannot be empty.' }
 if ($effectiveLogMaxLines -lt 1) { throw 'LogMaxLines must be greater than zero.' }
+$effectiveBasePath = [System.IO.Path]::GetFullPath($effectiveBasePath)
+if (-not [string]::IsNullOrWhiteSpace($effectiveWorkingPath)) {
+    $effectiveWorkingPath = [System.IO.Path]::GetFullPath($effectiveWorkingPath)
+}
+$ruleSetInstallDirectory = if ($effectiveWorkingPath) { $effectiveWorkingPath } else { $effectiveBasePath }
+$installedRuleSetPath = Join-Path $ruleSetInstallDirectory 'cn.srs'
 
 $serviceArguments = [Collections.Generic.List[string]]::new()
 $serviceArguments.Add('--base-path')
-$serviceArguments.Add([System.IO.Path]::GetFullPath($effectiveBasePath))
+$serviceArguments.Add($effectiveBasePath)
 $serviceArguments.Add('--log-max-lines')
 $serviceArguments.Add($effectiveLogMaxLines.ToString([Globalization.CultureInfo]::InvariantCulture))
 foreach ($option in @(
@@ -297,7 +306,9 @@ if ($effectiveRuntimeDebug) { $serviceArguments.Add('--debug') }
 $unknownArguments = @(Get-UnknownArguments -Arguments $oldArguments)
 Write-Host 'TargetLib service reinstall plan' -ForegroundColor Cyan
 Write-Host "  Build source: $SourcePath"
+Write-Host "  Rule set source: $RuleSetPath"
 Write-Host "  Install path: $InstallPath"
+Write-Host "  Rule set install path: $installedRuleSetPath"
 Write-Host "  Service arguments: $($serviceArguments -join ' ')"
 if ($unknownArguments.Count -gt 0) {
     Write-Warning "Removing obsolete service arguments: $($unknownArguments -join ' ')"
@@ -311,6 +322,9 @@ if (-not $SkipBuild -and $PSCmdlet.ShouldProcess($SourcePath, 'Build TargetLib d
 if (-not $WhatIfPreference -and -not (Test-Path -LiteralPath $SourcePath -PathType Leaf)) {
     throw "TargetLib executable not found: $SourcePath"
 }
+if (-not $WhatIfPreference -and -not (Test-Path -LiteralPath $RuleSetPath -PathType Leaf)) {
+    throw "TargetLib rule set not found: $RuleSetPath"
+}
 
 if (-not (Get-IsAdministrator)) {
     if ($WhatIfPreference) {
@@ -319,7 +333,7 @@ if (-not (Get-IsAdministrator)) {
     }
     if ($Elevated) { throw 'The elevated process does not have administrator privileges.' }
     $forward = @{
-        SourcePath = $SourcePath; InstallPath = $InstallPath; BasePath = $effectiveBasePath
+        SourcePath = $SourcePath; RuleSetPath = $RuleSetPath; InstallPath = $InstallPath; BasePath = $effectiveBasePath
         WorkingPath = $effectiveWorkingPath; TempPath = $effectiveTempPath; Locale = $effectiveLocale
         LogMaxLines = $effectiveLogMaxLines; SkipBuild = $true; NoStart = [bool]$NoStart
         KeepBackup = [bool]$KeepBackup; TimeoutSeconds = $TimeoutSeconds; Elevated = $true
@@ -335,17 +349,30 @@ if (-not $PSCmdlet.ShouldProcess($serviceName, "Reinstall service using $Install
 $installDirectory = Split-Path -Parent $InstallPath
 $stagedPath = "$InstallPath.new-$PID"
 $backupPath = "$InstallPath.backup-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
+$stagedRuleSetPath = "$installedRuleSetPath.new-$PID"
+$ruleSetBackupPath = "$installedRuleSetPath.backup-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
 $hadInstalledFile = Test-Path -LiteralPath $InstallPath -PathType Leaf
+$hadInstalledRuleSet = Test-Path -LiteralPath $installedRuleSetPath -PathType Leaf
 $backupCreated = $false
+$ruleSetBackupCreated = $false
+$ruleSetInstalled = $false
 try {
     Remove-RegisteredService -Name $serviceName -Seconds $TimeoutSeconds
     New-Item -ItemType Directory -Force -Path $installDirectory | Out-Null
+    New-Item -ItemType Directory -Force -Path $ruleSetInstallDirectory | Out-Null
     Copy-Item -LiteralPath $SourcePath -Destination $stagedPath -Force
+    Copy-Item -LiteralPath $RuleSetPath -Destination $stagedRuleSetPath -Force
     if ($hadInstalledFile) {
         Move-Item -LiteralPath $InstallPath -Destination $backupPath -Force
         $backupCreated = $true
     }
     Move-Item -LiteralPath $stagedPath -Destination $InstallPath -Force
+    if ($hadInstalledRuleSet) {
+        Move-Item -LiteralPath $installedRuleSetPath -Destination $ruleSetBackupPath -Force
+        $ruleSetBackupCreated = $true
+    }
+    Move-Item -LiteralPath $stagedRuleSetPath -Destination $installedRuleSetPath -Force
+    $ruleSetInstalled = $true
     $stampPath = "$InstallPath.version"
     if (Test-Path -LiteralPath $stampPath) { Remove-Item -LiteralPath $stampPath -Force }
 
@@ -361,14 +388,26 @@ try {
     }
 
     $hash = (Get-FileHash -LiteralPath $InstallPath -Algorithm SHA256).Hash
+    $ruleSetHash = (Get-FileHash -LiteralPath $installedRuleSetPath -Algorithm SHA256).Hash
     Write-Host 'TargetLib service reinstalled.' -ForegroundColor Green
     Write-Host "  Status: $((Get-Service -Name $serviceName).Status)"
     Write-Host "  SHA256: $hash"
-    if ($backupCreated -and -not $KeepBackup) {
-        Remove-Item -LiteralPath $backupPath -Force
-        $backupCreated = $false
-    } elseif ($backupCreated) {
-        Write-Host "  Previous binary: $backupPath"
+    Write-Host "  Rule set: $installedRuleSetPath"
+    Write-Host "  Rule set SHA256: $ruleSetHash"
+    if ($KeepBackup) {
+        if ($backupCreated) { Write-Host "  Previous binary: $backupPath" }
+        if ($ruleSetBackupCreated) { Write-Host "  Previous rule set: $ruleSetBackupPath" }
+    } else {
+        foreach ($obsoleteBackup in @($backupPath, $ruleSetBackupPath)) {
+            if (-not (Test-Path -LiteralPath $obsoleteBackup)) { continue }
+            try {
+                Remove-Item -LiteralPath $obsoleteBackup -Force
+            } catch {
+                Write-Warning "Could not remove backup ${obsoleteBackup}: $($_.Exception.Message)"
+            }
+        }
+        $backupCreated = Test-Path -LiteralPath $backupPath
+        $ruleSetBackupCreated = Test-Path -LiteralPath $ruleSetBackupPath
     }
 } catch {
     $failure = $_
@@ -379,6 +418,13 @@ try {
         if ($backupCreated -and (Test-Path -LiteralPath $backupPath)) {
             Move-Item -LiteralPath $backupPath -Destination $InstallPath -Force
             $backupCreated = $false
+        }
+        if ($ruleSetInstalled -and (Test-Path -LiteralPath $installedRuleSetPath)) {
+            Remove-Item -LiteralPath $installedRuleSetPath -Force
+        }
+        if ($ruleSetBackupCreated -and (Test-Path -LiteralPath $ruleSetBackupPath)) {
+            Move-Item -LiteralPath $ruleSetBackupPath -Destination $installedRuleSetPath -Force
+            $ruleSetBackupCreated = $false
         }
         if ($oldServiceExisted -and (Test-Path -LiteralPath $InstallPath -PathType Leaf)) {
             Invoke-DaemonAction -Executable $InstallPath -Action 'install' -Arguments $oldArguments
@@ -394,4 +440,5 @@ try {
     throw $failure
 } finally {
     if (Test-Path -LiteralPath $stagedPath) { Remove-Item -LiteralPath $stagedPath -Force }
+    if (Test-Path -LiteralPath $stagedRuleSetPath) { Remove-Item -LiteralPath $stagedRuleSetPath -Force }
 }

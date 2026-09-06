@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-Builds the TargetLib gRPC service.
+Builds the TargetLib gRPC service and stages its local rule set.
 
 .EXAMPLE
 .\scripts\service.ps1
@@ -21,6 +21,10 @@ $ErrorActionPreference = 'Stop'
 $repositoryRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $configuration = Import-PowerShellDataFile (Join-Path $PSScriptRoot 'build-config.psd1')
 $goCommand = Get-Command go -ErrorAction Stop
+$ruleSetSourcePath = Join-Path $repositoryRoot 'internal\ruleset\cn.srs'
+if (-not (Test-Path -LiteralPath $ruleSetSourcePath -PathType Leaf)) {
+    throw "Rule set not found: $ruleSetSourcePath"
+}
 $targetGOOS = if ($GOOS) { $GOOS } elseif ($env:GOOS) { $env:GOOS } else { & $goCommand.Source env GOOS }
 $targetGOARCH = if ($GOARCH) { $GOARCH } elseif ($env:GOARCH) { $env:GOARCH } else { & $goCommand.Source env GOARCH }
 
@@ -71,4 +75,12 @@ try {
 }
 
 if (-not (Test-Path -LiteralPath $OutputPath)) { throw "Build did not create $OutputPath" }
+$ruleSetOutputPath = Join-Path (Split-Path -Parent $OutputPath) 'cn.srs'
+if (-not [string]::Equals($ruleSetSourcePath, $ruleSetOutputPath, [StringComparison]::OrdinalIgnoreCase)) {
+    Copy-Item -LiteralPath $ruleSetSourcePath -Destination $ruleSetOutputPath -Force
+}
+if (-not (Test-Path -LiteralPath $ruleSetOutputPath -PathType Leaf)) {
+    throw "Build did not stage $ruleSetOutputPath"
+}
 Write-Host "Built $OutputPath" -ForegroundColor Green
+Write-Host "Staged $ruleSetOutputPath" -ForegroundColor Green

@@ -17,7 +17,6 @@ import (
 	"github.com/sagernet/sing-box/experimental/libbox"
 	"github.com/sagernet/sing-box/include"
 	"github.com/sagernet/sing/service"
-	"github.com/sagernet/sing/service/filemanager"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -110,7 +109,8 @@ func New(ctx context.Context, options Options) (*Manager, error) {
 			return nil, err
 		}
 	}
-	if _, err := buildSettings(runtimeConfig.GetSettings(), filepath.Join(options.BasePath, "cache.db")); err != nil {
+	cacheFilePath := filepath.Join(options.BasePath, "cache.db")
+	if _, err := buildSettings(runtimeConfig.GetSettings(), cacheFilePath); err != nil {
 		cancelSubscriptions()
 		subscriptionManager.Close()
 		return nil, err
@@ -119,20 +119,20 @@ func New(ctx context.Context, options Options) (*Manager, error) {
 		Handler: subscriptioncore.NewHandler(subscriptionManager), subscriptions: subscriptionManager,
 		subscriptionCancel: cancelSubscriptions, subscriptionDone: make(chan struct{}),
 		runtimeConfig: runtimeConfig, runtimeStore: runtimeStore,
-		cacheFilePath: filepath.Join(options.BasePath, "cache.db"),
+		cacheFilePath: cacheFilePath,
 	}
 	if closer, ok := sharedStore.(io.Closer); ok {
 		m.subscriptionStore = closer
 	}
 	m.started = daemon.NewStartedService(daemon.ServiceOptions{
-		Context:     serviceContext(ctx, options),
-		Handler:     platformHandler{manager: m},
-		Debug:       options.Debug,
-		LogMaxLines: options.LogMaxLines,
-		OOMKiller:   options.OOMKiller,
+		Context:          serviceContext(ctx, options),
+		Handler:          platformHandler{manager: m},
+		Debug:            options.Debug,
+		LogMaxLines:      options.LogMaxLines,
+		OOMKillerEnabled: options.OOMKiller,
 	})
 	m.applyConfig = func(content string) error {
-		return m.started.StartOrReloadService(content, &daemon.OverrideOptions{})
+		return m.started.StartOrReloadService(ctx, content, &daemon.OverrideOptions{})
 	}
 	m.daemon = newDaemonAdapter(m.started)
 	m.runtimeController = newRuntimeController(m)
@@ -159,13 +159,14 @@ func normalizeOptions(options Options) Options {
 }
 
 func serviceContext(ctx context.Context, options Options) context.Context {
-	ctx = filemanager.WithDefault(ctx, options.WorkingPath, options.TempPath, os.Getuid(), os.Getgid())
+	ctx = withFileManager(ctx, options.WorkingPath, options.TempPath, os.Getuid(), os.Getgid())
 	ctx = box.Context(ctx,
 		include.InboundRegistry(),
 		include.OutboundRegistry(),
 		include.EndpointRegistry(),
 		include.DNSTransportRegistry(),
 		include.ServiceRegistry(),
+		include.CertificateProviderRegistry(),
 	)
 	if platform := newPlatformInterface(); platform != nil {
 		service.MustRegister[adapter.PlatformInterface](ctx, platform)
@@ -382,6 +383,10 @@ func (platformHandler) SetSystemProxyEnabled(bool) error {
 }
 
 func (platformHandler) WriteDebugMessage(string) {}
+
+func (platformHandler) ConnectSSHAgent() (int32, error) {
+	return -1, status.Error(codes.Unimplemented, "SSH agent is managed by the host")
+}
 
 func (m *Manager) Close() {
 	m.close.Do(func() {

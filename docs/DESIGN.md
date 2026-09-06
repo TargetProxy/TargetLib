@@ -10,8 +10,8 @@ TargetLib 将订阅管理、配置生成和 sing-box 生命周期封装在共享
 | `api/TargetLib` | gRPC 协议与传输模型 |
 | `subscriptions` | 订阅更新、调度、存储、事件和端点解析 |
 | `profile` | 节点中间态与 sing-box 节点解析 |
-| `config` | `Profile + Settings` 到 sing-box 配置的唯一生成路径 |
-| `manager` | 配置协调、服务生命周期、状态、日志和流量 |
+| `config` | `NodePool + RuntimeSettings + ServiceRoutes` 到 sing-box 配置的唯一生成路径 |
+| `manager` | 节点池与运行时协调、selector/绑定应用、服务生命周期、状态、日志和流量 |
 | `ffi/native`、`flutter` | 平台接入与客户端绑定 |
 
 ```mermaid
@@ -19,11 +19,13 @@ flowchart LR
     HOST["Flutter / native host"] --> API["gRPC / FFI"]
     API --> MANAGER["manager"]
     MANAGER --> SUB["subscriptions"]
-    SUB --> PROFILE["node-only Profile"]
-    PROFILE --> CONFIG["config.Plan + config.Emit"]
+    SUB --> PROFILE["node-only Profiles"]
+    PROFILE --> POOL["统一 NodePool<br/>稳定 node_id / 来源"]
+    POOL --> CONFIG["config.Plan + config.Emit"]
     MANAGER --> SETTINGS["runtime Settings"]
     SETTINGS --> CONFIG
-    SRS["本地 cn.srs<br/>Loyalsoldier GeoIP"] --> CONFIG
+    ROUTES["ServiceRoutes + ServiceBindings"] --> CONFIG
+    SRS["工作目录 cn.srs<br/>Loyalsoldier GeoIP"] --> CONFIG
     CONFIG --> BOX["sing-box runtime"]
     SUB <--> STORE["encrypted subscription store"]
     MANAGER <--> RSTORE["runtime settings store"]
@@ -36,14 +38,15 @@ flowchart LR
 - `profile` 在持久化前统一规范化供应商节点；供应商 ALPN 和已移除的 TLS 字段不会进入节点中间态。
 - 服务商提供的 DNS、路由、rule set、入站、selector/urltest 分组和运行时选项不会透传。
 - `rule` 路由模式只使用 TargetLib 随运行目录提供的本地 [`cn.srs`](https://github.com/Loyalsoldier/geoip/tree/release/srs)，中国大陆目标 IP 直连，其余流量使用 `proxy`。
-- `config.Build(settings, profile)` 是最终 sing-box 配置的唯一生成入口。
+- 仓库中的规则源文件位于 `internal/ruleset/cn.srs`；服务构建脚本将它放到可执行文件旁，安装脚本再将它复制到 sing-box 工作目录。
+- `config.Build(settings, nodePool, serviceRoutes)` 是最终 sing-box 配置的唯一生成入口。
 - `config.Emit` 只序列化 Blueprint 并校验结果，不再解析和重写完整 JSON 文档。
 - TUN、系统密钥、私有存储路径和 socket protect 等平台能力由宿主实现。
 
 配置生成分为一次规划和一次输出：
 
 ```text
-Profile + Settings + local cn.srs -> config.Plan -> Blueprint -> config.Emit -> sing-box JSON
+NodePool + RuntimeSettings + ServiceRoutes + local cn.srs -> config.Plan -> Blueprint -> config.Emit -> sing-box JSON
 ```
 
 ## 订阅到 sing-box
@@ -72,13 +75,13 @@ flowchart TB
     I --> N["单写 Coordinator"]
     X --> N
     M --> N
-    N --> O{"活动订阅<br/>且 NodesHash 已变化？"}
+    N --> O{"统一 NodePool<br/>或路由/绑定已变化？"}
     O -->|否| P["原子持久化"]
     O -->|是| Q["Runtime changed callback"]
 
     subgraph BUILD["sing-box 配置生成"]
         SRS["运行目录中的 cn.srs"] --> R
-        Q --> R["活动 Profile + Runtime Settings<br/>+ 本地 GeoIP 规则"]
+        Q --> R["统一 NodePool + Runtime Settings<br/>+ ServiceRoutes/Bindings + 本地 GeoIP 规则"]
         R --> S["config.Plan"]
         S --> T["Blueprint"]
         T --> T1["应用入站<br/>Mixed / TUN"]
@@ -110,6 +113,15 @@ flowchart TB
 Badger 加载节点时通过 `profile.RestoreNodeOutbound` 从已规范化的持久化表示重建仅供运行时使用的类型化出站。
 完成上述处理后，`config.Emit` 无需构造 `map[string]any` 遍历整份配置，其固定流程为一次 `MarshalContext`
 和一次最终 `validateConfig`。
+
+## Smart Connect P0 运行时模型
+
+多个订阅分别解析为 `Profile`，再合并为统一 `NodePool`。节点通过稳定 `node_id` 标识，并保留订阅来源。
+`ServiceRoute` 将域名映射到独立 selector；一个节点可加入多个 selector，各 selector 的当前选择互不影响。
+`ServiceBinding` 持久化服务、selector、节点和 revision，重启后恢复并由运行时状态确认是否生效。
+
+配置应用采用 `VALIDATING -> BUILDING -> APPLYING -> READY/FAILED` 事务；失败时保留当前生效配置。
+候选评估只返回结果，节点切换和绑定应用必须由客户端显式发起，核心不执行隐式 fallback。
 
 ## 一致性与失败处理
 

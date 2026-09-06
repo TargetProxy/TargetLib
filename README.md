@@ -42,12 +42,16 @@ TargetLib 全面接管了底层网络代理的复杂性，为您提供开箱即�
 .\scripts\service.ps1
 .\scripts\service.ps1 -GOOS linux -GOARCH amd64
 
+# 构建并重装 Windows 服务（同时安装 cn.srs）
+.\scripts\reinstall-service.ps1
+
 # 构建 Flutter Android 原生库
 .\scripts\build-mobile.ps1
 .\scripts\build-mobile.ps1 -OutputDir build\mobile\android
 ```
 
-生成的原生库属于构建产物，不纳入 Git 版本管理。
+`service.ps1` 会在可执行文件旁生成配套的 `cn.srs`。Windows 重装脚本会将其复制到 sing-box 工作目录；
+未显式指定 `-WorkingPath` 时，该目录就是 `-BasePath`。生成的原生库属于构建产物，不纳入 Git 版本管理。
 
 ---
 
