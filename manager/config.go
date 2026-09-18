@@ -10,10 +10,9 @@ import (
 	targetlibapi "github.com/loafman1120/TargetLib/api/TargetLib"
 	"github.com/loafman1120/TargetLib/config"
 	targetprofile "github.com/loafman1120/TargetLib/profile"
-	"github.com/loafman1120/TargetLib/subscriptions"
 )
 
-// buildRuntimeConfig 是唯一的运行配置生成路径，使用后端持有的设置和已持久化的活动订阅。
+// buildRuntimeConfig 是唯一的运行配置生成路径，使用所有订阅聚合出的节点池。
 func (m *Manager) buildRuntimeConfig() ([]byte, error) {
 	m.configMu.RLock()
 	settingsProto := cloneRuntimeSettings(m.runtimeConfig.GetSettings())
@@ -26,24 +25,18 @@ func (m *Manager) buildRuntimeConfig() ([]byte, error) {
 }
 
 func (m *Manager) buildRuntimeConfigWithSettings(settings config.Settings) ([]byte, error) {
-	var active *subscriptions.Subscription
-	if id := m.subscriptions.ActiveID(); id != "" {
-		if subscription, ok := m.subscriptions.Get(id); ok {
-			active = &subscription
-		}
+	m.configMu.RLock()
+	desired := cloneRuntimeConfig(m.runtimeConfig)
+	nodes := append([]targetprofile.Node(nil), m.runtimeNodes...)
+	m.configMu.RUnlock()
+	if desired.Revision == "" {
+		nodes = m.subscriptions.NodePool().Nodes
 	}
-	return buildRuntimeConfigForSubscription(settings, active)
+	return buildRuntimeConfigForModel(settings, runtimeModel(desired, nodes))
 }
 
-func buildRuntimeConfigForSubscription(settings config.Settings, active *subscriptions.Subscription) ([]byte, error) {
-	var content []byte
-	var err error
-	if active != nil {
-		content, err = config.Build(settings, active.Profile)
-	}
-	if content == nil && err == nil {
-		content, err = config.Build(settings, targetprofile.Profile{})
-	}
+func buildRuntimeConfigForModel(settings config.Settings, model config.RuntimeModel) ([]byte, error) {
+	content, err := config.Build(settings, model)
 	if err != nil {
 		if errors.Is(err, config.ErrInvalidSettings) || errors.Is(err, config.ErrInvalidSource) {
 			return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -61,7 +54,9 @@ func buildSettings(source *targetlibapi.RuntimeSettings, cacheFilePath string) (
 		ListenAddress: source.GetListenAddress(),
 		MixedPort:     int(source.GetMixedPort()),
 		IPv6:          source.GetIpv6(),
-		CacheFilePath: cacheFilePath,
+		// Selector state is persisted with the runtime revision. A sing-box
+		// selection cache would override these authoritative defaults on reload.
+		CacheFilePath: "",
 	}
 	switch source.GetRouteMode() {
 	case targetlibapi.RouteMode_ROUTE_MODE_DIRECT:

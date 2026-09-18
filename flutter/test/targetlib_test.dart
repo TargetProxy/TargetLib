@@ -8,15 +8,6 @@ class MockTargetlibPlatform
     implements TargetlibPlatform {
   @override
   Future<String?> getPlatformVersion() => Future.value('42');
-
-  @override
-  Future<bool> requestVpnPermission() => Future.value(false);
-
-  @override
-  Future<void> startAndroidService({required String basePath}) async {}
-
-  @override
-  Future<void> stopAndroidService() async {}
 }
 
 void main() {
@@ -27,10 +18,9 @@ void main() {
   });
 
   test('getPlatformVersion', () async {
-    Targetlib targetlibPlugin = Targetlib();
     MockTargetlibPlatform fakePlatform = MockTargetlibPlatform();
     TargetlibPlatform.instance = fakePlatform;
 
-    expect(await targetlibPlugin.getPlatformVersion(), '42');
+    expect(await TargetlibPlatform.instance.getPlatformVersion(), '42');
   });
 }

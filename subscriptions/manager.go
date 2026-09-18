@@ -45,16 +45,11 @@ type Manager struct {
 	coordinatorContext             context.Context
 	coordinatorCancel              context.CancelFunc
 	coordinatorDone                chan struct{}
-	runtimeCallback                atomic.Pointer[runtimeCallback]
 	updates                        singleflight.Group
 	subscribersMu                  sync.RWMutex
 	subscribers                    map[uint64]chan Event
 	nextSubscriber                 uint64
 	closeOnce                      sync.Once
-}
-
-type runtimeCallback struct {
-	apply func(context.Context, *Subscription) error
 }
 
 func NewManager(options Options) *Manager {
@@ -101,7 +96,7 @@ func (m *Manager) Load(ctx context.Context) error {
 		return fmt.Errorf("load subscriptions: %w", err)
 	}
 	return m.submit(ctx, func(*managerState) (stateMutation, error) {
-		next := &managerState{items: make(map[string]Subscription, len(stored.Subscriptions)), activeID: stored.ActiveID}
+		next := &managerState{items: make(map[string]Subscription, len(stored.Subscriptions))}
 		for _, item := range stored.Subscriptions {
 			if item.ID == "" {
 				continue
@@ -109,21 +104,11 @@ func (m *Manager) Load(ctx context.Context) error {
 			if item.Status == StatusUpdating {
 				item.Status, item.Stage = StatusIdle, StageIdle
 			}
+			item.Profile = targetprofile.WithSource(item.Profile, item.ID)
 			next.items[item.ID] = cloneSubscription(item)
-		}
-		if _, ok := next.items[next.activeID]; !ok {
-			next.activeID = ""
 		}
 		return stateMutation{next: next}, nil
 	})
-}
-
-func (m *Manager) SetRuntimeChangedCallback(callback func(context.Context, *Subscription) error) {
-	if callback == nil {
-		m.runtimeCallback.Store(nil)
-		return
-	}
-	m.runtimeCallback.Store(&runtimeCallback{apply: callback})
 }
 
 func (m *Manager) AddRequest(ctx context.Context, request AddRequest) (Subscription, error) {
@@ -175,50 +160,17 @@ func (m *Manager) Remove(ctx context.Context, id string) error {
 		}
 		next := cloneManagerState(current)
 		delete(next.items, id)
-		wasActive := next.activeID == id
-		if wasActive {
-			next.activeID = ""
-		}
 		return stateMutation{
-			next: next, runtimeChanged: wasActive,
+			next: next,
 			persist: func(tx StoreTx) error {
 				if err := tx.Delete(id); err != nil {
 					return err
-				}
-				if wasActive {
-					return tx.SetActiveID("")
 				}
 				return nil
 			},
 			events: []pendingEvent{{type_: EventRemoved, item: item}},
 		}, nil
 	})
-}
-
-// SetActive 持久化当前活动订阅；传入空 ID 会清除活动订阅。
-func (m *Manager) SetActive(ctx context.Context, id string) error {
-	id = strings.TrimSpace(id)
-	return m.submit(ctx, func(current *managerState) (stateMutation, error) {
-		if id != "" {
-			if _, ok := current.items[id]; !ok {
-				return unchangedState(current), fmt.Errorf("%s: %w", id, ErrNotFound)
-			}
-		}
-		if current.activeID == id {
-			return unchangedState(current), nil
-		}
-		next := cloneManagerState(current)
-		next.activeID = id
-		return stateMutation{
-			next: next, runtimeChanged: true,
-			persist: func(tx StoreTx) error { return tx.SetActiveID(id) },
-		}, nil
-	})
-}
-
-// ActiveID 返回持久化的活动订阅 ID；没有活动订阅时返回空字符串。
-func (m *Manager) ActiveID() string {
-	return m.snapshot.Load().activeID
 }
 
 func (m *Manager) Rename(ctx context.Context, id, name string) error {
@@ -349,7 +301,7 @@ func (m *Manager) updateClaimed(ctx context.Context, id string, current Subscrip
 	m.setStage(ctx, id, StageResolving)
 	endpoints := ResolveEndpoints(ctx, m.resolver, profile.Nodes)
 	changed := current.NodesHash != profile.NodesHash
-	current.Profile, current.NodesHash = profile.Profile, profile.NodesHash
+	current.Profile, current.NodesHash = targetprofile.WithSource(profile.Profile, current.ID), profile.NodesHash
 	current.ResolvedEndpoints = endpoints
 	current.ETag, current.LastModified = fetched.ETag, fetched.LastModified
 	current.Status, current.Stage, current.Error, current.ErrorCode = StatusReady, StageComplete, "", ""
@@ -463,18 +415,17 @@ func (m *Manager) setStage(ctx context.Context, id string, stage UpdateStage) {
 	})
 }
 func (m *Manager) commit(ctx context.Context, item, persisted Subscription) error {
+	item.Profile = targetprofile.WithSource(item.Profile, item.ID)
 	return m.submit(context.WithoutCancel(ctx), func(current *managerState) (stateMutation, error) {
-		previous, existed := current.items[item.ID]
 		next := cloneManagerState(current)
 		next.items[item.ID] = cloneSubscription(item)
 		failure := cloneManagerState(current)
 		failure.items[item.ID] = cloneSubscription(persisted)
 		return stateMutation{
-			next:           next,
-			failure:        failure,
-			runtimeChanged: existed && current.activeID == item.ID && previous.NodesHash != item.NodesHash,
-			persist:        func(tx StoreTx) error { return tx.Put(item) },
-			events:         []pendingEvent{{type_: EventUpdated, item: item}},
+			next:    next,
+			failure: failure,
+			persist: func(tx StoreTx) error { return tx.Put(item) },
+			events:  []pendingEvent{{type_: EventUpdated, item: item}},
 		}, nil
 	})
 }
@@ -543,7 +494,7 @@ func subscriptionView(item Subscription) View {
 func profileView(source targetprofile.Profile) ProfileView {
 	nodes := make([]NodeView, len(source.Nodes))
 	for index, node := range source.Nodes {
-		nodes[index] = NodeView{Tag: node.ID, Name: node.Name, Type: node.Type, CountryCode: node.CountryCode, Server: node.Server, Port: node.Port, Phase: node.Phase, Error: node.Error}
+		nodes[index] = NodeView{Tag: node.ID, SubscriptionID: node.SubscriptionID, Name: node.Name, Type: node.Type, CountryCode: node.CountryCode, Server: node.Server, Port: node.Port, Phase: node.Phase, Error: node.Error}
 	}
 	sort.Slice(nodes, func(i, j int) bool {
 		if nodes[i].Name != nodes[j].Name {

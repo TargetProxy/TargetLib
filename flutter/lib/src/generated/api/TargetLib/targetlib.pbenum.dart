@@ -129,6 +129,231 @@ class RouteMode extends $pb.ProtobufEnum {
   const RouteMode._(super.value, super.name);
 }
 
+class ConfigApplyPhase extends $pb.ProtobufEnum {
+  static const ConfigApplyPhase CONFIG_APPLY_PHASE_UNSPECIFIED =
+      ConfigApplyPhase._(
+          0, _omitEnumNames ? '' : 'CONFIG_APPLY_PHASE_UNSPECIFIED');
+  static const ConfigApplyPhase CONFIG_APPLY_PHASE_VALIDATING =
+      ConfigApplyPhase._(
+          1, _omitEnumNames ? '' : 'CONFIG_APPLY_PHASE_VALIDATING');
+  static const ConfigApplyPhase CONFIG_APPLY_PHASE_BUILDING =
+      ConfigApplyPhase._(
+          2, _omitEnumNames ? '' : 'CONFIG_APPLY_PHASE_BUILDING');
+  static const ConfigApplyPhase CONFIG_APPLY_PHASE_APPLYING =
+      ConfigApplyPhase._(
+          3, _omitEnumNames ? '' : 'CONFIG_APPLY_PHASE_APPLYING');
+  static const ConfigApplyPhase CONFIG_APPLY_PHASE_READY =
+      ConfigApplyPhase._(4, _omitEnumNames ? '' : 'CONFIG_APPLY_PHASE_READY');
+  static const ConfigApplyPhase CONFIG_APPLY_PHASE_FAILED =
+      ConfigApplyPhase._(5, _omitEnumNames ? '' : 'CONFIG_APPLY_PHASE_FAILED');
+
+  static const $core.List<ConfigApplyPhase> values = <ConfigApplyPhase>[
+    CONFIG_APPLY_PHASE_UNSPECIFIED,
+    CONFIG_APPLY_PHASE_VALIDATING,
+    CONFIG_APPLY_PHASE_BUILDING,
+    CONFIG_APPLY_PHASE_APPLYING,
+    CONFIG_APPLY_PHASE_READY,
+    CONFIG_APPLY_PHASE_FAILED,
+  ];
+
+  static final $core.List<ConfigApplyPhase?> _byValue =
+      $pb.ProtobufEnum.$_initByValueList(values, 5);
+  static ConfigApplyPhase? valueOf($core.int value) =>
+      value < 0 || value >= _byValue.length ? null : _byValue[value];
+
+  const ConfigApplyPhase._(super.value, super.name);
+}
+
+class ProbeStage extends $pb.ProtobufEnum {
+  static const ProbeStage PROBE_STAGE_UNSPECIFIED =
+      ProbeStage._(0, _omitEnumNames ? '' : 'PROBE_STAGE_UNSPECIFIED');
+  static const ProbeStage PROBE_STAGE_READY =
+      ProbeStage._(1, _omitEnumNames ? '' : 'PROBE_STAGE_READY');
+  static const ProbeStage PROBE_STAGE_DNS =
+      ProbeStage._(2, _omitEnumNames ? '' : 'PROBE_STAGE_DNS');
+  static const ProbeStage PROBE_STAGE_TCP =
+      ProbeStage._(3, _omitEnumNames ? '' : 'PROBE_STAGE_TCP');
+  static const ProbeStage PROBE_STAGE_TLS =
+      ProbeStage._(4, _omitEnumNames ? '' : 'PROBE_STAGE_TLS');
+  static const ProbeStage PROBE_STAGE_HTTP =
+      ProbeStage._(5, _omitEnumNames ? '' : 'PROBE_STAGE_HTTP');
+  static const ProbeStage PROBE_STAGE_AUTH =
+      ProbeStage._(6, _omitEnumNames ? '' : 'PROBE_STAGE_AUTH');
+  static const ProbeStage PROBE_STAGE_TIMEOUT =
+      ProbeStage._(7, _omitEnumNames ? '' : 'PROBE_STAGE_TIMEOUT');
+  static const ProbeStage PROBE_STAGE_REGION =
+      ProbeStage._(8, _omitEnumNames ? '' : 'PROBE_STAGE_REGION');
+  static const ProbeStage PROBE_STAGE_CONTENT =
+      ProbeStage._(9, _omitEnumNames ? '' : 'PROBE_STAGE_CONTENT');
+  static const ProbeStage PROBE_STAGE_NODE =
+      ProbeStage._(10, _omitEnumNames ? '' : 'PROBE_STAGE_NODE');
+  static const ProbeStage PROBE_STAGE_EGRESS =
+      ProbeStage._(11, _omitEnumNames ? '' : 'PROBE_STAGE_EGRESS');
+
+  static const $core.List<ProbeStage> values = <ProbeStage>[
+    PROBE_STAGE_UNSPECIFIED,
+    PROBE_STAGE_READY,
+    PROBE_STAGE_DNS,
+    PROBE_STAGE_TCP,
+    PROBE_STAGE_TLS,
+    PROBE_STAGE_HTTP,
+    PROBE_STAGE_AUTH,
+    PROBE_STAGE_TIMEOUT,
+    PROBE_STAGE_REGION,
+    PROBE_STAGE_CONTENT,
+    PROBE_STAGE_NODE,
+    PROBE_STAGE_EGRESS,
+  ];
+
+  static final $core.List<ProbeStage?> _byValue =
+      $pb.ProtobufEnum.$_initByValueList(values, 11);
+  static ProbeStage? valueOf($core.int value) =>
+      value < 0 || value >= _byValue.length ? null : _byValue[value];
+
+  const ProbeStage._(super.value, super.name);
+}
+
+class RuntimeEventType extends $pb.ProtobufEnum {
+  static const RuntimeEventType RUNTIME_EVENT_TYPE_UNSPECIFIED =
+      RuntimeEventType._(
+          0, _omitEnumNames ? '' : 'RUNTIME_EVENT_TYPE_UNSPECIFIED');
+  static const RuntimeEventType RUNTIME_EVENT_TYPE_SNAPSHOT =
+      RuntimeEventType._(
+          1, _omitEnumNames ? '' : 'RUNTIME_EVENT_TYPE_SNAPSHOT');
+  static const RuntimeEventType RUNTIME_EVENT_TYPE_CONFIG =
+      RuntimeEventType._(2, _omitEnumNames ? '' : 'RUNTIME_EVENT_TYPE_CONFIG');
+  static const RuntimeEventType RUNTIME_EVENT_TYPE_NODE_POOL =
+      RuntimeEventType._(
+          3, _omitEnumNames ? '' : 'RUNTIME_EVENT_TYPE_NODE_POOL');
+  static const RuntimeEventType RUNTIME_EVENT_TYPE_BINDING =
+      RuntimeEventType._(4, _omitEnumNames ? '' : 'RUNTIME_EVENT_TYPE_BINDING');
+  static const RuntimeEventType RUNTIME_EVENT_TYPE_PROBE_STARTED =
+      RuntimeEventType._(
+          5, _omitEnumNames ? '' : 'RUNTIME_EVENT_TYPE_PROBE_STARTED');
+  static const RuntimeEventType RUNTIME_EVENT_TYPE_PROBE_COMPLETED =
+      RuntimeEventType._(
+          6, _omitEnumNames ? '' : 'RUNTIME_EVENT_TYPE_PROBE_COMPLETED');
+  static const RuntimeEventType RUNTIME_EVENT_TYPE_PROBE_DEFINITION =
+      RuntimeEventType._(
+          7, _omitEnumNames ? '' : 'RUNTIME_EVENT_TYPE_PROBE_DEFINITION');
+  static const RuntimeEventType RUNTIME_EVENT_TYPE_STOPPED =
+      RuntimeEventType._(8, _omitEnumNames ? '' : 'RUNTIME_EVENT_TYPE_STOPPED');
+
+  static const $core.List<RuntimeEventType> values = <RuntimeEventType>[
+    RUNTIME_EVENT_TYPE_UNSPECIFIED,
+    RUNTIME_EVENT_TYPE_SNAPSHOT,
+    RUNTIME_EVENT_TYPE_CONFIG,
+    RUNTIME_EVENT_TYPE_NODE_POOL,
+    RUNTIME_EVENT_TYPE_BINDING,
+    RUNTIME_EVENT_TYPE_PROBE_STARTED,
+    RUNTIME_EVENT_TYPE_PROBE_COMPLETED,
+    RUNTIME_EVENT_TYPE_PROBE_DEFINITION,
+    RUNTIME_EVENT_TYPE_STOPPED,
+  ];
+
+  static final $core.List<RuntimeEventType?> _byValue =
+      $pb.ProtobufEnum.$_initByValueList(values, 8);
+  static RuntimeEventType? valueOf($core.int value) =>
+      value < 0 || value >= _byValue.length ? null : _byValue[value];
+
+  const RuntimeEventType._(super.value, super.name);
+}
+
+class SmartRecoveryState extends $pb.ProtobufEnum {
+  static const SmartRecoveryState SMART_RECOVERY_STATE_UNSPECIFIED =
+      SmartRecoveryState._(
+          0, _omitEnumNames ? '' : 'SMART_RECOVERY_STATE_UNSPECIFIED');
+  static const SmartRecoveryState SMART_RECOVERY_STATE_RECOVERING =
+      SmartRecoveryState._(
+          1, _omitEnumNames ? '' : 'SMART_RECOVERY_STATE_RECOVERING');
+  static const SmartRecoveryState SMART_RECOVERY_STATE_READY =
+      SmartRecoveryState._(
+          2, _omitEnumNames ? '' : 'SMART_RECOVERY_STATE_READY');
+  static const SmartRecoveryState SMART_RECOVERY_STATE_DEGRADED =
+      SmartRecoveryState._(
+          3, _omitEnumNames ? '' : 'SMART_RECOVERY_STATE_DEGRADED');
+
+  static const $core.List<SmartRecoveryState> values = <SmartRecoveryState>[
+    SMART_RECOVERY_STATE_UNSPECIFIED,
+    SMART_RECOVERY_STATE_RECOVERING,
+    SMART_RECOVERY_STATE_READY,
+    SMART_RECOVERY_STATE_DEGRADED,
+  ];
+
+  static final $core.List<SmartRecoveryState?> _byValue =
+      $pb.ProtobufEnum.$_initByValueList(values, 3);
+  static SmartRecoveryState? valueOf($core.int value) =>
+      value < 0 || value >= _byValue.length ? null : _byValue[value];
+
+  const SmartRecoveryState._(super.value, super.name);
+}
+
+class SwitchMode extends $pb.ProtobufEnum {
+  static const SwitchMode SWITCH_MODE_UNSPECIFIED =
+      SwitchMode._(0, _omitEnumNames ? '' : 'SWITCH_MODE_UNSPECIFIED');
+  static const SwitchMode SWITCH_MODE_MANUAL =
+      SwitchMode._(1, _omitEnumNames ? '' : 'SWITCH_MODE_MANUAL');
+  static const SwitchMode SWITCH_MODE_AUTO_CONSTRAINED =
+      SwitchMode._(2, _omitEnumNames ? '' : 'SWITCH_MODE_AUTO_CONSTRAINED');
+  static const SwitchMode SWITCH_MODE_LOCKED =
+      SwitchMode._(3, _omitEnumNames ? '' : 'SWITCH_MODE_LOCKED');
+  static const SwitchMode SWITCH_MODE_DIRECT =
+      SwitchMode._(4, _omitEnumNames ? '' : 'SWITCH_MODE_DIRECT');
+
+  static const $core.List<SwitchMode> values = <SwitchMode>[
+    SWITCH_MODE_UNSPECIFIED,
+    SWITCH_MODE_MANUAL,
+    SWITCH_MODE_AUTO_CONSTRAINED,
+    SWITCH_MODE_LOCKED,
+    SWITCH_MODE_DIRECT,
+  ];
+
+  static final $core.List<SwitchMode?> _byValue =
+      $pb.ProtobufEnum.$_initByValueList(values, 4);
+  static SwitchMode? valueOf($core.int value) =>
+      value < 0 || value >= _byValue.length ? null : _byValue[value];
+
+  const SwitchMode._(super.value, super.name);
+}
+
+class OperationStatus extends $pb.ProtobufEnum {
+  static const OperationStatus OPERATION_STATUS_UNSPECIFIED = OperationStatus._(
+      0, _omitEnumNames ? '' : 'OPERATION_STATUS_UNSPECIFIED');
+  static const OperationStatus OPERATION_STATUS_QUEUED =
+      OperationStatus._(1, _omitEnumNames ? '' : 'OPERATION_STATUS_QUEUED');
+  static const OperationStatus OPERATION_STATUS_RUNNING =
+      OperationStatus._(2, _omitEnumNames ? '' : 'OPERATION_STATUS_RUNNING');
+  static const OperationStatus OPERATION_STATUS_WAITING_APPROVAL =
+      OperationStatus._(
+          3, _omitEnumNames ? '' : 'OPERATION_STATUS_WAITING_APPROVAL');
+  static const OperationStatus OPERATION_STATUS_SUCCEEDED =
+      OperationStatus._(4, _omitEnumNames ? '' : 'OPERATION_STATUS_SUCCEEDED');
+  static const OperationStatus OPERATION_STATUS_FAILED =
+      OperationStatus._(5, _omitEnumNames ? '' : 'OPERATION_STATUS_FAILED');
+  static const OperationStatus OPERATION_STATUS_CANCELLED =
+      OperationStatus._(6, _omitEnumNames ? '' : 'OPERATION_STATUS_CANCELLED');
+  static const OperationStatus OPERATION_STATUS_ROLLED_BACK = OperationStatus._(
+      7, _omitEnumNames ? '' : 'OPERATION_STATUS_ROLLED_BACK');
+
+  static const $core.List<OperationStatus> values = <OperationStatus>[
+    OPERATION_STATUS_UNSPECIFIED,
+    OPERATION_STATUS_QUEUED,
+    OPERATION_STATUS_RUNNING,
+    OPERATION_STATUS_WAITING_APPROVAL,
+    OPERATION_STATUS_SUCCEEDED,
+    OPERATION_STATUS_FAILED,
+    OPERATION_STATUS_CANCELLED,
+    OPERATION_STATUS_ROLLED_BACK,
+  ];
+
+  static final $core.List<OperationStatus?> _byValue =
+      $pb.ProtobufEnum.$_initByValueList(values, 7);
+  static OperationStatus? valueOf($core.int value) =>
+      value < 0 || value >= _byValue.length ? null : _byValue[value];
+
+  const OperationStatus._(super.value, super.name);
+}
+
 class LatencyTestStatus extends $pb.ProtobufEnum {
   static const LatencyTestStatus LATENCY_TEST_STATUS_UNSPECIFIED =
       LatencyTestStatus._(

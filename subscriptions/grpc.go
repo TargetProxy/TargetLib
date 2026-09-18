@@ -24,7 +24,7 @@ func NewHandler(manager *Manager) *Handler {
 
 func (s *Handler) ListSubscriptions(_ context.Context, _ *emptypb.Empty) (*targetlibapi.SubscriptionList, error) {
 	views := s.manager.Views()
-	result := &targetlibapi.SubscriptionList{ActiveId: s.manager.ActiveID(), Subscriptions: make([]*targetlibapi.SubscriptionView, len(views))}
+	result := &targetlibapi.SubscriptionList{Subscriptions: make([]*targetlibapi.SubscriptionView, len(views))}
 	for i := range views {
 		result.Subscriptions[i] = grpcSubscriptionView(views[i])
 	}
@@ -76,11 +76,6 @@ func (s *Handler) AddSubscription(ctx context.Context, request *targetlibapi.Add
 			return nil, subscriptionError(err)
 		}
 		view, _ = s.manager.View(item.ID)
-	}
-	if request.GetActivate() {
-		if err := s.manager.SetActive(ctx, item.ID); err != nil {
-			return nil, subscriptionError(err)
-		}
 	}
 	return grpcSubscriptionView(view), nil
 }
@@ -161,21 +156,6 @@ func (s *Handler) GetResolvedEndpoints(_ context.Context, request *targetlibapi.
 	return &targetlibapi.ResolvedEndpoints{Addresses: s.manager.ResolvedEndpoints(enabledOnly)}, nil
 }
 
-func (s *Handler) SetActiveSubscription(ctx context.Context, request *targetlibapi.SetActiveSubscriptionRequest) (*emptypb.Empty, error) {
-	id := ""
-	if request != nil {
-		id = request.GetId()
-	}
-	if err := s.manager.SetActive(ctx, id); err != nil {
-		return nil, subscriptionError(err)
-	}
-	return &emptypb.Empty{}, nil
-}
-
-func (s *Handler) GetActiveSubscription(context.Context, *emptypb.Empty) (*targetlibapi.ActiveSubscriptionResponse, error) {
-	return &targetlibapi.ActiveSubscriptionResponse{Id: s.manager.ActiveID()}, nil
-}
-
 func (s *Handler) SubscribeSubscriptionEvents(_ *emptypb.Empty, stream grpc.ServerStreamingServer[targetlibapi.SubscriptionEvent]) error {
 	events, unsubscribe := s.manager.Subscribe(32)
 	defer unsubscribe()
@@ -253,7 +233,8 @@ func grpcProfileView(view ProfileView) *targetlibapi.ProfileView {
 		nodes[i] = &targetlibapi.ProfileNode{
 			Tag: node.Tag, Name: node.Name, Type: node.Type, Server: node.Server,
 			Port: int32(node.Port), Phase: profileNodePhase(node.Phase), ErrorMessage: node.Error,
-			CountryCode: node.CountryCode,
+			CountryCode:    node.CountryCode,
+			SubscriptionId: node.SubscriptionID,
 		}
 	}
 	return &targetlibapi.ProfileView{Nodes: nodes}

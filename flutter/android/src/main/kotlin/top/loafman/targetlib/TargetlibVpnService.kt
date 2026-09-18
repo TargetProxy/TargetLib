@@ -7,11 +7,14 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.os.Build
 import android.net.VpnService
+import android.net.ConnectivityManager
+import android.net.Network
 import android.util.Log
 
 /** Foreground Android VPN host. JNI is owned exclusively by this service. */
 class TargetlibVpnService : VpnService() {
     private var nativeStarted = false
+    private var networkCallback: ConnectivityManager.NetworkCallback? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -40,6 +43,7 @@ class TargetlibVpnService : VpnService() {
             TargetlibNative.setTunFd(tunnel.detachFd())
             TargetlibNative.start(basePath = basePath)
             nativeStarted = true
+            registerNetworkCallback()
         } catch (error: Throwable) {
             Log.e(TAG, "Unable to start TargetLib VPN service", error)
             stopSelf(startId)
@@ -48,12 +52,38 @@ class TargetlibVpnService : VpnService() {
     }
 
     override fun onDestroy() {
+        unregisterNetworkCallback()
         if (nativeStarted) {
             runCatching { TargetlibNative.stop() }
             nativeStarted = false
         }
         stopForeground(STOP_FOREGROUND_REMOVE)
         super.onDestroy()
+    }
+
+    private fun registerNetworkCallback() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N || networkCallback != null) return
+        val callback = object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) = notifyCore()
+            override fun onLost(network: Network) = notifyCore()
+
+            private fun notifyCore() {
+                if (nativeStarted) runCatching { TargetlibNative.notifyNetworkChanged() }
+                    .onFailure { Log.w(TAG, "Unable to notify core about network change", it) }
+            }
+        }
+        getSystemService(ConnectivityManager::class.java)
+            .registerDefaultNetworkCallback(callback)
+        networkCallback = callback
+    }
+
+    private fun unregisterNetworkCallback() {
+        val callback = networkCallback ?: return
+        runCatching {
+            getSystemService(ConnectivityManager::class.java)
+                .unregisterNetworkCallback(callback)
+        }
+        networkCallback = null
     }
 
     private fun createNotificationChannel() {

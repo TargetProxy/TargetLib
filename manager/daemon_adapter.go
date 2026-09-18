@@ -19,12 +19,6 @@ func newDaemonAdapter(service *daemon.StartedService) *daemonAdapter {
 	return &daemonAdapter{service: service}
 }
 
-func (d *daemonAdapter) Apply(content string) error {
-	return d.service.StartOrReloadService(context.Background(), content, &daemon.OverrideOptions{})
-}
-
-func (d *daemonAdapter) Stop() error { return d.service.CloseService() }
-
 func (d *daemonAdapter) Close() { d.service.Close() }
 
 func (d *daemonAdapter) Status() (*daemon.ServiceStatus, error) {
@@ -39,24 +33,8 @@ func (d *daemonAdapter) Status() (*daemon.ServiceStatus, error) {
 	return nil, err
 }
 
-func (d *daemonAdapter) SubscribeState(stream grpc.ServerStreamingServer[targetlibapi.ServiceState]) error {
-	return d.service.SubscribeServiceStatus(&emptypb.Empty{}, newStatusRelay(stream))
-}
-
-func (d *daemonAdapter) SubscribeLogs(stream grpc.ServerStreamingServer[targetlibapi.LogBatch]) error {
-	return d.service.SubscribeLog(&emptypb.Empty{}, newLogRelay(stream))
-}
-
 func (d *daemonAdapter) SelectOutbound(ctx context.Context, group, outbound string) (*emptypb.Empty, error) {
 	return d.service.SelectOutbound(ctx, &daemon.SelectOutboundRequest{GroupTag: group, OutboundTag: outbound})
-}
-
-func (d *daemonAdapter) CloseConnection(ctx context.Context, id string) (*emptypb.Empty, error) {
-	return d.service.CloseConnection(ctx, &daemon.CloseConnectionRequest{Id: id})
-}
-
-func (d *daemonAdapter) CloseAllConnections(ctx context.Context, request *emptypb.Empty) (*emptypb.Empty, error) {
-	return d.service.CloseAllConnections(ctx, request)
 }
 
 func (d *daemonAdapter) SubscribeGroups(request *emptypb.Empty, stream grpc.ServerStreamingServer[daemon.Groups]) error {

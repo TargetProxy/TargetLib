@@ -57,13 +57,10 @@ func (s *failingStore) setFail(value bool) {
 	s.mu.Unlock()
 }
 
-func TestRemoveActiveSubscriptionCommitsOneStoreTransaction(t *testing.T) {
+func TestRemoveSubscriptionCommitsStoreTransaction(t *testing.T) {
 	store := &MemoryStore{}
 	manager := newTestManager(t, store)
 	addTestSubscription(t, manager, "active")
-	if err := manager.SetActive(context.Background(), "active"); err != nil {
-		t.Fatal(err)
-	}
 	if err := manager.Remove(context.Background(), "active"); err != nil {
 		t.Fatal(err)
 	}
@@ -71,47 +68,21 @@ func TestRemoveActiveSubscriptionCommitsOneStoreTransaction(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(stored.Subscriptions) != 0 || stored.ActiveID != "" {
+	if len(stored.Subscriptions) != 0 {
 		t.Fatalf("non-atomic stored state: %+v", stored)
 	}
 }
 
-func TestActiveChangeDoesNotPublishWhenRuntimeRejects(t *testing.T) {
-	manager := newTestManager(t, &MemoryStore{})
-	addTestSubscription(t, manager, "next")
-	manager.SetRuntimeChangedCallback(func(context.Context, *Subscription) error {
-		return errors.New("core rejected config")
-	})
-	if err := manager.SetActive(context.Background(), "next"); err == nil {
-		t.Fatal("active change unexpectedly succeeded")
-	}
-	if got := manager.ActiveID(); got != "" {
-		t.Fatalf("active ID = %q after rejected runtime", got)
-	}
-}
-
-func TestActiveChangeRollsBackRuntimeWhenStoreFails(t *testing.T) {
+func TestRemoveDoesNotPublishWhenStoreFails(t *testing.T) {
 	store := &failingStore{MemoryStore: &MemoryStore{}}
 	manager := newTestManager(t, store)
 	addTestSubscription(t, manager, "next")
 	store.setFail(true)
-	var applied []string
-	manager.SetRuntimeChangedCallback(func(_ context.Context, active *Subscription) error {
-		if active == nil {
-			applied = append(applied, "")
-		} else {
-			applied = append(applied, active.ID)
-		}
-		return nil
-	})
-	if err := manager.SetActive(context.Background(), "next"); err == nil {
-		t.Fatal("active change unexpectedly succeeded")
+	if err := manager.Remove(context.Background(), "next"); err == nil {
+		t.Fatal("remove unexpectedly succeeded")
 	}
-	if len(applied) != 2 || applied[0] != "next" || applied[1] != "" {
-		t.Fatalf("runtime apply sequence = %v", applied)
-	}
-	if got := manager.ActiveID(); got != "" {
-		t.Fatalf("active ID = %q after failed persistence", got)
+	if _, ok := manager.Get("next"); !ok {
+		t.Fatal("failed removal changed snapshot")
 	}
 }
 
@@ -153,7 +124,7 @@ func TestMemoryStoreUpdateRollsBackCallbackFailure(t *testing.T) {
 		if err := tx.Put(Subscription{ID: "discarded"}); err != nil {
 			return err
 		}
-		if err := tx.SetActiveID("discarded"); err != nil {
+		if err := tx.SetMetadata("revision", []byte("discarded")); err != nil {
 			return err
 		}
 		return errExpected
@@ -165,7 +136,8 @@ func TestMemoryStoreUpdateRollsBackCallbackFailure(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(stored.Subscriptions) != 0 || stored.ActiveID != "" {
+	metadata, _ := store.GetMetadata(context.Background(), "revision")
+	if len(stored.Subscriptions) != 0 || len(metadata) != 0 {
 		t.Fatalf("aborted transaction was committed: %+v", stored)
 	}
 }

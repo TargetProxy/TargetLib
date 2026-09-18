@@ -92,6 +92,18 @@ func targetlib_set_tun_fd(fd C.int32_t) C.int32_t {
 	return 0
 }
 
+//export targetlib_notify_network_changed
+func targetlib_notify_network_changed() C.int32_t {
+	serviceMu.Lock()
+	server := activeServer
+	serviceMu.Unlock()
+	if server == nil {
+		return -1
+	}
+	server.NotifyNetworkChanged()
+	return 0
+}
+
 //export targetlib_stop
 func targetlib_stop(errOut **C.char) C.int32_t {
 	clearErr(errOut)

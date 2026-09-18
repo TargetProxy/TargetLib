@@ -14,6 +14,7 @@ struct targetlib_init_options {
 
 int32_t targetlib_start(const targetlib_init_options*, char**);
 int32_t targetlib_set_tun_fd(int32_t);
+int32_t targetlib_notify_network_changed();
 int32_t targetlib_stop(char**);
 void targetlib_free_string(char*);
 }
@@ -57,6 +58,12 @@ extern "C" JNIEXPORT void JNICALL
 Java_top_loafman_targetlib_TargetlibNative_setTunFd(JNIEnv* env, jclass,
                                                     jint fd) {
   check(env, targetlib_set_tun_fd(static_cast<int32_t>(fd)), nullptr);
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_top_loafman_targetlib_TargetlibNative_notifyNetworkChanged(JNIEnv* env,
+                                                                jclass) {
+  check(env, targetlib_notify_network_changed(), nullptr);
 }
 
 extern "C" JNIEXPORT void JNICALL

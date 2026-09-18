@@ -5,6 +5,7 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"runtime/debug"
 	"testing"
 	"time"
 
@@ -15,8 +16,21 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
+func managerTestBasePath(t *testing.T) string {
+	t.Helper()
+	path := t.TempDir()
+	// libbox.Setup registers a process-wide duplicate file handle with Go.
+	// Release it before TempDir cleanup, independently of daemon lifecycle.
+	t.Cleanup(func() {
+		if err := debug.SetCrashOutput(nil, debug.CrashOptions{}); err != nil {
+			t.Error(err)
+		}
+	})
+	return path
+}
+
 func TestListenUsesUnixSocketAndLoopbackTCP(t *testing.T) {
-	basePath := t.TempDir()
+	basePath := managerTestBasePath(t)
 	manager, err := New(context.Background(), Options{
 		BasePath:          basePath,
 		SubscriptionStore: &subscriptions.MemoryStore{},
@@ -47,7 +61,7 @@ func TestListenUsesUnixSocketAndLoopbackTCP(t *testing.T) {
 }
 
 func TestServeAcceptsUnixSocketAndTCP(t *testing.T) {
-	basePath := t.TempDir()
+	basePath := managerTestBasePath(t)
 	manager, err := New(context.Background(), Options{
 		BasePath:          basePath,
 		SubscriptionStore: &subscriptions.MemoryStore{},
@@ -94,7 +108,7 @@ func TestServeAcceptsUnixSocketAndTCP(t *testing.T) {
 }
 
 func TestSecondServerDoesNotRemoveActiveSocket(t *testing.T) {
-	basePath := t.TempDir()
+	basePath := managerTestBasePath(t)
 	firstManager, err := New(context.Background(), Options{
 		BasePath:          basePath,
 		SubscriptionStore: &subscriptions.MemoryStore{},
@@ -111,7 +125,7 @@ func TestSecondServerDoesNotRemoveActiveSocket(t *testing.T) {
 	t.Cleanup(first.Close)
 
 	secondManager, err := New(context.Background(), Options{
-		BasePath:          t.TempDir(),
+		BasePath:          managerTestBasePath(t),
 		SubscriptionStore: &subscriptions.MemoryStore{},
 	})
 	if err != nil {

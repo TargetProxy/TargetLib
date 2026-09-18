@@ -131,6 +131,7 @@ type View struct {
 }
 
 type NodeView struct {
+	SubscriptionID                       string
 	Tag, Name, Type, CountryCode, Server string
 	Port                                 int
 	Phase                                NodePhase

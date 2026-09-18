@@ -20,15 +20,16 @@ const (
 // Node 同时保存规范化后的持久化表示和运行时类型表示；OutboundJSON
 // 不保留供应商 ALPN 等被 TargetLib 接管的字段。
 type Node struct {
-	ID           string          `json:"id"`
-	Name         string          `json:"name"`
-	Type         string          `json:"type"`
-	CountryCode  string          `json:"country_code,omitempty"`
-	Server       string          `json:"server,omitempty"`
-	Port         int             `json:"port,omitempty"`
-	Phase        NodePhase       `json:"phase"`
-	Error        string          `json:"error,omitempty"`
-	OutboundJSON json.RawMessage `json:"outbound_json,omitempty"`
+	ID             string          `json:"id"`
+	SubscriptionID string          `json:"subscription_id,omitempty"`
+	Name           string          `json:"name"`
+	Type           string          `json:"type"`
+	CountryCode    string          `json:"country_code,omitempty"`
+	Server         string          `json:"server,omitempty"`
+	Port           int             `json:"port,omitempty"`
+	Phase          NodePhase       `json:"phase"`
+	Error          string          `json:"error,omitempty"`
+	OutboundJSON   json.RawMessage `json:"outbound_json,omitempty"`
 	// Outbound 保留运行时使用的类型化配置，不直接参与 JSON/CBOR 持久化。
 	Outbound *option.Outbound `json:"-" cbor:"-"`
 }

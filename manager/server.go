@@ -65,7 +65,10 @@ func listen(manager *Manager, address, socketPath string) (*Server, error) {
 		return nil, err
 	}
 	_ = os.Chmod(socketPath, 0o600)
-	server := grpc.NewServer()
+	server := grpc.NewServer(
+		grpc.UnaryInterceptor(manager.authenticateUnary),
+		grpc.StreamInterceptor(manager.authenticateStream),
+	)
 	targetlibapi.RegisterTargetLibServer(server, manager)
 	return &Server{
 		manager: manager, tcpListener: tcpListener, socketListener: socketListener,
@@ -93,6 +96,8 @@ func (s *Server) Network() string {
 func (s *Server) SocketEndpoint() string {
 	return s.socketListener.Addr().String()
 }
+
+func (s *Server) NotifyNetworkChanged() { s.manager.NotifyNetworkChanged() }
 
 func (s *Server) Close() {
 	s.close.Do(func() {

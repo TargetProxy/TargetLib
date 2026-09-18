@@ -23,6 +23,7 @@ func TestAddSubscriptionRollsBackFailedImmediateUpdate(t *testing.T) {
 		Store:   &MemoryStore{},
 	})
 	handler := NewHandler(manager)
+	t.Cleanup(manager.Close)
 
 	_, err := handler.AddSubscription(context.Background(), &targetlibapi.AddSubscriptionRequest{
 		Id: "youtu", Name: "youtu", Url: "https://example.com/sub", UpdateNow: true,
@@ -35,21 +36,22 @@ func TestAddSubscriptionRollsBackFailedImmediateUpdate(t *testing.T) {
 	}
 }
 
-func TestAddSubscriptionReturnsUpdatedActiveProfile(t *testing.T) {
+func TestAddSubscriptionReturnsUpdatedPoolProfile(t *testing.T) {
 	manager := NewManager(Options{
 		Fetcher: fixedFetcher{body: []byte(`{"outbounds":[{"type":"ssh","tag":"youtu","server":"127.0.0.1","server_port":22,"user":"test","password":"secret"}]}`)},
 		Store:   &MemoryStore{},
 	})
 	handler := NewHandler(manager)
+	t.Cleanup(manager.Close)
 
 	view, err := handler.AddSubscription(context.Background(), &targetlibapi.AddSubscriptionRequest{
-		Id: "youtu", Name: "youtu", Url: "https://example.com/sub", UpdateNow: true, Activate: true,
+		Id: "youtu", Name: "youtu", Url: "https://example.com/sub", UpdateNow: true,
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if manager.ActiveID() != "youtu" {
-		t.Fatalf("active ID = %q, want youtu", manager.ActiveID())
+	if len(manager.NodePool().Nodes) != 1 || view.Profile.Nodes[0].SubscriptionId != "youtu" {
+		t.Fatal("subscription did not enter pool with its source")
 	}
 	if len(view.GetProfile().GetNodes()) != 1 ||
 		view.GetProfile().GetNodes()[0].GetTag() == "" ||

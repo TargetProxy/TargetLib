@@ -5,18 +5,17 @@ import 'package:path_provider/path_provider.dart';
 
 import '../targetlib_logger.dart';
 import 'target_lib_connection.dart';
-import 'target_lib_service_manager.dart';
-import '../../targetlib_platform_interface.dart';
+import 'target_lib_host.dart';
 import '../generated/api/TargetLib/targetlib.pb.dart';
 
 /// Cross-platform connection to the installer-managed TargetLib service.
 final class TargetLibRuntime {
-  TargetLibRuntime({TargetLibServiceManager? serviceManager})
-    : _serviceManager = serviceManager ?? TargetLibServiceManager();
+  TargetLibRuntime({TargetLibHost? host})
+    : _host = host ?? defaultTargetLibHost();
 
-  final TargetLibServiceManager _serviceManager;
+  final TargetLibHost _host;
   TargetLibConnection? _connection;
-  bool _androidServiceStarted = false;
+  bool _hostStarted = false;
 
   TargetLibConnection? get connection => _connection;
   static bool get isSupported =>
@@ -57,22 +56,24 @@ final class TargetLibRuntime {
       );
       return _connection!;
     } on Object {
-      if (Platform.isAndroid) {
-        await TargetlibPlatform.instance.startAndroidService(
-          basePath: base.path,
-        );
-        _androidServiceStarted = true;
-      } else {
-        final service = await _serviceManager.status();
-        if (service.status == TargetLibServiceStatus.notInstalled) {
-          throw StateError('TargetLib service is not installed.');
-        }
-        if (service.status != TargetLibServiceStatus.running) {
-          await _serviceManager.start();
-        }
+      final service = await _host.status();
+      if (service == TargetLibHostStatus.notInstalled) {
+        throw StateError('TargetLib service is not installed.');
+      }
+      if (service != TargetLibHostStatus.running) {
+        await _host.start(basePath: base.path);
+        _hostStarted = true;
       }
     }
-    _connection = await TargetLibConnection.connect(socketPath: socketPath);
+    try {
+      _connection = await TargetLibConnection.connect(socketPath: socketPath);
+    } on Object {
+      if (_hostStarted) {
+        await _host.stop();
+        _hostStarted = false;
+      }
+      rethrow;
+    }
     TargetLibLog.info(
       'Connected via ${_connection!.transport}',
       source: 'TargetLib',
@@ -83,14 +84,16 @@ final class TargetLibRuntime {
   Future<void> close() async {
     await _connection?.close();
     _connection = null;
-    if (Platform.isAndroid && _androidServiceStarted) {
-      await TargetlibPlatform.instance.stopAndroidService();
-      _androidServiceStarted = false;
+    if (_hostStarted) {
+      await _host.stop();
+      _hostStarted = false;
     }
   }
 
   Future<OperationResponse> start() async =>
       (await _requireConnection()).start();
+  Future<CapabilitiesResponse> capabilities() async =>
+      (await _requireConnection()).capabilities();
 
   Future<OperationResponse> restart() async =>
       (await _requireConnection()).restart();
@@ -102,8 +105,110 @@ final class TargetLibRuntime {
   Future<RuntimeConfig> getRuntimeConfig() async =>
       (await _requireConnection()).getRuntimeConfig();
 
-  Future<RuntimeConfig> updateRuntimeConfig(RuntimeSettings settings) async =>
-      (await _requireConnection()).updateRuntimeConfig(settings);
+  Future<RuntimeConfig> updateRuntimeConfig(
+    RuntimeSettings settings, {
+    RuntimeModel? model,
+    String? expectedRevision,
+  }) async => (await _requireConnection()).updateRuntimeConfig(
+    settings,
+    model: model,
+    expectedRevision: expectedRevision,
+  );
+
+  Future<NodePool> getNodePool() async =>
+      (await _requireConnection()).getNodePool();
+  Future<ServiceProbe> putServiceProbe(ServiceProbe probe) async =>
+      (await _requireConnection()).putServiceProbe(probe);
+  Future<ServiceProbeList> listServiceProbes() async =>
+      (await _requireConnection()).listServiceProbes();
+  Future<void> removeServiceProbe(RemoveServiceProbeRequest request) async =>
+      (await _requireConnection()).removeServiceProbe(request);
+  Future<SmartConnectDiagnostics> getSmartConnectDiagnostics({
+    String? serviceId,
+  }) async => (await _requireConnection()).getSmartConnectDiagnostics(
+    serviceId: serviceId,
+  );
+  Future<ServiceSelectionPolicy> getServiceSelectionPolicy(
+    String serviceId,
+  ) async => (await _requireConnection()).getServiceSelectionPolicy(serviceId);
+  Future<ServiceSelectionPolicy> putServiceSelectionPolicy(
+    ServiceSelectionPolicy policy,
+  ) async => (await _requireConnection()).putServiceSelectionPolicy(policy);
+  Stream<ProbeResult> probeService(ProbeServiceRequest request) async* {
+    yield* (await _requireConnection()).probeService(request);
+  }
+
+  Future<QualityHistory> getQualityHistory(
+    QualityHistoryRequest request,
+  ) async => (await _requireConnection()).getQualityHistory(request);
+  Future<ServiceEvaluation> evaluateService(String serviceId) async =>
+      (await _requireConnection()).evaluateService(serviceId);
+  Stream<RuntimeEvent> subscribeRuntimeEvents() async* {
+    yield* (await _requireConnection()).subscribeRuntimeEvents();
+  }
+
+  Future<SmartConnectPolicy> exportSmartConnectPolicy() async =>
+      (await _requireConnection()).exportSmartConnectPolicy();
+  Future<SmartConnectPolicy> importSmartConnectPolicy(
+    ImportSmartConnectPolicyRequest request,
+  ) async => (await _requireConnection()).importSmartConnectPolicy(request);
+  Future<RuntimeState> getRuntimeState() async =>
+      (await _requireConnection()).getRuntimeState();
+  Future<ServiceBindingList> listServiceBindings() async =>
+      (await _requireConnection()).listServiceBindings();
+  Future<RuntimeConfig> applyServiceBinding(
+    ServiceBinding binding, {
+    String? expectedRevision,
+  }) async => (await _requireConnection()).applyServiceBinding(
+    binding,
+    expectedRevision: expectedRevision,
+  );
+  Future<RuntimeConfig> removeServiceBinding(
+    String serviceId, {
+    String? expectedRevision,
+  }) async => (await _requireConnection()).removeServiceBinding(
+    serviceId,
+    expectedRevision: expectedRevision,
+  );
+
+  Future<SmartConnectSnapshot> getSmartConnectSnapshot() async =>
+      (await _requireConnection()).getSmartConnectSnapshot();
+  Future<Operation> setSmartConnectEnabled(
+    SetSmartConnectEnabledRequest request,
+  ) async => (await _requireConnection()).setSmartConnectEnabled(request);
+  Future<ServicePolicyList> listServicePolicies() async =>
+      (await _requireConnection()).listServicePolicies();
+  Future<Operation> upsertServicePolicy(
+    UpsertServicePolicyRequest request,
+  ) async => (await _requireConnection()).upsertServicePolicy(request);
+  Future<Operation> deleteServicePolicy(
+    DeleteServicePolicyRequest request,
+  ) async => (await _requireConnection()).deleteServicePolicy(request);
+  Future<Operation> setNodePreference(SetNodePreferenceRequest request) async =>
+      (await _requireConnection()).setNodePreference(request);
+  Future<Operation> requestServiceEvaluation(
+    RequestServiceEvaluationRequest request,
+  ) async => (await _requireConnection()).requestServiceEvaluation(request);
+  Future<Operation> approveSwitchProposal(
+    ProposalCommandRequest request,
+  ) async => (await _requireConnection()).approveSwitchProposal(request);
+  Future<Operation> rejectSwitchProposal(
+    ProposalCommandRequest request,
+  ) async => (await _requireConnection()).rejectSwitchProposal(request);
+  Future<Operation> forceServiceBinding(
+    ForceServiceBindingRequest request,
+  ) async => (await _requireConnection()).forceServiceBinding(request);
+  Future<Operation> getOperation(String operationId) async =>
+      (await _requireConnection()).getOperation(operationId);
+  Future<OperationList> listOperations(ListOperationsRequest request) async =>
+      (await _requireConnection()).listOperations(request);
+  Stream<SmartConnectEvent> subscribeSmartConnectEvents({
+    int afterSequence = 0,
+  }) async* {
+    yield* (await _requireConnection()).subscribeSmartConnectEvents(
+      afterSequence: afterSequence,
+    );
+  }
 
   Future<TargetLibConnection> _requireConnection() async {
     final current = _connection;

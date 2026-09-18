@@ -5,6 +5,7 @@ import (
 	"net/netip"
 	"path/filepath"
 	"runtime"
+	"sort"
 	"strings"
 	"time"
 
@@ -114,13 +115,16 @@ func Emit(plan Blueprint) ([]byte, error) {
 }
 
 // Build 保留稳定的公开入口。
-func Build(settings Settings, source targetprofile.Profile) ([]byte, error) {
-	return BuildRuntime(settings, RuntimeModelFromProfile(source))
-}
-
-// BuildRuntime generates configuration from the complete P0 runtime model.
-// It never selects an alternative node or configuration when the model is invalid.
-func BuildRuntime(settings Settings, model RuntimeModel) ([]byte, error) {
+func Build(settings Settings, source any) ([]byte, error) {
+	var model RuntimeModel
+	switch value := source.(type) {
+	case targetprofile.Profile:
+		model = RuntimeModelFromProfile(value)
+	case RuntimeModel:
+		model = value
+	default:
+		return nil, fmt.Errorf("%w: unsupported runtime model", ErrInvalidSource)
+	}
 	plan, err := planRuntimeModel(settings, model)
 	if err != nil {
 		return nil, err
@@ -128,7 +132,18 @@ func BuildRuntime(settings Settings, model RuntimeModel) ([]byte, error) {
 	return Emit(plan)
 }
 
+// BuildRuntime generates configuration from the complete P0 runtime model.
+// It never selects an alternative node or configuration when the model is invalid.
+func BuildRuntime(settings Settings, model RuntimeModel) ([]byte, error) {
+	return Build(settings, model)
+}
+
 func planRuntimeModel(settings Settings, model RuntimeModel) (Blueprint, error) {
+	var err error
+	model, err = NormalizeRuntimeModel(model)
+	if err != nil {
+		return Blueprint{}, err
+	}
 	if err := settings.Validate(); err != nil {
 		return Blueprint{}, err
 	}
@@ -140,7 +155,44 @@ func planRuntimeModel(settings Settings, model RuntimeModel) (Blueprint, error) 
 	if err != nil {
 		return Blueprint{}, err
 	}
+	if settings.ProbeOnly {
+		filtered := outbounds[:0]
+		for _, outbound := range outbounds {
+			if outbound.Type != "urltest" {
+				filtered = append(filtered, outbound)
+			}
+		}
+		outbounds = filtered
+	}
 	route := planRoute(finalOutbound, settings)
+	if settings.RouteMode != RouteModeDirect {
+		var serviceRules []option.Rule
+		for _, service := range model.ServiceRoutes {
+			if !service.Enabled {
+				continue
+			}
+			for _, domain := range service.Domains {
+				serviceRules = append(serviceRules, option.Rule{Type: C.RuleTypeDefault, DefaultOptions: option.DefaultRule{
+					RawDefaultRule: option.RawDefaultRule{DomainSuffix: []string{domain}},
+					RuleAction:     option.RuleAction{Action: C.RuleActionTypeRoute, RouteOptions: option.RouteActionOptions{Outbound: service.Selector}},
+				}})
+			}
+		}
+		sort.Slice(serviceRules, func(i, j int) bool {
+			a, b := serviceRules[i].DefaultOptions.DomainSuffix[0], serviceRules[j].DefaultOptions.DomainSuffix[0]
+			if len(a) != len(b) {
+				return len(a) > len(b)
+			}
+			return a < b
+		})
+		prefix := 1
+		if settings.ProxyMode == ProxyModeTun {
+			prefix++
+		}
+		rules := append([]option.Rule(nil), route.Rules[:prefix]...)
+		rules = append(rules, serviceRules...)
+		route.Rules = append(rules, route.Rules[prefix:]...)
+	}
 	dns, err := planDNS(settings.ProxyMode == ProxyModeTun)
 	if err != nil {
 		return Blueprint{}, err
@@ -175,14 +227,23 @@ func planOutboundsWithSelectors(nodes []targetprofile.Node, selectors []Selector
 	}
 	outbounds = append(outbounds, option.Outbound{Type: "direct", Tag: "direct", Options: option.DirectOutboundOptions{}})
 	if len(nodeTags) == 0 {
+		// Validation permits explicit Direct service selectors without a node
+		// subscription. Emit those selectors too, so their routes resolve.
+		for _, selector := range selectors {
+			outbounds = append(outbounds, option.Outbound{Type: "selector", Tag: selector.Tag, Options: option.SelectorOutboundOptions{Outbounds: []string{"direct"}, Default: "direct"}})
+		}
 		return outbounds, "direct", nil
 	}
 	outbounds = append(outbounds, option.Outbound{Type: "urltest", Tag: "urltest", Options: option.URLTestOutboundOptions{
 		Outbounds: append([]string(nil), nodeTags...), URL: urlTestURL, Interval: badoption.Duration(urlTestInterval), Tolerance: urlTestTolerance,
 	}})
-	members := append([]string{"urltest"}, nodeTags...)
-	members = append(members, "direct")
-	outbounds = append(outbounds, option.Outbound{Type: "selector", Tag: "proxy", Options: option.SelectorOutboundOptions{Outbounds: members, Default: "urltest"}})
+	defaultNode := nodeTags[0]
+	for _, selector := range selectors {
+		if selector.Tag == "proxy" {
+			defaultNode = selector.Selected
+		}
+	}
+	outbounds = append(outbounds, option.Outbound{Type: "selector", Tag: "proxy", Options: option.SelectorOutboundOptions{Outbounds: append(append([]string(nil), nodeTags...), "direct"), Default: defaultNode}})
 	if len(selectors) == 0 {
 		return outbounds, "proxy", nil
 	}
@@ -191,13 +252,16 @@ func planOutboundsWithSelectors(nodes []targetprofile.Node, selectors []Selector
 		known[tag] = true
 	}
 	for _, selector := range selectors {
+		if selector.Tag == "proxy" {
+			continue
+		}
 		tag := strings.TrimSpace(selector.Tag)
 		if tag == "" || used[tag] {
 			return nil, "", fmt.Errorf("%w: invalid selector tag %q", ErrInvalidSource, tag)
 		}
 		members := make([]string, 0, len(selector.NodeIDs))
 		for _, id := range selector.NodeIDs {
-			if known[id] {
+			if known[id] || id == "direct" {
 				members = append(members, id)
 			}
 		}
@@ -320,6 +384,9 @@ func emitRoute(plan RoutePlan) *option.RouteOptions {
 }
 
 func planRuntime(settings Settings) RuntimePlan {
+	if settings.ProbeOnly {
+		return RuntimePlan{Log: option.LogOptions{Disabled: true}}
+	}
 	experimental := option.ExperimentalOptions{}
 	// TargetLib owns telemetry and cache storage regardless of upstream metadata.
 	experimental.ClashAPI = &option.ClashAPIOptions{}
@@ -339,6 +406,9 @@ func validateConfig(content []byte) error {
 // buildInbounds 生成应用拥有的入站面。订阅透传配置不得自带 inbounds
 // （机场常带需管理员权限的 tun），入站主权始终在应用侧。
 func buildInbounds(settings Settings) ([]option.Inbound, error) {
+	if settings.ProbeOnly {
+		return nil, nil
+	}
 	var inbounds []option.Inbound
 	if settings.ProxyMode == ProxyModeMixed {
 		address, err := netip.ParseAddr(strings.TrimSpace(settings.ListenAddress))
@@ -368,7 +438,7 @@ func buildInbounds(settings Settings) ([]option.Inbound, error) {
 				Address:             addresses,
 				MTU:                 tunMTU,
 				AutoRoute:           true,
-				StrictRoute:         false,
+				StrictRoute:         true,
 				RouteExcludeAddress: []netip.Prefix{netip.MustParsePrefix("127.0.0.0/8")},
 			},
 		})

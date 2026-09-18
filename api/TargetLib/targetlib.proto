@@ -38,12 +38,40 @@ service TargetLib {
   rpc GetResolvedEndpoints(ResolvedEndpointsRequest) returns (ResolvedEndpoints);
   rpc SubscribeSubscriptionEvents(google.protobuf.Empty) returns (stream SubscriptionEvent);
 
-  // Active subscription state is persisted by the backend; clients do not track it.
-  rpc SetActiveSubscription(SetActiveSubscriptionRequest) returns (google.protobuf.Empty);
-  rpc GetActiveSubscription(google.protobuf.Empty) returns (ActiveSubscriptionResponse);
-
   // IP geolocation query (egress from the backend).
   rpc GetIpInfo(google.protobuf.Empty) returns (IpInfoResponse);
+  rpc GetNodePool(google.protobuf.Empty) returns (NodePool);
+  rpc GetRuntimeState(google.protobuf.Empty) returns (RuntimeState);
+  rpc ListServiceBindings(google.protobuf.Empty) returns (ServiceBindingList);
+  rpc ApplyServiceBinding(ApplyServiceBindingRequest) returns (RuntimeConfig);
+  rpc RemoveServiceBinding(RemoveServiceBindingRequest) returns (RuntimeConfig);
+  rpc PutServiceProbe(ServiceProbe) returns (ServiceProbe);
+  rpc RemoveServiceProbe(RemoveServiceProbeRequest) returns (google.protobuf.Empty);
+  rpc ListServiceProbes(google.protobuf.Empty) returns (ServiceProbeList);
+  rpc ProbeService(ProbeServiceRequest) returns (stream ProbeResult);
+  rpc GetQualityHistory(QualityHistoryRequest) returns (QualityHistory);
+  rpc EvaluateService(EvaluateServiceRequest) returns (ServiceEvaluation);
+  rpc GetServiceSelectionPolicy(ServiceSelectionPolicyRequest) returns (ServiceSelectionPolicy);
+  rpc PutServiceSelectionPolicy(ServiceSelectionPolicy) returns (ServiceSelectionPolicy);
+  rpc GetSmartConnectDiagnostics(EvaluateServiceRequest) returns (SmartConnectDiagnostics);
+  rpc SubscribeRuntimeEvents(google.protobuf.Empty) returns (stream RuntimeEvent);
+  rpc ExportSmartConnectPolicy(google.protobuf.Empty) returns (SmartConnectPolicy);
+  rpc ImportSmartConnectPolicy(ImportSmartConnectPolicyRequest) returns (SmartConnectPolicy);
+
+  // Intent-level Smart Connect API. Commands return a durable operation.
+  rpc GetSmartConnectSnapshot(google.protobuf.Empty) returns (SmartConnectSnapshot);
+  rpc SetSmartConnectEnabled(SetSmartConnectEnabledRequest) returns (Operation);
+  rpc ListServicePolicies(google.protobuf.Empty) returns (ServicePolicyList);
+  rpc UpsertServicePolicy(UpsertServicePolicyRequest) returns (Operation);
+  rpc DeleteServicePolicy(DeleteServicePolicyRequest) returns (Operation);
+  rpc SetNodePreference(SetNodePreferenceRequest) returns (Operation);
+  rpc RequestServiceEvaluation(RequestServiceEvaluationRequest) returns (Operation);
+  rpc ApproveSwitchProposal(ProposalCommandRequest) returns (Operation);
+  rpc RejectSwitchProposal(ProposalCommandRequest) returns (Operation);
+  rpc ForceServiceBinding(ForceServiceBindingRequest) returns (Operation);
+  rpc GetOperation(GetOperationRequest) returns (Operation);
+  rpc ListOperations(ListOperationsRequest) returns (OperationList);
+  rpc SubscribeSmartConnectEvents(SmartConnectEventsRequest) returns (stream SmartConnectEvent);
 }
 
 enum LogLevel {
@@ -91,6 +119,10 @@ message CapabilitiesResponse {
   reserved 4;
   bool subscription_management = 5;
   bool real_time_traffic = 6;
+  bool smart_connect = 7;
+  bool service_probes = 8;
+  bool runtime_events = 9;
+  bool smart_connect_intent_api = 10;
 }
 
 message OperationResponse {
@@ -136,6 +168,8 @@ message SubscriptionId {
 }
 
 message AddSubscriptionRequest {
+  reserved 8;
+  reserved "activate";
   string id = 1;
   string name = 2;
   string url = 3;
@@ -143,7 +177,6 @@ message AddSubscriptionRequest {
   optional bool auto_update = 5;
   int64 update_interval_seconds = 6;
   map<string, string> headers = 7;
-  bool activate = 8;
   bool update_now = 9;
 }
 
@@ -168,8 +201,9 @@ message ResolvedEndpointsRequest {
 }
 
 message SubscriptionList {
+  reserved 2;
+  reserved "active_id";
   repeated SubscriptionView subscriptions = 1;
-  string active_id = 2;
 }
 
 message SubscriptionView {
@@ -204,6 +238,7 @@ message ProfileView {
 }
 
 message ProfileNode {
+  string subscription_id = 10;
   string tag = 1;
   string name = 2;
   string type = 3;
@@ -249,10 +284,389 @@ message RuntimeSettings {
 
 message RuntimeConfig {
   RuntimeSettings settings = 1;
+  repeated SelectorConfig selectors = 2;
+  repeated ServiceRoute service_routes = 3;
+  repeated ServiceBinding service_bindings = 4;
+  string revision = 5;
+  string node_pool_revision = 6;
 }
 
 message UpdateRuntimeConfigRequest {
   RuntimeSettings settings = 1;
+  // When present, replaces the complete selector/route/binding model.
+  // When absent, preserves it (legacy settings-only updates).
+  RuntimeModel model = 2;
+  // Empty disables optimistic concurrency checking.
+  string expected_revision = 3;
+}
+
+message SelectorConfig {
+  string tag = 1;
+  repeated string node_ids = 2;
+  string selected_node_id = 3;
+}
+message ServiceRoute {
+  string service_id = 1;
+  // DNS suffixes, including the apex. More-specific domains take precedence.
+  repeated string domains = 2;
+  string selector_tag = 3;
+  bool enabled = 4;
+}
+message ServiceBinding {
+  string service_id = 1;
+  string selector_tag = 2;
+  string node_id = 3;
+  string revision = 4;
+  int64 expires_at_unix_ms = 5;
+  int64 selected_at_unix_ms = 6;
+  double selected_score = 7;
+  string selection_reason = 8;
+  string selection_policy_revision = 9;
+}
+message RuntimeModel {
+  repeated SelectorConfig selectors = 1;
+  repeated ServiceRoute service_routes = 2;
+  repeated ServiceBinding service_bindings = 3;
+}
+message NodePool {
+  string revision = 1;
+  repeated ProfileNode nodes = 2;
+}
+message ApplyServiceBindingRequest {
+  ServiceBinding binding = 1;
+  string expected_revision = 2;
+}
+message RemoveServiceBindingRequest {
+  string service_id = 1;
+  string expected_revision = 2;
+}
+message ServiceBindingList { repeated ServiceBinding bindings = 1; }
+enum ConfigApplyPhase {
+  CONFIG_APPLY_PHASE_UNSPECIFIED = 0;
+  CONFIG_APPLY_PHASE_VALIDATING = 1;
+  CONFIG_APPLY_PHASE_BUILDING = 2;
+  CONFIG_APPLY_PHASE_APPLYING = 3;
+  CONFIG_APPLY_PHASE_READY = 4;
+  CONFIG_APPLY_PHASE_FAILED = 5;
+}
+message SelectorState {
+  SelectorConfig desired = 1;
+  string actual_node_id = 2;
+  bool effective = 3;
+}
+message ServiceRouteState {
+  ServiceRoute desired = 1;
+  bool effective = 2;
+}
+message ServiceBindingState {
+  ServiceBinding desired = 1;
+  bool effective = 2;
+  bool node_available = 3;
+  bool needs_evaluation = 4;
+  string evaluation_reason = 5;
+}
+
+// Probe definitions contain no credentials. Request headers are transient.
+message ServiceProbe {
+  string service_id = 1;
+  string url = 2;
+  repeated uint32 expected_status = 3;
+  string body_contains = 4;
+  repeated string allowed_countries = 5;
+  // Optional JSON endpoint returning {"ip":"...","country":"US"}.
+  string egress_url = 6;
+  // Optional service response header containing an ISO country code.
+  string service_country_header = 7;
+  uint32 timeout_milliseconds = 8;
+  uint32 validity_seconds = 9;
+  string revision = 10;
+  // Optional RFC 862 UDP echo endpoint controlled by the host/operator.
+  string udp_echo_address = 11;
+  uint32 packet_count = 12;
+  uint32 packet_timeout_milliseconds = 13;
+  optional double maximum_packet_loss = 14;
+}
+message ServiceProbeList { repeated ServiceProbe probes = 1; }
+message RemoveServiceProbeRequest { string service_id = 1; string expected_revision = 2; }
+message ProbeServiceRequest {
+  string service_id = 1;
+  // Empty probes all ready nodes, up to 256 per request.
+  repeated string node_ids = 2;
+  map<string, string> headers = 3;
+  uint32 attempts = 4;
+  uint32 max_concurrency = 5;
+}
+enum ProbeStage {
+  PROBE_STAGE_UNSPECIFIED = 0;
+  PROBE_STAGE_READY = 1;
+  PROBE_STAGE_DNS = 2;
+  PROBE_STAGE_TCP = 3;
+  PROBE_STAGE_TLS = 4;
+  PROBE_STAGE_HTTP = 5;
+  PROBE_STAGE_AUTH = 6;
+  PROBE_STAGE_TIMEOUT = 7;
+  PROBE_STAGE_REGION = 8;
+  PROBE_STAGE_CONTENT = 9;
+  PROBE_STAGE_NODE = 10;
+  PROBE_STAGE_EGRESS = 11;
+}
+message ProbeResult {
+  string id = 1;
+  string service_id = 2;
+  string node_id = 3;
+  string node_pool_revision = 4;
+  string probe_revision = 5;
+  ProbeStage stage = 6;
+  string error_message = 7;
+  int64 tested_at_unix_ms = 8;
+  int64 expires_at_unix_ms = 9;
+  uint32 latency_milliseconds = 10;
+  uint32 http_status = 11;
+  string declared_country = 12;
+  string observed_country = 13;
+  string service_country = 14;
+  string egress_ip = 15;
+  uint32 attempts = 16;
+  uint32 successes = 17;
+  // Failed application probes / attempts, not ICMP or UDP packet loss.
+  double failure_ratio = 18;
+  uint32 jitter_milliseconds = 19;
+  bool packet_loss_available = 20;
+  double packet_loss_ratio = 21;
+  uint32 packets_sent = 22;
+  uint32 packets_received = 23;
+  string packet_error = 24;
+}
+message QualityHistoryRequest {
+  string service_id = 1;
+  string node_id = 2;
+  // Default 100, maximum 1024. Newest first.
+  uint32 limit = 3;
+}
+message QualityHistory { repeated ProbeResult results = 1; }
+message EvaluateServiceRequest { string service_id = 1; }
+message ServiceSelectionPolicyRequest { string service_id = 1; }
+message ServiceSelectionPolicy {
+  string service_id = 1;
+  repeated string preferred_countries = 2;
+  repeated string subscription_ids = 3;
+  repeated string excluded_node_ids = 4;
+  repeated string favorite_node_ids = 5;
+  bool allow_direct = 6;
+  uint32 max_candidates = 7;
+  string revision = 8;
+  string expected_revision = 9;
+}
+message ServiceCandidate {
+  string node_id = 1;
+  bool eligible = 2;
+  double score = 3;
+  string reason = 4;
+  ProbeResult latest = 5;
+  double success_ratio = 6;
+  double mean_latency_milliseconds = 7;
+  // Recent half mean latency minus older half; positive means slower.
+  double latency_trend_milliseconds = 8;
+}
+message ServiceEvaluation {
+  string service_id = 1;
+  string node_pool_revision = 2;
+  string runtime_revision = 3;
+  repeated ServiceCandidate candidates = 4;
+  int64 evaluated_at_unix_ms = 5;
+  string probe_revision = 6;
+}
+message SmartConnectDiagnostics {
+  RuntimeState runtime = 1;
+  repeated ServiceEvaluation evaluations = 2;
+  string policy_revision = 3;
+  int64 generated_at_unix_ms = 4;
+}
+enum RuntimeEventType {
+  RUNTIME_EVENT_TYPE_UNSPECIFIED = 0;
+  RUNTIME_EVENT_TYPE_SNAPSHOT = 1;
+  RUNTIME_EVENT_TYPE_CONFIG = 2;
+  RUNTIME_EVENT_TYPE_NODE_POOL = 3;
+  RUNTIME_EVENT_TYPE_BINDING = 4;
+  RUNTIME_EVENT_TYPE_PROBE_STARTED = 5;
+  RUNTIME_EVENT_TYPE_PROBE_COMPLETED = 6;
+  RUNTIME_EVENT_TYPE_PROBE_DEFINITION = 7;
+  RUNTIME_EVENT_TYPE_STOPPED = 8;
+}
+message RuntimeEvent {
+  // Monotonic within an event stream epoch. Reconnect starts with a snapshot.
+  uint64 sequence = 1;
+  RuntimeEventType type = 2;
+  int64 occurred_at_unix_ms = 3;
+  RuntimeState state = 4;
+  ProbeResult probe = 5;
+  string service_id = 6;
+  string node_id = 7;
+}
+// Internal persisted snapshot. Histories are local to this host/network.
+message SmartConnectSnapshot {
+  repeated ServiceProbe probes = 1;
+  repeated ProbeResult results = 2;
+  repeated ServiceSelectionPolicy selection_policies = 3;
+  bool enabled = 4;
+  string revision = 5;
+  SmartRecoveryState recovery_state = 6;
+  repeated ServicePolicy policies = 7;
+  repeated SwitchProposal proposals = 8;
+  repeated Operation operations = 9;
+  repeated NodePreference node_preferences = 10;
+  repeated SchedulerTask tasks = 11;
+}
+
+enum SmartRecoveryState {
+  SMART_RECOVERY_STATE_UNSPECIFIED = 0;
+  SMART_RECOVERY_STATE_RECOVERING = 1;
+  SMART_RECOVERY_STATE_READY = 2;
+  SMART_RECOVERY_STATE_DEGRADED = 3;
+}
+enum SwitchMode {
+  SWITCH_MODE_UNSPECIFIED = 0;
+  SWITCH_MODE_MANUAL = 1;
+  SWITCH_MODE_AUTO_CONSTRAINED = 2;
+  SWITCH_MODE_LOCKED = 3;
+  SWITCH_MODE_DIRECT = 4;
+}
+message SwitchPolicy {
+  SwitchMode mode = 1;
+  repeated string allowed_countries = 2;
+  repeated string allowed_subscription_ids = 3;
+  bool allow_cross_country = 4;
+  bool allow_cross_subscription = 5;
+  bool allow_direct = 6;
+  uint32 consecutive_failures = 7;
+  double minimum_score_delta = 8;
+  double minimum_health_score = 9;
+  uint32 minimum_dwell_seconds = 10;
+  uint32 cooldown_seconds = 11;
+  uint32 max_switches_per_hour = 12;
+  bool verify_after_switch = 13;
+  bool rollback_on_verification_failure = 14;
+}
+message ServicePolicy {
+  string service_id = 1;
+  string display_name = 2;
+  repeated string domains = 3;
+  repeated ServiceProbe probes = 4;
+  ServiceSelectionPolicy selection = 5;
+  SwitchPolicy switch_policy = 6;
+  string revision = 7;
+  uint32 schema_version = 8;
+  uint32 quality_validity_seconds = 9;
+  uint32 binding_validity_seconds = 10;
+  uint32 evaluation_interval_seconds = 11;
+}
+message ServicePolicyList { repeated ServicePolicy policies = 1; }
+message NodePreference {
+  string node_id = 1;
+  bool enabled = 2;
+  bool excluded = 3;
+  bool favorite = 4;
+  repeated string labels = 5;
+  int32 subscription_priority = 6;
+  string revision = 7;
+}
+message SwitchProposal {
+  string id = 1;
+  string service_id = 2;
+  string current_node_id = 3;
+  string suggested_node_id = 4;
+  repeated ServiceCandidate candidates = 5;
+  string reason = 6;
+  string policy_revision = 7;
+  string node_pool_revision = 8;
+  string binding_revision = 9;
+  int64 created_at_unix_ms = 10;
+  int64 expires_at_unix_ms = 11;
+  bool auto_authorized = 12;
+  bool approved = 13;
+}
+enum OperationStatus {
+  OPERATION_STATUS_UNSPECIFIED = 0;
+  OPERATION_STATUS_QUEUED = 1;
+  OPERATION_STATUS_RUNNING = 2;
+  OPERATION_STATUS_WAITING_APPROVAL = 3;
+  OPERATION_STATUS_SUCCEEDED = 4;
+  OPERATION_STATUS_FAILED = 5;
+  OPERATION_STATUS_CANCELLED = 6;
+  OPERATION_STATUS_ROLLED_BACK = 7;
+}
+message Operation {
+  string id = 1;
+  string kind = 2;
+  string resource_id = 3;
+  string idempotency_key = 4;
+  OperationStatus status = 5;
+  string phase = 6;
+  uint32 progress_current = 7;
+  uint32 progress_total = 8;
+  int64 created_at_unix_ms = 9;
+  int64 started_at_unix_ms = 10;
+  int64 updated_at_unix_ms = 11;
+  int64 completed_at_unix_ms = 12;
+  string policy_revision = 13;
+  string node_pool_revision = 14;
+  string binding_revision = 15;
+  string runtime_revision = 16;
+  string proposal_id = 17;
+  string result_summary = 18;
+  string error_code = 19;
+  string error_message = 20;
+  // Server-owned hash used to reject idempotency-key reuse with another payload.
+  string request_signature = 21;
+  string desired_node_id = 22;
+}
+message SchedulerTask {
+  string id = 1;
+  string service_id = 2;
+  string kind = 3;
+  string reason = 4;
+  string policy_revision = 5;
+  string node_pool_revision = 6;
+  int64 next_run_at_unix_ms = 7;
+  uint32 attempt = 8;
+  uint32 backoff_seconds = 9;
+  int64 deadline_unix_ms = 10;
+  string operation_id = 11;
+}
+message OperationList { repeated Operation operations = 1; }
+message SetSmartConnectEnabledRequest { bool enabled = 1; string expected_revision = 2; string idempotency_key = 3; }
+message UpsertServicePolicyRequest { ServicePolicy policy = 1; string expected_revision = 2; string idempotency_key = 3; }
+message DeleteServicePolicyRequest { string service_id = 1; string expected_revision = 2; string idempotency_key = 3; }
+message SetNodePreferenceRequest { NodePreference preference = 1; string expected_revision = 2; string idempotency_key = 3; }
+message RequestServiceEvaluationRequest { string service_id = 1; string expected_revision = 2; string idempotency_key = 3; }
+message ProposalCommandRequest { string proposal_id = 1; string expected_revision = 2; string idempotency_key = 3; }
+message ForceServiceBindingRequest { string service_id = 1; string node_id = 2; string expected_revision = 3; string idempotency_key = 4; bool close_existing_connections = 5; }
+message GetOperationRequest { string operation_id = 1; }
+message ListOperationsRequest { string resource_id = 1; uint32 limit = 2; }
+message SmartConnectEventsRequest { uint64 after_sequence = 1; }
+message SmartConnectEvent { uint64 sequence = 1; string epoch = 2; string operation_id = 3; string resource_id = 4; int64 occurred_at_unix_ms = 5; SmartConnectSnapshot snapshot = 6; }
+// Portable probe policy only. Quality and runtime bindings remain device-local.
+message SmartConnectPolicy {
+  uint32 schema_version = 1;
+  string revision = 2;
+  repeated ServiceProbe probes = 3;
+}
+message ImportSmartConnectPolicyRequest {
+  SmartConnectPolicy policy = 1;
+  // Required local export revision. Import atomically replaces probe definitions.
+  string expected_revision = 2;
+}
+message RuntimeState {
+  ConfigApplyPhase phase = 1;
+  string attempted_revision = 2;
+  string desired_revision = 3;
+  string applied_revision = 4;
+  string error_message = 5;
+  bool running = 6;
+  repeated SelectorState selectors = 7;
+  repeated ServiceRouteState service_routes = 8;
+  repeated ServiceBindingState service_bindings = 9;
+  string node_pool_revision = 10;
 }
 
 message TestOutboundRequest {
@@ -288,17 +702,6 @@ message LatencyTestResult {
 
 message ResolvedEndpoints {
   repeated string addresses = 1;
-}
-
-message SetActiveSubscriptionRequest {
-  // Empty id clears the active subscription and selects the explicit
-  // direct-only runtime configuration.
-  string id = 1;
-}
-
-message ActiveSubscriptionResponse {
-  // Empty when no subscription is active.
-  string id = 1;
 }
 
 message IpInfoResponse {

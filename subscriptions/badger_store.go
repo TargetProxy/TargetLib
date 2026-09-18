@@ -16,7 +16,6 @@ import (
 const (
 	badgerSchemaVersion  byte = 2
 	badgerPrefix              = "subscription/"
-	badgerActiveIDKey         = "meta/active_subscription_id"
 	badgerMetadataPrefix      = "meta/runtime/"
 )
 
@@ -92,17 +91,7 @@ func (s *BadgerStore) Load(ctx context.Context) (StoredState, error) {
 			}
 			result.Subscriptions = append(result.Subscriptions, item)
 		}
-		item, err := transaction.Get([]byte(badgerActiveIDKey))
-		if errors.Is(err, badger.ErrKeyNotFound) {
-			return nil
-		}
-		if err != nil {
-			return err
-		}
-		return item.Value(func(value []byte) error {
-			result.ActiveID = string(value)
-			return nil
-		})
+		return nil
 	})
 	return result, err
 }
@@ -165,13 +154,6 @@ func (tx badgerStoreTx) Put(item Subscription) error {
 }
 
 func (tx badgerStoreTx) Delete(id string) error { return tx.tx.Delete(badgerKey(id)) }
-
-func (tx badgerStoreTx) SetActiveID(id string) error {
-	if id == "" {
-		return tx.tx.Delete([]byte(badgerActiveIDKey))
-	}
-	return tx.tx.Set([]byte(badgerActiveIDKey), []byte(id))
-}
 
 func (tx badgerStoreTx) SetMetadata(key string, value []byte) error {
 	return tx.tx.Set(metadataKey(key), append([]byte(nil), value...))

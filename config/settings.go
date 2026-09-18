@@ -31,6 +31,8 @@ const (
 )
 
 type Settings struct {
+	// ProbeOnly creates an outbound-only runtime without listeners or disk cache.
+	ProbeOnly     bool
 	ListenAddress string
 	MixedPort     int
 	ProxyMode     ProxyMode

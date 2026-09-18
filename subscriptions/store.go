@@ -7,13 +7,11 @@ import (
 
 type StoredState struct {
 	Subscriptions []Subscription
-	ActiveID      string
 }
 
 type StoreTx interface {
 	Put(Subscription) error
 	Delete(string) error
-	SetActiveID(string) error
 	SetMetadata(string, []byte) error
 }
 
@@ -26,14 +24,13 @@ type Store interface {
 type MemoryStore struct {
 	mu       sync.RWMutex
 	items    []Subscription
-	activeID string
 	metadata map[string][]byte
 }
 
 func (s *MemoryStore) Load(context.Context) (StoredState, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	return StoredState{Subscriptions: cloneSubscriptions(s.items), ActiveID: s.activeID}, nil
+	return StoredState{Subscriptions: cloneSubscriptions(s.items)}, nil
 }
 
 func (s *MemoryStore) GetMetadata(_ context.Context, key string) ([]byte, error) {
@@ -48,17 +45,16 @@ func (s *MemoryStore) Update(ctx context.Context, update func(StoreTx) error) er
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	tx := &memoryStoreTx{items: cloneSubscriptions(s.items), activeID: s.activeID, metadata: cloneBytesMap(s.metadata)}
+	tx := &memoryStoreTx{items: cloneSubscriptions(s.items), metadata: cloneBytesMap(s.metadata)}
 	if err := update(tx); err != nil {
 		return err
 	}
-	s.items, s.activeID, s.metadata = tx.items, tx.activeID, tx.metadata
+	s.items, s.metadata = tx.items, tx.metadata
 	return nil
 }
 
 type memoryStoreTx struct {
 	items    []Subscription
-	activeID string
 	metadata map[string][]byte
 }
 
@@ -80,11 +76,6 @@ func (tx *memoryStoreTx) Delete(id string) error {
 			break
 		}
 	}
-	return nil
-}
-
-func (tx *memoryStoreTx) SetActiveID(id string) error {
-	tx.activeID = id
 	return nil
 }
 

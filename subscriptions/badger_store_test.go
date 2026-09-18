@@ -21,7 +21,7 @@ func TestBadgerStoreUpdateIsAtomic(t *testing.T) {
 		if err := tx.Put(Subscription{ID: "discarded"}); err != nil {
 			return err
 		}
-		if err := tx.SetActiveID("discarded"); err != nil {
+		if err := tx.SetMetadata("revision", []byte("discarded")); err != nil {
 			return err
 		}
 		return errAbort
@@ -33,15 +33,13 @@ func TestBadgerStoreUpdateIsAtomic(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(stored.Subscriptions) != 0 || stored.ActiveID != "" {
+	metadata, _ := store.GetMetadata(context.Background(), "revision")
+	if len(stored.Subscriptions) != 0 || len(metadata) != 0 {
 		t.Fatalf("aborted Badger transaction was committed: %+v", stored)
 	}
 
 	err = store.Update(context.Background(), func(tx StoreTx) error {
 		if err := tx.Put(Subscription{ID: "active"}); err != nil {
-			return err
-		}
-		if err := tx.SetActiveID("active"); err != nil {
 			return err
 		}
 		return tx.SetMetadata("revision", []byte("1"))
@@ -53,11 +51,11 @@ func TestBadgerStoreUpdateIsAtomic(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	metadata, err := store.GetMetadata(context.Background(), "revision")
+	metadata, err = store.GetMetadata(context.Background(), "revision")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(stored.Subscriptions) != 1 || stored.ActiveID != "active" || string(metadata) != "1" {
+	if len(stored.Subscriptions) != 1 || string(metadata) != "1" {
 		t.Fatalf("committed Badger state is incomplete: state=%+v metadata=%q", stored, metadata)
 	}
 }

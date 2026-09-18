@@ -45,7 +45,7 @@ func TestRuntimeConfigStoreUsesSharedMetadataStore(t *testing.T) {
 func TestManagerPersistsAuthoritativeRuntimeConfig(t *testing.T) {
 	shared := &subscriptions.MemoryStore{}
 	manager, err := New(context.Background(), Options{
-		BasePath:          t.TempDir(),
+		BasePath:          managerTestBasePath(t),
 		SubscriptionStore: shared,
 	})
 	if err != nil {

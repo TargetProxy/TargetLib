@@ -26,17 +26,4 @@ abstract class TargetlibPlatform extends PlatformInterface {
   Future<String?> getPlatformVersion() {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
-
-  Future<bool> requestVpnPermission() => throw UnimplementedError(
-    'requestVpnPermission() has not been implemented.',
-  );
-
-  Future<void> startAndroidService({required String basePath}) =>
-      throw UnimplementedError(
-        'startAndroidService() has not been implemented.',
-      );
-
-  Future<void> stopAndroidService() => throw UnimplementedError(
-    'stopAndroidService() has not been implemented.',
-  );
 }

@@ -11,6 +11,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/loafman1120/TargetLib/config"
+	targetprofile "github.com/loafman1120/TargetLib/profile"
 	box "github.com/sagernet/sing-box"
 	"github.com/sagernet/sing-box/adapter"
 	"github.com/sagernet/sing-box/daemon"
@@ -34,23 +36,31 @@ type Manager struct {
 
 	started            *daemon.StartedService
 	daemon             *daemonAdapter
-	runtimeController  *runtimeController
 	subscriptions      *subscriptioncore.Manager
 	subscriptionCancel context.CancelFunc
 	subscriptionDone   chan struct{}
 	subscriptionStore  io.Closer
 
-	opMu          sync.Mutex
-	configMu      sync.RWMutex
-	config        string
-	runtimeConfig *targetlibapi.RuntimeConfig
-	runtimeStore  runtimeConfigStore
-	cacheFilePath string
-	applyConfig   func(string) error
-	latency       latencyService
-	latencyMu     sync.Mutex
-	latencyGroups map[string]chan struct{}
-	close         sync.Once
+	opMu           sync.Mutex
+	configMu       sync.RWMutex
+	config         string
+	runtimeConfig  *targetlibapi.RuntimeConfig
+	runtimeNodes   []targetprofile.Node
+	applyState     targetlibapi.RuntimeState
+	appliedConfig  *targetlibapi.RuntimeConfig
+	checkConfig    func(context.Context, string) error
+	readStatus     func() (*daemon.ServiceStatus, error)
+	runtimeStore   runtimeConfigStore
+	cacheFilePath  string
+	applyConfig    func(string) error
+	latency        latencyService
+	latencyMu      sync.Mutex
+	latencyGroups  map[string]chan struct{}
+	close          sync.Once
+	smart          *smartConnect
+	probeContext   func(context.Context) context.Context
+	probeTransport func(context.Context, targetprofile.Node) (*nodeProbeTransport, error)
+	controlToken   string
 }
 
 func Setup(options Options) error {
@@ -69,6 +79,10 @@ func Setup(options Options) error {
 
 func New(ctx context.Context, options Options) (*Manager, error) {
 	options = normalizeOptions(options)
+	controlToken, err := loadControlToken(options.BasePath, options.ControlToken)
+	if err != nil {
+		return nil, err
+	}
 	if err := Setup(options); err != nil {
 		return nil, err
 	}
@@ -120,7 +134,18 @@ func New(ctx context.Context, options Options) (*Manager, error) {
 		subscriptionCancel: cancelSubscriptions, subscriptionDone: make(chan struct{}),
 		runtimeConfig: runtimeConfig, runtimeStore: runtimeStore,
 		cacheFilePath: cacheFilePath,
+		controlToken:  controlToken,
 	}
+	m.smart, err = newSmartConnect(ctx, sharedStore)
+	if err != nil {
+		cancelSubscriptions()
+		subscriptionManager.Close()
+		if closer, ok := sharedStore.(io.Closer); ok {
+			_ = closer.Close()
+		}
+		return nil, err
+	}
+	m.probeContext = func(probeCtx context.Context) context.Context { return serviceContext(probeCtx, options) }
 	if closer, ok := sharedStore.(io.Closer); ok {
 		m.subscriptionStore = closer
 	}
@@ -134,10 +159,20 @@ func New(ctx context.Context, options Options) (*Manager, error) {
 	m.applyConfig = func(content string) error {
 		return m.started.StartOrReloadService(ctx, content, &daemon.OverrideOptions{})
 	}
+	m.checkConfig = m.started.CheckConfig
 	m.daemon = newDaemonAdapter(m.started)
-	m.runtimeController = newRuntimeController(m)
-	m.subscriptions.SetRuntimeChangedCallback(m.reloadActiveSubscription)
+	m.readStatus = m.daemon.Status
+	m.runtimeNodes, err = runtimeStore.LoadNodes(ctx)
+	if err != nil {
+		m.started.Close()
+		cancelSubscriptions()
+		subscriptionManager.Close()
+		return nil, err
+	}
+	m.applyState.Phase = targetlibapi.ConfigApplyPhase_CONFIG_APPLY_PHASE_READY
 	m.latency = m.daemon
+	m.recoverSmartConnectOperations()
+	m.watchSmartConnect(subscriptionContext)
 	go func() {
 		defer close(m.subscriptionDone)
 		_ = subscriptionManager.Run(subscriptionContext)
@@ -189,19 +224,32 @@ func (m *Manager) GetCapabilities(context.Context, *emptypb.Empty) (*targetlibap
 		PlatformVpn:            runtime.GOOS == "android" || runtime.GOOS == "ios",
 		SubscriptionManagement: true,
 		RealTimeTraffic:        true,
+		SmartConnect:           true,
+		ServiceProbes:          true,
+		RuntimeEvents:          true,
+		SmartConnectIntentApi:  true,
 	}, nil
 }
 
 func (m *Manager) Start(_ context.Context, _ *emptypb.Empty) (*targetlibapi.OperationResponse, error) {
-	return m.runtimeController.Start()
+	if err := m.startRuntime(); err != nil {
+		return nil, err
+	}
+	return m.operationResponse()
 }
 
 func (m *Manager) Restart(_ context.Context, _ *emptypb.Empty) (*targetlibapi.OperationResponse, error) {
-	return m.runtimeController.Restart()
+	if err := m.restartRuntime(); err != nil {
+		return nil, err
+	}
+	return m.operationResponse()
 }
 
 func (m *Manager) Stop(context.Context, *emptypb.Empty) (*targetlibapi.OperationResponse, error) {
-	return m.runtimeController.Stop()
+	if err := m.StopService(); err != nil {
+		return nil, err
+	}
+	return m.operationResponse()
 }
 
 func (m *Manager) startRuntime() error {
@@ -214,11 +262,7 @@ func (m *Manager) startRuntime() error {
 	if current.Status == daemon.ServiceStatus_STARTED || current.Status == daemon.ServiceStatus_STARTING {
 		return status.Error(codes.FailedPrecondition, "service is already running")
 	}
-	content, err := m.buildRuntimeConfig()
-	if err != nil {
-		return err
-	}
-	return m.startOrReload(string(content))
+	return m.activateSavedRuntime(context.Background(), false)
 }
 
 func (m *Manager) restartRuntime() error {
@@ -228,16 +272,7 @@ func (m *Manager) restartRuntime() error {
 	if err != nil {
 		return err
 	}
-	content, err := m.buildRuntimeConfig()
-	if err != nil {
-		return err
-	}
-	if current.Status == daemon.ServiceStatus_STARTED || current.Status == daemon.ServiceStatus_STARTING {
-		if err := m.started.CloseService(); err != nil {
-			return status.Error(codes.Internal, err.Error())
-		}
-	}
-	return m.startOrReload(string(content))
+	return m.activateSavedRuntime(context.Background(), current.Status == daemon.ServiceStatus_STARTED)
 }
 
 func (m *Manager) StopService() error {
@@ -253,6 +288,10 @@ func (m *Manager) StopService() error {
 	if err := m.started.CloseService(); err != nil {
 		return status.Error(codes.Internal, err.Error())
 	}
+	m.configMu.Lock()
+	m.appliedConfig = nil
+	m.configMu.Unlock()
+	m.publishRuntime(&targetlibapi.RuntimeEvent{Type: targetlibapi.RuntimeEventType_RUNTIME_EVENT_TYPE_STOPPED})
 	return nil
 }
 
@@ -315,7 +354,7 @@ func (m *Manager) UpdateSubscription(ctx context.Context, request *targetlibapi.
 	if err != nil {
 		return nil, err
 	}
-	content, err := buildRuntimeConfigForSubscription(settings, &subscription)
+	content, err := buildRuntimeConfigForModel(settings, config.RuntimeModel{NodePool: config.NodePool{Nodes: subscription.Profile.Nodes}})
 	if err != nil {
 		return nil, err
 	}
@@ -327,9 +366,7 @@ func (m *Manager) SelectOutbound(ctx context.Context, request *targetlibapi.Sele
 	if request == nil || request.GetGroupTag() == "" || request.GetOutboundTag() == "" {
 		return nil, status.Error(codes.InvalidArgument, "group_tag and outbound_tag are required")
 	}
-	return m.started.SelectOutbound(ctx, &daemon.SelectOutboundRequest{
-		GroupTag: request.GetGroupTag(), OutboundTag: request.GetOutboundTag(),
-	})
+	return m.selectRuntimeOutbound(ctx, request)
 }
 
 func (m *Manager) CloseConnection(ctx context.Context, request *targetlibapi.CloseConnectionRequest) (*emptypb.Empty, error) {
@@ -391,6 +428,9 @@ func (platformHandler) ConnectSSHAgent() (int32, error) {
 func (m *Manager) Close() {
 	m.close.Do(func() {
 		m.subscriptionCancel()
+		if m.smart != nil {
+			m.smart.close()
+		}
 		<-m.subscriptionDone
 		m.subscriptions.Close()
 		m.opMu.Lock()
@@ -417,6 +457,9 @@ func (m *Manager) operationResponse() (*targetlibapi.OperationResponse, error) {
 var errStatusReceived = errors.New("status received")
 
 func (m *Manager) currentStatus() (*daemon.ServiceStatus, error) {
+	if m.readStatus != nil {
+		return m.readStatus()
+	}
 	receiver := new(firstStatusReceiver)
 	err := m.started.SubscribeServiceStatus(&emptypb.Empty{}, receiver)
 	if errors.Is(err, errStatusReceived) && receiver.status != nil {

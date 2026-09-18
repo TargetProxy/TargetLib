@@ -14,7 +14,6 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 
 	targetlibapi "github.com/loafman1120/TargetLib/api/TargetLib"
-	"github.com/loafman1120/TargetLib/subscriptions"
 )
 
 func defaultRuntimeConfig() *targetlibapi.RuntimeConfig {
@@ -64,30 +63,16 @@ func (m *Manager) UpdateRuntimeConfig(ctx context.Context, request *targetlibapi
 	m.opMu.Lock()
 	defer m.opMu.Unlock()
 
-	canonical := canonicalRuntimeSettings(request.GetSettings())
-	settings, err := buildSettings(canonical, m.cacheFilePath)
+	next, err := m.desiredForUpdate(request.ExpectedRevision)
 	if err != nil {
 		return nil, err
 	}
-	content, err := m.buildRuntimeConfigWithSettings(settings)
-	if err != nil {
-		return nil, err
+	next.Settings = canonicalRuntimeSettings(request.Settings)
+	if request.Model != nil {
+		model := proto.Clone(request.Model).(*targetlibapi.RuntimeModel)
+		next.Selectors, next.ServiceRoutes, next.ServiceBindings = model.Selectors, model.ServiceRoutes, model.ServiceBindings
 	}
-	if err := m.started.CheckConfig(ctx, string(content)); err != nil {
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-	current, err := m.waitForStableStatus(ctx)
-	if err != nil {
-		return nil, err
-	}
-	if current.Status != daemon.ServiceStatus_STARTED && current.Status != daemon.ServiceStatus_IDLE && current.Status != daemon.ServiceStatus_FATAL {
-		return nil, status.Errorf(codes.FailedPrecondition, "service is not ready to update runtime config: %s", current.Status.String())
-	}
-	next := &targetlibapi.RuntimeConfig{Settings: canonical}
-	if err := m.commitRuntimeConfig(ctx, next, string(content), current.Status == daemon.ServiceStatus_STARTED); err != nil {
-		return nil, err
-	}
-	return cloneRuntimeConfig(next), nil
+	return m.applyDesired(ctx, next)
 }
 
 func (m *Manager) commitRuntimeConfig(ctx context.Context, next *targetlibapi.RuntimeConfig, content string, running bool) error {
@@ -97,12 +82,17 @@ func (m *Manager) commitRuntimeConfig(ctx context.Context, next *targetlibapi.Ru
 
 	if running {
 		if err := m.applyConfig(content); err != nil {
+			if rollbackErr := m.applyConfig(previousContent); rollbackErr != nil {
+				m.appliedConfig = nil
+				return status.Errorf(codes.DataLoss, "apply: %v; rollback: %v", err, rollbackErr)
+			}
 			return runtimeSettingsError("update runtime config", daemon.ServiceStatus_STARTED, err)
 		}
 	}
 	if err := m.runtimeStore.Save(ctx, next); err != nil {
 		if running {
 			if rollbackErr := m.applyConfig(previousContent); rollbackErr != nil {
+				m.appliedConfig = nil
 				return status.Errorf(codes.DataLoss, "save runtime config: %v; rollback active config: %v", err, rollbackErr)
 			}
 		}
@@ -147,37 +137,4 @@ func runtimeSettingsError(operation string, serviceStatus daemon.ServiceStatus_T
 		return status.Errorf(codes.FailedPrecondition, "%s rejected while service state is %s: %v", operation, serviceStatus.String(), err)
 	}
 	return status.Errorf(codes.Internal, "%s: %v", operation, err)
-}
-
-func (m *Manager) reloadActiveSubscription(ctx context.Context, active *subscriptions.Subscription) error {
-	m.opMu.Lock()
-	defer m.opMu.Unlock()
-	current, err := m.currentStatus()
-	if err != nil {
-		return err
-	}
-	if current.Status != daemon.ServiceStatus_STARTED {
-		return nil
-	}
-	m.configMu.RLock()
-	settingsProto := cloneRuntimeSettings(m.runtimeConfig.GetSettings())
-	m.configMu.RUnlock()
-	settings, err := buildSettings(settingsProto, m.cacheFilePath)
-	if err != nil {
-		return err
-	}
-	content, err := buildRuntimeConfigForSubscription(settings, active)
-	if err != nil {
-		return err
-	}
-	if err := m.started.CheckConfig(ctx, string(content)); err != nil {
-		return status.Error(codes.InvalidArgument, err.Error())
-	}
-	if err := m.applyConfig(string(content)); err != nil {
-		return runtimeSettingsError("reload active subscription", current.Status, err)
-	}
-	m.configMu.Lock()
-	m.config = string(content)
-	m.configMu.Unlock()
-	return nil
 }

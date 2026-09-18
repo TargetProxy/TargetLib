@@ -8,16 +8,14 @@ import (
 var errManagerClosed = errors.New("subscription manager is closed")
 
 type managerState struct {
-	items    map[string]Subscription
-	activeID string
+	items map[string]Subscription
 }
 
 type stateMutation struct {
-	next           *managerState
-	failure        *managerState
-	persist        func(StoreTx) error
-	runtimeChanged bool
-	events         []pendingEvent
+	next    *managerState
+	failure *managerState
+	persist func(StoreTx) error
+	events  []pendingEvent
 }
 
 type pendingEvent struct {
@@ -63,18 +61,8 @@ func (m *Manager) applyMutation(ctx context.Context, current *managerState, muta
 	if mutation.next == nil {
 		return errors.New("state mutation returned no state")
 	}
-	if mutation.runtimeChanged {
-		if err := m.applyRuntime(ctx, mutation.next); err != nil {
-			return err
-		}
-	}
 	if mutation.persist != nil {
 		if err := m.store.Update(ctx, mutation.persist); err != nil {
-			if mutation.runtimeChanged {
-				if rollbackErr := m.applyRuntime(context.WithoutCancel(ctx), current); rollbackErr != nil {
-					return errors.Join(err, errors.New("rollback active runtime: "+rollbackErr.Error()))
-				}
-			}
 			return err
 		}
 	}
@@ -101,21 +89,8 @@ func (m *Manager) submit(ctx context.Context, build func(*managerState) (stateMu
 	}
 }
 
-func (m *Manager) applyRuntime(ctx context.Context, state *managerState) error {
-	callback := m.runtimeCallback.Load()
-	if callback == nil {
-		return nil
-	}
-	var active *Subscription
-	if item, ok := state.items[state.activeID]; ok {
-		cloned := cloneSubscription(item)
-		active = &cloned
-	}
-	return callback.apply(ctx, active)
-}
-
 func cloneManagerState(source *managerState) *managerState {
-	result := &managerState{items: make(map[string]Subscription, len(source.items)), activeID: source.activeID}
+	result := &managerState{items: make(map[string]Subscription, len(source.items))}
 	for id, item := range source.items {
 		result.items[id] = cloneSubscription(item)
 	}

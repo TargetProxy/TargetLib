@@ -21,6 +21,9 @@ object TargetlibNative {
     @JvmStatic
     external fun setTunFd(fd: Int)
 
+	@JvmStatic
+	external fun notifyNetworkChanged()
+
     @JvmStatic
     external fun stop()
 }

@@ -22,16 +22,26 @@ abstract final class TargetLibLog {
     Object? error,
     StackTrace? stackTrace,
     String? source,
-  }) =>
-      _write('WARN', message, error: error, stackTrace: stackTrace, source: source);
+  }) => _write(
+    'WARN',
+    message,
+    error: error,
+    stackTrace: stackTrace,
+    source: source,
+  );
 
   static void error(
     String message, {
     Object? error,
     StackTrace? stackTrace,
     String? source,
-  }) =>
-      _write('ERROR', message, error: error, stackTrace: stackTrace, source: source);
+  }) => _write(
+    'ERROR',
+    message,
+    error: error,
+    stackTrace: stackTrace,
+    source: source,
+  );
 
   static void _write(
     String level,
@@ -42,9 +52,21 @@ abstract final class TargetLibLog {
   }) {
     final callback = sink;
     if (callback != null) {
-      callback(level, message, error: error, stackTrace: stackTrace, source: source);
+      callback(
+        level,
+        message,
+        error: error,
+        stackTrace: stackTrace,
+        source: source,
+      );
       return;
     }
-    developer.log(message, name: source ?? 'TargetLib', level: level == 'ERROR' ? 1000 : 800, error: error, stackTrace: stackTrace);
+    developer.log(
+      message,
+      name: source ?? 'TargetLib',
+      level: level == 'ERROR' ? 1000 : 800,
+      error: error,
+      stackTrace: stackTrace,
+    );
   }
 }

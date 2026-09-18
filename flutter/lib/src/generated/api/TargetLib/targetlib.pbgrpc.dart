@@ -230,27 +230,237 @@ class TargetLibClient extends $grpc.Client {
         options: options);
   }
 
-  /// Active subscription state is persisted by the backend; clients do not track it.
-  $grpc.ResponseFuture<$0.Empty> setActiveSubscription(
-    $1.SetActiveSubscriptionRequest request, {
-    $grpc.CallOptions? options,
-  }) {
-    return $createUnaryCall(_$setActiveSubscription, request, options: options);
-  }
-
-  $grpc.ResponseFuture<$1.ActiveSubscriptionResponse> getActiveSubscription(
-    $0.Empty request, {
-    $grpc.CallOptions? options,
-  }) {
-    return $createUnaryCall(_$getActiveSubscription, request, options: options);
-  }
-
   /// IP geolocation query (egress from the backend).
   $grpc.ResponseFuture<$1.IpInfoResponse> getIpInfo(
     $0.Empty request, {
     $grpc.CallOptions? options,
   }) {
     return $createUnaryCall(_$getIpInfo, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$1.NodePool> getNodePool(
+    $0.Empty request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$getNodePool, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$1.RuntimeState> getRuntimeState(
+    $0.Empty request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$getRuntimeState, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$1.ServiceBindingList> listServiceBindings(
+    $0.Empty request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$listServiceBindings, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$1.RuntimeConfig> applyServiceBinding(
+    $1.ApplyServiceBindingRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$applyServiceBinding, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$1.RuntimeConfig> removeServiceBinding(
+    $1.RemoveServiceBindingRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$removeServiceBinding, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$1.ServiceProbe> putServiceProbe(
+    $1.ServiceProbe request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$putServiceProbe, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$0.Empty> removeServiceProbe(
+    $1.RemoveServiceProbeRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$removeServiceProbe, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$1.ServiceProbeList> listServiceProbes(
+    $0.Empty request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$listServiceProbes, request, options: options);
+  }
+
+  $grpc.ResponseStream<$1.ProbeResult> probeService(
+    $1.ProbeServiceRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createStreamingCall(
+        _$probeService, $async.Stream.fromIterable([request]),
+        options: options);
+  }
+
+  $grpc.ResponseFuture<$1.QualityHistory> getQualityHistory(
+    $1.QualityHistoryRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$getQualityHistory, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$1.ServiceEvaluation> evaluateService(
+    $1.EvaluateServiceRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$evaluateService, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$1.ServiceSelectionPolicy> getServiceSelectionPolicy(
+    $1.ServiceSelectionPolicyRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$getServiceSelectionPolicy, request,
+        options: options);
+  }
+
+  $grpc.ResponseFuture<$1.ServiceSelectionPolicy> putServiceSelectionPolicy(
+    $1.ServiceSelectionPolicy request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$putServiceSelectionPolicy, request,
+        options: options);
+  }
+
+  $grpc.ResponseFuture<$1.SmartConnectDiagnostics> getSmartConnectDiagnostics(
+    $1.EvaluateServiceRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$getSmartConnectDiagnostics, request,
+        options: options);
+  }
+
+  $grpc.ResponseStream<$1.RuntimeEvent> subscribeRuntimeEvents(
+    $0.Empty request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createStreamingCall(
+        _$subscribeRuntimeEvents, $async.Stream.fromIterable([request]),
+        options: options);
+  }
+
+  $grpc.ResponseFuture<$1.SmartConnectPolicy> exportSmartConnectPolicy(
+    $0.Empty request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$exportSmartConnectPolicy, request,
+        options: options);
+  }
+
+  $grpc.ResponseFuture<$1.SmartConnectPolicy> importSmartConnectPolicy(
+    $1.ImportSmartConnectPolicyRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$importSmartConnectPolicy, request,
+        options: options);
+  }
+
+  /// Intent-level Smart Connect API. Commands return a durable operation.
+  $grpc.ResponseFuture<$1.SmartConnectSnapshot> getSmartConnectSnapshot(
+    $0.Empty request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$getSmartConnectSnapshot, request,
+        options: options);
+  }
+
+  $grpc.ResponseFuture<$1.Operation> setSmartConnectEnabled(
+    $1.SetSmartConnectEnabledRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$setSmartConnectEnabled, request,
+        options: options);
+  }
+
+  $grpc.ResponseFuture<$1.ServicePolicyList> listServicePolicies(
+    $0.Empty request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$listServicePolicies, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$1.Operation> upsertServicePolicy(
+    $1.UpsertServicePolicyRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$upsertServicePolicy, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$1.Operation> deleteServicePolicy(
+    $1.DeleteServicePolicyRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$deleteServicePolicy, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$1.Operation> setNodePreference(
+    $1.SetNodePreferenceRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$setNodePreference, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$1.Operation> requestServiceEvaluation(
+    $1.RequestServiceEvaluationRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$requestServiceEvaluation, request,
+        options: options);
+  }
+
+  $grpc.ResponseFuture<$1.Operation> approveSwitchProposal(
+    $1.ProposalCommandRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$approveSwitchProposal, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$1.Operation> rejectSwitchProposal(
+    $1.ProposalCommandRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$rejectSwitchProposal, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$1.Operation> forceServiceBinding(
+    $1.ForceServiceBindingRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$forceServiceBinding, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$1.Operation> getOperation(
+    $1.GetOperationRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$getOperation, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$1.OperationList> listOperations(
+    $1.ListOperationsRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$listOperations, request, options: options);
+  }
+
+  $grpc.ResponseStream<$1.SmartConnectEvent> subscribeSmartConnectEvents(
+    $1.SmartConnectEventsRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createStreamingCall(
+        _$subscribeSmartConnectEvents, $async.Stream.fromIterable([request]),
+        options: options);
   }
 
   // method descriptors
@@ -377,20 +587,159 @@ class TargetLibClient extends $grpc.Client {
           '/targetlib.TargetLib/SubscribeSubscriptionEvents',
           ($0.Empty value) => value.writeToBuffer(),
           $1.SubscriptionEvent.fromBuffer);
-  static final _$setActiveSubscription =
-      $grpc.ClientMethod<$1.SetActiveSubscriptionRequest, $0.Empty>(
-          '/targetlib.TargetLib/SetActiveSubscription',
-          ($1.SetActiveSubscriptionRequest value) => value.writeToBuffer(),
-          $0.Empty.fromBuffer);
-  static final _$getActiveSubscription =
-      $grpc.ClientMethod<$0.Empty, $1.ActiveSubscriptionResponse>(
-          '/targetlib.TargetLib/GetActiveSubscription',
-          ($0.Empty value) => value.writeToBuffer(),
-          $1.ActiveSubscriptionResponse.fromBuffer);
   static final _$getIpInfo = $grpc.ClientMethod<$0.Empty, $1.IpInfoResponse>(
       '/targetlib.TargetLib/GetIpInfo',
       ($0.Empty value) => value.writeToBuffer(),
       $1.IpInfoResponse.fromBuffer);
+  static final _$getNodePool = $grpc.ClientMethod<$0.Empty, $1.NodePool>(
+      '/targetlib.TargetLib/GetNodePool',
+      ($0.Empty value) => value.writeToBuffer(),
+      $1.NodePool.fromBuffer);
+  static final _$getRuntimeState =
+      $grpc.ClientMethod<$0.Empty, $1.RuntimeState>(
+          '/targetlib.TargetLib/GetRuntimeState',
+          ($0.Empty value) => value.writeToBuffer(),
+          $1.RuntimeState.fromBuffer);
+  static final _$listServiceBindings =
+      $grpc.ClientMethod<$0.Empty, $1.ServiceBindingList>(
+          '/targetlib.TargetLib/ListServiceBindings',
+          ($0.Empty value) => value.writeToBuffer(),
+          $1.ServiceBindingList.fromBuffer);
+  static final _$applyServiceBinding =
+      $grpc.ClientMethod<$1.ApplyServiceBindingRequest, $1.RuntimeConfig>(
+          '/targetlib.TargetLib/ApplyServiceBinding',
+          ($1.ApplyServiceBindingRequest value) => value.writeToBuffer(),
+          $1.RuntimeConfig.fromBuffer);
+  static final _$removeServiceBinding =
+      $grpc.ClientMethod<$1.RemoveServiceBindingRequest, $1.RuntimeConfig>(
+          '/targetlib.TargetLib/RemoveServiceBinding',
+          ($1.RemoveServiceBindingRequest value) => value.writeToBuffer(),
+          $1.RuntimeConfig.fromBuffer);
+  static final _$putServiceProbe =
+      $grpc.ClientMethod<$1.ServiceProbe, $1.ServiceProbe>(
+          '/targetlib.TargetLib/PutServiceProbe',
+          ($1.ServiceProbe value) => value.writeToBuffer(),
+          $1.ServiceProbe.fromBuffer);
+  static final _$removeServiceProbe =
+      $grpc.ClientMethod<$1.RemoveServiceProbeRequest, $0.Empty>(
+          '/targetlib.TargetLib/RemoveServiceProbe',
+          ($1.RemoveServiceProbeRequest value) => value.writeToBuffer(),
+          $0.Empty.fromBuffer);
+  static final _$listServiceProbes =
+      $grpc.ClientMethod<$0.Empty, $1.ServiceProbeList>(
+          '/targetlib.TargetLib/ListServiceProbes',
+          ($0.Empty value) => value.writeToBuffer(),
+          $1.ServiceProbeList.fromBuffer);
+  static final _$probeService =
+      $grpc.ClientMethod<$1.ProbeServiceRequest, $1.ProbeResult>(
+          '/targetlib.TargetLib/ProbeService',
+          ($1.ProbeServiceRequest value) => value.writeToBuffer(),
+          $1.ProbeResult.fromBuffer);
+  static final _$getQualityHistory =
+      $grpc.ClientMethod<$1.QualityHistoryRequest, $1.QualityHistory>(
+          '/targetlib.TargetLib/GetQualityHistory',
+          ($1.QualityHistoryRequest value) => value.writeToBuffer(),
+          $1.QualityHistory.fromBuffer);
+  static final _$evaluateService =
+      $grpc.ClientMethod<$1.EvaluateServiceRequest, $1.ServiceEvaluation>(
+          '/targetlib.TargetLib/EvaluateService',
+          ($1.EvaluateServiceRequest value) => value.writeToBuffer(),
+          $1.ServiceEvaluation.fromBuffer);
+  static final _$getServiceSelectionPolicy = $grpc.ClientMethod<
+          $1.ServiceSelectionPolicyRequest, $1.ServiceSelectionPolicy>(
+      '/targetlib.TargetLib/GetServiceSelectionPolicy',
+      ($1.ServiceSelectionPolicyRequest value) => value.writeToBuffer(),
+      $1.ServiceSelectionPolicy.fromBuffer);
+  static final _$putServiceSelectionPolicy =
+      $grpc.ClientMethod<$1.ServiceSelectionPolicy, $1.ServiceSelectionPolicy>(
+          '/targetlib.TargetLib/PutServiceSelectionPolicy',
+          ($1.ServiceSelectionPolicy value) => value.writeToBuffer(),
+          $1.ServiceSelectionPolicy.fromBuffer);
+  static final _$getSmartConnectDiagnostics =
+      $grpc.ClientMethod<$1.EvaluateServiceRequest, $1.SmartConnectDiagnostics>(
+          '/targetlib.TargetLib/GetSmartConnectDiagnostics',
+          ($1.EvaluateServiceRequest value) => value.writeToBuffer(),
+          $1.SmartConnectDiagnostics.fromBuffer);
+  static final _$subscribeRuntimeEvents =
+      $grpc.ClientMethod<$0.Empty, $1.RuntimeEvent>(
+          '/targetlib.TargetLib/SubscribeRuntimeEvents',
+          ($0.Empty value) => value.writeToBuffer(),
+          $1.RuntimeEvent.fromBuffer);
+  static final _$exportSmartConnectPolicy =
+      $grpc.ClientMethod<$0.Empty, $1.SmartConnectPolicy>(
+          '/targetlib.TargetLib/ExportSmartConnectPolicy',
+          ($0.Empty value) => value.writeToBuffer(),
+          $1.SmartConnectPolicy.fromBuffer);
+  static final _$importSmartConnectPolicy = $grpc.ClientMethod<
+          $1.ImportSmartConnectPolicyRequest, $1.SmartConnectPolicy>(
+      '/targetlib.TargetLib/ImportSmartConnectPolicy',
+      ($1.ImportSmartConnectPolicyRequest value) => value.writeToBuffer(),
+      $1.SmartConnectPolicy.fromBuffer);
+  static final _$getSmartConnectSnapshot =
+      $grpc.ClientMethod<$0.Empty, $1.SmartConnectSnapshot>(
+          '/targetlib.TargetLib/GetSmartConnectSnapshot',
+          ($0.Empty value) => value.writeToBuffer(),
+          $1.SmartConnectSnapshot.fromBuffer);
+  static final _$setSmartConnectEnabled =
+      $grpc.ClientMethod<$1.SetSmartConnectEnabledRequest, $1.Operation>(
+          '/targetlib.TargetLib/SetSmartConnectEnabled',
+          ($1.SetSmartConnectEnabledRequest value) => value.writeToBuffer(),
+          $1.Operation.fromBuffer);
+  static final _$listServicePolicies =
+      $grpc.ClientMethod<$0.Empty, $1.ServicePolicyList>(
+          '/targetlib.TargetLib/ListServicePolicies',
+          ($0.Empty value) => value.writeToBuffer(),
+          $1.ServicePolicyList.fromBuffer);
+  static final _$upsertServicePolicy =
+      $grpc.ClientMethod<$1.UpsertServicePolicyRequest, $1.Operation>(
+          '/targetlib.TargetLib/UpsertServicePolicy',
+          ($1.UpsertServicePolicyRequest value) => value.writeToBuffer(),
+          $1.Operation.fromBuffer);
+  static final _$deleteServicePolicy =
+      $grpc.ClientMethod<$1.DeleteServicePolicyRequest, $1.Operation>(
+          '/targetlib.TargetLib/DeleteServicePolicy',
+          ($1.DeleteServicePolicyRequest value) => value.writeToBuffer(),
+          $1.Operation.fromBuffer);
+  static final _$setNodePreference =
+      $grpc.ClientMethod<$1.SetNodePreferenceRequest, $1.Operation>(
+          '/targetlib.TargetLib/SetNodePreference',
+          ($1.SetNodePreferenceRequest value) => value.writeToBuffer(),
+          $1.Operation.fromBuffer);
+  static final _$requestServiceEvaluation =
+      $grpc.ClientMethod<$1.RequestServiceEvaluationRequest, $1.Operation>(
+          '/targetlib.TargetLib/RequestServiceEvaluation',
+          ($1.RequestServiceEvaluationRequest value) => value.writeToBuffer(),
+          $1.Operation.fromBuffer);
+  static final _$approveSwitchProposal =
+      $grpc.ClientMethod<$1.ProposalCommandRequest, $1.Operation>(
+          '/targetlib.TargetLib/ApproveSwitchProposal',
+          ($1.ProposalCommandRequest value) => value.writeToBuffer(),
+          $1.Operation.fromBuffer);
+  static final _$rejectSwitchProposal =
+      $grpc.ClientMethod<$1.ProposalCommandRequest, $1.Operation>(
+          '/targetlib.TargetLib/RejectSwitchProposal',
+          ($1.ProposalCommandRequest value) => value.writeToBuffer(),
+          $1.Operation.fromBuffer);
+  static final _$forceServiceBinding =
+      $grpc.ClientMethod<$1.ForceServiceBindingRequest, $1.Operation>(
+          '/targetlib.TargetLib/ForceServiceBinding',
+          ($1.ForceServiceBindingRequest value) => value.writeToBuffer(),
+          $1.Operation.fromBuffer);
+  static final _$getOperation =
+      $grpc.ClientMethod<$1.GetOperationRequest, $1.Operation>(
+          '/targetlib.TargetLib/GetOperation',
+          ($1.GetOperationRequest value) => value.writeToBuffer(),
+          $1.Operation.fromBuffer);
+  static final _$listOperations =
+      $grpc.ClientMethod<$1.ListOperationsRequest, $1.OperationList>(
+          '/targetlib.TargetLib/ListOperations',
+          ($1.ListOperationsRequest value) => value.writeToBuffer(),
+          $1.OperationList.fromBuffer);
+  static final _$subscribeSmartConnectEvents =
+      $grpc.ClientMethod<$1.SmartConnectEventsRequest, $1.SmartConnectEvent>(
+          '/targetlib.TargetLib/SubscribeSmartConnectEvents',
+          ($1.SmartConnectEventsRequest value) => value.writeToBuffer(),
+          $1.SmartConnectEvent.fromBuffer);
 }
 
 @$pb.GrpcServiceName('targetlib.TargetLib')
@@ -600,21 +949,6 @@ abstract class TargetLibServiceBase extends $grpc.Service {
         true,
         ($core.List<$core.int> value) => $0.Empty.fromBuffer(value),
         ($1.SubscriptionEvent value) => value.writeToBuffer()));
-    $addMethod($grpc.ServiceMethod<$1.SetActiveSubscriptionRequest, $0.Empty>(
-        'SetActiveSubscription',
-        setActiveSubscription_Pre,
-        false,
-        false,
-        ($core.List<$core.int> value) =>
-            $1.SetActiveSubscriptionRequest.fromBuffer(value),
-        ($0.Empty value) => value.writeToBuffer()));
-    $addMethod($grpc.ServiceMethod<$0.Empty, $1.ActiveSubscriptionResponse>(
-        'GetActiveSubscription',
-        getActiveSubscription_Pre,
-        false,
-        false,
-        ($core.List<$core.int> value) => $0.Empty.fromBuffer(value),
-        ($1.ActiveSubscriptionResponse value) => value.writeToBuffer()));
     $addMethod($grpc.ServiceMethod<$0.Empty, $1.IpInfoResponse>(
         'GetIpInfo',
         getIpInfo_Pre,
@@ -622,6 +956,247 @@ abstract class TargetLibServiceBase extends $grpc.Service {
         false,
         ($core.List<$core.int> value) => $0.Empty.fromBuffer(value),
         ($1.IpInfoResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.Empty, $1.NodePool>(
+        'GetNodePool',
+        getNodePool_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) => $0.Empty.fromBuffer(value),
+        ($1.NodePool value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.Empty, $1.RuntimeState>(
+        'GetRuntimeState',
+        getRuntimeState_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) => $0.Empty.fromBuffer(value),
+        ($1.RuntimeState value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.Empty, $1.ServiceBindingList>(
+        'ListServiceBindings',
+        listServiceBindings_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) => $0.Empty.fromBuffer(value),
+        ($1.ServiceBindingList value) => value.writeToBuffer()));
+    $addMethod(
+        $grpc.ServiceMethod<$1.ApplyServiceBindingRequest, $1.RuntimeConfig>(
+            'ApplyServiceBinding',
+            applyServiceBinding_Pre,
+            false,
+            false,
+            ($core.List<$core.int> value) =>
+                $1.ApplyServiceBindingRequest.fromBuffer(value),
+            ($1.RuntimeConfig value) => value.writeToBuffer()));
+    $addMethod(
+        $grpc.ServiceMethod<$1.RemoveServiceBindingRequest, $1.RuntimeConfig>(
+            'RemoveServiceBinding',
+            removeServiceBinding_Pre,
+            false,
+            false,
+            ($core.List<$core.int> value) =>
+                $1.RemoveServiceBindingRequest.fromBuffer(value),
+            ($1.RuntimeConfig value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$1.ServiceProbe, $1.ServiceProbe>(
+        'PutServiceProbe',
+        putServiceProbe_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) => $1.ServiceProbe.fromBuffer(value),
+        ($1.ServiceProbe value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$1.RemoveServiceProbeRequest, $0.Empty>(
+        'RemoveServiceProbe',
+        removeServiceProbe_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) =>
+            $1.RemoveServiceProbeRequest.fromBuffer(value),
+        ($0.Empty value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.Empty, $1.ServiceProbeList>(
+        'ListServiceProbes',
+        listServiceProbes_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) => $0.Empty.fromBuffer(value),
+        ($1.ServiceProbeList value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$1.ProbeServiceRequest, $1.ProbeResult>(
+        'ProbeService',
+        probeService_Pre,
+        false,
+        true,
+        ($core.List<$core.int> value) =>
+            $1.ProbeServiceRequest.fromBuffer(value),
+        ($1.ProbeResult value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$1.QualityHistoryRequest, $1.QualityHistory>(
+        'GetQualityHistory',
+        getQualityHistory_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) =>
+            $1.QualityHistoryRequest.fromBuffer(value),
+        ($1.QualityHistory value) => value.writeToBuffer()));
+    $addMethod(
+        $grpc.ServiceMethod<$1.EvaluateServiceRequest, $1.ServiceEvaluation>(
+            'EvaluateService',
+            evaluateService_Pre,
+            false,
+            false,
+            ($core.List<$core.int> value) =>
+                $1.EvaluateServiceRequest.fromBuffer(value),
+            ($1.ServiceEvaluation value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$1.ServiceSelectionPolicyRequest,
+            $1.ServiceSelectionPolicy>(
+        'GetServiceSelectionPolicy',
+        getServiceSelectionPolicy_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) =>
+            $1.ServiceSelectionPolicyRequest.fromBuffer(value),
+        ($1.ServiceSelectionPolicy value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$1.ServiceSelectionPolicy,
+            $1.ServiceSelectionPolicy>(
+        'PutServiceSelectionPolicy',
+        putServiceSelectionPolicy_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) =>
+            $1.ServiceSelectionPolicy.fromBuffer(value),
+        ($1.ServiceSelectionPolicy value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$1.EvaluateServiceRequest,
+            $1.SmartConnectDiagnostics>(
+        'GetSmartConnectDiagnostics',
+        getSmartConnectDiagnostics_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) =>
+            $1.EvaluateServiceRequest.fromBuffer(value),
+        ($1.SmartConnectDiagnostics value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.Empty, $1.RuntimeEvent>(
+        'SubscribeRuntimeEvents',
+        subscribeRuntimeEvents_Pre,
+        false,
+        true,
+        ($core.List<$core.int> value) => $0.Empty.fromBuffer(value),
+        ($1.RuntimeEvent value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.Empty, $1.SmartConnectPolicy>(
+        'ExportSmartConnectPolicy',
+        exportSmartConnectPolicy_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) => $0.Empty.fromBuffer(value),
+        ($1.SmartConnectPolicy value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$1.ImportSmartConnectPolicyRequest,
+            $1.SmartConnectPolicy>(
+        'ImportSmartConnectPolicy',
+        importSmartConnectPolicy_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) =>
+            $1.ImportSmartConnectPolicyRequest.fromBuffer(value),
+        ($1.SmartConnectPolicy value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.Empty, $1.SmartConnectSnapshot>(
+        'GetSmartConnectSnapshot',
+        getSmartConnectSnapshot_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) => $0.Empty.fromBuffer(value),
+        ($1.SmartConnectSnapshot value) => value.writeToBuffer()));
+    $addMethod(
+        $grpc.ServiceMethod<$1.SetSmartConnectEnabledRequest, $1.Operation>(
+            'SetSmartConnectEnabled',
+            setSmartConnectEnabled_Pre,
+            false,
+            false,
+            ($core.List<$core.int> value) =>
+                $1.SetSmartConnectEnabledRequest.fromBuffer(value),
+            ($1.Operation value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.Empty, $1.ServicePolicyList>(
+        'ListServicePolicies',
+        listServicePolicies_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) => $0.Empty.fromBuffer(value),
+        ($1.ServicePolicyList value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$1.UpsertServicePolicyRequest, $1.Operation>(
+        'UpsertServicePolicy',
+        upsertServicePolicy_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) =>
+            $1.UpsertServicePolicyRequest.fromBuffer(value),
+        ($1.Operation value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$1.DeleteServicePolicyRequest, $1.Operation>(
+        'DeleteServicePolicy',
+        deleteServicePolicy_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) =>
+            $1.DeleteServicePolicyRequest.fromBuffer(value),
+        ($1.Operation value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$1.SetNodePreferenceRequest, $1.Operation>(
+        'SetNodePreference',
+        setNodePreference_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) =>
+            $1.SetNodePreferenceRequest.fromBuffer(value),
+        ($1.Operation value) => value.writeToBuffer()));
+    $addMethod(
+        $grpc.ServiceMethod<$1.RequestServiceEvaluationRequest, $1.Operation>(
+            'RequestServiceEvaluation',
+            requestServiceEvaluation_Pre,
+            false,
+            false,
+            ($core.List<$core.int> value) =>
+                $1.RequestServiceEvaluationRequest.fromBuffer(value),
+            ($1.Operation value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$1.ProposalCommandRequest, $1.Operation>(
+        'ApproveSwitchProposal',
+        approveSwitchProposal_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) =>
+            $1.ProposalCommandRequest.fromBuffer(value),
+        ($1.Operation value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$1.ProposalCommandRequest, $1.Operation>(
+        'RejectSwitchProposal',
+        rejectSwitchProposal_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) =>
+            $1.ProposalCommandRequest.fromBuffer(value),
+        ($1.Operation value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$1.ForceServiceBindingRequest, $1.Operation>(
+        'ForceServiceBinding',
+        forceServiceBinding_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) =>
+            $1.ForceServiceBindingRequest.fromBuffer(value),
+        ($1.Operation value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$1.GetOperationRequest, $1.Operation>(
+        'GetOperation',
+        getOperation_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) =>
+            $1.GetOperationRequest.fromBuffer(value),
+        ($1.Operation value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$1.ListOperationsRequest, $1.OperationList>(
+        'ListOperations',
+        listOperations_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) =>
+            $1.ListOperationsRequest.fromBuffer(value),
+        ($1.OperationList value) => value.writeToBuffer()));
+    $addMethod(
+        $grpc.ServiceMethod<$1.SmartConnectEventsRequest, $1.SmartConnectEvent>(
+            'SubscribeSmartConnectEvents',
+            subscribeSmartConnectEvents_Pre,
+            false,
+            true,
+            ($core.List<$core.int> value) =>
+                $1.SmartConnectEventsRequest.fromBuffer(value),
+            ($1.SmartConnectEvent value) => value.writeToBuffer()));
   }
 
   $async.Future<$1.VersionResponse> getVersion_Pre(
@@ -840,22 +1415,6 @@ abstract class TargetLibServiceBase extends $grpc.Service {
   $async.Stream<$1.SubscriptionEvent> subscribeSubscriptionEvents(
       $grpc.ServiceCall call, $0.Empty request);
 
-  $async.Future<$0.Empty> setActiveSubscription_Pre($grpc.ServiceCall $call,
-      $async.Future<$1.SetActiveSubscriptionRequest> $request) async {
-    return setActiveSubscription($call, await $request);
-  }
-
-  $async.Future<$0.Empty> setActiveSubscription(
-      $grpc.ServiceCall call, $1.SetActiveSubscriptionRequest request);
-
-  $async.Future<$1.ActiveSubscriptionResponse> getActiveSubscription_Pre(
-      $grpc.ServiceCall $call, $async.Future<$0.Empty> $request) async {
-    return getActiveSubscription($call, await $request);
-  }
-
-  $async.Future<$1.ActiveSubscriptionResponse> getActiveSubscription(
-      $grpc.ServiceCall call, $0.Empty request);
-
   $async.Future<$1.IpInfoResponse> getIpInfo_Pre(
       $grpc.ServiceCall $call, $async.Future<$0.Empty> $request) async {
     return getIpInfo($call, await $request);
@@ -863,4 +1422,255 @@ abstract class TargetLibServiceBase extends $grpc.Service {
 
   $async.Future<$1.IpInfoResponse> getIpInfo(
       $grpc.ServiceCall call, $0.Empty request);
+
+  $async.Future<$1.NodePool> getNodePool_Pre(
+      $grpc.ServiceCall $call, $async.Future<$0.Empty> $request) async {
+    return getNodePool($call, await $request);
+  }
+
+  $async.Future<$1.NodePool> getNodePool(
+      $grpc.ServiceCall call, $0.Empty request);
+
+  $async.Future<$1.RuntimeState> getRuntimeState_Pre(
+      $grpc.ServiceCall $call, $async.Future<$0.Empty> $request) async {
+    return getRuntimeState($call, await $request);
+  }
+
+  $async.Future<$1.RuntimeState> getRuntimeState(
+      $grpc.ServiceCall call, $0.Empty request);
+
+  $async.Future<$1.ServiceBindingList> listServiceBindings_Pre(
+      $grpc.ServiceCall $call, $async.Future<$0.Empty> $request) async {
+    return listServiceBindings($call, await $request);
+  }
+
+  $async.Future<$1.ServiceBindingList> listServiceBindings(
+      $grpc.ServiceCall call, $0.Empty request);
+
+  $async.Future<$1.RuntimeConfig> applyServiceBinding_Pre(
+      $grpc.ServiceCall $call,
+      $async.Future<$1.ApplyServiceBindingRequest> $request) async {
+    return applyServiceBinding($call, await $request);
+  }
+
+  $async.Future<$1.RuntimeConfig> applyServiceBinding(
+      $grpc.ServiceCall call, $1.ApplyServiceBindingRequest request);
+
+  $async.Future<$1.RuntimeConfig> removeServiceBinding_Pre(
+      $grpc.ServiceCall $call,
+      $async.Future<$1.RemoveServiceBindingRequest> $request) async {
+    return removeServiceBinding($call, await $request);
+  }
+
+  $async.Future<$1.RuntimeConfig> removeServiceBinding(
+      $grpc.ServiceCall call, $1.RemoveServiceBindingRequest request);
+
+  $async.Future<$1.ServiceProbe> putServiceProbe_Pre(
+      $grpc.ServiceCall $call, $async.Future<$1.ServiceProbe> $request) async {
+    return putServiceProbe($call, await $request);
+  }
+
+  $async.Future<$1.ServiceProbe> putServiceProbe(
+      $grpc.ServiceCall call, $1.ServiceProbe request);
+
+  $async.Future<$0.Empty> removeServiceProbe_Pre($grpc.ServiceCall $call,
+      $async.Future<$1.RemoveServiceProbeRequest> $request) async {
+    return removeServiceProbe($call, await $request);
+  }
+
+  $async.Future<$0.Empty> removeServiceProbe(
+      $grpc.ServiceCall call, $1.RemoveServiceProbeRequest request);
+
+  $async.Future<$1.ServiceProbeList> listServiceProbes_Pre(
+      $grpc.ServiceCall $call, $async.Future<$0.Empty> $request) async {
+    return listServiceProbes($call, await $request);
+  }
+
+  $async.Future<$1.ServiceProbeList> listServiceProbes(
+      $grpc.ServiceCall call, $0.Empty request);
+
+  $async.Stream<$1.ProbeResult> probeService_Pre($grpc.ServiceCall $call,
+      $async.Future<$1.ProbeServiceRequest> $request) async* {
+    yield* probeService($call, await $request);
+  }
+
+  $async.Stream<$1.ProbeResult> probeService(
+      $grpc.ServiceCall call, $1.ProbeServiceRequest request);
+
+  $async.Future<$1.QualityHistory> getQualityHistory_Pre(
+      $grpc.ServiceCall $call,
+      $async.Future<$1.QualityHistoryRequest> $request) async {
+    return getQualityHistory($call, await $request);
+  }
+
+  $async.Future<$1.QualityHistory> getQualityHistory(
+      $grpc.ServiceCall call, $1.QualityHistoryRequest request);
+
+  $async.Future<$1.ServiceEvaluation> evaluateService_Pre(
+      $grpc.ServiceCall $call,
+      $async.Future<$1.EvaluateServiceRequest> $request) async {
+    return evaluateService($call, await $request);
+  }
+
+  $async.Future<$1.ServiceEvaluation> evaluateService(
+      $grpc.ServiceCall call, $1.EvaluateServiceRequest request);
+
+  $async.Future<$1.ServiceSelectionPolicy> getServiceSelectionPolicy_Pre(
+      $grpc.ServiceCall $call,
+      $async.Future<$1.ServiceSelectionPolicyRequest> $request) async {
+    return getServiceSelectionPolicy($call, await $request);
+  }
+
+  $async.Future<$1.ServiceSelectionPolicy> getServiceSelectionPolicy(
+      $grpc.ServiceCall call, $1.ServiceSelectionPolicyRequest request);
+
+  $async.Future<$1.ServiceSelectionPolicy> putServiceSelectionPolicy_Pre(
+      $grpc.ServiceCall $call,
+      $async.Future<$1.ServiceSelectionPolicy> $request) async {
+    return putServiceSelectionPolicy($call, await $request);
+  }
+
+  $async.Future<$1.ServiceSelectionPolicy> putServiceSelectionPolicy(
+      $grpc.ServiceCall call, $1.ServiceSelectionPolicy request);
+
+  $async.Future<$1.SmartConnectDiagnostics> getSmartConnectDiagnostics_Pre(
+      $grpc.ServiceCall $call,
+      $async.Future<$1.EvaluateServiceRequest> $request) async {
+    return getSmartConnectDiagnostics($call, await $request);
+  }
+
+  $async.Future<$1.SmartConnectDiagnostics> getSmartConnectDiagnostics(
+      $grpc.ServiceCall call, $1.EvaluateServiceRequest request);
+
+  $async.Stream<$1.RuntimeEvent> subscribeRuntimeEvents_Pre(
+      $grpc.ServiceCall $call, $async.Future<$0.Empty> $request) async* {
+    yield* subscribeRuntimeEvents($call, await $request);
+  }
+
+  $async.Stream<$1.RuntimeEvent> subscribeRuntimeEvents(
+      $grpc.ServiceCall call, $0.Empty request);
+
+  $async.Future<$1.SmartConnectPolicy> exportSmartConnectPolicy_Pre(
+      $grpc.ServiceCall $call, $async.Future<$0.Empty> $request) async {
+    return exportSmartConnectPolicy($call, await $request);
+  }
+
+  $async.Future<$1.SmartConnectPolicy> exportSmartConnectPolicy(
+      $grpc.ServiceCall call, $0.Empty request);
+
+  $async.Future<$1.SmartConnectPolicy> importSmartConnectPolicy_Pre(
+      $grpc.ServiceCall $call,
+      $async.Future<$1.ImportSmartConnectPolicyRequest> $request) async {
+    return importSmartConnectPolicy($call, await $request);
+  }
+
+  $async.Future<$1.SmartConnectPolicy> importSmartConnectPolicy(
+      $grpc.ServiceCall call, $1.ImportSmartConnectPolicyRequest request);
+
+  $async.Future<$1.SmartConnectSnapshot> getSmartConnectSnapshot_Pre(
+      $grpc.ServiceCall $call, $async.Future<$0.Empty> $request) async {
+    return getSmartConnectSnapshot($call, await $request);
+  }
+
+  $async.Future<$1.SmartConnectSnapshot> getSmartConnectSnapshot(
+      $grpc.ServiceCall call, $0.Empty request);
+
+  $async.Future<$1.Operation> setSmartConnectEnabled_Pre(
+      $grpc.ServiceCall $call,
+      $async.Future<$1.SetSmartConnectEnabledRequest> $request) async {
+    return setSmartConnectEnabled($call, await $request);
+  }
+
+  $async.Future<$1.Operation> setSmartConnectEnabled(
+      $grpc.ServiceCall call, $1.SetSmartConnectEnabledRequest request);
+
+  $async.Future<$1.ServicePolicyList> listServicePolicies_Pre(
+      $grpc.ServiceCall $call, $async.Future<$0.Empty> $request) async {
+    return listServicePolicies($call, await $request);
+  }
+
+  $async.Future<$1.ServicePolicyList> listServicePolicies(
+      $grpc.ServiceCall call, $0.Empty request);
+
+  $async.Future<$1.Operation> upsertServicePolicy_Pre($grpc.ServiceCall $call,
+      $async.Future<$1.UpsertServicePolicyRequest> $request) async {
+    return upsertServicePolicy($call, await $request);
+  }
+
+  $async.Future<$1.Operation> upsertServicePolicy(
+      $grpc.ServiceCall call, $1.UpsertServicePolicyRequest request);
+
+  $async.Future<$1.Operation> deleteServicePolicy_Pre($grpc.ServiceCall $call,
+      $async.Future<$1.DeleteServicePolicyRequest> $request) async {
+    return deleteServicePolicy($call, await $request);
+  }
+
+  $async.Future<$1.Operation> deleteServicePolicy(
+      $grpc.ServiceCall call, $1.DeleteServicePolicyRequest request);
+
+  $async.Future<$1.Operation> setNodePreference_Pre($grpc.ServiceCall $call,
+      $async.Future<$1.SetNodePreferenceRequest> $request) async {
+    return setNodePreference($call, await $request);
+  }
+
+  $async.Future<$1.Operation> setNodePreference(
+      $grpc.ServiceCall call, $1.SetNodePreferenceRequest request);
+
+  $async.Future<$1.Operation> requestServiceEvaluation_Pre(
+      $grpc.ServiceCall $call,
+      $async.Future<$1.RequestServiceEvaluationRequest> $request) async {
+    return requestServiceEvaluation($call, await $request);
+  }
+
+  $async.Future<$1.Operation> requestServiceEvaluation(
+      $grpc.ServiceCall call, $1.RequestServiceEvaluationRequest request);
+
+  $async.Future<$1.Operation> approveSwitchProposal_Pre($grpc.ServiceCall $call,
+      $async.Future<$1.ProposalCommandRequest> $request) async {
+    return approveSwitchProposal($call, await $request);
+  }
+
+  $async.Future<$1.Operation> approveSwitchProposal(
+      $grpc.ServiceCall call, $1.ProposalCommandRequest request);
+
+  $async.Future<$1.Operation> rejectSwitchProposal_Pre($grpc.ServiceCall $call,
+      $async.Future<$1.ProposalCommandRequest> $request) async {
+    return rejectSwitchProposal($call, await $request);
+  }
+
+  $async.Future<$1.Operation> rejectSwitchProposal(
+      $grpc.ServiceCall call, $1.ProposalCommandRequest request);
+
+  $async.Future<$1.Operation> forceServiceBinding_Pre($grpc.ServiceCall $call,
+      $async.Future<$1.ForceServiceBindingRequest> $request) async {
+    return forceServiceBinding($call, await $request);
+  }
+
+  $async.Future<$1.Operation> forceServiceBinding(
+      $grpc.ServiceCall call, $1.ForceServiceBindingRequest request);
+
+  $async.Future<$1.Operation> getOperation_Pre($grpc.ServiceCall $call,
+      $async.Future<$1.GetOperationRequest> $request) async {
+    return getOperation($call, await $request);
+  }
+
+  $async.Future<$1.Operation> getOperation(
+      $grpc.ServiceCall call, $1.GetOperationRequest request);
+
+  $async.Future<$1.OperationList> listOperations_Pre($grpc.ServiceCall $call,
+      $async.Future<$1.ListOperationsRequest> $request) async {
+    return listOperations($call, await $request);
+  }
+
+  $async.Future<$1.OperationList> listOperations(
+      $grpc.ServiceCall call, $1.ListOperationsRequest request);
+
+  $async.Stream<$1.SmartConnectEvent> subscribeSmartConnectEvents_Pre(
+      $grpc.ServiceCall $call,
+      $async.Future<$1.SmartConnectEventsRequest> $request) async* {
+    yield* subscribeSmartConnectEvents($call, await $request);
+  }
+
+  $async.Stream<$1.SmartConnectEvent> subscribeSmartConnectEvents(
+      $grpc.ServiceCall call, $1.SmartConnectEventsRequest request);
 }

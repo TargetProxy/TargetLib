@@ -40,6 +40,25 @@ final class TargetLibServiceManager {
     return const TargetLibServiceResult(TargetLibServiceStatus.running);
   }
 
+  Future<void> stop() async {
+    final result = switch (Platform.operatingSystem) {
+      'windows' => await Process.run('sc.exe', ['stop', _serviceName]),
+      'linux' => await Process.run('systemctl', [
+        'stop',
+        '${_serviceName.toLowerCase()}.service',
+      ]),
+      'macos' => await Process.run('launchctl', [
+        'kill',
+        'SIGTERM',
+        'system/$_serviceName',
+      ]),
+      _ => throw UnsupportedError(
+        'TargetLib desktop service is not supported on this platform.',
+      ),
+    };
+    _throwOnFailure('stop', result);
+  }
+
   Future<TargetLibServiceResult> _statusWindows() async {
     final result = await Process.run('sc.exe', ['query', _serviceName]);
     final output = _output(result);
