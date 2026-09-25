@@ -59,14 +59,17 @@ final class TargetLibConnection {
         ),
       ),
     ));
-    final tokenFile = File(
-      '${File(socketPath).parent.path}${Platform.pathSeparator}$controlTokenName',
-    );
     String? controlToken;
-    try {
-      controlToken = (await tokenFile.readAsString()).trim();
-    } on FileSystemException {
-      // Older cores do not create a token and remain usable for v12 APIs.
+    for (final tokenPath in _controlTokenPaths(socketPath)) {
+      try {
+        final token = (await File(tokenPath).readAsString()).trim();
+        if (token.isNotEmpty) {
+          controlToken = token;
+          break;
+        }
+      } on FileSystemException {
+        // Try the next location when the service owns a different base path.
+      }
     }
     final options = CallOptions(
       metadata: controlToken == null || controlToken.isEmpty
@@ -107,6 +110,16 @@ final class TargetLibConnection {
   }
 
   Future<void> close() => channel.shutdown();
+
+  static Iterable<String> _controlTokenPaths(String socketPath) sync* {
+    yield '${File(socketPath).parent.path}${Platform.pathSeparator}$controlTokenName';
+    if (Platform.isWindows) {
+      final programData = Platform.environment['PROGRAMDATA'];
+      if (programData != null && programData.trim().isNotEmpty) {
+        yield '$programData${Platform.pathSeparator}TargetLib${Platform.pathSeparator}$controlTokenName';
+      }
+    }
+  }
 
   Future<OperationResponse> start() => client.start(Empty(), options: options);
   Future<CapabilitiesResponse> capabilities() =>
