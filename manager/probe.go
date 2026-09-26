@@ -79,7 +79,7 @@ func (m *Manager) ProbeService(request *api.ProbeServiceRequest, stream grpc.Ser
 	if request.Attempts > 5 || request.MaxConcurrency > 4 || len(request.NodeIds) > 256 {
 		return status.Error(codes.InvalidArgument, "probe limits: 5 attempts, 4 workers, 256 nodes")
 	}
-	p := findProbe(m.smart.read(), request.ServiceId)
+	p := findProbe(m.runtimeState.read(), request.ServiceId)
 	if p == nil {
 		return status.Error(codes.NotFound, "service probe not found")
 	}
@@ -120,7 +120,7 @@ func (m *Manager) ProbeService(request *api.ProbeServiceRequest, stream grpc.Ser
 	}
 	ctx, cancel := context.WithCancel(stream.Context())
 	defer cancel()
-	s := m.smart
+	s := m.runtimeState
 	s.mu.Lock()
 	if s.closed {
 		s.mu.Unlock()
@@ -167,6 +167,12 @@ func (m *Manager) ProbeService(request *api.ProbeServiceRequest, stream grpc.Ser
 				}
 				err := m.saveQuality(ctx, result)
 				if err == nil {
+					m.publishRuntime(&api.RuntimeEvent{
+						Type:      api.RuntimeEventType_RUNTIME_EVENT_TYPE_PROBE_COMPLETED,
+						Probe:     result,
+						ServiceId: result.ServiceId,
+						NodeId:    result.NodeId,
+					})
 				}
 				select {
 				case results <- outcome{result, err}:

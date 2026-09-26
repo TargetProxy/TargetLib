@@ -57,7 +57,7 @@ type Manager struct {
 	latencyMu      sync.Mutex
 	latencyGroups  map[string]chan struct{}
 	close          sync.Once
-	smart          *smartConnect
+	runtimeState   *runtimeStateStore
 	probeContext   func(context.Context) context.Context
 	probeTransport func(context.Context, targetprofile.Node) (*nodeProbeTransport, error)
 	controlToken   string
@@ -136,7 +136,7 @@ func New(ctx context.Context, options Options) (*Manager, error) {
 		cacheFilePath: cacheFilePath,
 		controlToken:  controlToken,
 	}
-	m.smart, err = newSmartConnect(ctx, sharedStore)
+	m.runtimeState, err = newRuntimeStateStore(ctx, sharedStore)
 	if err != nil {
 		cancelSubscriptions()
 		subscriptionManager.Close()
@@ -171,7 +171,7 @@ func New(ctx context.Context, options Options) (*Manager, error) {
 	}
 	m.applyState.Phase = targetlibapi.ConfigApplyPhase_CONFIG_APPLY_PHASE_READY
 	m.latency = m.daemon
-	m.watchSmartConnect(subscriptionContext)
+	m.watchRuntimeState(subscriptionContext)
 	go func() {
 		defer close(m.subscriptionDone)
 		_ = subscriptionManager.Run(subscriptionContext)
@@ -223,9 +223,9 @@ func (m *Manager) GetCapabilities(context.Context, *emptypb.Empty) (*targetlibap
 		PlatformVpn:            runtime.GOOS == "android" || runtime.GOOS == "ios",
 		SubscriptionManagement: true,
 		RealTimeTraffic:        true,
-		SmartConnect:           true,
+		PolicyAutomation:       true,
 		ServiceProbes:          true,
-		SmartConnectIntentApi:  true,
+		PolicyAutomationApi:    true,
 	}, nil
 }
 
@@ -426,8 +426,8 @@ func (platformHandler) ConnectSSHAgent() (int32, error) {
 func (m *Manager) Close() {
 	m.close.Do(func() {
 		m.subscriptionCancel()
-		if m.smart != nil {
-			m.smart.close()
+		if m.runtimeState != nil {
+			m.runtimeState.close()
 		}
 		<-m.subscriptionDone
 		m.subscriptions.Close()

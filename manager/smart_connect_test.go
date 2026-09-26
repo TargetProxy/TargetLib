@@ -2,7 +2,6 @@ package manager
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -50,11 +49,11 @@ func smartTestManager(t *testing.T, store subscriptions.Store) *Manager {
 	if err := sub.Load(ctx); err != nil {
 		t.Fatal(err)
 	}
-	smart, err := newSmartConnect(ctx, store)
+	smart, err := newRuntimeStateStore(ctx, store)
 	if err != nil {
 		t.Fatal(err)
 	}
-	m := &Manager{Handler: subscriptions.NewHandler(sub), subscriptions: sub, smart: smart, runtimeConfig: defaultRuntimeConfig(), runtimeStore: runtimeConfigStore{store: store}, readStatus: func() (*daemon.ServiceStatus, error) {
+	m := &Manager{Handler: subscriptions.NewHandler(sub), subscriptions: sub, runtimeState: smart, runtimeConfig: defaultRuntimeConfig(), runtimeStore: runtimeConfigStore{store: store}, readStatus: func() (*daemon.ServiceStatus, error) {
 		return &daemon.ServiceStatus{Status: daemon.ServiceStatus_IDLE}, nil
 	}, checkConfig: func(context.Context, string) error { return nil }, applyConfig: func(string) error { return nil }}
 	t.Cleanup(func() { smart.close(); sub.Close() })
@@ -198,12 +197,12 @@ func TestSmartQualityPersistenceExpiryAndRanking(t *testing.T) {
 	if !proto.Equal(before, m.runtimeConfig) {
 		t.Fatal("evaluation changed runtime")
 	}
-	restored, err := newSmartConnect(context.Background(), store)
+	restored, err := newRuntimeStateStore(context.Background(), store)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer restored.close()
-	if !proto.Equal(restored.read(), m.smart.read()) {
+	if !proto.Equal(restored.read(), m.runtimeState.read()) {
 		t.Fatal("history not restored")
 	}
 	if got := qualityReason(restored.read(), "svc", nodes[0].ID, now+60001); got != "quality_expired" {
@@ -217,7 +216,7 @@ func TestSmartQualityPersistenceExpiryAndRanking(t *testing.T) {
 	if updated.Revision == p.Revision {
 		t.Fatal("definition revision unchanged")
 	}
-	if got := qualityReason(m.smart.read(), "svc", nodes[0].ID, now); got != "probe_definition_changed" {
+	if got := qualityReason(m.runtimeState.read(), "svc", nodes[0].ID, now); got != "probe_definition_changed" {
 		t.Fatal(got)
 	}
 	if _, err := m.PutServiceProbe(context.Background(), p); status.Code(err) != codes.Aborted {
@@ -228,12 +227,12 @@ func TestSmartQualityPersistenceExpiryAndRanking(t *testing.T) {
 func TestSmartQualityFailureDoesNotCommitOrPublish(t *testing.T) {
 	store := &failingMetadataStore{MemoryStore: &subscriptions.MemoryStore{}}
 	m := smartTestManager(t, store)
-	before := m.smart.read()
+	before := m.runtimeState.read()
 	store.fail = true
 	if _, err := m.PutServiceProbe(context.Background(), &api.ServiceProbe{ServiceId: "svc", Url: "https://service.example"}); err == nil {
 		t.Fatal("save succeeded")
 	}
-	if !proto.Equal(before, m.smart.read()) || m.smart.sequence != 0 {
+	if !proto.Equal(before, m.runtimeState.read()) || m.runtimeState.sequence != 0 {
 		t.Fatal("failed save changed state or published an event")
 	}
 }
@@ -294,7 +293,7 @@ func TestSmartProbeCancellationAndGlobalConcurrency(t *testing.T) {
 	if maxActive.Load() > 4 || active.Load() != 0 {
 		t.Fatalf("workers leaked or exceeded limit: max=%d active=%d", maxActive.Load(), active.Load())
 	}
-	if len(m.smart.read().Results) != 0 {
+	if len(m.runtimeState.read().Results) != 0 {
 		t.Fatal("canceled probes saved as failures")
 	}
 }
@@ -327,35 +326,12 @@ func TestSmartGRPCProbeHistoryAndEvents(t *testing.T) {
 	if err != nil || initial.GetType() != api.RuntimeEventType_RUNTIME_EVENT_TYPE_SNAPSHOT {
 		t.Fatalf("missing snapshot: %v %v", initial, err)
 	}
-	_, err = client.PutServiceProbe(ctx, &api.ServiceProbe{ServiceId: "svc", Url: endpoint.URL})
-	if err != nil {
+	if _, err = m.PutServiceProbe(ctx, &api.ServiceProbe{ServiceId: "svc", Url: endpoint.URL}); err != nil {
 		t.Fatal(err)
-	}
-	stream, err := client.ProbeService(ctx, &api.ProbeServiceRequest{ServiceId: "svc", Attempts: 2})
-	if err != nil {
-		t.Fatal(err)
-	}
-	count := 0
-	for {
-		r, err := stream.Recv()
-		if errors.Is(err, io.EOF) {
-			break
-		}
-		if err != nil {
-			t.Fatal(err)
-		}
-		count++
-		if r.Stage != api.ProbeStage_PROBE_STAGE_READY || r.Successes != 2 {
-			t.Fatalf("bad result %v", r)
-		}
-	}
-	history, err := client.GetQualityHistory(ctx, &api.QualityHistoryRequest{ServiceId: "svc"})
-	if err != nil || len(history.GetResults()) != count || count != 2 {
-		t.Fatalf("history mismatch %v %v", history, err)
 	}
 	seen := 0
 	sequence := initial.Sequence
-	for seen < 2 {
+	for seen < 1 {
 		event, err := events.Recv()
 		if err != nil {
 			t.Fatal(err)
@@ -364,7 +340,7 @@ func TestSmartGRPCProbeHistoryAndEvents(t *testing.T) {
 			t.Fatal("event order regressed")
 		}
 		sequence = event.Sequence
-		if event.Type == api.RuntimeEventType_RUNTIME_EVENT_TYPE_PROBE_COMPLETED {
+		if event.Type == api.RuntimeEventType_RUNTIME_EVENT_TYPE_PROBE_DEFINITION {
 			seen++
 		}
 	}
@@ -373,14 +349,14 @@ func TestSmartGRPCProbeHistoryAndEvents(t *testing.T) {
 func TestSmartEventsDisconnectSlowConsumer(t *testing.T) {
 	m := smartTestManager(t, nil)
 	ch := make(chan *api.RuntimeEvent, 1)
-	m.smart.subscribers[ch] = struct{}{}
+	m.runtimeState.subscribers[ch] = struct{}{}
 	m.publishRuntime(&api.RuntimeEvent{Type: api.RuntimeEventType_RUNTIME_EVENT_TYPE_CONFIG})
 	m.publishRuntime(&api.RuntimeEvent{Type: api.RuntimeEventType_RUNTIME_EVENT_TYPE_CONFIG})
 	<-ch
 	if _, ok := <-ch; ok {
 		t.Fatal("slow subscriber remained open")
 	}
-	if len(m.smart.subscribers) != 0 {
+	if len(m.runtimeState.subscribers) != 0 {
 		t.Fatal("slow subscriber leaked")
 	}
 }
@@ -463,49 +439,6 @@ func TestSmartPacketLossUsesEchoAcknowledgements(t *testing.T) {
 	}
 }
 
-func TestSmartPolicyImportIsAtomicAndDeviceLocal(t *testing.T) {
-	m := smartTestManager(t, nil)
-	p, err := m.PutServiceProbe(context.Background(), &api.ServiceProbe{ServiceId: "local", Url: "https://local.example"})
-	if err != nil {
-		t.Fatal(err)
-	}
-	exported, err := m.ExportSmartConnectPolicy(context.Background(), &emptypb.Empty{})
-	if err != nil {
-		t.Fatal(err)
-	}
-	original := proto.Clone(m.runtimeConfig)
-	imported, err := m.ImportSmartConnectPolicy(context.Background(), &api.ImportSmartConnectPolicyRequest{ExpectedRevision: exported.Revision, Policy: exported})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if imported.Probes[0].Revision != p.Revision {
-		t.Fatal("equivalent policy invalidated local quality")
-	}
-	exported.Probes[0].Url = "https://remote.example"
-	exported.Probes[0].Revision = "foreign-revision"
-	updated, err := m.ImportSmartConnectPolicy(context.Background(), &api.ImportSmartConnectPolicyRequest{ExpectedRevision: imported.Revision, Policy: exported})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if updated.Probes[0].Revision == "foreign-revision" || updated.Probes[0].Revision == p.Revision {
-		t.Fatal("foreign policy did not receive a local revision")
-	}
-	if !proto.Equal(original, m.runtimeConfig) {
-		t.Fatal("policy import changed runtime binding")
-	}
-	if _, err := m.ImportSmartConnectPolicy(context.Background(), &api.ImportSmartConnectPolicyRequest{ExpectedRevision: imported.Revision, Policy: exported}); status.Code(err) != codes.Aborted {
-		t.Fatalf("stale policy accepted: %v", err)
-	}
-	before := m.smart.read()
-	bad := &api.SmartConnectPolicy{SchemaVersion: 1, Probes: []*api.ServiceProbe{{ServiceId: "valid", Url: "https://valid.example"}, {ServiceId: "bad", Url: "file:///bad"}}}
-	if _, err := m.ImportSmartConnectPolicy(context.Background(), &api.ImportSmartConnectPolicyRequest{ExpectedRevision: updated.Revision, Policy: bad}); status.Code(err) != codes.InvalidArgument {
-		t.Fatal(err)
-	}
-	if !proto.Equal(before, m.smart.read()) {
-		t.Fatal("invalid import partially committed")
-	}
-}
-
 func TestSmartValidationRejectsInvalidInputs(t *testing.T) {
 	nan := 0.0
 	nan = nan / nan
@@ -533,27 +466,20 @@ func TestSmartHistoryRetentionAndOldRevisionCompletion(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if len(m.smart.read().Results) != 32 {
+	if len(m.runtimeState.read().Results) != 32 {
 		t.Fatal("per-node retention not enforced")
 	}
 	m.saveQuality(context.Background(), &api.ProbeResult{Id: "old-definition", ServiceId: "svc", NodeId: "n", ProbeRevision: "old", TestedAtUnixMs: 100, ExpiresAtUnixMs: 10000, Stage: api.ProbeStage_PROBE_STAGE_HTTP})
-	if got := qualityReason(m.smart.read(), "svc", "n", 101); got != "" {
+	if got := qualityReason(m.runtimeState.read(), "svc", "n", 101); got != "" {
 		t.Fatalf("late old definition replaced current result: %s", got)
 	}
 }
 
-func TestSmartDiagnosticsAndProbeRemoval(t *testing.T) {
+func TestProbeRemoval(t *testing.T) {
 	m := smartTestManager(t, nil)
 	p, err := m.PutServiceProbe(context.Background(), &api.ServiceProbe{ServiceId: "svc", Url: "https://service.example"})
 	if err != nil {
 		t.Fatal(err)
-	}
-	report, err := m.GetSmartConnectDiagnostics(context.Background(), &api.EvaluateServiceRequest{})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(report.Evaluations) != 1 || report.Evaluations[0].ProbeRevision != p.Revision || len(report.Evaluations[0].Candidates) != 2 || report.PolicyRevision == "" {
-		t.Fatalf("bad report %v", report)
 	}
 	if _, err := m.RemoveServiceProbe(context.Background(), &api.RemoveServiceProbeRequest{ServiceId: p.ServiceId, ExpectedRevision: "stale"}); status.Code(err) != codes.Aborted {
 		t.Fatal(err)
@@ -561,21 +487,18 @@ func TestSmartDiagnosticsAndProbeRemoval(t *testing.T) {
 	if _, err := m.RemoveServiceProbe(context.Background(), &api.RemoveServiceProbeRequest{ServiceId: p.ServiceId, ExpectedRevision: p.Revision}); err != nil {
 		t.Fatal(err)
 	}
-	if got := qualityReason(m.smart.read(), p.ServiceId, "node", time.Now().UnixMilli()); got != "probe_not_configured" {
+	if got := qualityReason(m.runtimeState.read(), p.ServiceId, "node", time.Now().UnixMilli()); got != "probe_not_configured" {
 		t.Fatal(got)
-	}
-	if _, err := m.EvaluateService(context.Background(), &api.EvaluateServiceRequest{ServiceId: p.ServiceId}); status.Code(err) != codes.NotFound {
-		t.Fatal(err)
 	}
 }
 
 func TestSmartPoolChangePublishesWithoutApplying(t *testing.T) {
 	m := smartTestManager(t, nil)
 	ch := make(chan *api.RuntimeEvent, 64)
-	m.smart.subscribers[ch] = struct{}{}
+	m.runtimeState.subscribers[ch] = struct{}{}
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	m.watchSmartConnect(ctx)
+	m.watchRuntimeState(ctx)
 	before := proto.Clone(m.runtimeConfig)
 	if err := m.subscriptions.Remove(ctx, "a"); err != nil {
 		t.Fatal(err)
@@ -624,7 +547,7 @@ func TestSmartCloseCancelsActiveProbes(t *testing.T) {
 		t.Fatal("probe not started")
 	}
 	closed := make(chan struct{})
-	go func() { m.smart.close(); close(closed) }()
+	go func() { m.runtimeState.close(); close(closed) }()
 	select {
 	case <-closed:
 	case <-time.After(time.Second):

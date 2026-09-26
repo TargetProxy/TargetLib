@@ -110,11 +110,9 @@ final class TargetLibRuntime {
   Future<RuntimeState> getRuntimeState() async =>
       (await _requireConnection()).getRuntimeState();
 
-  Future<SmartConnectSnapshot> getSmartConnectSnapshot() async =>
-      (await _requireConnection()).getSmartConnectSnapshot();
-  Future<Operation> setSmartConnectEnabled(
-    SetSmartConnectEnabledRequest request,
-  ) async => (await _requireConnection()).setSmartConnectEnabled(request);
+  Future<Operation> setPolicyAutomationEnabled(
+    SetPolicyAutomationEnabledRequest request,
+  ) async => (await _requireConnection()).setPolicyAutomationEnabled(request);
   Future<ServicePolicyList> listServicePolicies() async =>
       (await _requireConnection()).listServicePolicies();
   Future<Operation> upsertServicePolicy(
@@ -141,12 +139,8 @@ final class TargetLibRuntime {
       (await _requireConnection()).getOperation(operationId);
   Future<OperationList> listOperations(ListOperationsRequest request) async =>
       (await _requireConnection()).listOperations(request);
-  Stream<SmartConnectEvent> subscribeSmartConnectEvents({
-    int afterSequence = 0,
-  }) async* {
-    yield* (await _requireConnection()).subscribeSmartConnectEvents(
-      afterSequence: afterSequence,
-    );
+  Stream<RuntimeEvent> subscribeRuntimeEvents() async* {
+    yield* (await _requireConnection()).subscribeRuntimeEvents();
   }
 
   Future<TargetLibConnection> _requireConnection() async {

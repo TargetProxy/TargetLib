@@ -14,7 +14,7 @@ Flutter、FFI 和 gRPC 只负责传递用户意图、平台能力和状态，不
 | [Smart Connect 目标架构](SMART_CONNECT_ARCHITECTURE.md) | 领域模型、策略、调度器、决策、切换状态机、不变量和验收标准 | 通用订阅解析和协议传输细节 |
 | [gRPC 能力总览](GRPC.md) | 当前 RPC、目标意图 API、并发控制、幂等、错误码和兼容策略 | 领域算法和 sing-box 配置生成 |
 
-当前代码事实与目标设计必须明确标注。`现有 v13` 表示已经存在于 proto/实现；`目标` 表示仍待平台宿主或产品客户端完成的迁移方向。
+当前代码事实与目标设计必须明确标注。`现有 v14` 表示已经存在于 proto/实现；`目标` 表示仍待平台宿主或产品客户端完成的迁移方向。
 
 ## 分层与依赖方向
 
@@ -176,7 +176,7 @@ flowchart TB
 
 ## Smart Connect 质量、决策与切换
 
-协议版本 13 已实现服务策略、持久化调度、质量历史、候选评估、proposal、operation、授权切换、验证与回滚，
+协议版本 14 已实现服务策略、持久化调度、质量历史、候选评估、proposal、operation、授权切换、验证与回滚，
 由后台编排器管理完整生命周期。Android 独立进程宿主和产品客户端收口仍按迁移计划推进，详见
 [Smart Connect 目标架构](SMART_CONNECT_ARCHITECTURE.md)。
 
@@ -207,7 +207,7 @@ flowchart LR
 `AUTO_CONSTRAINED`、`LOCKED` 或 `DIRECT` 决定是否进入切换事务。自动模式也必须遵守地区、订阅、驻留时间、
 冷却期和频率限制，不得把探测失败直接等同于切换授权。
 
-Snapshot 是客户端权威读模型，事件仅作为变化通知。客户端断开或错过事件不会影响后台任务，重连后读取 snapshot 即可恢复。
+`RuntimeState` 是客户端权威读模型，事件仅作为变化通知。客户端断开或错过事件不会影响后台任务，重连后读取 `RuntimeState` 即可恢复。
 
 ## 端到端命令流程
 
@@ -238,7 +238,7 @@ sequenceDiagram
     RUN-->>ORCH: applied / rollback result
     ORCH->>STORE: binding + operation + audit transaction
     ORCH-->>UI: event invalidation
-    UI->>API: GetSmartConnectSnapshot
+    UI->>API: GetRuntimeState
     API-->>UI: authoritative committed state
 ```
 
@@ -260,7 +260,7 @@ Badger 加载节点时通过 `profile.RestoreNodeOutbound` 从已规范化的持
 `ServiceBinding` 持久化服务、selector、节点和 revision，重启后恢复并由运行时状态确认是否生效。
 
 配置应用采用 `VALIDATING -> BUILDING -> APPLYING -> READY/FAILED` 事务；失败时恢复当前生效配置。
-兼容 v12 的低层流程仍允许客户端显式提交绑定。v13 产品流程由核心持久化 proposal 和 operation：手动模式等待客户端审批，
+旧 v12 低层流程已从服务描述删除。v14 产品流程由核心持久化 proposal 和 operation：手动模式等待客户端审批，
 受约束自动模式由核心执行，locked 模式只报告故障。首次创建路由允许 reload；后续同 selector 切换优先 live select。
 
 迁移完成后，客户端不能直接决定 selector 成员、服务路由或 binding 元数据，也不能独立实现候选评分。
@@ -292,13 +292,13 @@ last-known-good；回滚失败进入明确的 degraded 状态。operation 持久
 
 | 用户能力 | 领域所有者 | 写入状态 | 目标 RPC | 运行时动作 |
 | --- | --- | --- | --- | --- |
-| 启停 Smart Connect | Orchestrator | enabled、operation | `SetSmartConnectEnabled` | 创建或清理核心自有路由 |
+| 启停 Smart Connect | Orchestrator | enabled、operation | `SetPolicyAutomationEnabled` | 创建或清理核心自有路由 |
 | 编辑服务策略 | PolicyService | policy revision、tasks | `UpsertServicePolicy` | 仅标记失效，不直接切换 |
 | 重新评估 | Scheduler/DecisionEngine | operation、quality、proposal | `RequestServiceEvaluation` | 隔离探测，不改主 selector |
 | 批准推荐 | BindingController | approval、binding operation | `ApproveSwitchProposal` | live select 或 reload |
 | 强制选择节点 | BindingController | audited intent、operation | `ForceServiceBinding` | 校验后切换并验证 |
-| 查看状态 | QueryService | snapshot | `GetSmartConnectSnapshot` | 读回 actual，不产生副作用 |
-| 后台状态通知 | EventJournal | cursor/epoch | `SubscribeSmartConnectEvents` | 仅通知 snapshot 已变化 |
+| 查看状态 | QueryService | snapshot | `GetRuntimeState` | 读回 actual，不产生副作用 |
+| 后台状态通知 | EventJournal | cursor/epoch | `SubscribeRuntimeEvents` | 仅通知 snapshot 已变化 |
 
 目标 RPC 的 wire contract、幂等和错误语义以 [GRPC.md](GRPC.md) 为准；策略和状态转换以
 [SMART_CONNECT_ARCHITECTURE.md](SMART_CONNECT_ARCHITECTURE.md) 为准。

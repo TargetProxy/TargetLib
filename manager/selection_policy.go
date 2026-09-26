@@ -15,7 +15,13 @@ func (m *Manager) GetServiceSelectionPolicy(_ context.Context, req *api.ServiceS
 	if req == nil || strings.TrimSpace(req.ServiceId) == "" {
 		return nil, status.Error(codes.InvalidArgument, "service ID is required")
 	}
-	for _, p := range m.smart.read().SelectionPolicies {
+	snapshot := m.runtimeState.read()
+	for _, p := range snapshot.Policies {
+		if p.ServiceId == req.ServiceId && p.Selection != nil {
+			return proto.Clone(p.Selection).(*api.ServiceSelectionPolicy), nil
+		}
+	}
+	for _, p := range snapshot.SelectionPolicies {
 		if p.ServiceId == req.ServiceId {
 			return p, nil
 		}
@@ -39,13 +45,21 @@ func (m *Manager) PutServiceSelectionPolicy(ctx context.Context, value *api.Serv
 	}
 	requestedRevision := p.ExpectedRevision
 	p.ExpectedRevision = ""
-	if err := m.smart.update(ctx, func(next *api.SmartConnectSnapshot) error {
+	p.Revision = time.Now().UTC().Format("20060102T150405.000000000Z")
+	if err := m.runtimeState.update(ctx, func(next *api.RuntimeOrchestrationState) error {
+		for _, policy := range next.Policies {
+			if policy.ServiceId == p.ServiceId {
+				if requestedRevision != "" && policy.Selection != nil && requestedRevision != policy.Selection.Revision {
+					return status.Error(codes.Aborted, "selection policy revision changed")
+				}
+				policy.Selection = proto.Clone(p).(*api.ServiceSelectionPolicy)
+			}
+		}
 		for i, old := range next.SelectionPolicies {
 			if old.ServiceId == p.ServiceId {
 				if requestedRevision != "" && requestedRevision != old.Revision {
 					return status.Error(codes.Aborted, "selection policy revision changed")
 				}
-				p.Revision = time.Now().UTC().Format("20060102T150405.000000000Z")
 				next.SelectionPolicies[i] = p
 				return nil
 			}

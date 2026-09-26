@@ -43,7 +43,7 @@ func TestSmartIntentEvaluationProbesEveryTargetAndDirect(t *testing.T) {
 	m.probeTransport = func(context.Context, profile.Node) (*nodeProbeTransport, error) {
 		return &nodeProbeTransport{dial: (&net.Dialer{}).DialContext, close: func() error { return nil }}, nil
 	}
-	if _, err := m.SetSmartConnectEnabled(context.Background(), &api.SetSmartConnectEnabledRequest{Enabled: true, IdempotencyKey: "enable-probes"}); err != nil {
+	if _, err := m.SetPolicyAutomationEnabled(context.Background(), &api.SetPolicyAutomationEnabledRequest{Enabled: true, IdempotencyKey: "enable-probes"}); err != nil {
 		t.Fatal(err)
 	}
 	policy := &api.ServicePolicy{ServiceId: "multi", Domains: []string{"service.example"}, Probes: []*api.ServiceProbe{{Url: good.URL, ExpectedStatus: []uint32{204}}, {Url: bad.URL, ExpectedStatus: []uint32{204}}}}
@@ -84,30 +84,30 @@ func TestSmartIntentEvaluationProbesEveryTargetAndDirect(t *testing.T) {
 func TestSmartIntentCommandsPersistAndAreIdempotent(t *testing.T) {
 	store := &subscriptions.MemoryStore{}
 	m := smartTestManager(t, store)
-	initial, err := m.GetSmartConnectSnapshot(context.Background(), &emptypb.Empty{})
+	initial, err := m.GetRuntimeState(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		t.Fatal(err)
 	}
-	enable := &api.SetSmartConnectEnabledRequest{Enabled: true, ExpectedRevision: initial.Revision, IdempotencyKey: "enable-1"}
-	first, err := m.SetSmartConnectEnabled(context.Background(), enable)
+	enable := &api.SetPolicyAutomationEnabledRequest{Enabled: true, ExpectedRevision: initial.PolicyRevision, IdempotencyKey: "enable-1"}
+	first, err := m.SetPolicyAutomationEnabled(context.Background(), enable)
 	if err != nil {
 		t.Fatal(err)
 	}
-	second, err := m.SetSmartConnectEnabled(context.Background(), enable)
+	second, err := m.SetPolicyAutomationEnabled(context.Background(), enable)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if first.Id != second.Id || second.Status != api.OperationStatus_OPERATION_STATUS_SUCCEEDED {
 		t.Fatalf("idempotent operation mismatch: %v %v", first, second)
 	}
-	if _, err := m.SetSmartConnectEnabled(context.Background(), &api.SetSmartConnectEnabledRequest{Enabled: false, IdempotencyKey: "enable-1"}); status.Code(err) != codes.AlreadyExists {
+	if _, err := m.SetPolicyAutomationEnabled(context.Background(), &api.SetPolicyAutomationEnabledRequest{Enabled: false, IdempotencyKey: "enable-1"}); status.Code(err) != codes.AlreadyExists {
 		t.Fatalf("changed idempotent command accepted: %v", err)
 	}
-	if _, err := m.SetSmartConnectEnabled(context.Background(), &api.SetSmartConnectEnabledRequest{Enabled: false, ExpectedRevision: initial.Revision, IdempotencyKey: "enable-stale"}); status.Code(err) != codes.Aborted {
+	if _, err := m.SetPolicyAutomationEnabled(context.Background(), &api.SetPolicyAutomationEnabledRequest{Enabled: false, ExpectedRevision: initial.PolicyRevision, IdempotencyKey: "enable-stale"}); status.Code(err) != codes.Aborted {
 		t.Fatalf("stale revision accepted: %v", err)
 	}
 
-	policyRequest := &api.UpsertServicePolicyRequest{ExpectedRevision: m.smart.read().Revision, IdempotencyKey: "policy-1", Policy: &api.ServicePolicy{ServiceId: "video", DisplayName: "Video", Domains: []string{"Example.COM"}, EvaluationIntervalSeconds: 60, Probes: []*api.ServiceProbe{{Url: "https://example.com/health"}}}}
+	policyRequest := &api.UpsertServicePolicyRequest{ExpectedRevision: m.runtimeState.read().Revision, IdempotencyKey: "policy-1", Policy: &api.ServicePolicy{ServiceId: "video", DisplayName: "Video", Domains: []string{"Example.COM"}, EvaluationIntervalSeconds: 60, Probes: []*api.ServiceProbe{{Url: "https://example.com/health"}}}}
 	operation, err := m.UpsertServicePolicy(context.Background(), policyRequest)
 	if err != nil {
 		t.Fatal(err)
@@ -120,7 +120,7 @@ func TestSmartIntentCommandsPersistAndAreIdempotent(t *testing.T) {
 		t.Fatalf("unexpected policies: %v, %v", policies, err)
 	}
 
-	restored, err := newSmartConnect(context.Background(), store)
+	restored, err := newRuntimeStateStore(context.Background(), store)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -132,16 +132,16 @@ func TestSmartIntentCommandsPersistAndAreIdempotent(t *testing.T) {
 
 func TestSmartIntentForceBindingBuildsCoreOwnedRuntimeModel(t *testing.T) {
 	m := smartTestManager(t, nil)
-	_, err := m.SetSmartConnectEnabled(context.Background(), &api.SetSmartConnectEnabledRequest{Enabled: true, ExpectedRevision: m.smart.read().Revision, IdempotencyKey: "enable-force"})
+	_, err := m.SetPolicyAutomationEnabled(context.Background(), &api.SetPolicyAutomationEnabledRequest{Enabled: true, ExpectedRevision: m.runtimeState.read().Revision, IdempotencyKey: "enable-force"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = m.UpsertServicePolicy(context.Background(), &api.UpsertServicePolicyRequest{ExpectedRevision: m.smart.read().Revision, IdempotencyKey: "policy-force", Policy: &api.ServicePolicy{ServiceId: "svc", Domains: []string{"service.example"}}})
+	_, err = m.UpsertServicePolicy(context.Background(), &api.UpsertServicePolicyRequest{ExpectedRevision: m.runtimeState.read().Revision, IdempotencyKey: "policy-force", Policy: &api.ServicePolicy{ServiceId: "svc", Domains: []string{"service.example"}}})
 	if err != nil {
 		t.Fatal(err)
 	}
 	nodeID := m.subscriptions.NodePool().Nodes[0].ID
-	operation, err := m.ForceServiceBinding(context.Background(), &api.ForceServiceBindingRequest{ServiceId: "svc", NodeId: nodeID, ExpectedRevision: m.smart.read().Revision, IdempotencyKey: "force"})
+	operation, err := m.ForceServiceBinding(context.Background(), &api.ForceServiceBindingRequest{ServiceId: "svc", NodeId: nodeID, ExpectedRevision: m.runtimeState.read().Revision, IdempotencyKey: "force"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -163,7 +163,7 @@ func TestSmartIntentForceBindingBuildsCoreOwnedRuntimeModel(t *testing.T) {
 	if len(desired.ServiceBindings) != 1 || desired.ServiceBindings[0].NodeId != nodeID || len(desired.ServiceRoutes) != 1 || desired.ServiceRoutes[0].Domains[0] != "service.example" {
 		t.Fatalf("core did not build runtime model: %v", desired)
 	}
-	disable, err := m.SetSmartConnectEnabled(context.Background(), &api.SetSmartConnectEnabledRequest{Enabled: false, ExpectedRevision: m.smart.read().Revision, IdempotencyKey: "disable"})
+	disable, err := m.SetPolicyAutomationEnabled(context.Background(), &api.SetPolicyAutomationEnabledRequest{Enabled: false, ExpectedRevision: m.runtimeState.read().Revision, IdempotencyKey: "disable"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -189,15 +189,15 @@ func TestSmartIntentForceBindingBuildsCoreOwnedRuntimeModel(t *testing.T) {
 
 func TestSmartIntentEvaluationCreatesDurableProposal(t *testing.T) {
 	m := smartTestManager(t, nil)
-	_, err := m.SetSmartConnectEnabled(context.Background(), &api.SetSmartConnectEnabledRequest{Enabled: true, ExpectedRevision: m.smart.read().Revision, IdempotencyKey: "enable"})
+	_, err := m.SetPolicyAutomationEnabled(context.Background(), &api.SetPolicyAutomationEnabledRequest{Enabled: true, ExpectedRevision: m.runtimeState.read().Revision, IdempotencyKey: "enable"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = m.UpsertServicePolicy(context.Background(), &api.UpsertServicePolicyRequest{ExpectedRevision: m.smart.read().Revision, IdempotencyKey: "policy", Policy: &api.ServicePolicy{ServiceId: "svc", Domains: []string{"service.example"}, EvaluationIntervalSeconds: 60, Probes: []*api.ServiceProbe{{Url: "https://service.example"}}}})
+	_, err = m.UpsertServicePolicy(context.Background(), &api.UpsertServicePolicyRequest{ExpectedRevision: m.runtimeState.read().Revision, IdempotencyKey: "policy", Policy: &api.ServicePolicy{ServiceId: "svc", Domains: []string{"service.example"}, EvaluationIntervalSeconds: 60, Probes: []*api.ServiceProbe{{Url: "https://service.example"}}}})
 	if err != nil {
 		t.Fatal(err)
 	}
-	probe := findProbe(m.smart.read(), "svc")
+	probe := findProbe(m.runtimeState.read(), "svc")
 	pool := m.subscriptions.NodePool()
 	now := time.Now().UnixMilli()
 	for _, node := range pool.Nodes {
@@ -205,7 +205,7 @@ func TestSmartIntentEvaluationCreatesDurableProposal(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	operation, err := m.RequestServiceEvaluation(context.Background(), &api.RequestServiceEvaluationRequest{ServiceId: "svc", ExpectedRevision: m.smart.read().Revision, IdempotencyKey: "evaluation"})
+	operation, err := m.RequestServiceEvaluation(context.Background(), &api.RequestServiceEvaluationRequest{ServiceId: "svc", ExpectedRevision: m.runtimeState.read().Revision, IdempotencyKey: "evaluation"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -223,7 +223,7 @@ func TestSmartIntentEvaluationCreatesDurableProposal(t *testing.T) {
 	if operation.Status != api.OperationStatus_OPERATION_STATUS_WAITING_APPROVAL || operation.ProposalId == "" {
 		t.Fatalf("evaluation did not create proposal: %v", operation)
 	}
-	snapshot := m.smart.read()
+	snapshot := m.runtimeState.read()
 	if len(snapshot.Proposals) != 1 || snapshot.Proposals[0].SuggestedNodeId == "" || snapshot.Proposals[0].PolicyRevision == "" {
 		t.Fatalf("invalid proposal: %v", snapshot.Proposals)
 	}
@@ -232,7 +232,7 @@ func TestSmartIntentEvaluationCreatesDurableProposal(t *testing.T) {
 		t.Fatalf("operation query failed: %v %v", listed, err)
 	}
 	m.NotifyNetworkChanged()
-	invalidated := m.smart.read()
+	invalidated := m.runtimeState.read()
 	if invalidated.Results[0].ExpiresAtUnixMs > time.Now().UnixMilli() || invalidated.Tasks[0].NextRunAtUnixMs > time.Now().UnixMilli() || invalidated.Tasks[0].Reason != "network_changed" {
 		t.Fatalf("network change did not invalidate quality/task: %v", invalidated)
 	}

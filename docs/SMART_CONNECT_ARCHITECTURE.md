@@ -2,8 +2,8 @@
 
 ## 文档状态
 
-本文定义 Smart Connect 的目标架构和迁移边界。当前协议版本 13 已将服务策略、持久化任务、候选评估、proposal、
-operation、授权绑定、验证和回滚迁入共享 Go 核心；v12 低层接口仅为兼容和诊断保留。
+本文定义策略自动化的架构和迁移边界。当前协议版本 14 已将服务策略、持久化任务、候选评估、proposal、
+operation、授权绑定、验证和回滚迁入共享 Go 核心；旧低层接口已从产品 API 删除。
 
 目标状态下，TargetLib 是 Smart Connect 唯一事实源和长期运行者。Target、其他 Flutter 客户端及平台 UI
 只提交用户意图、显示快照和确认需要人工授权的切换，不再构造 selector、路由、绑定或评分结果。
@@ -246,8 +246,8 @@ Activity 销毁、Flutter engine detach、Dart isolate 暂停或事件订阅断�
 目标产品路径只暴露粗粒度意图，不允许 UI 提交完整 selector/route/binding 模型：
 
 ```text
-GetSmartConnectSnapshot
-SetSmartConnectEnabled
+GetRuntimeState
+SetPolicyAutomationEnabled
 ListServicePolicies
 UpsertServicePolicy
 DeleteServicePolicy
@@ -257,32 +257,32 @@ ApproveSwitchProposal
 RejectSwitchProposal
 ForceServiceBinding
 GetOperation / ListOperations
-SubscribeSmartConnectEvents
+SubscribeRuntimeEvents
 ```
 
 所有写命令包含 `expected_revision` 和 `idempotency_key`，立即返回持久化 `Operation`。长时间探测、等待审批、切换和验证
 通过 operation 状态观察，不占用长 RPC。Force binding 仍必须经过节点存在性、地区和显式安全约束校验。
 
-当前 `UpdateRuntimeConfig.model`、`PutServiceProbe`、`ProbeService`、`EvaluateService` 和 `ApplyServiceBinding`
-在迁移期保留给诊断、兼容客户端和底层测试。Target 完成迁移后不得再用它们编排 Smart Connect。
+旧的 `PutServiceProbe`、`ProbeService`、`EvaluateService` 和 `ApplyServiceBinding` 已从 gRPC 服务删除；
+探测、评估和绑定只能通过统一策略命令由核心执行。
 
 具体请求字段、operation 语义、错误码、版本协商和兼容期限由 [GRPC.md](GRPC.md) 定义；本文列出的名称只表示领域能力，
 不能绕过 BindingController 直接调用 RuntimeController。
 
-## Snapshot、Operation 与事件
+## RuntimeState、Operation 与事件
 
-Snapshot 是权威状态，事件只是变化通知。客户端首次连接、重连或发现 sequence 间断时必须重新读取 snapshot。
+`RuntimeState` 是权威状态，事件只是变化通知。客户端首次连接、重连或发现 sequence 间断时必须重新读取 `RuntimeState`。
 
-Snapshot 至少包含：
+`RuntimeState` 至少包含：
 
-- core lifecycle、Smart Connect enabled 和恢复状态；
+- core lifecycle、policy automation enabled 和恢复状态；
 - policy/node-pool/runtime revision；
 - 每个服务的策略摘要、binding、健康、proposal 和活动 operation；
 - actual selector、last-known-good、待评估原因和下一次计划任务；
 - 最近一次失败及是否需要用户操作。
 
 Operation 使用稳定 ID，状态为 `QUEUED/RUNNING/WAITING_APPROVAL/SUCCEEDED/FAILED/CANCELLED/ROLLED_BACK`。
-近期 operation 和关键事件持久化，以便 UI 被挂起后重新查询。事件流带 epoch 和 cursor；服务重启或日志截断时要求 snapshot resync。
+近期 operation 和关键事件持久化，以便 UI 被挂起后重新查询。事件流带单调 sequence；服务重启或日志截断时要求 `RuntimeState` resync。
 
 ## 安全与隐私
 
@@ -321,7 +321,7 @@ Operation 使用稳定 ID，状态为 `QUEUED/RUNNING/WAITING_APPROVAL/SUCCEEDED
 | B：后台评估 | scheduler、operation、唯一 DecisionEngine | request/get operation | 停止本地评分和探测编排 |
 | C：核心切换 | proposal、BindingController、验证/回滚 | approve/reject/force binding | 只提交意图 |
 | D：生命周期 | Android 独立进程、恢复、event journal | cursor event stream | UI 可任意挂起和重连 |
-| E：收口 | 删除双实现，限制低层 model 写入口 | 标记旧 RPC deprecated | 删除本地 Smart Connect Store |
+| E：收口 | 删除双实现，限制低层 model 写入口 | 删除旧 RPC | 删除本地 Smart Connect Store |
 
 ## 验收标准
 

@@ -366,10 +366,10 @@ class CapabilitiesResponse extends $pb.GeneratedMessage {
     $core.bool? platformVpn,
     $core.bool? subscriptionManagement,
     $core.bool? realTimeTraffic,
-    $core.bool? smartConnect,
+    $core.bool? policyAutomation,
     $core.bool? serviceProbes,
     $core.bool? runtimeEvents,
-    $core.bool? smartConnectIntentApi,
+    $core.bool? policyAutomationApi,
   }) {
     final result = create();
     if (platform != null) result.platform = platform;
@@ -377,11 +377,11 @@ class CapabilitiesResponse extends $pb.GeneratedMessage {
     if (subscriptionManagement != null)
       result.subscriptionManagement = subscriptionManagement;
     if (realTimeTraffic != null) result.realTimeTraffic = realTimeTraffic;
-    if (smartConnect != null) result.smartConnect = smartConnect;
+    if (policyAutomation != null) result.policyAutomation = policyAutomation;
     if (serviceProbes != null) result.serviceProbes = serviceProbes;
     if (runtimeEvents != null) result.runtimeEvents = runtimeEvents;
-    if (smartConnectIntentApi != null)
-      result.smartConnectIntentApi = smartConnectIntentApi;
+    if (policyAutomationApi != null)
+      result.policyAutomationApi = policyAutomationApi;
     return result;
   }
 
@@ -402,10 +402,10 @@ class CapabilitiesResponse extends $pb.GeneratedMessage {
     ..aOB(3, _omitFieldNames ? '' : 'platformVpn')
     ..aOB(5, _omitFieldNames ? '' : 'subscriptionManagement')
     ..aOB(6, _omitFieldNames ? '' : 'realTimeTraffic')
-    ..aOB(7, _omitFieldNames ? '' : 'smartConnect')
+    ..aOB(7, _omitFieldNames ? '' : 'policyAutomation')
     ..aOB(8, _omitFieldNames ? '' : 'serviceProbes')
     ..aOB(9, _omitFieldNames ? '' : 'runtimeEvents')
-    ..aOB(10, _omitFieldNames ? '' : 'smartConnectIntentApi')
+    ..aOB(10, _omitFieldNames ? '' : 'policyAutomationApi')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -464,13 +464,13 @@ class CapabilitiesResponse extends $pb.GeneratedMessage {
   void clearRealTimeTraffic() => $_clearField(6);
 
   @$pb.TagNumber(7)
-  $core.bool get smartConnect => $_getBF(4);
+  $core.bool get policyAutomation => $_getBF(4);
   @$pb.TagNumber(7)
-  set smartConnect($core.bool value) => $_setBool(4, value);
+  set policyAutomation($core.bool value) => $_setBool(4, value);
   @$pb.TagNumber(7)
-  $core.bool hasSmartConnect() => $_has(4);
+  $core.bool hasPolicyAutomation() => $_has(4);
   @$pb.TagNumber(7)
-  void clearSmartConnect() => $_clearField(7);
+  void clearPolicyAutomation() => $_clearField(7);
 
   @$pb.TagNumber(8)
   $core.bool get serviceProbes => $_getBF(5);
@@ -491,13 +491,13 @@ class CapabilitiesResponse extends $pb.GeneratedMessage {
   void clearRuntimeEvents() => $_clearField(9);
 
   @$pb.TagNumber(10)
-  $core.bool get smartConnectIntentApi => $_getBF(7);
+  $core.bool get policyAutomationApi => $_getBF(7);
   @$pb.TagNumber(10)
-  set smartConnectIntentApi($core.bool value) => $_setBool(7, value);
+  set policyAutomationApi($core.bool value) => $_setBool(7, value);
   @$pb.TagNumber(10)
-  $core.bool hasSmartConnectIntentApi() => $_has(7);
+  $core.bool hasPolicyAutomationApi() => $_has(7);
   @$pb.TagNumber(10)
-  void clearSmartConnectIntentApi() => $_clearField(10);
+  void clearPolicyAutomationApi() => $_clearField(10);
 }
 
 class OperationResponse extends $pb.GeneratedMessage {
@@ -4550,240 +4550,14 @@ class ServiceEvaluation extends $pb.GeneratedMessage {
   void clearProbeRevision() => $_clearField(6);
 }
 
-class SmartConnectDiagnostics extends $pb.GeneratedMessage {
-  factory SmartConnectDiagnostics({
-    RuntimeState? runtime,
-    $core.Iterable<ServiceEvaluation>? evaluations,
-    $core.String? policyRevision,
-    $fixnum.Int64? generatedAtUnixMs,
-  }) {
-    final result = create();
-    if (runtime != null) result.runtime = runtime;
-    if (evaluations != null) result.evaluations.addAll(evaluations);
-    if (policyRevision != null) result.policyRevision = policyRevision;
-    if (generatedAtUnixMs != null) result.generatedAtUnixMs = generatedAtUnixMs;
-    return result;
-  }
-
-  SmartConnectDiagnostics._();
-
-  factory SmartConnectDiagnostics.fromBuffer($core.List<$core.int> data,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
-  factory SmartConnectDiagnostics.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'SmartConnectDiagnostics',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'targetlib'),
-      createEmptyInstance: create)
-    ..aOM<RuntimeState>(1, _omitFieldNames ? '' : 'runtime',
-        subBuilder: RuntimeState.create)
-    ..pPM<ServiceEvaluation>(2, _omitFieldNames ? '' : 'evaluations',
-        subBuilder: ServiceEvaluation.create)
-    ..aOS(3, _omitFieldNames ? '' : 'policyRevision')
-    ..aInt64(4, _omitFieldNames ? '' : 'generatedAtUnixMs')
-    ..hasRequiredFields = false;
-
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  SmartConnectDiagnostics clone() => deepCopy();
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  SmartConnectDiagnostics copyWith(
-          void Function(SmartConnectDiagnostics) updates) =>
-      super.copyWith((message) => updates(message as SmartConnectDiagnostics))
-          as SmartConnectDiagnostics;
-
-  @$core.override
-  $pb.BuilderInfo get info_ => _i;
-
-  @$core.pragma('dart2js:noInline')
-  static SmartConnectDiagnostics create() => SmartConnectDiagnostics._();
-  @$core.override
-  SmartConnectDiagnostics createEmptyInstance() => create();
-  @$core.pragma('dart2js:noInline')
-  static SmartConnectDiagnostics getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<SmartConnectDiagnostics>(create);
-  static SmartConnectDiagnostics? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  RuntimeState get runtime => $_getN(0);
-  @$pb.TagNumber(1)
-  set runtime(RuntimeState value) => $_setField(1, value);
-  @$pb.TagNumber(1)
-  $core.bool hasRuntime() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearRuntime() => $_clearField(1);
-  @$pb.TagNumber(1)
-  RuntimeState ensureRuntime() => $_ensure(0);
-
-  @$pb.TagNumber(2)
-  $pb.PbList<ServiceEvaluation> get evaluations => $_getList(1);
-
-  @$pb.TagNumber(3)
-  $core.String get policyRevision => $_getSZ(2);
-  @$pb.TagNumber(3)
-  set policyRevision($core.String value) => $_setString(2, value);
-  @$pb.TagNumber(3)
-  $core.bool hasPolicyRevision() => $_has(2);
-  @$pb.TagNumber(3)
-  void clearPolicyRevision() => $_clearField(3);
-
-  @$pb.TagNumber(4)
-  $fixnum.Int64 get generatedAtUnixMs => $_getI64(3);
-  @$pb.TagNumber(4)
-  set generatedAtUnixMs($fixnum.Int64 value) => $_setInt64(3, value);
-  @$pb.TagNumber(4)
-  $core.bool hasGeneratedAtUnixMs() => $_has(3);
-  @$pb.TagNumber(4)
-  void clearGeneratedAtUnixMs() => $_clearField(4);
-}
-
-class RuntimeEvent extends $pb.GeneratedMessage {
-  factory RuntimeEvent({
-    $fixnum.Int64? sequence,
-    RuntimeEventType? type,
-    $fixnum.Int64? occurredAtUnixMs,
-    RuntimeState? state,
-    ProbeResult? probe,
-    $core.String? serviceId,
-    $core.String? nodeId,
-  }) {
-    final result = create();
-    if (sequence != null) result.sequence = sequence;
-    if (type != null) result.type = type;
-    if (occurredAtUnixMs != null) result.occurredAtUnixMs = occurredAtUnixMs;
-    if (state != null) result.state = state;
-    if (probe != null) result.probe = probe;
-    if (serviceId != null) result.serviceId = serviceId;
-    if (nodeId != null) result.nodeId = nodeId;
-    return result;
-  }
-
-  RuntimeEvent._();
-
-  factory RuntimeEvent.fromBuffer($core.List<$core.int> data,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
-  factory RuntimeEvent.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'RuntimeEvent',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'targetlib'),
-      createEmptyInstance: create)
-    ..a<$fixnum.Int64>(
-        1, _omitFieldNames ? '' : 'sequence', $pb.PbFieldType.OU6,
-        defaultOrMaker: $fixnum.Int64.ZERO)
-    ..aE<RuntimeEventType>(2, _omitFieldNames ? '' : 'type',
-        enumValues: RuntimeEventType.values)
-    ..aInt64(3, _omitFieldNames ? '' : 'occurredAtUnixMs')
-    ..aOM<RuntimeState>(4, _omitFieldNames ? '' : 'state',
-        subBuilder: RuntimeState.create)
-    ..aOM<ProbeResult>(5, _omitFieldNames ? '' : 'probe',
-        subBuilder: ProbeResult.create)
-    ..aOS(6, _omitFieldNames ? '' : 'serviceId')
-    ..aOS(7, _omitFieldNames ? '' : 'nodeId')
-    ..hasRequiredFields = false;
-
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  RuntimeEvent clone() => deepCopy();
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  RuntimeEvent copyWith(void Function(RuntimeEvent) updates) =>
-      super.copyWith((message) => updates(message as RuntimeEvent))
-          as RuntimeEvent;
-
-  @$core.override
-  $pb.BuilderInfo get info_ => _i;
-
-  @$core.pragma('dart2js:noInline')
-  static RuntimeEvent create() => RuntimeEvent._();
-  @$core.override
-  RuntimeEvent createEmptyInstance() => create();
-  @$core.pragma('dart2js:noInline')
-  static RuntimeEvent getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<RuntimeEvent>(create);
-  static RuntimeEvent? _defaultInstance;
-
-  /// Monotonic within an event stream epoch. Reconnect starts with a snapshot.
-  @$pb.TagNumber(1)
-  $fixnum.Int64 get sequence => $_getI64(0);
-  @$pb.TagNumber(1)
-  set sequence($fixnum.Int64 value) => $_setInt64(0, value);
-  @$pb.TagNumber(1)
-  $core.bool hasSequence() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearSequence() => $_clearField(1);
-
-  @$pb.TagNumber(2)
-  RuntimeEventType get type => $_getN(1);
-  @$pb.TagNumber(2)
-  set type(RuntimeEventType value) => $_setField(2, value);
-  @$pb.TagNumber(2)
-  $core.bool hasType() => $_has(1);
-  @$pb.TagNumber(2)
-  void clearType() => $_clearField(2);
-
-  @$pb.TagNumber(3)
-  $fixnum.Int64 get occurredAtUnixMs => $_getI64(2);
-  @$pb.TagNumber(3)
-  set occurredAtUnixMs($fixnum.Int64 value) => $_setInt64(2, value);
-  @$pb.TagNumber(3)
-  $core.bool hasOccurredAtUnixMs() => $_has(2);
-  @$pb.TagNumber(3)
-  void clearOccurredAtUnixMs() => $_clearField(3);
-
-  @$pb.TagNumber(4)
-  RuntimeState get state => $_getN(3);
-  @$pb.TagNumber(4)
-  set state(RuntimeState value) => $_setField(4, value);
-  @$pb.TagNumber(4)
-  $core.bool hasState() => $_has(3);
-  @$pb.TagNumber(4)
-  void clearState() => $_clearField(4);
-  @$pb.TagNumber(4)
-  RuntimeState ensureState() => $_ensure(3);
-
-  @$pb.TagNumber(5)
-  ProbeResult get probe => $_getN(4);
-  @$pb.TagNumber(5)
-  set probe(ProbeResult value) => $_setField(5, value);
-  @$pb.TagNumber(5)
-  $core.bool hasProbe() => $_has(4);
-  @$pb.TagNumber(5)
-  void clearProbe() => $_clearField(5);
-  @$pb.TagNumber(5)
-  ProbeResult ensureProbe() => $_ensure(4);
-
-  @$pb.TagNumber(6)
-  $core.String get serviceId => $_getSZ(5);
-  @$pb.TagNumber(6)
-  set serviceId($core.String value) => $_setString(5, value);
-  @$pb.TagNumber(6)
-  $core.bool hasServiceId() => $_has(5);
-  @$pb.TagNumber(6)
-  void clearServiceId() => $_clearField(6);
-
-  @$pb.TagNumber(7)
-  $core.String get nodeId => $_getSZ(6);
-  @$pb.TagNumber(7)
-  set nodeId($core.String value) => $_setString(6, value);
-  @$pb.TagNumber(7)
-  $core.bool hasNodeId() => $_has(6);
-  @$pb.TagNumber(7)
-  void clearNodeId() => $_clearField(7);
-}
-
-/// Internal persisted snapshot. Histories are local to this host/network.
-class SmartConnectSnapshot extends $pb.GeneratedMessage {
-  factory SmartConnectSnapshot({
+class RuntimeOrchestrationState extends $pb.GeneratedMessage {
+  factory RuntimeOrchestrationState({
     $core.Iterable<ServiceProbe>? probes,
     $core.Iterable<ProbeResult>? results,
     $core.Iterable<ServiceSelectionPolicy>? selectionPolicies,
     $core.bool? enabled,
     $core.String? revision,
-    SmartRecoveryState? recoveryState,
+    RuntimeRecoveryState? recoveryState,
     $core.Iterable<ServicePolicy>? policies,
     $core.Iterable<SwitchProposal>? proposals,
     $core.Iterable<Operation>? operations,
@@ -4806,17 +4580,17 @@ class SmartConnectSnapshot extends $pb.GeneratedMessage {
     return result;
   }
 
-  SmartConnectSnapshot._();
+  RuntimeOrchestrationState._();
 
-  factory SmartConnectSnapshot.fromBuffer($core.List<$core.int> data,
+  factory RuntimeOrchestrationState.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromBuffer(data, registry);
-  factory SmartConnectSnapshot.fromJson($core.String json,
+  factory RuntimeOrchestrationState.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'SmartConnectSnapshot',
+      _omitMessageNames ? '' : 'RuntimeOrchestrationState',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'targetlib'),
       createEmptyInstance: create)
     ..pPM<ServiceProbe>(1, _omitFieldNames ? '' : 'probes',
@@ -4827,8 +4601,8 @@ class SmartConnectSnapshot extends $pb.GeneratedMessage {
         subBuilder: ServiceSelectionPolicy.create)
     ..aOB(4, _omitFieldNames ? '' : 'enabled')
     ..aOS(5, _omitFieldNames ? '' : 'revision')
-    ..aE<SmartRecoveryState>(6, _omitFieldNames ? '' : 'recoveryState',
-        enumValues: SmartRecoveryState.values)
+    ..aE<RuntimeRecoveryState>(6, _omitFieldNames ? '' : 'recoveryState',
+        enumValues: RuntimeRecoveryState.values)
     ..pPM<ServicePolicy>(7, _omitFieldNames ? '' : 'policies',
         subBuilder: ServicePolicy.create)
     ..pPM<SwitchProposal>(8, _omitFieldNames ? '' : 'proposals',
@@ -4842,23 +4616,24 @@ class SmartConnectSnapshot extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  SmartConnectSnapshot clone() => deepCopy();
+  RuntimeOrchestrationState clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  SmartConnectSnapshot copyWith(void Function(SmartConnectSnapshot) updates) =>
-      super.copyWith((message) => updates(message as SmartConnectSnapshot))
-          as SmartConnectSnapshot;
+  RuntimeOrchestrationState copyWith(
+          void Function(RuntimeOrchestrationState) updates) =>
+      super.copyWith((message) => updates(message as RuntimeOrchestrationState))
+          as RuntimeOrchestrationState;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
-  static SmartConnectSnapshot create() => SmartConnectSnapshot._();
+  static RuntimeOrchestrationState create() => RuntimeOrchestrationState._();
   @$core.override
-  SmartConnectSnapshot createEmptyInstance() => create();
+  RuntimeOrchestrationState createEmptyInstance() => create();
   @$core.pragma('dart2js:noInline')
-  static SmartConnectSnapshot getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<SmartConnectSnapshot>(create);
-  static SmartConnectSnapshot? _defaultInstance;
+  static RuntimeOrchestrationState getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<RuntimeOrchestrationState>(create);
+  static RuntimeOrchestrationState? _defaultInstance;
 
   @$pb.TagNumber(1)
   $pb.PbList<ServiceProbe> get probes => $_getList(0);
@@ -4888,9 +4663,9 @@ class SmartConnectSnapshot extends $pb.GeneratedMessage {
   void clearRevision() => $_clearField(5);
 
   @$pb.TagNumber(6)
-  SmartRecoveryState get recoveryState => $_getN(5);
+  RuntimeRecoveryState get recoveryState => $_getN(5);
   @$pb.TagNumber(6)
-  set recoveryState(SmartRecoveryState value) => $_setField(6, value);
+  set recoveryState(RuntimeRecoveryState value) => $_setField(6, value);
   @$pb.TagNumber(6)
   $core.bool hasRecoveryState() => $_has(5);
   @$pb.TagNumber(6)
@@ -6196,8 +5971,8 @@ class OperationList extends $pb.GeneratedMessage {
   $pb.PbList<Operation> get operations => $_getList(0);
 }
 
-class SetSmartConnectEnabledRequest extends $pb.GeneratedMessage {
-  factory SetSmartConnectEnabledRequest({
+class SetPolicyAutomationEnabledRequest extends $pb.GeneratedMessage {
+  factory SetPolicyAutomationEnabledRequest({
     $core.bool? enabled,
     $core.String? expectedRevision,
     $core.String? idempotencyKey,
@@ -6209,17 +5984,18 @@ class SetSmartConnectEnabledRequest extends $pb.GeneratedMessage {
     return result;
   }
 
-  SetSmartConnectEnabledRequest._();
+  SetPolicyAutomationEnabledRequest._();
 
-  factory SetSmartConnectEnabledRequest.fromBuffer($core.List<$core.int> data,
+  factory SetPolicyAutomationEnabledRequest.fromBuffer(
+          $core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromBuffer(data, registry);
-  factory SetSmartConnectEnabledRequest.fromJson($core.String json,
+  factory SetPolicyAutomationEnabledRequest.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'SetSmartConnectEnabledRequest',
+      _omitMessageNames ? '' : 'SetPolicyAutomationEnabledRequest',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'targetlib'),
       createEmptyInstance: create)
     ..aOB(1, _omitFieldNames ? '' : 'enabled')
@@ -6228,26 +6004,27 @@ class SetSmartConnectEnabledRequest extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  SetSmartConnectEnabledRequest clone() => deepCopy();
+  SetPolicyAutomationEnabledRequest clone() => deepCopy();
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  SetSmartConnectEnabledRequest copyWith(
-          void Function(SetSmartConnectEnabledRequest) updates) =>
-      super.copyWith(
-              (message) => updates(message as SetSmartConnectEnabledRequest))
-          as SetSmartConnectEnabledRequest;
+  SetPolicyAutomationEnabledRequest copyWith(
+          void Function(SetPolicyAutomationEnabledRequest) updates) =>
+      super.copyWith((message) =>
+              updates(message as SetPolicyAutomationEnabledRequest))
+          as SetPolicyAutomationEnabledRequest;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
-  static SetSmartConnectEnabledRequest create() =>
-      SetSmartConnectEnabledRequest._();
+  static SetPolicyAutomationEnabledRequest create() =>
+      SetPolicyAutomationEnabledRequest._();
   @$core.override
-  SetSmartConnectEnabledRequest createEmptyInstance() => create();
+  SetPolicyAutomationEnabledRequest createEmptyInstance() => create();
   @$core.pragma('dart2js:noInline')
-  static SetSmartConnectEnabledRequest getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<SetSmartConnectEnabledRequest>(create);
-  static SetSmartConnectEnabledRequest? _defaultInstance;
+  static SetPolicyAutomationEnabledRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<SetPolicyAutomationEnabledRequest>(
+          create);
+  static SetPolicyAutomationEnabledRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.bool get enabled => $_getBF(0);
@@ -6909,331 +6686,6 @@ class ListOperationsRequest extends $pb.GeneratedMessage {
   void clearLimit() => $_clearField(2);
 }
 
-class SmartConnectEventsRequest extends $pb.GeneratedMessage {
-  factory SmartConnectEventsRequest({
-    $fixnum.Int64? afterSequence,
-  }) {
-    final result = create();
-    if (afterSequence != null) result.afterSequence = afterSequence;
-    return result;
-  }
-
-  SmartConnectEventsRequest._();
-
-  factory SmartConnectEventsRequest.fromBuffer($core.List<$core.int> data,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
-  factory SmartConnectEventsRequest.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'SmartConnectEventsRequest',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'targetlib'),
-      createEmptyInstance: create)
-    ..a<$fixnum.Int64>(
-        1, _omitFieldNames ? '' : 'afterSequence', $pb.PbFieldType.OU6,
-        defaultOrMaker: $fixnum.Int64.ZERO)
-    ..hasRequiredFields = false;
-
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  SmartConnectEventsRequest clone() => deepCopy();
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  SmartConnectEventsRequest copyWith(
-          void Function(SmartConnectEventsRequest) updates) =>
-      super.copyWith((message) => updates(message as SmartConnectEventsRequest))
-          as SmartConnectEventsRequest;
-
-  @$core.override
-  $pb.BuilderInfo get info_ => _i;
-
-  @$core.pragma('dart2js:noInline')
-  static SmartConnectEventsRequest create() => SmartConnectEventsRequest._();
-  @$core.override
-  SmartConnectEventsRequest createEmptyInstance() => create();
-  @$core.pragma('dart2js:noInline')
-  static SmartConnectEventsRequest getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<SmartConnectEventsRequest>(create);
-  static SmartConnectEventsRequest? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  $fixnum.Int64 get afterSequence => $_getI64(0);
-  @$pb.TagNumber(1)
-  set afterSequence($fixnum.Int64 value) => $_setInt64(0, value);
-  @$pb.TagNumber(1)
-  $core.bool hasAfterSequence() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearAfterSequence() => $_clearField(1);
-}
-
-class SmartConnectEvent extends $pb.GeneratedMessage {
-  factory SmartConnectEvent({
-    $fixnum.Int64? sequence,
-    $core.String? epoch,
-    $core.String? operationId,
-    $core.String? resourceId,
-    $fixnum.Int64? occurredAtUnixMs,
-    SmartConnectSnapshot? snapshot,
-  }) {
-    final result = create();
-    if (sequence != null) result.sequence = sequence;
-    if (epoch != null) result.epoch = epoch;
-    if (operationId != null) result.operationId = operationId;
-    if (resourceId != null) result.resourceId = resourceId;
-    if (occurredAtUnixMs != null) result.occurredAtUnixMs = occurredAtUnixMs;
-    if (snapshot != null) result.snapshot = snapshot;
-    return result;
-  }
-
-  SmartConnectEvent._();
-
-  factory SmartConnectEvent.fromBuffer($core.List<$core.int> data,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
-  factory SmartConnectEvent.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'SmartConnectEvent',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'targetlib'),
-      createEmptyInstance: create)
-    ..a<$fixnum.Int64>(
-        1, _omitFieldNames ? '' : 'sequence', $pb.PbFieldType.OU6,
-        defaultOrMaker: $fixnum.Int64.ZERO)
-    ..aOS(2, _omitFieldNames ? '' : 'epoch')
-    ..aOS(3, _omitFieldNames ? '' : 'operationId')
-    ..aOS(4, _omitFieldNames ? '' : 'resourceId')
-    ..aInt64(5, _omitFieldNames ? '' : 'occurredAtUnixMs')
-    ..aOM<SmartConnectSnapshot>(6, _omitFieldNames ? '' : 'snapshot',
-        subBuilder: SmartConnectSnapshot.create)
-    ..hasRequiredFields = false;
-
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  SmartConnectEvent clone() => deepCopy();
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  SmartConnectEvent copyWith(void Function(SmartConnectEvent) updates) =>
-      super.copyWith((message) => updates(message as SmartConnectEvent))
-          as SmartConnectEvent;
-
-  @$core.override
-  $pb.BuilderInfo get info_ => _i;
-
-  @$core.pragma('dart2js:noInline')
-  static SmartConnectEvent create() => SmartConnectEvent._();
-  @$core.override
-  SmartConnectEvent createEmptyInstance() => create();
-  @$core.pragma('dart2js:noInline')
-  static SmartConnectEvent getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<SmartConnectEvent>(create);
-  static SmartConnectEvent? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  $fixnum.Int64 get sequence => $_getI64(0);
-  @$pb.TagNumber(1)
-  set sequence($fixnum.Int64 value) => $_setInt64(0, value);
-  @$pb.TagNumber(1)
-  $core.bool hasSequence() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearSequence() => $_clearField(1);
-
-  @$pb.TagNumber(2)
-  $core.String get epoch => $_getSZ(1);
-  @$pb.TagNumber(2)
-  set epoch($core.String value) => $_setString(1, value);
-  @$pb.TagNumber(2)
-  $core.bool hasEpoch() => $_has(1);
-  @$pb.TagNumber(2)
-  void clearEpoch() => $_clearField(2);
-
-  @$pb.TagNumber(3)
-  $core.String get operationId => $_getSZ(2);
-  @$pb.TagNumber(3)
-  set operationId($core.String value) => $_setString(2, value);
-  @$pb.TagNumber(3)
-  $core.bool hasOperationId() => $_has(2);
-  @$pb.TagNumber(3)
-  void clearOperationId() => $_clearField(3);
-
-  @$pb.TagNumber(4)
-  $core.String get resourceId => $_getSZ(3);
-  @$pb.TagNumber(4)
-  set resourceId($core.String value) => $_setString(3, value);
-  @$pb.TagNumber(4)
-  $core.bool hasResourceId() => $_has(3);
-  @$pb.TagNumber(4)
-  void clearResourceId() => $_clearField(4);
-
-  @$pb.TagNumber(5)
-  $fixnum.Int64 get occurredAtUnixMs => $_getI64(4);
-  @$pb.TagNumber(5)
-  set occurredAtUnixMs($fixnum.Int64 value) => $_setInt64(4, value);
-  @$pb.TagNumber(5)
-  $core.bool hasOccurredAtUnixMs() => $_has(4);
-  @$pb.TagNumber(5)
-  void clearOccurredAtUnixMs() => $_clearField(5);
-
-  @$pb.TagNumber(6)
-  SmartConnectSnapshot get snapshot => $_getN(5);
-  @$pb.TagNumber(6)
-  set snapshot(SmartConnectSnapshot value) => $_setField(6, value);
-  @$pb.TagNumber(6)
-  $core.bool hasSnapshot() => $_has(5);
-  @$pb.TagNumber(6)
-  void clearSnapshot() => $_clearField(6);
-  @$pb.TagNumber(6)
-  SmartConnectSnapshot ensureSnapshot() => $_ensure(5);
-}
-
-/// Portable probe policy only. Quality and runtime bindings remain device-local.
-class SmartConnectPolicy extends $pb.GeneratedMessage {
-  factory SmartConnectPolicy({
-    $core.int? schemaVersion,
-    $core.String? revision,
-    $core.Iterable<ServiceProbe>? probes,
-  }) {
-    final result = create();
-    if (schemaVersion != null) result.schemaVersion = schemaVersion;
-    if (revision != null) result.revision = revision;
-    if (probes != null) result.probes.addAll(probes);
-    return result;
-  }
-
-  SmartConnectPolicy._();
-
-  factory SmartConnectPolicy.fromBuffer($core.List<$core.int> data,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
-  factory SmartConnectPolicy.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'SmartConnectPolicy',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'targetlib'),
-      createEmptyInstance: create)
-    ..aI(1, _omitFieldNames ? '' : 'schemaVersion',
-        fieldType: $pb.PbFieldType.OU3)
-    ..aOS(2, _omitFieldNames ? '' : 'revision')
-    ..pPM<ServiceProbe>(3, _omitFieldNames ? '' : 'probes',
-        subBuilder: ServiceProbe.create)
-    ..hasRequiredFields = false;
-
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  SmartConnectPolicy clone() => deepCopy();
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  SmartConnectPolicy copyWith(void Function(SmartConnectPolicy) updates) =>
-      super.copyWith((message) => updates(message as SmartConnectPolicy))
-          as SmartConnectPolicy;
-
-  @$core.override
-  $pb.BuilderInfo get info_ => _i;
-
-  @$core.pragma('dart2js:noInline')
-  static SmartConnectPolicy create() => SmartConnectPolicy._();
-  @$core.override
-  SmartConnectPolicy createEmptyInstance() => create();
-  @$core.pragma('dart2js:noInline')
-  static SmartConnectPolicy getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<SmartConnectPolicy>(create);
-  static SmartConnectPolicy? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  $core.int get schemaVersion => $_getIZ(0);
-  @$pb.TagNumber(1)
-  set schemaVersion($core.int value) => $_setUnsignedInt32(0, value);
-  @$pb.TagNumber(1)
-  $core.bool hasSchemaVersion() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearSchemaVersion() => $_clearField(1);
-
-  @$pb.TagNumber(2)
-  $core.String get revision => $_getSZ(1);
-  @$pb.TagNumber(2)
-  set revision($core.String value) => $_setString(1, value);
-  @$pb.TagNumber(2)
-  $core.bool hasRevision() => $_has(1);
-  @$pb.TagNumber(2)
-  void clearRevision() => $_clearField(2);
-
-  @$pb.TagNumber(3)
-  $pb.PbList<ServiceProbe> get probes => $_getList(2);
-}
-
-class ImportSmartConnectPolicyRequest extends $pb.GeneratedMessage {
-  factory ImportSmartConnectPolicyRequest({
-    SmartConnectPolicy? policy,
-    $core.String? expectedRevision,
-  }) {
-    final result = create();
-    if (policy != null) result.policy = policy;
-    if (expectedRevision != null) result.expectedRevision = expectedRevision;
-    return result;
-  }
-
-  ImportSmartConnectPolicyRequest._();
-
-  factory ImportSmartConnectPolicyRequest.fromBuffer($core.List<$core.int> data,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
-  factory ImportSmartConnectPolicyRequest.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'ImportSmartConnectPolicyRequest',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'targetlib'),
-      createEmptyInstance: create)
-    ..aOM<SmartConnectPolicy>(1, _omitFieldNames ? '' : 'policy',
-        subBuilder: SmartConnectPolicy.create)
-    ..aOS(2, _omitFieldNames ? '' : 'expectedRevision')
-    ..hasRequiredFields = false;
-
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  ImportSmartConnectPolicyRequest clone() => deepCopy();
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  ImportSmartConnectPolicyRequest copyWith(
-          void Function(ImportSmartConnectPolicyRequest) updates) =>
-      super.copyWith(
-              (message) => updates(message as ImportSmartConnectPolicyRequest))
-          as ImportSmartConnectPolicyRequest;
-
-  @$core.override
-  $pb.BuilderInfo get info_ => _i;
-
-  @$core.pragma('dart2js:noInline')
-  static ImportSmartConnectPolicyRequest create() =>
-      ImportSmartConnectPolicyRequest._();
-  @$core.override
-  ImportSmartConnectPolicyRequest createEmptyInstance() => create();
-  @$core.pragma('dart2js:noInline')
-  static ImportSmartConnectPolicyRequest getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<ImportSmartConnectPolicyRequest>(
-          create);
-  static ImportSmartConnectPolicyRequest? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  SmartConnectPolicy get policy => $_getN(0);
-  @$pb.TagNumber(1)
-  set policy(SmartConnectPolicy value) => $_setField(1, value);
-  @$pb.TagNumber(1)
-  $core.bool hasPolicy() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearPolicy() => $_clearField(1);
-  @$pb.TagNumber(1)
-  SmartConnectPolicy ensurePolicy() => $_ensure(0);
-
-  /// Required local export revision. Import atomically replaces probe definitions.
-  @$pb.TagNumber(2)
-  $core.String get expectedRevision => $_getSZ(1);
-  @$pb.TagNumber(2)
-  set expectedRevision($core.String value) => $_setString(1, value);
-  @$pb.TagNumber(2)
-  $core.bool hasExpectedRevision() => $_has(1);
-  @$pb.TagNumber(2)
-  void clearExpectedRevision() => $_clearField(2);
-}
-
 class RuntimeState extends $pb.GeneratedMessage {
   factory RuntimeState({
     ConfigApplyPhase? phase,
@@ -7246,6 +6698,15 @@ class RuntimeState extends $pb.GeneratedMessage {
     $core.Iterable<ServiceRouteState>? serviceRoutes,
     $core.Iterable<ServiceBindingState>? serviceBindings,
     $core.String? nodePoolRevision,
+    $core.bool? policyAutomationEnabled,
+    $core.String? policyRevision,
+    RuntimeRecoveryState? recoveryState,
+    $core.Iterable<ServicePolicy>? policies,
+    $core.Iterable<SwitchProposal>? proposals,
+    $core.Iterable<Operation>? operations,
+    $core.Iterable<NodePreference>? nodePreferences,
+    $core.Iterable<SchedulerTask>? tasks,
+    $core.Iterable<ProbeResult>? qualityHistory,
   }) {
     final result = create();
     if (phase != null) result.phase = phase;
@@ -7258,6 +6719,16 @@ class RuntimeState extends $pb.GeneratedMessage {
     if (serviceRoutes != null) result.serviceRoutes.addAll(serviceRoutes);
     if (serviceBindings != null) result.serviceBindings.addAll(serviceBindings);
     if (nodePoolRevision != null) result.nodePoolRevision = nodePoolRevision;
+    if (policyAutomationEnabled != null)
+      result.policyAutomationEnabled = policyAutomationEnabled;
+    if (policyRevision != null) result.policyRevision = policyRevision;
+    if (recoveryState != null) result.recoveryState = recoveryState;
+    if (policies != null) result.policies.addAll(policies);
+    if (proposals != null) result.proposals.addAll(proposals);
+    if (operations != null) result.operations.addAll(operations);
+    if (nodePreferences != null) result.nodePreferences.addAll(nodePreferences);
+    if (tasks != null) result.tasks.addAll(tasks);
+    if (qualityHistory != null) result.qualityHistory.addAll(qualityHistory);
     return result;
   }
 
@@ -7288,6 +6759,22 @@ class RuntimeState extends $pb.GeneratedMessage {
     ..pPM<ServiceBindingState>(9, _omitFieldNames ? '' : 'serviceBindings',
         subBuilder: ServiceBindingState.create)
     ..aOS(10, _omitFieldNames ? '' : 'nodePoolRevision')
+    ..aOB(11, _omitFieldNames ? '' : 'policyAutomationEnabled')
+    ..aOS(12, _omitFieldNames ? '' : 'policyRevision')
+    ..aE<RuntimeRecoveryState>(13, _omitFieldNames ? '' : 'recoveryState',
+        enumValues: RuntimeRecoveryState.values)
+    ..pPM<ServicePolicy>(14, _omitFieldNames ? '' : 'policies',
+        subBuilder: ServicePolicy.create)
+    ..pPM<SwitchProposal>(15, _omitFieldNames ? '' : 'proposals',
+        subBuilder: SwitchProposal.create)
+    ..pPM<Operation>(16, _omitFieldNames ? '' : 'operations',
+        subBuilder: Operation.create)
+    ..pPM<NodePreference>(17, _omitFieldNames ? '' : 'nodePreferences',
+        subBuilder: NodePreference.create)
+    ..pPM<SchedulerTask>(18, _omitFieldNames ? '' : 'tasks',
+        subBuilder: SchedulerTask.create)
+    ..pPM<ProbeResult>(19, _omitFieldNames ? '' : 'qualityHistory',
+        subBuilder: ProbeResult.create)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -7380,6 +6867,186 @@ class RuntimeState extends $pb.GeneratedMessage {
   $core.bool hasNodePoolRevision() => $_has(9);
   @$pb.TagNumber(10)
   void clearNodePoolRevision() => $_clearField(10);
+
+  @$pb.TagNumber(11)
+  $core.bool get policyAutomationEnabled => $_getBF(10);
+  @$pb.TagNumber(11)
+  set policyAutomationEnabled($core.bool value) => $_setBool(10, value);
+  @$pb.TagNumber(11)
+  $core.bool hasPolicyAutomationEnabled() => $_has(10);
+  @$pb.TagNumber(11)
+  void clearPolicyAutomationEnabled() => $_clearField(11);
+
+  @$pb.TagNumber(12)
+  $core.String get policyRevision => $_getSZ(11);
+  @$pb.TagNumber(12)
+  set policyRevision($core.String value) => $_setString(11, value);
+  @$pb.TagNumber(12)
+  $core.bool hasPolicyRevision() => $_has(11);
+  @$pb.TagNumber(12)
+  void clearPolicyRevision() => $_clearField(12);
+
+  @$pb.TagNumber(13)
+  RuntimeRecoveryState get recoveryState => $_getN(12);
+  @$pb.TagNumber(13)
+  set recoveryState(RuntimeRecoveryState value) => $_setField(13, value);
+  @$pb.TagNumber(13)
+  $core.bool hasRecoveryState() => $_has(12);
+  @$pb.TagNumber(13)
+  void clearRecoveryState() => $_clearField(13);
+
+  @$pb.TagNumber(14)
+  $pb.PbList<ServicePolicy> get policies => $_getList(13);
+
+  @$pb.TagNumber(15)
+  $pb.PbList<SwitchProposal> get proposals => $_getList(14);
+
+  @$pb.TagNumber(16)
+  $pb.PbList<Operation> get operations => $_getList(15);
+
+  @$pb.TagNumber(17)
+  $pb.PbList<NodePreference> get nodePreferences => $_getList(16);
+
+  @$pb.TagNumber(18)
+  $pb.PbList<SchedulerTask> get tasks => $_getList(17);
+
+  @$pb.TagNumber(19)
+  $pb.PbList<ProbeResult> get qualityHistory => $_getList(18);
+}
+
+class RuntimeEvent extends $pb.GeneratedMessage {
+  factory RuntimeEvent({
+    $fixnum.Int64? sequence,
+    RuntimeEventType? type,
+    $fixnum.Int64? occurredAtUnixMs,
+    RuntimeState? state,
+    ProbeResult? probe,
+    $core.String? serviceId,
+    $core.String? nodeId,
+  }) {
+    final result = create();
+    if (sequence != null) result.sequence = sequence;
+    if (type != null) result.type = type;
+    if (occurredAtUnixMs != null) result.occurredAtUnixMs = occurredAtUnixMs;
+    if (state != null) result.state = state;
+    if (probe != null) result.probe = probe;
+    if (serviceId != null) result.serviceId = serviceId;
+    if (nodeId != null) result.nodeId = nodeId;
+    return result;
+  }
+
+  RuntimeEvent._();
+
+  factory RuntimeEvent.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory RuntimeEvent.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'RuntimeEvent',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'targetlib'),
+      createEmptyInstance: create)
+    ..a<$fixnum.Int64>(
+        1, _omitFieldNames ? '' : 'sequence', $pb.PbFieldType.OU6,
+        defaultOrMaker: $fixnum.Int64.ZERO)
+    ..aE<RuntimeEventType>(2, _omitFieldNames ? '' : 'type',
+        enumValues: RuntimeEventType.values)
+    ..aInt64(3, _omitFieldNames ? '' : 'occurredAtUnixMs')
+    ..aOM<RuntimeState>(4, _omitFieldNames ? '' : 'state',
+        subBuilder: RuntimeState.create)
+    ..aOM<ProbeResult>(5, _omitFieldNames ? '' : 'probe',
+        subBuilder: ProbeResult.create)
+    ..aOS(6, _omitFieldNames ? '' : 'serviceId')
+    ..aOS(7, _omitFieldNames ? '' : 'nodeId')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  RuntimeEvent clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  RuntimeEvent copyWith(void Function(RuntimeEvent) updates) =>
+      super.copyWith((message) => updates(message as RuntimeEvent))
+          as RuntimeEvent;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static RuntimeEvent create() => RuntimeEvent._();
+  @$core.override
+  RuntimeEvent createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static RuntimeEvent getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<RuntimeEvent>(create);
+  static RuntimeEvent? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $fixnum.Int64 get sequence => $_getI64(0);
+  @$pb.TagNumber(1)
+  set sequence($fixnum.Int64 value) => $_setInt64(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasSequence() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSequence() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  RuntimeEventType get type => $_getN(1);
+  @$pb.TagNumber(2)
+  set type(RuntimeEventType value) => $_setField(2, value);
+  @$pb.TagNumber(2)
+  $core.bool hasType() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearType() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $fixnum.Int64 get occurredAtUnixMs => $_getI64(2);
+  @$pb.TagNumber(3)
+  set occurredAtUnixMs($fixnum.Int64 value) => $_setInt64(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasOccurredAtUnixMs() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearOccurredAtUnixMs() => $_clearField(3);
+
+  @$pb.TagNumber(4)
+  RuntimeState get state => $_getN(3);
+  @$pb.TagNumber(4)
+  set state(RuntimeState value) => $_setField(4, value);
+  @$pb.TagNumber(4)
+  $core.bool hasState() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearState() => $_clearField(4);
+  @$pb.TagNumber(4)
+  RuntimeState ensureState() => $_ensure(3);
+
+  @$pb.TagNumber(5)
+  ProbeResult get probe => $_getN(4);
+  @$pb.TagNumber(5)
+  set probe(ProbeResult value) => $_setField(5, value);
+  @$pb.TagNumber(5)
+  $core.bool hasProbe() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearProbe() => $_clearField(5);
+  @$pb.TagNumber(5)
+  ProbeResult ensureProbe() => $_ensure(4);
+
+  @$pb.TagNumber(6)
+  $core.String get serviceId => $_getSZ(5);
+  @$pb.TagNumber(6)
+  set serviceId($core.String value) => $_setString(5, value);
+  @$pb.TagNumber(6)
+  $core.bool hasServiceId() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearServiceId() => $_clearField(6);
+
+  @$pb.TagNumber(7)
+  $core.String get nodeId => $_getSZ(6);
+  @$pb.TagNumber(7)
+  set nodeId($core.String value) => $_setString(6, value);
+  @$pb.TagNumber(7)
+  $core.bool hasNodeId() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearNodeId() => $_clearField(7);
 }
 
 class TestOutboundRequest extends $pb.GeneratedMessage {

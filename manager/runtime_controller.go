@@ -28,13 +28,13 @@ func (m *Manager) commitSmartRuntime(ctx context.Context, next *api.RuntimeConfi
 	if err != nil {
 		return err
 	}
-	s := m.smart
+	s := m.runtimeState
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if s.closed {
 		return status.Error(codes.Unavailable, "manager is closed")
 	}
-	snapshot := proto.Clone(s.snapshot).(*api.SmartConnectSnapshot)
+	snapshot := proto.Clone(s.snapshot).(*api.RuntimeOrchestrationState)
 	if operationID != "" {
 		operation := findOperation(snapshot, operationID)
 		if operation != nil {
@@ -55,7 +55,7 @@ func (m *Manager) commitSmartRuntime(ctx context.Context, next *api.RuntimeConfi
 		if err := tx.SetMetadata(runtimeNodesMetadataKey, nodeContent); err != nil {
 			return err
 		}
-		return tx.SetMetadata(smartMetadataKey, smartContent)
+		return tx.SetMetadata(runtimeStateMetadataKey, smartContent)
 	}); err != nil {
 		return err
 	}
@@ -470,9 +470,9 @@ func (m *Manager) GetRuntimeState(ctx context.Context, _ *emptypb.Empty) (*api.R
 		routeEffective[route.ServiceId] = effective
 		result.ServiceRoutes = append(result.ServiceRoutes, &api.ServiceRouteState{Desired: route, Effective: effective})
 	}
-	var quality *api.SmartConnectSnapshot
-	if m.smart != nil {
-		quality = m.smart.read()
+	var quality *api.RuntimeOrchestrationState
+	if m.runtimeState != nil {
+		quality = m.runtimeState.read()
 	}
 	for _, binding := range desired.ServiceBindings {
 		reason := ""
@@ -487,6 +487,21 @@ func (m *Manager) GetRuntimeState(ctx context.Context, _ *emptypb.Empty) (*api.R
 			reason = "node_unavailable"
 		}
 		result.ServiceBindings = append(result.ServiceBindings, &api.ServiceBindingState{Desired: binding, Effective: routeEffective[binding.ServiceId] && actual[binding.SelectorTag] == binding.NodeId, NodeAvailable: available[binding.NodeId], NeedsEvaluation: reason != "", EvaluationReason: reason})
+	}
+	if quality != nil {
+		result.PolicyAutomationEnabled = quality.Enabled
+		result.PolicyRevision = quality.Revision
+		result.RecoveryState = quality.RecoveryState
+		result.Policies = quality.Policies
+		result.Proposals = quality.Proposals
+		result.Operations = quality.Operations
+		result.NodePreferences = quality.NodePreferences
+		result.Tasks = quality.Tasks
+		if len(quality.Results) > 100 {
+			result.QualityHistory = quality.Results[len(quality.Results)-100:]
+		} else {
+			result.QualityHistory = quality.Results
+		}
 	}
 	return result, nil
 }

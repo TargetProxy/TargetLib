@@ -22,26 +22,34 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-const smartMetadataKey = "smart-connect-v1"
+const runtimeStateMetadataKey = "smart-connect-v1"
 
-type smartConnect struct {
-	mu                sync.Mutex
-	store             subscriptions.Store
-	snapshot          *api.SmartConnectSnapshot
-	closed            bool
-	done              chan struct{}
-	workers           sync.WaitGroup
-	slots             chan struct{}
+type runtimeStateStore struct {
+	mu          sync.Mutex
+	store       subscriptions.Store
+	snapshot    *api.RuntimeOrchestrationState
+	closed      bool
+	done        chan struct{}
+	workers     sync.WaitGroup
+	slots       chan struct{}
+	sequence    uint64
+	subscribers map[chan *api.RuntimeEvent]struct{}
 }
 
-func newSmartConnect(ctx context.Context, store subscriptions.Store) (*smartConnect, error) {
-	s := &smartConnect{store: store, snapshot: new(api.SmartConnectSnapshot), done: make(chan struct{}), slots: make(chan struct{}, 4)}
-	content, err := store.GetMetadata(ctx, smartMetadataKey)
+func newRuntimeStateStore(ctx context.Context, store subscriptions.Store) (*runtimeStateStore, error) {
+	s := &runtimeStateStore{
+		store:       store,
+		snapshot:    new(api.RuntimeOrchestrationState),
+		done:        make(chan struct{}),
+		slots:       make(chan struct{}, 4),
+		subscribers: make(map[chan *api.RuntimeEvent]struct{}),
+	}
+	content, err := store.GetMetadata(ctx, runtimeStateMetadataKey)
 	if err != nil {
 		return nil, err
 	}
 	if err := proto.Unmarshal(content, s.snapshot); err != nil {
-		return nil, fmt.Errorf("decode smart connect: %w", err)
+		return nil, fmt.Errorf("decode runtime policy state: %w", err)
 	}
 	if s.snapshot.Revision == "" {
 		s.snapshot.Revision = uuid.NewString()
@@ -49,19 +57,19 @@ func newSmartConnect(ctx context.Context, store subscriptions.Store) (*smartConn
 	return s, nil
 }
 
-func (s *smartConnect) read() *api.SmartConnectSnapshot {
+func (s *runtimeStateStore) read() *api.RuntimeOrchestrationState {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	return proto.Clone(s.snapshot).(*api.SmartConnectSnapshot)
+	return proto.Clone(s.snapshot).(*api.RuntimeOrchestrationState)
 }
 
-func (s *smartConnect) update(ctx context.Context, change func(*api.SmartConnectSnapshot) error) error {
+func (s *runtimeStateStore) update(ctx context.Context, change func(*api.RuntimeOrchestrationState) error) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if s.closed {
 		return status.Error(codes.Unavailable, "manager is closed")
 	}
-	next := proto.Clone(s.snapshot).(*api.SmartConnectSnapshot)
+	next := proto.Clone(s.snapshot).(*api.RuntimeOrchestrationState)
 	if err := change(next); err != nil {
 		return err
 	}
@@ -69,17 +77,17 @@ func (s *smartConnect) update(ctx context.Context, change func(*api.SmartConnect
 	if err != nil {
 		return err
 	}
-	if err := s.store.Update(ctx, func(tx subscriptions.StoreTx) error { return tx.SetMetadata(smartMetadataKey, content) }); err != nil {
+	if err := s.store.Update(ctx, func(tx subscriptions.StoreTx) error { return tx.SetMetadata(runtimeStateMetadataKey, content) }); err != nil {
 		if ctx.Err() != nil {
 			return status.FromContextError(ctx.Err()).Err()
 		}
-		return status.Error(codes.Internal, "persist smart connect: "+err.Error())
+		return status.Error(codes.Internal, "persist runtime policy state: "+err.Error())
 	}
 	s.snapshot = next
 	return nil
 }
 
-func (s *smartConnect) close() {
+func (s *runtimeStateStore) close() {
 	s.mu.Lock()
 	if !s.closed {
 		s.closed = true
@@ -89,19 +97,36 @@ func (s *smartConnect) close() {
 	s.workers.Wait()
 }
 
-func (m *Manager) watchSmartConnect(ctx context.Context) {
-	m.smart.workers.Add(1)
+func (m *Manager) watchRuntimeState(ctx context.Context) {
+	events, cancel := m.subscriptions.Subscribe(16)
+	lastPoolRevision := m.subscriptions.NodePool().Revision
+	m.runtimeState.workers.Add(1)
 	go func() {
-		defer m.smart.workers.Done()
-		ticker := time.NewTicker(time.Second)
+		defer m.runtimeState.workers.Done()
+		defer cancel()
+		ticker := time.NewTicker(100 * time.Millisecond)
 		defer ticker.Stop()
+		publishPoolChange := func() {
+			poolRevision := m.subscriptions.NodePool().Revision
+			if poolRevision == lastPoolRevision {
+				return
+			}
+			lastPoolRevision = poolRevision
+			state, err := m.GetRuntimeState(ctx, &emptypb.Empty{})
+			if err == nil {
+				m.publishRuntime(&api.RuntimeEvent{Type: api.RuntimeEventType_RUNTIME_EVENT_TYPE_NODE_POOL, State: state})
+			}
+		}
 		for {
 			select {
 			case <-ctx.Done():
 				return
-			case <-m.smart.done:
+			case <-m.runtimeState.done:
 				return
+			case <-events:
+				publishPoolChange()
 			case <-ticker.C:
+				publishPoolChange()
 				m.dispatchDueSmartTasks()
 			}
 		}
@@ -194,18 +219,24 @@ func (m *Manager) PutServiceProbe(ctx context.Context, value *api.ServiceProbe) 
 	if err != nil {
 		return nil, err
 	}
-	err = m.smart.update(ctx, func(next *api.SmartConnectSnapshot) error {
+	err = m.runtimeState.update(ctx, func(next *api.RuntimeOrchestrationState) error {
+		current := findProbe(next, p.ServiceId)
+		if current != nil && value.Revision != "" && value.Revision != current.Revision {
+			return status.Error(codes.Aborted, "probe revision changed")
+		}
+		if current == nil && value.Revision != "" {
+			return status.Error(codes.Aborted, "probe no longer exists")
+		}
+		for _, policy := range next.Policies {
+			if policy.ServiceId == p.ServiceId {
+				policy.Probes = []*api.ServiceProbe{proto.Clone(p).(*api.ServiceProbe)}
+			}
+		}
 		for i, old := range next.Probes {
 			if old.ServiceId == p.ServiceId {
-				if value.Revision != "" && value.Revision != old.Revision {
-					return status.Error(codes.Aborted, "probe revision changed")
-				}
 				next.Probes[i] = p
 				return nil
 			}
-		}
-		if value.Revision != "" {
-			return status.Error(codes.Aborted, "probe no longer exists")
 		}
 		if len(next.Probes) >= 256 {
 			return status.Error(codes.ResourceExhausted, "maximum 256 service probes")
@@ -220,13 +251,12 @@ func (m *Manager) PutServiceProbe(ctx context.Context, value *api.ServiceProbe) 
 	return proto.Clone(p).(*api.ServiceProbe), nil
 }
 
-func (m *Manager) ListServiceProbes(context.Context, *emptypb.Empty) (*api.ServiceProbeList, error) {
-	probes := m.smart.read().Probes
-	sort.Slice(probes, func(i, j int) bool { return probes[i].ServiceId < probes[j].ServiceId })
-	return &api.ServiceProbeList{Probes: probes}, nil
-}
-
-func findProbe(snapshot *api.SmartConnectSnapshot, id string) *api.ServiceProbe {
+func findProbe(snapshot *api.RuntimeOrchestrationState, id string) *api.ServiceProbe {
+	for _, policy := range snapshot.Policies {
+		if policy.ServiceId == id && len(policy.Probes) > 0 {
+			return policy.Probes[0]
+		}
+	}
 	for _, p := range snapshot.Probes {
 		if p.ServiceId == id {
 			return p
@@ -239,16 +269,21 @@ func (m *Manager) RemoveServiceProbe(ctx context.Context, request *api.RemoveSer
 	if request.GetServiceId() == "" {
 		return nil, status.Error(codes.InvalidArgument, "service ID is required")
 	}
-	err := m.smart.update(ctx, func(next *api.SmartConnectSnapshot) error {
+	err := m.runtimeState.update(ctx, func(next *api.RuntimeOrchestrationState) error {
 		probe := findProbe(next, request.ServiceId)
-		if probe != nil {
-			if request.ExpectedRevision != "" && request.ExpectedRevision != probe.Revision {
-				return status.Error(codes.Aborted, "probe revision changed")
-			}
-			next.Probes = removeIf(next.Probes, func(candidate *api.ServiceProbe) bool { return candidate.ServiceId == request.ServiceId })
-			return nil
+		if probe == nil {
+			return status.Error(codes.NotFound, "service probe not found")
 		}
-		return status.Error(codes.NotFound, "service probe not found")
+		if request.ExpectedRevision != "" && request.ExpectedRevision != probe.Revision {
+			return status.Error(codes.Aborted, "probe revision changed")
+		}
+		for _, policy := range next.Policies {
+			if policy.ServiceId == request.ServiceId {
+				policy.Probes = nil
+			}
+		}
+		next.Probes = removeIf(next.Probes, func(candidate *api.ServiceProbe) bool { return candidate.ServiceId == request.ServiceId })
+		return nil
 	})
 	if err != nil {
 		return nil, err
@@ -266,7 +301,7 @@ func (m *Manager) GetQualityHistory(_ context.Context, request *api.QualityHisto
 		return nil, status.Error(codes.InvalidArgument, "history limit exceeds 1024")
 	}
 	result := new(api.QualityHistory)
-	history := m.smart.read().Results
+	history := m.runtimeState.read().Results
 	for i := len(history) - 1; i >= 0 && len(result.Results) < int(limit); i-- {
 		row := history[i]
 		if (request.GetServiceId() == "" || row.ServiceId == request.GetServiceId()) && (request.GetNodeId() == "" || row.NodeId == request.GetNodeId()) {
@@ -277,7 +312,7 @@ func (m *Manager) GetQualityHistory(_ context.Context, request *api.QualityHisto
 }
 
 func (m *Manager) saveQuality(ctx context.Context, result *api.ProbeResult) error {
-	return m.smart.update(ctx, func(next *api.SmartConnectSnapshot) error {
+	return m.runtimeState.update(ctx, func(next *api.RuntimeOrchestrationState) error {
 		next.Results = append(next.Results, proto.Clone(result).(*api.ProbeResult))
 		sort.SliceStable(next.Results, func(i, j int) bool { return next.Results[i].TestedAtUnixMs < next.Results[j].TestedAtUnixMs })
 		// Retain at most 32 observations per service/node and 1024 globally.
@@ -299,7 +334,7 @@ func (m *Manager) saveQuality(ctx context.Context, result *api.ProbeResult) erro
 	})
 }
 
-func latestQuality(snapshot *api.SmartConnectSnapshot, serviceID, nodeID string) *api.ProbeResult {
+func latestQuality(snapshot *api.RuntimeOrchestrationState, serviceID, nodeID string) *api.ProbeResult {
 	p := findProbe(snapshot, serviceID)
 	var fallback *api.ProbeResult
 	for i := len(snapshot.Results) - 1; i >= 0; i-- {
@@ -316,7 +351,7 @@ func latestQuality(snapshot *api.SmartConnectSnapshot, serviceID, nodeID string)
 	return fallback
 }
 
-func qualityReason(snapshot *api.SmartConnectSnapshot, serviceID, nodeID string, now int64) string {
+func qualityReason(snapshot *api.RuntimeOrchestrationState, serviceID, nodeID string, now int64) string {
 	p := findProbe(snapshot, serviceID)
 	if p == nil {
 		return "probe_not_configured"
@@ -344,7 +379,7 @@ func (m *Manager) EvaluateService(_ context.Context, request *api.EvaluateServic
 	if request.GetServiceId() == "" {
 		return nil, status.Error(codes.InvalidArgument, "service ID is required")
 	}
-	snapshot := m.smart.read()
+	snapshot := m.runtimeState.read()
 	p := findProbe(snapshot, request.ServiceId)
 	if p == nil {
 		return nil, status.Error(codes.NotFound, "service probe not found")

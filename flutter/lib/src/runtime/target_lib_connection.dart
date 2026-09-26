@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:grpc/grpc.dart';
-import 'package:fixnum/fixnum.dart' show Int64;
 import 'package:protobuf/well_known_types/google/protobuf/empty.pb.dart';
 
 import '../generated/api/TargetLib/targetlib.pbgrpc.dart';
@@ -155,11 +154,9 @@ final class TargetLibConnection {
       client.getNodePool(Empty(), options: options);
   Future<RuntimeState> getRuntimeState() =>
       client.getRuntimeState(Empty(), options: options);
-  Future<SmartConnectSnapshot> getSmartConnectSnapshot() =>
-      client.getSmartConnectSnapshot(Empty(), options: options);
-  Future<Operation> setSmartConnectEnabled(
-    SetSmartConnectEnabledRequest request,
-  ) => client.setSmartConnectEnabled(request, options: options);
+  Future<Operation> setPolicyAutomationEnabled(
+    SetPolicyAutomationEnabledRequest request,
+  ) => client.setPolicyAutomationEnabled(request, options: options);
   Future<ServicePolicyList> listServicePolicies() =>
       client.listServicePolicies(Empty(), options: options);
   Future<Operation> upsertServicePolicy(UpsertServicePolicyRequest request) =>
@@ -183,10 +180,6 @@ final class TargetLibConnection {
   );
   Future<OperationList> listOperations(ListOperationsRequest request) =>
       client.listOperations(request, options: options);
-  ResponseStream<SmartConnectEvent> subscribeSmartConnectEvents({
-    int afterSequence = 0,
-  }) => client.subscribeSmartConnectEvents(
-    SmartConnectEventsRequest(afterSequence: Int64(afterSequence)),
-    options: options,
-  );
+  ResponseStream<RuntimeEvent> subscribeRuntimeEvents() =>
+      client.subscribeRuntimeEvents(Empty(), options: options);
 }

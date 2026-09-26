@@ -136,48 +136,23 @@ final $typed_data.Uint8List probeStageDescriptor = $convert.base64Decode(
     'ChNQUk9CRV9TVEFHRV9DT05URU5UEAkSFAoQUFJPQkVfU1RBR0VfTk9ERRAKEhYKElBST0JFX1'
     'NUQUdFX0VHUkVTUxAL');
 
-@$core.Deprecated('Use runtimeEventTypeDescriptor instead')
-const RuntimeEventType$json = {
-  '1': 'RuntimeEventType',
+@$core.Deprecated('Use runtimeRecoveryStateDescriptor instead')
+const RuntimeRecoveryState$json = {
+  '1': 'RuntimeRecoveryState',
   '2': [
-    {'1': 'RUNTIME_EVENT_TYPE_UNSPECIFIED', '2': 0},
-    {'1': 'RUNTIME_EVENT_TYPE_SNAPSHOT', '2': 1},
-    {'1': 'RUNTIME_EVENT_TYPE_CONFIG', '2': 2},
-    {'1': 'RUNTIME_EVENT_TYPE_NODE_POOL', '2': 3},
-    {'1': 'RUNTIME_EVENT_TYPE_BINDING', '2': 4},
-    {'1': 'RUNTIME_EVENT_TYPE_PROBE_STARTED', '2': 5},
-    {'1': 'RUNTIME_EVENT_TYPE_PROBE_COMPLETED', '2': 6},
-    {'1': 'RUNTIME_EVENT_TYPE_PROBE_DEFINITION', '2': 7},
-    {'1': 'RUNTIME_EVENT_TYPE_STOPPED', '2': 8},
+    {'1': 'RUNTIME_RECOVERY_STATE_UNSPECIFIED', '2': 0},
+    {'1': 'RUNTIME_RECOVERY_STATE_RECOVERING', '2': 1},
+    {'1': 'RUNTIME_RECOVERY_STATE_READY', '2': 2},
+    {'1': 'RUNTIME_RECOVERY_STATE_DEGRADED', '2': 3},
   ],
 };
 
-/// Descriptor for `RuntimeEventType`. Decode as a `google.protobuf.EnumDescriptorProto`.
-final $typed_data.Uint8List runtimeEventTypeDescriptor = $convert.base64Decode(
-    'ChBSdW50aW1lRXZlbnRUeXBlEiIKHlJVTlRJTUVfRVZFTlRfVFlQRV9VTlNQRUNJRklFRBAAEh'
-    '8KG1JVTlRJTUVfRVZFTlRfVFlQRV9TTkFQU0hPVBABEh0KGVJVTlRJTUVfRVZFTlRfVFlQRV9D'
-    'T05GSUcQAhIgChxSVU5USU1FX0VWRU5UX1RZUEVfTk9ERV9QT09MEAMSHgoaUlVOVElNRV9FVk'
-    'VOVF9UWVBFX0JJTkRJTkcQBBIkCiBSVU5USU1FX0VWRU5UX1RZUEVfUFJPQkVfU1RBUlRFRBAF'
-    'EiYKIlJVTlRJTUVfRVZFTlRfVFlQRV9QUk9CRV9DT01QTEVURUQQBhInCiNSVU5USU1FX0VWRU'
-    '5UX1RZUEVfUFJPQkVfREVGSU5JVElPThAHEh4KGlJVTlRJTUVfRVZFTlRfVFlQRV9TVE9QUEVE'
-    'EAg=');
-
-@$core.Deprecated('Use smartRecoveryStateDescriptor instead')
-const SmartRecoveryState$json = {
-  '1': 'SmartRecoveryState',
-  '2': [
-    {'1': 'SMART_RECOVERY_STATE_UNSPECIFIED', '2': 0},
-    {'1': 'SMART_RECOVERY_STATE_RECOVERING', '2': 1},
-    {'1': 'SMART_RECOVERY_STATE_READY', '2': 2},
-    {'1': 'SMART_RECOVERY_STATE_DEGRADED', '2': 3},
-  ],
-};
-
-/// Descriptor for `SmartRecoveryState`. Decode as a `google.protobuf.EnumDescriptorProto`.
-final $typed_data.Uint8List smartRecoveryStateDescriptor = $convert.base64Decode(
-    'ChJTbWFydFJlY292ZXJ5U3RhdGUSJAogU01BUlRfUkVDT1ZFUllfU1RBVEVfVU5TUEVDSUZJRU'
-    'QQABIjCh9TTUFSVF9SRUNPVkVSWV9TVEFURV9SRUNPVkVSSU5HEAESHgoaU01BUlRfUkVDT1ZF'
-    'UllfU1RBVEVfUkVBRFkQAhIhCh1TTUFSVF9SRUNPVkVSWV9TVEFURV9ERUdSQURFRBAD');
+/// Descriptor for `RuntimeRecoveryState`. Decode as a `google.protobuf.EnumDescriptorProto`.
+final $typed_data.Uint8List runtimeRecoveryStateDescriptor = $convert.base64Decode(
+    'ChRSdW50aW1lUmVjb3ZlcnlTdGF0ZRImCiJSVU5USU1FX1JFQ09WRVJZX1NUQVRFX1VOU1BFQ0'
+    'lGSUVEEAASJQohUlVOVElNRV9SRUNPVkVSWV9TVEFURV9SRUNPVkVSSU5HEAESIAocUlVOVElN'
+    'RV9SRUNPVkVSWV9TVEFURV9SRUFEWRACEiMKH1JVTlRJTUVfUkVDT1ZFUllfU1RBVEVfREVHUk'
+    'FERUQQAw==');
 
 @$core.Deprecated('Use switchModeDescriptor instead')
 const SwitchMode$json = {
@@ -219,6 +194,32 @@ final $typed_data.Uint8List operationStatusDescriptor = $convert.base64Decode(
     'JQohT1BFUkFUSU9OX1NUQVRVU19XQUlUSU5HX0FQUFJPVkFMEAMSHgoaT1BFUkFUSU9OX1NUQV'
     'RVU19TVUNDRUVERUQQBBIbChdPUEVSQVRJT05fU1RBVFVTX0ZBSUxFRBAFEh4KGk9QRVJBVElP'
     'Tl9TVEFUVVNfQ0FOQ0VMTEVEEAYSIAocT1BFUkFUSU9OX1NUQVRVU19ST0xMRURfQkFDSxAH');
+
+@$core.Deprecated('Use runtimeEventTypeDescriptor instead')
+const RuntimeEventType$json = {
+  '1': 'RuntimeEventType',
+  '2': [
+    {'1': 'RUNTIME_EVENT_TYPE_UNSPECIFIED', '2': 0},
+    {'1': 'RUNTIME_EVENT_TYPE_SNAPSHOT', '2': 1},
+    {'1': 'RUNTIME_EVENT_TYPE_CONFIG', '2': 2},
+    {'1': 'RUNTIME_EVENT_TYPE_NODE_POOL', '2': 3},
+    {'1': 'RUNTIME_EVENT_TYPE_BINDING', '2': 4},
+    {'1': 'RUNTIME_EVENT_TYPE_PROBE_STARTED', '2': 5},
+    {'1': 'RUNTIME_EVENT_TYPE_PROBE_COMPLETED', '2': 6},
+    {'1': 'RUNTIME_EVENT_TYPE_PROBE_DEFINITION', '2': 7},
+    {'1': 'RUNTIME_EVENT_TYPE_STOPPED', '2': 8},
+  ],
+};
+
+/// Descriptor for `RuntimeEventType`. Decode as a `google.protobuf.EnumDescriptorProto`.
+final $typed_data.Uint8List runtimeEventTypeDescriptor = $convert.base64Decode(
+    'ChBSdW50aW1lRXZlbnRUeXBlEiIKHlJVTlRJTUVfRVZFTlRfVFlQRV9VTlNQRUNJRklFRBAAEh'
+    '8KG1JVTlRJTUVfRVZFTlRfVFlQRV9TTkFQU0hPVBABEh0KGVJVTlRJTUVfRVZFTlRfVFlQRV9D'
+    'T05GSUcQAhIgChxSVU5USU1FX0VWRU5UX1RZUEVfTk9ERV9QT09MEAMSHgoaUlVOVElNRV9FVk'
+    'VOVF9UWVBFX0JJTkRJTkcQBBIkCiBSVU5USU1FX0VWRU5UX1RZUEVfUFJPQkVfU1RBUlRFRBAF'
+    'EiYKIlJVTlRJTUVfRVZFTlRfVFlQRV9QUk9CRV9DT01QTEVURUQQBhInCiNSVU5USU1FX0VWRU'
+    '5UX1RZUEVfUFJPQkVfREVGSU5JVElPThAHEh4KGlJVTlRJTUVfRVZFTlRfVFlQRV9TVE9QUEVE'
+    'EAg=');
 
 @$core.Deprecated('Use latencyTestStatusDescriptor instead')
 const LatencyTestStatus$json = {
@@ -427,15 +428,21 @@ const CapabilitiesResponse$json = {
       '10': 'subscriptionManagement'
     },
     {'1': 'real_time_traffic', '3': 6, '4': 1, '5': 8, '10': 'realTimeTraffic'},
-    {'1': 'smart_connect', '3': 7, '4': 1, '5': 8, '10': 'smartConnect'},
+    {
+      '1': 'policy_automation',
+      '3': 7,
+      '4': 1,
+      '5': 8,
+      '10': 'policyAutomation'
+    },
     {'1': 'service_probes', '3': 8, '4': 1, '5': 8, '10': 'serviceProbes'},
     {'1': 'runtime_events', '3': 9, '4': 1, '5': 8, '10': 'runtimeEvents'},
     {
-      '1': 'smart_connect_intent_api',
+      '1': 'policy_automation_api',
       '3': 10,
       '4': 1,
       '5': 8,
-      '10': 'smartConnectIntentApi'
+      '10': 'policyAutomationApi'
     },
   ],
   '9': [
@@ -450,10 +457,10 @@ final $typed_data.Uint8List capabilitiesResponseDescriptor = $convert.base64Deco
     'ChRDYXBhYmlsaXRpZXNSZXNwb25zZRIaCghwbGF0Zm9ybRgBIAEoCVIIcGxhdGZvcm0SIQoMcG'
     'xhdGZvcm1fdnBuGAMgASgIUgtwbGF0Zm9ybVZwbhI3ChdzdWJzY3JpcHRpb25fbWFuYWdlbWVu'
     'dBgFIAEoCFIWc3Vic2NyaXB0aW9uTWFuYWdlbWVudBIqChFyZWFsX3RpbWVfdHJhZmZpYxgGIA'
-    'EoCFIPcmVhbFRpbWVUcmFmZmljEiMKDXNtYXJ0X2Nvbm5lY3QYByABKAhSDHNtYXJ0Q29ubmVj'
-    'dBIlCg5zZXJ2aWNlX3Byb2JlcxgIIAEoCFINc2VydmljZVByb2JlcxIlCg5ydW50aW1lX2V2ZW'
-    '50cxgJIAEoCFINcnVudGltZUV2ZW50cxI3ChhzbWFydF9jb25uZWN0X2ludGVudF9hcGkYCiAB'
-    'KAhSFXNtYXJ0Q29ubmVjdEludGVudEFwaUoECAIQA0oECAQQBVIMc3lzdGVtX3Byb3h5');
+    'EoCFIPcmVhbFRpbWVUcmFmZmljEisKEXBvbGljeV9hdXRvbWF0aW9uGAcgASgIUhBwb2xpY3lB'
+    'dXRvbWF0aW9uEiUKDnNlcnZpY2VfcHJvYmVzGAggASgIUg1zZXJ2aWNlUHJvYmVzEiUKDnJ1bn'
+    'RpbWVfZXZlbnRzGAkgASgIUg1ydW50aW1lRXZlbnRzEjIKFXBvbGljeV9hdXRvbWF0aW9uX2Fw'
+    'aRgKIAEoCFITcG9saWN5QXV0b21hdGlvbkFwaUoECAIQA0oECAQQBVIMc3lzdGVtX3Byb3h5');
 
 @$core.Deprecated('Use operationResponseDescriptor instead')
 const OperationResponse$json = {
@@ -1820,98 +1827,9 @@ final $typed_data.Uint8List serviceEvaluationDescriptor = $convert.base64Decode(
     'bXMYBSABKANSEWV2YWx1YXRlZEF0VW5peE1zEiUKDnByb2JlX3JldmlzaW9uGAYgASgJUg1wcm'
     '9iZVJldmlzaW9u');
 
-@$core.Deprecated('Use smartConnectDiagnosticsDescriptor instead')
-const SmartConnectDiagnostics$json = {
-  '1': 'SmartConnectDiagnostics',
-  '2': [
-    {
-      '1': 'runtime',
-      '3': 1,
-      '4': 1,
-      '5': 11,
-      '6': '.targetlib.RuntimeState',
-      '10': 'runtime'
-    },
-    {
-      '1': 'evaluations',
-      '3': 2,
-      '4': 3,
-      '5': 11,
-      '6': '.targetlib.ServiceEvaluation',
-      '10': 'evaluations'
-    },
-    {'1': 'policy_revision', '3': 3, '4': 1, '5': 9, '10': 'policyRevision'},
-    {
-      '1': 'generated_at_unix_ms',
-      '3': 4,
-      '4': 1,
-      '5': 3,
-      '10': 'generatedAtUnixMs'
-    },
-  ],
-};
-
-/// Descriptor for `SmartConnectDiagnostics`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List smartConnectDiagnosticsDescriptor = $convert.base64Decode(
-    'ChdTbWFydENvbm5lY3REaWFnbm9zdGljcxIxCgdydW50aW1lGAEgASgLMhcudGFyZ2V0bGliLl'
-    'J1bnRpbWVTdGF0ZVIHcnVudGltZRI+CgtldmFsdWF0aW9ucxgCIAMoCzIcLnRhcmdldGxpYi5T'
-    'ZXJ2aWNlRXZhbHVhdGlvblILZXZhbHVhdGlvbnMSJwoPcG9saWN5X3JldmlzaW9uGAMgASgJUg'
-    '5wb2xpY3lSZXZpc2lvbhIvChRnZW5lcmF0ZWRfYXRfdW5peF9tcxgEIAEoA1IRZ2VuZXJhdGVk'
-    'QXRVbml4TXM=');
-
-@$core.Deprecated('Use runtimeEventDescriptor instead')
-const RuntimeEvent$json = {
-  '1': 'RuntimeEvent',
-  '2': [
-    {'1': 'sequence', '3': 1, '4': 1, '5': 4, '10': 'sequence'},
-    {
-      '1': 'type',
-      '3': 2,
-      '4': 1,
-      '5': 14,
-      '6': '.targetlib.RuntimeEventType',
-      '10': 'type'
-    },
-    {
-      '1': 'occurred_at_unix_ms',
-      '3': 3,
-      '4': 1,
-      '5': 3,
-      '10': 'occurredAtUnixMs'
-    },
-    {
-      '1': 'state',
-      '3': 4,
-      '4': 1,
-      '5': 11,
-      '6': '.targetlib.RuntimeState',
-      '10': 'state'
-    },
-    {
-      '1': 'probe',
-      '3': 5,
-      '4': 1,
-      '5': 11,
-      '6': '.targetlib.ProbeResult',
-      '10': 'probe'
-    },
-    {'1': 'service_id', '3': 6, '4': 1, '5': 9, '10': 'serviceId'},
-    {'1': 'node_id', '3': 7, '4': 1, '5': 9, '10': 'nodeId'},
-  ],
-};
-
-/// Descriptor for `RuntimeEvent`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List runtimeEventDescriptor = $convert.base64Decode(
-    'CgxSdW50aW1lRXZlbnQSGgoIc2VxdWVuY2UYASABKARSCHNlcXVlbmNlEi8KBHR5cGUYAiABKA'
-    '4yGy50YXJnZXRsaWIuUnVudGltZUV2ZW50VHlwZVIEdHlwZRItChNvY2N1cnJlZF9hdF91bml4'
-    'X21zGAMgASgDUhBvY2N1cnJlZEF0VW5peE1zEi0KBXN0YXRlGAQgASgLMhcudGFyZ2V0bGliLl'
-    'J1bnRpbWVTdGF0ZVIFc3RhdGUSLAoFcHJvYmUYBSABKAsyFi50YXJnZXRsaWIuUHJvYmVSZXN1'
-    'bHRSBXByb2JlEh0KCnNlcnZpY2VfaWQYBiABKAlSCXNlcnZpY2VJZBIXCgdub2RlX2lkGAcgAS'
-    'gJUgZub2RlSWQ=');
-
-@$core.Deprecated('Use smartConnectSnapshotDescriptor instead')
-const SmartConnectSnapshot$json = {
-  '1': 'SmartConnectSnapshot',
+@$core.Deprecated('Use runtimeOrchestrationStateDescriptor instead')
+const RuntimeOrchestrationState$json = {
+  '1': 'RuntimeOrchestrationState',
   '2': [
     {
       '1': 'probes',
@@ -1944,7 +1862,7 @@ const SmartConnectSnapshot$json = {
       '3': 6,
       '4': 1,
       '5': 14,
-      '6': '.targetlib.SmartRecoveryState',
+      '6': '.targetlib.RuntimeRecoveryState',
       '10': 'recoveryState'
     },
     {
@@ -1990,20 +1908,20 @@ const SmartConnectSnapshot$json = {
   ],
 };
 
-/// Descriptor for `SmartConnectSnapshot`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List smartConnectSnapshotDescriptor = $convert.base64Decode(
-    'ChRTbWFydENvbm5lY3RTbmFwc2hvdBIvCgZwcm9iZXMYASADKAsyFy50YXJnZXRsaWIuU2Vydm'
-    'ljZVByb2JlUgZwcm9iZXMSMAoHcmVzdWx0cxgCIAMoCzIWLnRhcmdldGxpYi5Qcm9iZVJlc3Vs'
-    'dFIHcmVzdWx0cxJQChJzZWxlY3Rpb25fcG9saWNpZXMYAyADKAsyIS50YXJnZXRsaWIuU2Vydm'
-    'ljZVNlbGVjdGlvblBvbGljeVIRc2VsZWN0aW9uUG9saWNpZXMSGAoHZW5hYmxlZBgEIAEoCFIH'
-    'ZW5hYmxlZBIaCghyZXZpc2lvbhgFIAEoCVIIcmV2aXNpb24SRAoOcmVjb3Zlcnlfc3RhdGUYBi'
-    'ABKA4yHS50YXJnZXRsaWIuU21hcnRSZWNvdmVyeVN0YXRlUg1yZWNvdmVyeVN0YXRlEjQKCHBv'
-    'bGljaWVzGAcgAygLMhgudGFyZ2V0bGliLlNlcnZpY2VQb2xpY3lSCHBvbGljaWVzEjcKCXByb3'
-    'Bvc2FscxgIIAMoCzIZLnRhcmdldGxpYi5Td2l0Y2hQcm9wb3NhbFIJcHJvcG9zYWxzEjQKCm9w'
-    'ZXJhdGlvbnMYCSADKAsyFC50YXJnZXRsaWIuT3BlcmF0aW9uUgpvcGVyYXRpb25zEkQKEG5vZG'
-    'VfcHJlZmVyZW5jZXMYCiADKAsyGS50YXJnZXRsaWIuTm9kZVByZWZlcmVuY2VSD25vZGVQcmVm'
-    'ZXJlbmNlcxIuCgV0YXNrcxgLIAMoCzIYLnRhcmdldGxpYi5TY2hlZHVsZXJUYXNrUgV0YXNrcw'
-    '==');
+/// Descriptor for `RuntimeOrchestrationState`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List runtimeOrchestrationStateDescriptor = $convert.base64Decode(
+    'ChlSdW50aW1lT3JjaGVzdHJhdGlvblN0YXRlEi8KBnByb2JlcxgBIAMoCzIXLnRhcmdldGxpYi'
+    '5TZXJ2aWNlUHJvYmVSBnByb2JlcxIwCgdyZXN1bHRzGAIgAygLMhYudGFyZ2V0bGliLlByb2Jl'
+    'UmVzdWx0UgdyZXN1bHRzElAKEnNlbGVjdGlvbl9wb2xpY2llcxgDIAMoCzIhLnRhcmdldGxpYi'
+    '5TZXJ2aWNlU2VsZWN0aW9uUG9saWN5UhFzZWxlY3Rpb25Qb2xpY2llcxIYCgdlbmFibGVkGAQg'
+    'ASgIUgdlbmFibGVkEhoKCHJldmlzaW9uGAUgASgJUghyZXZpc2lvbhJGCg5yZWNvdmVyeV9zdG'
+    'F0ZRgGIAEoDjIfLnRhcmdldGxpYi5SdW50aW1lUmVjb3ZlcnlTdGF0ZVINcmVjb3ZlcnlTdGF0'
+    'ZRI0Cghwb2xpY2llcxgHIAMoCzIYLnRhcmdldGxpYi5TZXJ2aWNlUG9saWN5Ughwb2xpY2llcx'
+    'I3Cglwcm9wb3NhbHMYCCADKAsyGS50YXJnZXRsaWIuU3dpdGNoUHJvcG9zYWxSCXByb3Bvc2Fs'
+    'cxI0CgpvcGVyYXRpb25zGAkgAygLMhQudGFyZ2V0bGliLk9wZXJhdGlvblIKb3BlcmF0aW9ucx'
+    'JEChBub2RlX3ByZWZlcmVuY2VzGAogAygLMhkudGFyZ2V0bGliLk5vZGVQcmVmZXJlbmNlUg9u'
+    'b2RlUHJlZmVyZW5jZXMSLgoFdGFza3MYCyADKAsyGC50YXJnZXRsaWIuU2NoZWR1bGVyVGFza1'
+    'IFdGFza3M=');
 
 @$core.Deprecated('Use switchPolicyDescriptor instead')
 const SwitchPolicy$json = {
@@ -2448,9 +2366,9 @@ final $typed_data.Uint8List operationListDescriptor = $convert.base64Decode(
     'Cg1PcGVyYXRpb25MaXN0EjQKCm9wZXJhdGlvbnMYASADKAsyFC50YXJnZXRsaWIuT3BlcmF0aW'
     '9uUgpvcGVyYXRpb25z');
 
-@$core.Deprecated('Use setSmartConnectEnabledRequestDescriptor instead')
-const SetSmartConnectEnabledRequest$json = {
-  '1': 'SetSmartConnectEnabledRequest',
+@$core.Deprecated('Use setPolicyAutomationEnabledRequestDescriptor instead')
+const SetPolicyAutomationEnabledRequest$json = {
+  '1': 'SetPolicyAutomationEnabledRequest',
   '2': [
     {'1': 'enabled', '3': 1, '4': 1, '5': 8, '10': 'enabled'},
     {
@@ -2464,12 +2382,12 @@ const SetSmartConnectEnabledRequest$json = {
   ],
 };
 
-/// Descriptor for `SetSmartConnectEnabledRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List setSmartConnectEnabledRequestDescriptor =
+/// Descriptor for `SetPolicyAutomationEnabledRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List setPolicyAutomationEnabledRequestDescriptor =
     $convert.base64Decode(
-        'Ch1TZXRTbWFydENvbm5lY3RFbmFibGVkUmVxdWVzdBIYCgdlbmFibGVkGAEgASgIUgdlbmFibG'
-        'VkEisKEWV4cGVjdGVkX3JldmlzaW9uGAIgASgJUhBleHBlY3RlZFJldmlzaW9uEicKD2lkZW1w'
-        'b3RlbmN5X2tleRgDIAEoCVIOaWRlbXBvdGVuY3lLZXk=');
+        'CiFTZXRQb2xpY3lBdXRvbWF0aW9uRW5hYmxlZFJlcXVlc3QSGAoHZW5hYmxlZBgBIAEoCFIHZW'
+        '5hYmxlZBIrChFleHBlY3RlZF9yZXZpc2lvbhgCIAEoCVIQZXhwZWN0ZWRSZXZpc2lvbhInCg9p'
+        'ZGVtcG90ZW5jeV9rZXkYAyABKAlSDmlkZW1wb3RlbmN5S2V5');
 
 @$core.Deprecated('Use upsertServicePolicyRequestDescriptor instead')
 const UpsertServicePolicyRequest$json = {
@@ -2657,106 +2575,6 @@ final $typed_data.Uint8List listOperationsRequestDescriptor = $convert.base64Dec
     'ChVMaXN0T3BlcmF0aW9uc1JlcXVlc3QSHwoLcmVzb3VyY2VfaWQYASABKAlSCnJlc291cmNlSW'
     'QSFAoFbGltaXQYAiABKA1SBWxpbWl0');
 
-@$core.Deprecated('Use smartConnectEventsRequestDescriptor instead')
-const SmartConnectEventsRequest$json = {
-  '1': 'SmartConnectEventsRequest',
-  '2': [
-    {'1': 'after_sequence', '3': 1, '4': 1, '5': 4, '10': 'afterSequence'},
-  ],
-};
-
-/// Descriptor for `SmartConnectEventsRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List smartConnectEventsRequestDescriptor =
-    $convert.base64Decode(
-        'ChlTbWFydENvbm5lY3RFdmVudHNSZXF1ZXN0EiUKDmFmdGVyX3NlcXVlbmNlGAEgASgEUg1hZn'
-        'RlclNlcXVlbmNl');
-
-@$core.Deprecated('Use smartConnectEventDescriptor instead')
-const SmartConnectEvent$json = {
-  '1': 'SmartConnectEvent',
-  '2': [
-    {'1': 'sequence', '3': 1, '4': 1, '5': 4, '10': 'sequence'},
-    {'1': 'epoch', '3': 2, '4': 1, '5': 9, '10': 'epoch'},
-    {'1': 'operation_id', '3': 3, '4': 1, '5': 9, '10': 'operationId'},
-    {'1': 'resource_id', '3': 4, '4': 1, '5': 9, '10': 'resourceId'},
-    {
-      '1': 'occurred_at_unix_ms',
-      '3': 5,
-      '4': 1,
-      '5': 3,
-      '10': 'occurredAtUnixMs'
-    },
-    {
-      '1': 'snapshot',
-      '3': 6,
-      '4': 1,
-      '5': 11,
-      '6': '.targetlib.SmartConnectSnapshot',
-      '10': 'snapshot'
-    },
-  ],
-};
-
-/// Descriptor for `SmartConnectEvent`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List smartConnectEventDescriptor = $convert.base64Decode(
-    'ChFTbWFydENvbm5lY3RFdmVudBIaCghzZXF1ZW5jZRgBIAEoBFIIc2VxdWVuY2USFAoFZXBvY2'
-    'gYAiABKAlSBWVwb2NoEiEKDG9wZXJhdGlvbl9pZBgDIAEoCVILb3BlcmF0aW9uSWQSHwoLcmVz'
-    'b3VyY2VfaWQYBCABKAlSCnJlc291cmNlSWQSLQoTb2NjdXJyZWRfYXRfdW5peF9tcxgFIAEoA1'
-    'IQb2NjdXJyZWRBdFVuaXhNcxI7CghzbmFwc2hvdBgGIAEoCzIfLnRhcmdldGxpYi5TbWFydENv'
-    'bm5lY3RTbmFwc2hvdFIIc25hcHNob3Q=');
-
-@$core.Deprecated('Use smartConnectPolicyDescriptor instead')
-const SmartConnectPolicy$json = {
-  '1': 'SmartConnectPolicy',
-  '2': [
-    {'1': 'schema_version', '3': 1, '4': 1, '5': 13, '10': 'schemaVersion'},
-    {'1': 'revision', '3': 2, '4': 1, '5': 9, '10': 'revision'},
-    {
-      '1': 'probes',
-      '3': 3,
-      '4': 3,
-      '5': 11,
-      '6': '.targetlib.ServiceProbe',
-      '10': 'probes'
-    },
-  ],
-};
-
-/// Descriptor for `SmartConnectPolicy`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List smartConnectPolicyDescriptor = $convert.base64Decode(
-    'ChJTbWFydENvbm5lY3RQb2xpY3kSJQoOc2NoZW1hX3ZlcnNpb24YASABKA1SDXNjaGVtYVZlcn'
-    'Npb24SGgoIcmV2aXNpb24YAiABKAlSCHJldmlzaW9uEi8KBnByb2JlcxgDIAMoCzIXLnRhcmdl'
-    'dGxpYi5TZXJ2aWNlUHJvYmVSBnByb2Jlcw==');
-
-@$core.Deprecated('Use importSmartConnectPolicyRequestDescriptor instead')
-const ImportSmartConnectPolicyRequest$json = {
-  '1': 'ImportSmartConnectPolicyRequest',
-  '2': [
-    {
-      '1': 'policy',
-      '3': 1,
-      '4': 1,
-      '5': 11,
-      '6': '.targetlib.SmartConnectPolicy',
-      '10': 'policy'
-    },
-    {
-      '1': 'expected_revision',
-      '3': 2,
-      '4': 1,
-      '5': 9,
-      '10': 'expectedRevision'
-    },
-  ],
-};
-
-/// Descriptor for `ImportSmartConnectPolicyRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List importSmartConnectPolicyRequestDescriptor =
-    $convert.base64Decode(
-        'Ch9JbXBvcnRTbWFydENvbm5lY3RQb2xpY3lSZXF1ZXN0EjUKBnBvbGljeRgBIAEoCzIdLnRhcm'
-        'dldGxpYi5TbWFydENvbm5lY3RQb2xpY3lSBnBvbGljeRIrChFleHBlY3RlZF9yZXZpc2lvbhgC'
-        'IAEoCVIQZXhwZWN0ZWRSZXZpc2lvbg==');
-
 @$core.Deprecated('Use runtimeStateDescriptor instead')
 const RuntimeState$json = {
   '1': 'RuntimeState',
@@ -2811,6 +2629,70 @@ const RuntimeState$json = {
       '5': 9,
       '10': 'nodePoolRevision'
     },
+    {
+      '1': 'policy_automation_enabled',
+      '3': 11,
+      '4': 1,
+      '5': 8,
+      '10': 'policyAutomationEnabled'
+    },
+    {'1': 'policy_revision', '3': 12, '4': 1, '5': 9, '10': 'policyRevision'},
+    {
+      '1': 'recovery_state',
+      '3': 13,
+      '4': 1,
+      '5': 14,
+      '6': '.targetlib.RuntimeRecoveryState',
+      '10': 'recoveryState'
+    },
+    {
+      '1': 'policies',
+      '3': 14,
+      '4': 3,
+      '5': 11,
+      '6': '.targetlib.ServicePolicy',
+      '10': 'policies'
+    },
+    {
+      '1': 'proposals',
+      '3': 15,
+      '4': 3,
+      '5': 11,
+      '6': '.targetlib.SwitchProposal',
+      '10': 'proposals'
+    },
+    {
+      '1': 'operations',
+      '3': 16,
+      '4': 3,
+      '5': 11,
+      '6': '.targetlib.Operation',
+      '10': 'operations'
+    },
+    {
+      '1': 'node_preferences',
+      '3': 17,
+      '4': 3,
+      '5': 11,
+      '6': '.targetlib.NodePreference',
+      '10': 'nodePreferences'
+    },
+    {
+      '1': 'tasks',
+      '3': 18,
+      '4': 3,
+      '5': 11,
+      '6': '.targetlib.SchedulerTask',
+      '10': 'tasks'
+    },
+    {
+      '1': 'quality_history',
+      '3': 19,
+      '4': 3,
+      '5': 11,
+      '6': '.targetlib.ProbeResult',
+      '10': 'qualityHistory'
+    },
   ],
 };
 
@@ -2825,7 +2707,66 @@ final $typed_data.Uint8List runtimeStateDescriptor = $convert.base64Decode(
     'ZXMYCCADKAsyHC50YXJnZXRsaWIuU2VydmljZVJvdXRlU3RhdGVSDXNlcnZpY2VSb3V0ZXMSSQ'
     'oQc2VydmljZV9iaW5kaW5ncxgJIAMoCzIeLnRhcmdldGxpYi5TZXJ2aWNlQmluZGluZ1N0YXRl'
     'Ug9zZXJ2aWNlQmluZGluZ3MSLAoSbm9kZV9wb29sX3JldmlzaW9uGAogASgJUhBub2RlUG9vbF'
-    'JldmlzaW9u');
+    'JldmlzaW9uEjoKGXBvbGljeV9hdXRvbWF0aW9uX2VuYWJsZWQYCyABKAhSF3BvbGljeUF1dG9t'
+    'YXRpb25FbmFibGVkEicKD3BvbGljeV9yZXZpc2lvbhgMIAEoCVIOcG9saWN5UmV2aXNpb24SRg'
+    'oOcmVjb3Zlcnlfc3RhdGUYDSABKA4yHy50YXJnZXRsaWIuUnVudGltZVJlY292ZXJ5U3RhdGVS'
+    'DXJlY292ZXJ5U3RhdGUSNAoIcG9saWNpZXMYDiADKAsyGC50YXJnZXRsaWIuU2VydmljZVBvbG'
+    'ljeVIIcG9saWNpZXMSNwoJcHJvcG9zYWxzGA8gAygLMhkudGFyZ2V0bGliLlN3aXRjaFByb3Bv'
+    'c2FsUglwcm9wb3NhbHMSNAoKb3BlcmF0aW9ucxgQIAMoCzIULnRhcmdldGxpYi5PcGVyYXRpb2'
+    '5SCm9wZXJhdGlvbnMSRAoQbm9kZV9wcmVmZXJlbmNlcxgRIAMoCzIZLnRhcmdldGxpYi5Ob2Rl'
+    'UHJlZmVyZW5jZVIPbm9kZVByZWZlcmVuY2VzEi4KBXRhc2tzGBIgAygLMhgudGFyZ2V0bGliLl'
+    'NjaGVkdWxlclRhc2tSBXRhc2tzEj8KD3F1YWxpdHlfaGlzdG9yeRgTIAMoCzIWLnRhcmdldGxp'
+    'Yi5Qcm9iZVJlc3VsdFIOcXVhbGl0eUhpc3Rvcnk=');
+
+@$core.Deprecated('Use runtimeEventDescriptor instead')
+const RuntimeEvent$json = {
+  '1': 'RuntimeEvent',
+  '2': [
+    {'1': 'sequence', '3': 1, '4': 1, '5': 4, '10': 'sequence'},
+    {
+      '1': 'type',
+      '3': 2,
+      '4': 1,
+      '5': 14,
+      '6': '.targetlib.RuntimeEventType',
+      '10': 'type'
+    },
+    {
+      '1': 'occurred_at_unix_ms',
+      '3': 3,
+      '4': 1,
+      '5': 3,
+      '10': 'occurredAtUnixMs'
+    },
+    {
+      '1': 'state',
+      '3': 4,
+      '4': 1,
+      '5': 11,
+      '6': '.targetlib.RuntimeState',
+      '10': 'state'
+    },
+    {
+      '1': 'probe',
+      '3': 5,
+      '4': 1,
+      '5': 11,
+      '6': '.targetlib.ProbeResult',
+      '10': 'probe'
+    },
+    {'1': 'service_id', '3': 6, '4': 1, '5': 9, '10': 'serviceId'},
+    {'1': 'node_id', '3': 7, '4': 1, '5': 9, '10': 'nodeId'},
+  ],
+};
+
+/// Descriptor for `RuntimeEvent`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List runtimeEventDescriptor = $convert.base64Decode(
+    'CgxSdW50aW1lRXZlbnQSGgoIc2VxdWVuY2UYASABKARSCHNlcXVlbmNlEi8KBHR5cGUYAiABKA'
+    '4yGy50YXJnZXRsaWIuUnVudGltZUV2ZW50VHlwZVIEdHlwZRItChNvY2N1cnJlZF9hdF91bml4'
+    'X21zGAMgASgDUhBvY2N1cnJlZEF0VW5peE1zEi0KBXN0YXRlGAQgASgLMhcudGFyZ2V0bGliLl'
+    'J1bnRpbWVTdGF0ZVIFc3RhdGUSLAoFcHJvYmUYBSABKAsyFi50YXJnZXRsaWIuUHJvYmVSZXN1'
+    'bHRSBXByb2JlEh0KCnNlcnZpY2VfaWQYBiABKAlSCXNlcnZpY2VJZBIXCgdub2RlX2lkGAcgAS'
+    'gJUgZub2RlSWQ=');
 
 @$core.Deprecated('Use testOutboundRequestDescriptor instead')
 const TestOutboundRequest$json = {

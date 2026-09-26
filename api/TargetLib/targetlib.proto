@@ -42,24 +42,12 @@ service TargetLib {
   rpc GetIpInfo(google.protobuf.Empty) returns (IpInfoResponse);
   rpc GetNodePool(google.protobuf.Empty) returns (NodePool);
   rpc GetRuntimeState(google.protobuf.Empty) returns (RuntimeState);
-  rpc ListServiceBindings(google.protobuf.Empty) returns (ServiceBindingList);
-  rpc ApplyServiceBinding(ApplyServiceBindingRequest) returns (RuntimeConfig);
-  rpc RemoveServiceBinding(RemoveServiceBindingRequest) returns (RuntimeConfig);
-  rpc PutServiceProbe(ServiceProbe) returns (ServiceProbe);
-  rpc RemoveServiceProbe(RemoveServiceProbeRequest) returns (google.protobuf.Empty);
-  rpc ListServiceProbes(google.protobuf.Empty) returns (ServiceProbeList);
-  rpc ProbeService(ProbeServiceRequest) returns (stream ProbeResult);
-  rpc GetQualityHistory(QualityHistoryRequest) returns (QualityHistory);
-  rpc EvaluateService(EvaluateServiceRequest) returns (ServiceEvaluation);
-  rpc GetServiceSelectionPolicy(ServiceSelectionPolicyRequest) returns (ServiceSelectionPolicy);
-  rpc PutServiceSelectionPolicy(ServiceSelectionPolicy) returns (ServiceSelectionPolicy);
-  rpc GetSmartConnectDiagnostics(EvaluateServiceRequest) returns (SmartConnectDiagnostics);
-  rpc ExportSmartConnectPolicy(google.protobuf.Empty) returns (SmartConnectPolicy);
-  rpc ImportSmartConnectPolicy(ImportSmartConnectPolicyRequest) returns (SmartConnectPolicy);
+  rpc SubscribeRuntimeEvents(google.protobuf.Empty) returns (stream RuntimeEvent);
+  // Service policy, evaluation, binding, and operation state are exposed by
+  // the unified policy commands below and RuntimeState.
 
-  // Intent-level Smart Connect API. Commands return a durable operation.
-  rpc GetSmartConnectSnapshot(google.protobuf.Empty) returns (SmartConnectSnapshot);
-  rpc SetSmartConnectEnabled(SetSmartConnectEnabledRequest) returns (Operation);
+  // Policy automation is part of the runtime control plane. Commands return a durable operation.
+  rpc SetPolicyAutomationEnabled(SetPolicyAutomationEnabledRequest) returns (Operation);
   rpc ListServicePolicies(google.protobuf.Empty) returns (ServicePolicyList);
   rpc UpsertServicePolicy(UpsertServicePolicyRequest) returns (Operation);
   rpc DeleteServicePolicy(DeleteServicePolicyRequest) returns (Operation);
@@ -117,9 +105,10 @@ message CapabilitiesResponse {
   reserved 4;
   bool subscription_management = 5;
   bool real_time_traffic = 6;
-  bool smart_connect = 7;
+  bool policy_automation = 7;
   bool service_probes = 8;
-  bool smart_connect_intent_api = 10;
+  bool runtime_events = 9;
+  bool policy_automation_api = 10;
 }
 
 message OperationResponse {
@@ -473,19 +462,21 @@ message ServiceEvaluation {
   int64 evaluated_at_unix_ms = 5;
   string probe_revision = 6;
 }
-message SmartConnectDiagnostics {
-  RuntimeState runtime = 1;
-  repeated ServiceEvaluation evaluations = 2;
-  string policy_revision = 3;
-  int64 generated_at_unix_ms = 4;
-}
 // Internal persisted snapshot. Histories are local to this host/network.
-message SmartConnectSnapshot {
+enum RuntimeRecoveryState {
+  RUNTIME_RECOVERY_STATE_UNSPECIFIED = 0;
+  RUNTIME_RECOVERY_STATE_RECOVERING = 1;
+  RUNTIME_RECOVERY_STATE_READY = 2;
+  RUNTIME_RECOVERY_STATE_DEGRADED = 3;
+}
+
+message RuntimeOrchestrationState {
   repeated ServiceProbe probes = 1;
   repeated ProbeResult results = 2;
   repeated ServiceSelectionPolicy selection_policies = 3;
   bool enabled = 4;
   string revision = 5;
+  RuntimeRecoveryState recovery_state = 6;
   repeated ServicePolicy policies = 7;
   repeated SwitchProposal proposals = 8;
   repeated Operation operations = 9;
@@ -513,6 +504,8 @@ message SwitchPolicy {
   uint32 minimum_dwell_seconds = 10;
   uint32 cooldown_seconds = 11;
   uint32 max_switches_per_hour = 12;
+  bool verify_after_switch = 13;
+  bool rollback_on_verification_failure = 14;
 }
 message ServicePolicy {
   string service_id = 1;
@@ -601,7 +594,7 @@ message SchedulerTask {
   string operation_id = 11;
 }
 message OperationList { repeated Operation operations = 1; }
-message SetSmartConnectEnabledRequest { bool enabled = 1; string expected_revision = 2; string idempotency_key = 3; }
+message SetPolicyAutomationEnabledRequest { bool enabled = 1; string expected_revision = 2; string idempotency_key = 3; }
 message UpsertServicePolicyRequest { ServicePolicy policy = 1; string expected_revision = 2; string idempotency_key = 3; }
 message DeleteServicePolicyRequest { string service_id = 1; string expected_revision = 2; string idempotency_key = 3; }
 message SetNodePreferenceRequest { NodePreference preference = 1; string expected_revision = 2; string idempotency_key = 3; }
@@ -610,17 +603,6 @@ message ProposalCommandRequest { string proposal_id = 1; string expected_revisio
 message ForceServiceBindingRequest { string service_id = 1; string node_id = 2; string expected_revision = 3; string idempotency_key = 4; bool close_existing_connections = 5; }
 message GetOperationRequest { string operation_id = 1; }
 message ListOperationsRequest { string resource_id = 1; uint32 limit = 2; }
-// Portable probe policy only. Quality and runtime bindings remain device-local.
-message SmartConnectPolicy {
-  uint32 schema_version = 1;
-  string revision = 2;
-  repeated ServiceProbe probes = 3;
-}
-message ImportSmartConnectPolicyRequest {
-  SmartConnectPolicy policy = 1;
-  // Required local export revision. Import atomically replaces probe definitions.
-  string expected_revision = 2;
-}
 message RuntimeState {
   ConfigApplyPhase phase = 1;
   string attempted_revision = 2;
@@ -632,6 +614,37 @@ message RuntimeState {
   repeated ServiceRouteState service_routes = 8;
   repeated ServiceBindingState service_bindings = 9;
   string node_pool_revision = 10;
+  bool policy_automation_enabled = 11;
+  string policy_revision = 12;
+  RuntimeRecoveryState recovery_state = 13;
+  repeated ServicePolicy policies = 14;
+  repeated SwitchProposal proposals = 15;
+  repeated Operation operations = 16;
+  repeated NodePreference node_preferences = 17;
+  repeated SchedulerTask tasks = 18;
+  repeated ProbeResult quality_history = 19;
+}
+
+enum RuntimeEventType {
+  RUNTIME_EVENT_TYPE_UNSPECIFIED = 0;
+  RUNTIME_EVENT_TYPE_SNAPSHOT = 1;
+  RUNTIME_EVENT_TYPE_CONFIG = 2;
+  RUNTIME_EVENT_TYPE_NODE_POOL = 3;
+  RUNTIME_EVENT_TYPE_BINDING = 4;
+  RUNTIME_EVENT_TYPE_PROBE_STARTED = 5;
+  RUNTIME_EVENT_TYPE_PROBE_COMPLETED = 6;
+  RUNTIME_EVENT_TYPE_PROBE_DEFINITION = 7;
+  RUNTIME_EVENT_TYPE_STOPPED = 8;
+}
+
+message RuntimeEvent {
+  uint64 sequence = 1;
+  RuntimeEventType type = 2;
+  int64 occurred_at_unix_ms = 3;
+  RuntimeState state = 4;
+  ProbeResult probe = 5;
+  string service_id = 6;
+  string node_id = 7;
 }
 
 message TestOutboundRequest {

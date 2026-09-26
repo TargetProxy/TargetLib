@@ -49,23 +49,8 @@ const (
 	TargetLib_GetIpInfo_FullMethodName                    = "/targetlib.TargetLib/GetIpInfo"
 	TargetLib_GetNodePool_FullMethodName                  = "/targetlib.TargetLib/GetNodePool"
 	TargetLib_GetRuntimeState_FullMethodName              = "/targetlib.TargetLib/GetRuntimeState"
-	TargetLib_ListServiceBindings_FullMethodName          = "/targetlib.TargetLib/ListServiceBindings"
-	TargetLib_ApplyServiceBinding_FullMethodName          = "/targetlib.TargetLib/ApplyServiceBinding"
-	TargetLib_RemoveServiceBinding_FullMethodName         = "/targetlib.TargetLib/RemoveServiceBinding"
-	TargetLib_PutServiceProbe_FullMethodName              = "/targetlib.TargetLib/PutServiceProbe"
-	TargetLib_RemoveServiceProbe_FullMethodName           = "/targetlib.TargetLib/RemoveServiceProbe"
-	TargetLib_ListServiceProbes_FullMethodName            = "/targetlib.TargetLib/ListServiceProbes"
-	TargetLib_ProbeService_FullMethodName                 = "/targetlib.TargetLib/ProbeService"
-	TargetLib_GetQualityHistory_FullMethodName            = "/targetlib.TargetLib/GetQualityHistory"
-	TargetLib_EvaluateService_FullMethodName              = "/targetlib.TargetLib/EvaluateService"
-	TargetLib_GetServiceSelectionPolicy_FullMethodName    = "/targetlib.TargetLib/GetServiceSelectionPolicy"
-	TargetLib_PutServiceSelectionPolicy_FullMethodName    = "/targetlib.TargetLib/PutServiceSelectionPolicy"
-	TargetLib_GetSmartConnectDiagnostics_FullMethodName   = "/targetlib.TargetLib/GetSmartConnectDiagnostics"
 	TargetLib_SubscribeRuntimeEvents_FullMethodName       = "/targetlib.TargetLib/SubscribeRuntimeEvents"
-	TargetLib_ExportSmartConnectPolicy_FullMethodName     = "/targetlib.TargetLib/ExportSmartConnectPolicy"
-	TargetLib_ImportSmartConnectPolicy_FullMethodName     = "/targetlib.TargetLib/ImportSmartConnectPolicy"
-	TargetLib_GetSmartConnectSnapshot_FullMethodName      = "/targetlib.TargetLib/GetSmartConnectSnapshot"
-	TargetLib_SetSmartConnectEnabled_FullMethodName       = "/targetlib.TargetLib/SetSmartConnectEnabled"
+	TargetLib_SetPolicyAutomationEnabled_FullMethodName   = "/targetlib.TargetLib/SetPolicyAutomationEnabled"
 	TargetLib_ListServicePolicies_FullMethodName          = "/targetlib.TargetLib/ListServicePolicies"
 	TargetLib_UpsertServicePolicy_FullMethodName          = "/targetlib.TargetLib/UpsertServicePolicy"
 	TargetLib_DeleteServicePolicy_FullMethodName          = "/targetlib.TargetLib/DeleteServicePolicy"
@@ -76,7 +61,6 @@ const (
 	TargetLib_ForceServiceBinding_FullMethodName          = "/targetlib.TargetLib/ForceServiceBinding"
 	TargetLib_GetOperation_FullMethodName                 = "/targetlib.TargetLib/GetOperation"
 	TargetLib_ListOperations_FullMethodName               = "/targetlib.TargetLib/ListOperations"
-	TargetLib_SubscribeSmartConnectEvents_FullMethodName  = "/targetlib.TargetLib/SubscribeSmartConnectEvents"
 )
 
 // TargetLibClient is the client API for TargetLib service.
@@ -116,24 +100,9 @@ type TargetLibClient interface {
 	GetIpInfo(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*IpInfoResponse, error)
 	GetNodePool(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*NodePool, error)
 	GetRuntimeState(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*RuntimeState, error)
-	ListServiceBindings(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ServiceBindingList, error)
-	ApplyServiceBinding(ctx context.Context, in *ApplyServiceBindingRequest, opts ...grpc.CallOption) (*RuntimeConfig, error)
-	RemoveServiceBinding(ctx context.Context, in *RemoveServiceBindingRequest, opts ...grpc.CallOption) (*RuntimeConfig, error)
-	PutServiceProbe(ctx context.Context, in *ServiceProbe, opts ...grpc.CallOption) (*ServiceProbe, error)
-	RemoveServiceProbe(ctx context.Context, in *RemoveServiceProbeRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	ListServiceProbes(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ServiceProbeList, error)
-	ProbeService(ctx context.Context, in *ProbeServiceRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ProbeResult], error)
-	GetQualityHistory(ctx context.Context, in *QualityHistoryRequest, opts ...grpc.CallOption) (*QualityHistory, error)
-	EvaluateService(ctx context.Context, in *EvaluateServiceRequest, opts ...grpc.CallOption) (*ServiceEvaluation, error)
-	GetServiceSelectionPolicy(ctx context.Context, in *ServiceSelectionPolicyRequest, opts ...grpc.CallOption) (*ServiceSelectionPolicy, error)
-	PutServiceSelectionPolicy(ctx context.Context, in *ServiceSelectionPolicy, opts ...grpc.CallOption) (*ServiceSelectionPolicy, error)
-	GetSmartConnectDiagnostics(ctx context.Context, in *EvaluateServiceRequest, opts ...grpc.CallOption) (*SmartConnectDiagnostics, error)
 	SubscribeRuntimeEvents(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[RuntimeEvent], error)
-	ExportSmartConnectPolicy(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*SmartConnectPolicy, error)
-	ImportSmartConnectPolicy(ctx context.Context, in *ImportSmartConnectPolicyRequest, opts ...grpc.CallOption) (*SmartConnectPolicy, error)
-	// Intent-level Smart Connect API. Commands return a durable operation.
-	GetSmartConnectSnapshot(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*SmartConnectSnapshot, error)
-	SetSmartConnectEnabled(ctx context.Context, in *SetSmartConnectEnabledRequest, opts ...grpc.CallOption) (*Operation, error)
+	// Policy automation is part of the runtime control plane. Commands return a durable operation.
+	SetPolicyAutomationEnabled(ctx context.Context, in *SetPolicyAutomationEnabledRequest, opts ...grpc.CallOption) (*Operation, error)
 	ListServicePolicies(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ServicePolicyList, error)
 	UpsertServicePolicy(ctx context.Context, in *UpsertServicePolicyRequest, opts ...grpc.CallOption) (*Operation, error)
 	DeleteServicePolicy(ctx context.Context, in *DeleteServicePolicyRequest, opts ...grpc.CallOption) (*Operation, error)
@@ -144,7 +113,6 @@ type TargetLibClient interface {
 	ForceServiceBinding(ctx context.Context, in *ForceServiceBindingRequest, opts ...grpc.CallOption) (*Operation, error)
 	GetOperation(ctx context.Context, in *GetOperationRequest, opts ...grpc.CallOption) (*Operation, error)
 	ListOperations(ctx context.Context, in *ListOperationsRequest, opts ...grpc.CallOption) (*OperationList, error)
-	SubscribeSmartConnectEvents(ctx context.Context, in *SmartConnectEventsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[SmartConnectEvent], error)
 }
 
 type targetLibClient struct {
@@ -490,138 +458,9 @@ func (c *targetLibClient) GetRuntimeState(ctx context.Context, in *emptypb.Empty
 	return out, nil
 }
 
-func (c *targetLibClient) ListServiceBindings(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ServiceBindingList, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ServiceBindingList)
-	err := c.cc.Invoke(ctx, TargetLib_ListServiceBindings_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *targetLibClient) ApplyServiceBinding(ctx context.Context, in *ApplyServiceBindingRequest, opts ...grpc.CallOption) (*RuntimeConfig, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(RuntimeConfig)
-	err := c.cc.Invoke(ctx, TargetLib_ApplyServiceBinding_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *targetLibClient) RemoveServiceBinding(ctx context.Context, in *RemoveServiceBindingRequest, opts ...grpc.CallOption) (*RuntimeConfig, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(RuntimeConfig)
-	err := c.cc.Invoke(ctx, TargetLib_RemoveServiceBinding_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *targetLibClient) PutServiceProbe(ctx context.Context, in *ServiceProbe, opts ...grpc.CallOption) (*ServiceProbe, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ServiceProbe)
-	err := c.cc.Invoke(ctx, TargetLib_PutServiceProbe_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *targetLibClient) RemoveServiceProbe(ctx context.Context, in *RemoveServiceProbeRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, TargetLib_RemoveServiceProbe_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *targetLibClient) ListServiceProbes(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ServiceProbeList, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ServiceProbeList)
-	err := c.cc.Invoke(ctx, TargetLib_ListServiceProbes_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *targetLibClient) ProbeService(ctx context.Context, in *ProbeServiceRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ProbeResult], error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &TargetLib_ServiceDesc.Streams[5], TargetLib_ProbeService_FullMethodName, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &grpc.GenericClientStream[ProbeServiceRequest, ProbeResult]{ClientStream: stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
-}
-
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type TargetLib_ProbeServiceClient = grpc.ServerStreamingClient[ProbeResult]
-
-func (c *targetLibClient) GetQualityHistory(ctx context.Context, in *QualityHistoryRequest, opts ...grpc.CallOption) (*QualityHistory, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(QualityHistory)
-	err := c.cc.Invoke(ctx, TargetLib_GetQualityHistory_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *targetLibClient) EvaluateService(ctx context.Context, in *EvaluateServiceRequest, opts ...grpc.CallOption) (*ServiceEvaluation, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ServiceEvaluation)
-	err := c.cc.Invoke(ctx, TargetLib_EvaluateService_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *targetLibClient) GetServiceSelectionPolicy(ctx context.Context, in *ServiceSelectionPolicyRequest, opts ...grpc.CallOption) (*ServiceSelectionPolicy, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ServiceSelectionPolicy)
-	err := c.cc.Invoke(ctx, TargetLib_GetServiceSelectionPolicy_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *targetLibClient) PutServiceSelectionPolicy(ctx context.Context, in *ServiceSelectionPolicy, opts ...grpc.CallOption) (*ServiceSelectionPolicy, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ServiceSelectionPolicy)
-	err := c.cc.Invoke(ctx, TargetLib_PutServiceSelectionPolicy_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *targetLibClient) GetSmartConnectDiagnostics(ctx context.Context, in *EvaluateServiceRequest, opts ...grpc.CallOption) (*SmartConnectDiagnostics, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(SmartConnectDiagnostics)
-	err := c.cc.Invoke(ctx, TargetLib_GetSmartConnectDiagnostics_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *targetLibClient) SubscribeRuntimeEvents(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[RuntimeEvent], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &TargetLib_ServiceDesc.Streams[6], TargetLib_SubscribeRuntimeEvents_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &TargetLib_ServiceDesc.Streams[5], TargetLib_SubscribeRuntimeEvents_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -638,40 +477,10 @@ func (c *targetLibClient) SubscribeRuntimeEvents(ctx context.Context, in *emptyp
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type TargetLib_SubscribeRuntimeEventsClient = grpc.ServerStreamingClient[RuntimeEvent]
 
-func (c *targetLibClient) ExportSmartConnectPolicy(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*SmartConnectPolicy, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(SmartConnectPolicy)
-	err := c.cc.Invoke(ctx, TargetLib_ExportSmartConnectPolicy_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *targetLibClient) ImportSmartConnectPolicy(ctx context.Context, in *ImportSmartConnectPolicyRequest, opts ...grpc.CallOption) (*SmartConnectPolicy, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(SmartConnectPolicy)
-	err := c.cc.Invoke(ctx, TargetLib_ImportSmartConnectPolicy_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *targetLibClient) GetSmartConnectSnapshot(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*SmartConnectSnapshot, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(SmartConnectSnapshot)
-	err := c.cc.Invoke(ctx, TargetLib_GetSmartConnectSnapshot_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *targetLibClient) SetSmartConnectEnabled(ctx context.Context, in *SetSmartConnectEnabledRequest, opts ...grpc.CallOption) (*Operation, error) {
+func (c *targetLibClient) SetPolicyAutomationEnabled(ctx context.Context, in *SetPolicyAutomationEnabledRequest, opts ...grpc.CallOption) (*Operation, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Operation)
-	err := c.cc.Invoke(ctx, TargetLib_SetSmartConnectEnabled_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, TargetLib_SetPolicyAutomationEnabled_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -778,25 +587,6 @@ func (c *targetLibClient) ListOperations(ctx context.Context, in *ListOperations
 	return out, nil
 }
 
-func (c *targetLibClient) SubscribeSmartConnectEvents(ctx context.Context, in *SmartConnectEventsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[SmartConnectEvent], error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &TargetLib_ServiceDesc.Streams[7], TargetLib_SubscribeSmartConnectEvents_FullMethodName, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &grpc.GenericClientStream[SmartConnectEventsRequest, SmartConnectEvent]{ClientStream: stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
-}
-
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type TargetLib_SubscribeSmartConnectEventsClient = grpc.ServerStreamingClient[SmartConnectEvent]
-
 // TargetLibServer is the server API for TargetLib service.
 // All implementations must embed UnimplementedTargetLibServer
 // for forward compatibility.
@@ -834,24 +624,9 @@ type TargetLibServer interface {
 	GetIpInfo(context.Context, *emptypb.Empty) (*IpInfoResponse, error)
 	GetNodePool(context.Context, *emptypb.Empty) (*NodePool, error)
 	GetRuntimeState(context.Context, *emptypb.Empty) (*RuntimeState, error)
-	ListServiceBindings(context.Context, *emptypb.Empty) (*ServiceBindingList, error)
-	ApplyServiceBinding(context.Context, *ApplyServiceBindingRequest) (*RuntimeConfig, error)
-	RemoveServiceBinding(context.Context, *RemoveServiceBindingRequest) (*RuntimeConfig, error)
-	PutServiceProbe(context.Context, *ServiceProbe) (*ServiceProbe, error)
-	RemoveServiceProbe(context.Context, *RemoveServiceProbeRequest) (*emptypb.Empty, error)
-	ListServiceProbes(context.Context, *emptypb.Empty) (*ServiceProbeList, error)
-	ProbeService(*ProbeServiceRequest, grpc.ServerStreamingServer[ProbeResult]) error
-	GetQualityHistory(context.Context, *QualityHistoryRequest) (*QualityHistory, error)
-	EvaluateService(context.Context, *EvaluateServiceRequest) (*ServiceEvaluation, error)
-	GetServiceSelectionPolicy(context.Context, *ServiceSelectionPolicyRequest) (*ServiceSelectionPolicy, error)
-	PutServiceSelectionPolicy(context.Context, *ServiceSelectionPolicy) (*ServiceSelectionPolicy, error)
-	GetSmartConnectDiagnostics(context.Context, *EvaluateServiceRequest) (*SmartConnectDiagnostics, error)
 	SubscribeRuntimeEvents(*emptypb.Empty, grpc.ServerStreamingServer[RuntimeEvent]) error
-	ExportSmartConnectPolicy(context.Context, *emptypb.Empty) (*SmartConnectPolicy, error)
-	ImportSmartConnectPolicy(context.Context, *ImportSmartConnectPolicyRequest) (*SmartConnectPolicy, error)
-	// Intent-level Smart Connect API. Commands return a durable operation.
-	GetSmartConnectSnapshot(context.Context, *emptypb.Empty) (*SmartConnectSnapshot, error)
-	SetSmartConnectEnabled(context.Context, *SetSmartConnectEnabledRequest) (*Operation, error)
+	// Policy automation is part of the runtime control plane. Commands return a durable operation.
+	SetPolicyAutomationEnabled(context.Context, *SetPolicyAutomationEnabledRequest) (*Operation, error)
 	ListServicePolicies(context.Context, *emptypb.Empty) (*ServicePolicyList, error)
 	UpsertServicePolicy(context.Context, *UpsertServicePolicyRequest) (*Operation, error)
 	DeleteServicePolicy(context.Context, *DeleteServicePolicyRequest) (*Operation, error)
@@ -862,7 +637,6 @@ type TargetLibServer interface {
 	ForceServiceBinding(context.Context, *ForceServiceBindingRequest) (*Operation, error)
 	GetOperation(context.Context, *GetOperationRequest) (*Operation, error)
 	ListOperations(context.Context, *ListOperationsRequest) (*OperationList, error)
-	SubscribeSmartConnectEvents(*SmartConnectEventsRequest, grpc.ServerStreamingServer[SmartConnectEvent]) error
 	mustEmbedUnimplementedTargetLibServer()
 }
 
@@ -960,56 +734,11 @@ func (UnimplementedTargetLibServer) GetNodePool(context.Context, *emptypb.Empty)
 func (UnimplementedTargetLibServer) GetRuntimeState(context.Context, *emptypb.Empty) (*RuntimeState, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetRuntimeState not implemented")
 }
-func (UnimplementedTargetLibServer) ListServiceBindings(context.Context, *emptypb.Empty) (*ServiceBindingList, error) {
-	return nil, status.Error(codes.Unimplemented, "method ListServiceBindings not implemented")
-}
-func (UnimplementedTargetLibServer) ApplyServiceBinding(context.Context, *ApplyServiceBindingRequest) (*RuntimeConfig, error) {
-	return nil, status.Error(codes.Unimplemented, "method ApplyServiceBinding not implemented")
-}
-func (UnimplementedTargetLibServer) RemoveServiceBinding(context.Context, *RemoveServiceBindingRequest) (*RuntimeConfig, error) {
-	return nil, status.Error(codes.Unimplemented, "method RemoveServiceBinding not implemented")
-}
-func (UnimplementedTargetLibServer) PutServiceProbe(context.Context, *ServiceProbe) (*ServiceProbe, error) {
-	return nil, status.Error(codes.Unimplemented, "method PutServiceProbe not implemented")
-}
-func (UnimplementedTargetLibServer) RemoveServiceProbe(context.Context, *RemoveServiceProbeRequest) (*emptypb.Empty, error) {
-	return nil, status.Error(codes.Unimplemented, "method RemoveServiceProbe not implemented")
-}
-func (UnimplementedTargetLibServer) ListServiceProbes(context.Context, *emptypb.Empty) (*ServiceProbeList, error) {
-	return nil, status.Error(codes.Unimplemented, "method ListServiceProbes not implemented")
-}
-func (UnimplementedTargetLibServer) ProbeService(*ProbeServiceRequest, grpc.ServerStreamingServer[ProbeResult]) error {
-	return status.Error(codes.Unimplemented, "method ProbeService not implemented")
-}
-func (UnimplementedTargetLibServer) GetQualityHistory(context.Context, *QualityHistoryRequest) (*QualityHistory, error) {
-	return nil, status.Error(codes.Unimplemented, "method GetQualityHistory not implemented")
-}
-func (UnimplementedTargetLibServer) EvaluateService(context.Context, *EvaluateServiceRequest) (*ServiceEvaluation, error) {
-	return nil, status.Error(codes.Unimplemented, "method EvaluateService not implemented")
-}
-func (UnimplementedTargetLibServer) GetServiceSelectionPolicy(context.Context, *ServiceSelectionPolicyRequest) (*ServiceSelectionPolicy, error) {
-	return nil, status.Error(codes.Unimplemented, "method GetServiceSelectionPolicy not implemented")
-}
-func (UnimplementedTargetLibServer) PutServiceSelectionPolicy(context.Context, *ServiceSelectionPolicy) (*ServiceSelectionPolicy, error) {
-	return nil, status.Error(codes.Unimplemented, "method PutServiceSelectionPolicy not implemented")
-}
-func (UnimplementedTargetLibServer) GetSmartConnectDiagnostics(context.Context, *EvaluateServiceRequest) (*SmartConnectDiagnostics, error) {
-	return nil, status.Error(codes.Unimplemented, "method GetSmartConnectDiagnostics not implemented")
-}
 func (UnimplementedTargetLibServer) SubscribeRuntimeEvents(*emptypb.Empty, grpc.ServerStreamingServer[RuntimeEvent]) error {
 	return status.Error(codes.Unimplemented, "method SubscribeRuntimeEvents not implemented")
 }
-func (UnimplementedTargetLibServer) ExportSmartConnectPolicy(context.Context, *emptypb.Empty) (*SmartConnectPolicy, error) {
-	return nil, status.Error(codes.Unimplemented, "method ExportSmartConnectPolicy not implemented")
-}
-func (UnimplementedTargetLibServer) ImportSmartConnectPolicy(context.Context, *ImportSmartConnectPolicyRequest) (*SmartConnectPolicy, error) {
-	return nil, status.Error(codes.Unimplemented, "method ImportSmartConnectPolicy not implemented")
-}
-func (UnimplementedTargetLibServer) GetSmartConnectSnapshot(context.Context, *emptypb.Empty) (*SmartConnectSnapshot, error) {
-	return nil, status.Error(codes.Unimplemented, "method GetSmartConnectSnapshot not implemented")
-}
-func (UnimplementedTargetLibServer) SetSmartConnectEnabled(context.Context, *SetSmartConnectEnabledRequest) (*Operation, error) {
-	return nil, status.Error(codes.Unimplemented, "method SetSmartConnectEnabled not implemented")
+func (UnimplementedTargetLibServer) SetPolicyAutomationEnabled(context.Context, *SetPolicyAutomationEnabledRequest) (*Operation, error) {
+	return nil, status.Error(codes.Unimplemented, "method SetPolicyAutomationEnabled not implemented")
 }
 func (UnimplementedTargetLibServer) ListServicePolicies(context.Context, *emptypb.Empty) (*ServicePolicyList, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListServicePolicies not implemented")
@@ -1040,9 +769,6 @@ func (UnimplementedTargetLibServer) GetOperation(context.Context, *GetOperationR
 }
 func (UnimplementedTargetLibServer) ListOperations(context.Context, *ListOperationsRequest) (*OperationList, error) {
 	return nil, status.Error(codes.Unimplemented, "method ListOperations not implemented")
-}
-func (UnimplementedTargetLibServer) SubscribeSmartConnectEvents(*SmartConnectEventsRequest, grpc.ServerStreamingServer[SmartConnectEvent]) error {
-	return status.Error(codes.Unimplemented, "method SubscribeSmartConnectEvents not implemented")
 }
 func (UnimplementedTargetLibServer) mustEmbedUnimplementedTargetLibServer() {}
 func (UnimplementedTargetLibServer) testEmbeddedByValue()                   {}
@@ -1552,215 +1278,6 @@ func _TargetLib_GetRuntimeState_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TargetLib_ListServiceBindings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TargetLibServer).ListServiceBindings(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TargetLib_ListServiceBindings_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TargetLibServer).ListServiceBindings(ctx, req.(*emptypb.Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TargetLib_ApplyServiceBinding_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ApplyServiceBindingRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TargetLibServer).ApplyServiceBinding(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TargetLib_ApplyServiceBinding_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TargetLibServer).ApplyServiceBinding(ctx, req.(*ApplyServiceBindingRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TargetLib_RemoveServiceBinding_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RemoveServiceBindingRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TargetLibServer).RemoveServiceBinding(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TargetLib_RemoveServiceBinding_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TargetLibServer).RemoveServiceBinding(ctx, req.(*RemoveServiceBindingRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TargetLib_PutServiceProbe_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ServiceProbe)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TargetLibServer).PutServiceProbe(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TargetLib_PutServiceProbe_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TargetLibServer).PutServiceProbe(ctx, req.(*ServiceProbe))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TargetLib_RemoveServiceProbe_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RemoveServiceProbeRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TargetLibServer).RemoveServiceProbe(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TargetLib_RemoveServiceProbe_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TargetLibServer).RemoveServiceProbe(ctx, req.(*RemoveServiceProbeRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TargetLib_ListServiceProbes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TargetLibServer).ListServiceProbes(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TargetLib_ListServiceProbes_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TargetLibServer).ListServiceProbes(ctx, req.(*emptypb.Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TargetLib_ProbeService_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(ProbeServiceRequest)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
-	}
-	return srv.(TargetLibServer).ProbeService(m, &grpc.GenericServerStream[ProbeServiceRequest, ProbeResult]{ServerStream: stream})
-}
-
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type TargetLib_ProbeServiceServer = grpc.ServerStreamingServer[ProbeResult]
-
-func _TargetLib_GetQualityHistory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QualityHistoryRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TargetLibServer).GetQualityHistory(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TargetLib_GetQualityHistory_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TargetLibServer).GetQualityHistory(ctx, req.(*QualityHistoryRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TargetLib_EvaluateService_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(EvaluateServiceRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TargetLibServer).EvaluateService(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TargetLib_EvaluateService_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TargetLibServer).EvaluateService(ctx, req.(*EvaluateServiceRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TargetLib_GetServiceSelectionPolicy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ServiceSelectionPolicyRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TargetLibServer).GetServiceSelectionPolicy(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TargetLib_GetServiceSelectionPolicy_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TargetLibServer).GetServiceSelectionPolicy(ctx, req.(*ServiceSelectionPolicyRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TargetLib_PutServiceSelectionPolicy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ServiceSelectionPolicy)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TargetLibServer).PutServiceSelectionPolicy(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TargetLib_PutServiceSelectionPolicy_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TargetLibServer).PutServiceSelectionPolicy(ctx, req.(*ServiceSelectionPolicy))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TargetLib_GetSmartConnectDiagnostics_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(EvaluateServiceRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TargetLibServer).GetSmartConnectDiagnostics(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TargetLib_GetSmartConnectDiagnostics_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TargetLibServer).GetSmartConnectDiagnostics(ctx, req.(*EvaluateServiceRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _TargetLib_SubscribeRuntimeEvents_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(emptypb.Empty)
 	if err := stream.RecvMsg(m); err != nil {
@@ -1772,74 +1289,20 @@ func _TargetLib_SubscribeRuntimeEvents_Handler(srv interface{}, stream grpc.Serv
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type TargetLib_SubscribeRuntimeEventsServer = grpc.ServerStreamingServer[RuntimeEvent]
 
-func _TargetLib_ExportSmartConnectPolicy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
+func _TargetLib_SetPolicyAutomationEnabled_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetPolicyAutomationEnabledRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TargetLibServer).ExportSmartConnectPolicy(ctx, in)
+		return srv.(TargetLibServer).SetPolicyAutomationEnabled(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: TargetLib_ExportSmartConnectPolicy_FullMethodName,
+		FullMethod: TargetLib_SetPolicyAutomationEnabled_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TargetLibServer).ExportSmartConnectPolicy(ctx, req.(*emptypb.Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TargetLib_ImportSmartConnectPolicy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ImportSmartConnectPolicyRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TargetLibServer).ImportSmartConnectPolicy(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TargetLib_ImportSmartConnectPolicy_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TargetLibServer).ImportSmartConnectPolicy(ctx, req.(*ImportSmartConnectPolicyRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TargetLib_GetSmartConnectSnapshot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TargetLibServer).GetSmartConnectSnapshot(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TargetLib_GetSmartConnectSnapshot_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TargetLibServer).GetSmartConnectSnapshot(ctx, req.(*emptypb.Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TargetLib_SetSmartConnectEnabled_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SetSmartConnectEnabledRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TargetLibServer).SetSmartConnectEnabled(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TargetLib_SetSmartConnectEnabled_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TargetLibServer).SetSmartConnectEnabled(ctx, req.(*SetSmartConnectEnabledRequest))
+		return srv.(TargetLibServer).SetPolicyAutomationEnabled(ctx, req.(*SetPolicyAutomationEnabledRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -2024,17 +1487,6 @@ func _TargetLib_ListOperations_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TargetLib_SubscribeSmartConnectEvents_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(SmartConnectEventsRequest)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
-	}
-	return srv.(TargetLibServer).SubscribeSmartConnectEvents(m, &grpc.GenericServerStream[SmartConnectEventsRequest, SmartConnectEvent]{ServerStream: stream})
-}
-
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type TargetLib_SubscribeSmartConnectEventsServer = grpc.ServerStreamingServer[SmartConnectEvent]
-
 // TargetLib_ServiceDesc is the grpc.ServiceDesc for TargetLib service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -2139,64 +1591,8 @@ var TargetLib_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _TargetLib_GetRuntimeState_Handler,
 		},
 		{
-			MethodName: "ListServiceBindings",
-			Handler:    _TargetLib_ListServiceBindings_Handler,
-		},
-		{
-			MethodName: "ApplyServiceBinding",
-			Handler:    _TargetLib_ApplyServiceBinding_Handler,
-		},
-		{
-			MethodName: "RemoveServiceBinding",
-			Handler:    _TargetLib_RemoveServiceBinding_Handler,
-		},
-		{
-			MethodName: "PutServiceProbe",
-			Handler:    _TargetLib_PutServiceProbe_Handler,
-		},
-		{
-			MethodName: "RemoveServiceProbe",
-			Handler:    _TargetLib_RemoveServiceProbe_Handler,
-		},
-		{
-			MethodName: "ListServiceProbes",
-			Handler:    _TargetLib_ListServiceProbes_Handler,
-		},
-		{
-			MethodName: "GetQualityHistory",
-			Handler:    _TargetLib_GetQualityHistory_Handler,
-		},
-		{
-			MethodName: "EvaluateService",
-			Handler:    _TargetLib_EvaluateService_Handler,
-		},
-		{
-			MethodName: "GetServiceSelectionPolicy",
-			Handler:    _TargetLib_GetServiceSelectionPolicy_Handler,
-		},
-		{
-			MethodName: "PutServiceSelectionPolicy",
-			Handler:    _TargetLib_PutServiceSelectionPolicy_Handler,
-		},
-		{
-			MethodName: "GetSmartConnectDiagnostics",
-			Handler:    _TargetLib_GetSmartConnectDiagnostics_Handler,
-		},
-		{
-			MethodName: "ExportSmartConnectPolicy",
-			Handler:    _TargetLib_ExportSmartConnectPolicy_Handler,
-		},
-		{
-			MethodName: "ImportSmartConnectPolicy",
-			Handler:    _TargetLib_ImportSmartConnectPolicy_Handler,
-		},
-		{
-			MethodName: "GetSmartConnectSnapshot",
-			Handler:    _TargetLib_GetSmartConnectSnapshot_Handler,
-		},
-		{
-			MethodName: "SetSmartConnectEnabled",
-			Handler:    _TargetLib_SetSmartConnectEnabled_Handler,
+			MethodName: "SetPolicyAutomationEnabled",
+			Handler:    _TargetLib_SetPolicyAutomationEnabled_Handler,
 		},
 		{
 			MethodName: "ListServicePolicies",
@@ -2266,18 +1662,8 @@ var TargetLib_ServiceDesc = grpc.ServiceDesc{
 			ServerStreams: true,
 		},
 		{
-			StreamName:    "ProbeService",
-			Handler:       _TargetLib_ProbeService_Handler,
-			ServerStreams: true,
-		},
-		{
 			StreamName:    "SubscribeRuntimeEvents",
 			Handler:       _TargetLib_SubscribeRuntimeEvents_Handler,
-			ServerStreams: true,
-		},
-		{
-			StreamName:    "SubscribeSmartConnectEvents",
-			Handler:       _TargetLib_SubscribeSmartConnectEvents_Handler,
 			ServerStreams: true,
 		},
 	},

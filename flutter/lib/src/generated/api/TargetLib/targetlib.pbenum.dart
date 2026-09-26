@@ -213,79 +213,34 @@ class ProbeStage extends $pb.ProtobufEnum {
   const ProbeStage._(super.value, super.name);
 }
 
-class RuntimeEventType extends $pb.ProtobufEnum {
-  static const RuntimeEventType RUNTIME_EVENT_TYPE_UNSPECIFIED =
-      RuntimeEventType._(
-          0, _omitEnumNames ? '' : 'RUNTIME_EVENT_TYPE_UNSPECIFIED');
-  static const RuntimeEventType RUNTIME_EVENT_TYPE_SNAPSHOT =
-      RuntimeEventType._(
-          1, _omitEnumNames ? '' : 'RUNTIME_EVENT_TYPE_SNAPSHOT');
-  static const RuntimeEventType RUNTIME_EVENT_TYPE_CONFIG =
-      RuntimeEventType._(2, _omitEnumNames ? '' : 'RUNTIME_EVENT_TYPE_CONFIG');
-  static const RuntimeEventType RUNTIME_EVENT_TYPE_NODE_POOL =
-      RuntimeEventType._(
-          3, _omitEnumNames ? '' : 'RUNTIME_EVENT_TYPE_NODE_POOL');
-  static const RuntimeEventType RUNTIME_EVENT_TYPE_BINDING =
-      RuntimeEventType._(4, _omitEnumNames ? '' : 'RUNTIME_EVENT_TYPE_BINDING');
-  static const RuntimeEventType RUNTIME_EVENT_TYPE_PROBE_STARTED =
-      RuntimeEventType._(
-          5, _omitEnumNames ? '' : 'RUNTIME_EVENT_TYPE_PROBE_STARTED');
-  static const RuntimeEventType RUNTIME_EVENT_TYPE_PROBE_COMPLETED =
-      RuntimeEventType._(
-          6, _omitEnumNames ? '' : 'RUNTIME_EVENT_TYPE_PROBE_COMPLETED');
-  static const RuntimeEventType RUNTIME_EVENT_TYPE_PROBE_DEFINITION =
-      RuntimeEventType._(
-          7, _omitEnumNames ? '' : 'RUNTIME_EVENT_TYPE_PROBE_DEFINITION');
-  static const RuntimeEventType RUNTIME_EVENT_TYPE_STOPPED =
-      RuntimeEventType._(8, _omitEnumNames ? '' : 'RUNTIME_EVENT_TYPE_STOPPED');
+/// Internal persisted snapshot. Histories are local to this host/network.
+class RuntimeRecoveryState extends $pb.ProtobufEnum {
+  static const RuntimeRecoveryState RUNTIME_RECOVERY_STATE_UNSPECIFIED =
+      RuntimeRecoveryState._(
+          0, _omitEnumNames ? '' : 'RUNTIME_RECOVERY_STATE_UNSPECIFIED');
+  static const RuntimeRecoveryState RUNTIME_RECOVERY_STATE_RECOVERING =
+      RuntimeRecoveryState._(
+          1, _omitEnumNames ? '' : 'RUNTIME_RECOVERY_STATE_RECOVERING');
+  static const RuntimeRecoveryState RUNTIME_RECOVERY_STATE_READY =
+      RuntimeRecoveryState._(
+          2, _omitEnumNames ? '' : 'RUNTIME_RECOVERY_STATE_READY');
+  static const RuntimeRecoveryState RUNTIME_RECOVERY_STATE_DEGRADED =
+      RuntimeRecoveryState._(
+          3, _omitEnumNames ? '' : 'RUNTIME_RECOVERY_STATE_DEGRADED');
 
-  static const $core.List<RuntimeEventType> values = <RuntimeEventType>[
-    RUNTIME_EVENT_TYPE_UNSPECIFIED,
-    RUNTIME_EVENT_TYPE_SNAPSHOT,
-    RUNTIME_EVENT_TYPE_CONFIG,
-    RUNTIME_EVENT_TYPE_NODE_POOL,
-    RUNTIME_EVENT_TYPE_BINDING,
-    RUNTIME_EVENT_TYPE_PROBE_STARTED,
-    RUNTIME_EVENT_TYPE_PROBE_COMPLETED,
-    RUNTIME_EVENT_TYPE_PROBE_DEFINITION,
-    RUNTIME_EVENT_TYPE_STOPPED,
+  static const $core.List<RuntimeRecoveryState> values = <RuntimeRecoveryState>[
+    RUNTIME_RECOVERY_STATE_UNSPECIFIED,
+    RUNTIME_RECOVERY_STATE_RECOVERING,
+    RUNTIME_RECOVERY_STATE_READY,
+    RUNTIME_RECOVERY_STATE_DEGRADED,
   ];
 
-  static final $core.List<RuntimeEventType?> _byValue =
-      $pb.ProtobufEnum.$_initByValueList(values, 8);
-  static RuntimeEventType? valueOf($core.int value) =>
-      value < 0 || value >= _byValue.length ? null : _byValue[value];
-
-  const RuntimeEventType._(super.value, super.name);
-}
-
-class SmartRecoveryState extends $pb.ProtobufEnum {
-  static const SmartRecoveryState SMART_RECOVERY_STATE_UNSPECIFIED =
-      SmartRecoveryState._(
-          0, _omitEnumNames ? '' : 'SMART_RECOVERY_STATE_UNSPECIFIED');
-  static const SmartRecoveryState SMART_RECOVERY_STATE_RECOVERING =
-      SmartRecoveryState._(
-          1, _omitEnumNames ? '' : 'SMART_RECOVERY_STATE_RECOVERING');
-  static const SmartRecoveryState SMART_RECOVERY_STATE_READY =
-      SmartRecoveryState._(
-          2, _omitEnumNames ? '' : 'SMART_RECOVERY_STATE_READY');
-  static const SmartRecoveryState SMART_RECOVERY_STATE_DEGRADED =
-      SmartRecoveryState._(
-          3, _omitEnumNames ? '' : 'SMART_RECOVERY_STATE_DEGRADED');
-
-  static const $core.List<SmartRecoveryState> values = <SmartRecoveryState>[
-    SMART_RECOVERY_STATE_UNSPECIFIED,
-    SMART_RECOVERY_STATE_RECOVERING,
-    SMART_RECOVERY_STATE_READY,
-    SMART_RECOVERY_STATE_DEGRADED,
-  ];
-
-  static final $core.List<SmartRecoveryState?> _byValue =
+  static final $core.List<RuntimeRecoveryState?> _byValue =
       $pb.ProtobufEnum.$_initByValueList(values, 3);
-  static SmartRecoveryState? valueOf($core.int value) =>
+  static RuntimeRecoveryState? valueOf($core.int value) =>
       value < 0 || value >= _byValue.length ? null : _byValue[value];
 
-  const SmartRecoveryState._(super.value, super.name);
+  const RuntimeRecoveryState._(super.value, super.name);
 }
 
 class SwitchMode extends $pb.ProtobufEnum {
@@ -352,6 +307,52 @@ class OperationStatus extends $pb.ProtobufEnum {
       value < 0 || value >= _byValue.length ? null : _byValue[value];
 
   const OperationStatus._(super.value, super.name);
+}
+
+class RuntimeEventType extends $pb.ProtobufEnum {
+  static const RuntimeEventType RUNTIME_EVENT_TYPE_UNSPECIFIED =
+      RuntimeEventType._(
+          0, _omitEnumNames ? '' : 'RUNTIME_EVENT_TYPE_UNSPECIFIED');
+  static const RuntimeEventType RUNTIME_EVENT_TYPE_SNAPSHOT =
+      RuntimeEventType._(
+          1, _omitEnumNames ? '' : 'RUNTIME_EVENT_TYPE_SNAPSHOT');
+  static const RuntimeEventType RUNTIME_EVENT_TYPE_CONFIG =
+      RuntimeEventType._(2, _omitEnumNames ? '' : 'RUNTIME_EVENT_TYPE_CONFIG');
+  static const RuntimeEventType RUNTIME_EVENT_TYPE_NODE_POOL =
+      RuntimeEventType._(
+          3, _omitEnumNames ? '' : 'RUNTIME_EVENT_TYPE_NODE_POOL');
+  static const RuntimeEventType RUNTIME_EVENT_TYPE_BINDING =
+      RuntimeEventType._(4, _omitEnumNames ? '' : 'RUNTIME_EVENT_TYPE_BINDING');
+  static const RuntimeEventType RUNTIME_EVENT_TYPE_PROBE_STARTED =
+      RuntimeEventType._(
+          5, _omitEnumNames ? '' : 'RUNTIME_EVENT_TYPE_PROBE_STARTED');
+  static const RuntimeEventType RUNTIME_EVENT_TYPE_PROBE_COMPLETED =
+      RuntimeEventType._(
+          6, _omitEnumNames ? '' : 'RUNTIME_EVENT_TYPE_PROBE_COMPLETED');
+  static const RuntimeEventType RUNTIME_EVENT_TYPE_PROBE_DEFINITION =
+      RuntimeEventType._(
+          7, _omitEnumNames ? '' : 'RUNTIME_EVENT_TYPE_PROBE_DEFINITION');
+  static const RuntimeEventType RUNTIME_EVENT_TYPE_STOPPED =
+      RuntimeEventType._(8, _omitEnumNames ? '' : 'RUNTIME_EVENT_TYPE_STOPPED');
+
+  static const $core.List<RuntimeEventType> values = <RuntimeEventType>[
+    RUNTIME_EVENT_TYPE_UNSPECIFIED,
+    RUNTIME_EVENT_TYPE_SNAPSHOT,
+    RUNTIME_EVENT_TYPE_CONFIG,
+    RUNTIME_EVENT_TYPE_NODE_POOL,
+    RUNTIME_EVENT_TYPE_BINDING,
+    RUNTIME_EVENT_TYPE_PROBE_STARTED,
+    RUNTIME_EVENT_TYPE_PROBE_COMPLETED,
+    RUNTIME_EVENT_TYPE_PROBE_DEFINITION,
+    RUNTIME_EVENT_TYPE_STOPPED,
+  ];
+
+  static final $core.List<RuntimeEventType?> _byValue =
+      $pb.ProtobufEnum.$_initByValueList(values, 8);
+  static RuntimeEventType? valueOf($core.int value) =>
+      value < 0 || value >= _byValue.length ? null : _byValue[value];
+
+  const RuntimeEventType._(super.value, super.name);
 }
 
 class LatencyTestStatus extends $pb.ProtobufEnum {

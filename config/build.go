@@ -356,7 +356,6 @@ func planRuntime(settings Settings) RuntimePlan {
 	}
 	experimental := option.ExperimentalOptions{}
 	// TargetLib owns telemetry and cache storage regardless of upstream metadata.
-	experimental.ClashAPI = &option.ClashAPIOptions{}
 	if path := strings.TrimSpace(settings.CacheFilePath); path != "" {
 		experimental.CacheFile = &option.CacheFileOptions{Enabled: true, Path: singBoxPath(path)}
 	}

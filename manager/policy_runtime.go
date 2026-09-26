@@ -14,7 +14,6 @@ import (
 	api "github.com/loafman1120/TargetLib/api/TargetLib"
 	targetprofile "github.com/loafman1120/TargetLib/profile"
 	"github.com/sagernet/sing-box/daemon"
-	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
@@ -23,12 +22,32 @@ import (
 
 const smartPolicySchemaVersion = 1
 
-func (m *Manager) GetSmartConnectSnapshot(context.Context, *emptypb.Empty) (*api.SmartConnectSnapshot, error) {
-	return m.smart.read(), nil
+// SetPolicyAutomationEnabled is the single runtime command for enabling the
+// policy scheduler. The old Smart Connect method remains only as a source
+// compatibility shim and is not registered in the public service.
+func (m *Manager) SetPolicyAutomationEnabled(ctx context.Context, request *api.SetPolicyAutomationEnabledRequest) (*api.Operation, error) {
+	if request == nil {
+		return nil, status.Error(codes.InvalidArgument, "request is required")
+	}
+	signature := operationSignature(request)
+	operation, created, err := m.acceptOperation(ctx, "set_enabled", "policy-automation", request.IdempotencyKey, request.ExpectedRevision, signature, func(next *api.RuntimeOrchestrationState, operation *api.Operation) error {
+		next.Enabled = request.Enabled
+		if request.Enabled {
+			completeImmediate(operation, "enabled=true")
+		} else {
+			operation.Phase = "cleanup"
+		}
+		return nil
+	})
+	if err == nil && created && !request.Enabled {
+		m.runtimeState.workers.Add(1)
+		go func() { defer m.runtimeState.workers.Done(); m.runDisableCleanup(operation.Id) }()
+	}
+	return operation, err
 }
 
 func (m *Manager) ListServicePolicies(context.Context, *emptypb.Empty) (*api.ServicePolicyList, error) {
-	policies := m.smart.read().Policies
+	policies := m.runtimeState.read().Policies
 	sort.Slice(policies, func(i, j int) bool { return policies[i].ServiceId < policies[j].ServiceId })
 	return &api.ServicePolicyList{Policies: policies}, nil
 }
@@ -40,9 +59,9 @@ func validateIntentKey(key string) error {
 	return nil
 }
 
-func validateExpected(snapshot *api.SmartConnectSnapshot, expected string) error {
+func validateExpected(snapshot *api.RuntimeOrchestrationState, expected string) error {
 	if expected != "" && expected != snapshot.Revision {
-		return status.Error(codes.Aborted, "smart connect revision changed")
+		return status.Error(codes.Aborted, "runtime policy revision changed")
 	}
 	return nil
 }
@@ -53,7 +72,7 @@ func operationSignature(message proto.Message) string {
 	return hex.EncodeToString(sum[:])
 }
 
-func findOperation(snapshot *api.SmartConnectSnapshot, key string) *api.Operation {
+func findOperation(snapshot *api.RuntimeOrchestrationState, key string) *api.Operation {
 	for _, operation := range snapshot.Operations {
 		if operation.IdempotencyKey == key {
 			return operation
@@ -62,7 +81,7 @@ func findOperation(snapshot *api.SmartConnectSnapshot, key string) *api.Operatio
 	return nil
 }
 
-func trimOperations(snapshot *api.SmartConnectSnapshot) {
+func trimOperations(snapshot *api.RuntimeOrchestrationState) {
 	if len(snapshot.Operations) > 256 {
 		snapshot.Operations = append([]*api.Operation(nil), snapshot.Operations[len(snapshot.Operations)-256:]...)
 	}
@@ -73,13 +92,13 @@ func newOperation(kind, resource, key, signature string) *api.Operation {
 	return &api.Operation{Id: uuid.NewString(), Kind: kind, ResourceId: resource, IdempotencyKey: key, RequestSignature: signature, Status: api.OperationStatus_OPERATION_STATUS_QUEUED, Phase: "accepted", CreatedAtUnixMs: now, UpdatedAtUnixMs: now}
 }
 
-func (m *Manager) acceptOperation(ctx context.Context, kind, resource, key, expected, signature string, change func(*api.SmartConnectSnapshot, *api.Operation) error) (*api.Operation, bool, error) {
+func (m *Manager) acceptOperation(ctx context.Context, kind, resource, key, expected, signature string, change func(*api.RuntimeOrchestrationState, *api.Operation) error) (*api.Operation, bool, error) {
 	if err := validateIntentKey(key); err != nil {
 		return nil, false, err
 	}
 	var result *api.Operation
 	created := false
-	err := m.smart.update(ctx, func(next *api.SmartConnectSnapshot) error {
+	err := m.runtimeState.update(ctx, func(next *api.RuntimeOrchestrationState) error {
 		if existing := findOperation(next, key); existing != nil {
 			if existing.Kind != kind || existing.ResourceId != resource || existing.RequestSignature != signature {
 				return status.Error(codes.AlreadyExists, "idempotency key was used for a different command")
@@ -105,7 +124,7 @@ func (m *Manager) acceptOperation(ctx context.Context, kind, resource, key, expe
 		return nil, false, err
 	}
 	if created {
-		m.publishSmartConnect(result.Id, resource)
+		m.publishRuntimeSnapshot(result.Id, resource)
 	}
 	return result, created, nil
 }
@@ -122,29 +141,8 @@ func completeImmediate(operation *api.Operation, summary string) {
 	operation.ResultSummary = summary
 }
 
-func (m *Manager) SetSmartConnectEnabled(ctx context.Context, request *api.SetSmartConnectEnabledRequest) (*api.Operation, error) {
-	if request == nil {
-		return nil, status.Error(codes.InvalidArgument, "request is required")
-	}
-	signature := operationSignature(request)
-	operation, created, err := m.acceptOperation(ctx, "set_enabled", "smart-connect", request.IdempotencyKey, request.ExpectedRevision, signature, func(next *api.SmartConnectSnapshot, operation *api.Operation) error {
-		next.Enabled = request.Enabled
-		if request.Enabled {
-			completeImmediate(operation, "enabled=true")
-		} else {
-			operation.Phase = "cleanup"
-		}
-		return nil
-	})
-	if err == nil && created && !request.Enabled {
-		m.smart.workers.Add(1)
-		go func() { defer m.smart.workers.Done(); m.runDisableCleanup(operation.Id) }()
-	}
-	return operation, err
-}
-
 func (m *Manager) runDisableCleanup(operationID string) {
-	m.updateOperation(operationID, "smart-connect", func(_ *api.SmartConnectSnapshot, operation *api.Operation) error {
+	m.updateOperation(operationID, "policy-automation", func(_ *api.RuntimeOrchestrationState, operation *api.Operation) error {
 		operation.Status = api.OperationStatus_OPERATION_STATUS_RUNNING
 		operation.Phase = "cleanup"
 		operation.StartedAtUnixMs = time.Now().UnixMilli()
@@ -161,10 +159,10 @@ func (m *Manager) runDisableCleanup(operationID string) {
 	result, err := m.applyDesired(context.Background(), next)
 	m.opMu.Unlock()
 	if err != nil {
-		m.failOperation(operationID, "smart-connect", "CLEANUP_FAILED", err)
+		m.failOperation(operationID, "policy-automation", "CLEANUP_FAILED", err)
 		return
 	}
-	m.updateOperation(operationID, "smart-connect", func(_ *api.SmartConnectSnapshot, operation *api.Operation) error {
+	m.updateOperation(operationID, "policy-automation", func(_ *api.RuntimeOrchestrationState, operation *api.Operation) error {
 		operation.Status = api.OperationStatus_OPERATION_STATUS_SUCCEEDED
 		operation.Phase = "committed"
 		operation.CompletedAtUnixMs = time.Now().UnixMilli()
@@ -239,7 +237,7 @@ func (m *Manager) UpsertServicePolicy(ctx context.Context, request *api.UpsertSe
 		return nil, err
 	}
 	signature := operationSignature(request)
-	operation, _, err := m.acceptOperation(ctx, "upsert_policy", policy.ServiceId, request.IdempotencyKey, request.ExpectedRevision, signature, func(next *api.SmartConnectSnapshot, operation *api.Operation) error {
+	operation, _, err := m.acceptOperation(ctx, "upsert_policy", policy.ServiceId, request.IdempotencyKey, request.ExpectedRevision, signature, func(next *api.RuntimeOrchestrationState, operation *api.Operation) error {
 		replaced := false
 		for i, existing := range next.Policies {
 			if existing.ServiceId == policy.ServiceId {
@@ -277,7 +275,7 @@ func (m *Manager) DeleteServicePolicy(ctx context.Context, request *api.DeleteSe
 		return nil, status.Error(codes.InvalidArgument, "service ID is required")
 	}
 	signature := operationSignature(request)
-	operation, created, err := m.acceptOperation(ctx, "delete_policy", request.ServiceId, request.IdempotencyKey, request.ExpectedRevision, signature, func(next *api.SmartConnectSnapshot, operation *api.Operation) error {
+	operation, created, err := m.acceptOperation(ctx, "delete_policy", request.ServiceId, request.IdempotencyKey, request.ExpectedRevision, signature, func(next *api.RuntimeOrchestrationState, operation *api.Operation) error {
 		before := len(next.Policies)
 		next.Policies = removeIf(next.Policies, func(policy *api.ServicePolicy) bool { return policy.ServiceId == request.ServiceId })
 		if len(next.Policies) == before {
@@ -289,14 +287,14 @@ func (m *Manager) DeleteServicePolicy(ctx context.Context, request *api.DeleteSe
 		return nil
 	})
 	if err == nil && created {
-		m.smart.workers.Add(1)
-		go func() { defer m.smart.workers.Done(); m.runPolicyCleanup(operation.Id, request.ServiceId) }()
+		m.runtimeState.workers.Add(1)
+		go func() { defer m.runtimeState.workers.Done(); m.runPolicyCleanup(operation.Id, request.ServiceId) }()
 	}
 	return operation, err
 }
 
 func (m *Manager) runPolicyCleanup(operationID, serviceID string) {
-	m.updateOperation(operationID, serviceID, func(_ *api.SmartConnectSnapshot, operation *api.Operation) error {
+	m.updateOperation(operationID, serviceID, func(_ *api.RuntimeOrchestrationState, operation *api.Operation) error {
 		operation.Status = api.OperationStatus_OPERATION_STATUS_RUNNING
 		operation.StartedAtUnixMs = time.Now().UnixMilli()
 		return nil
@@ -313,7 +311,7 @@ func (m *Manager) runPolicyCleanup(operationID, serviceID string) {
 		m.failOperation(operationID, serviceID, "CLEANUP_FAILED", err)
 		return
 	}
-	m.updateOperation(operationID, serviceID, func(_ *api.SmartConnectSnapshot, operation *api.Operation) error {
+	m.updateOperation(operationID, serviceID, func(_ *api.RuntimeOrchestrationState, operation *api.Operation) error {
 		completeImmediate(operation, "policy and route deleted")
 		operation.RuntimeRevision = result.Revision
 		return nil
@@ -327,7 +325,7 @@ func (m *Manager) SetNodePreference(ctx context.Context, request *api.SetNodePre
 	preference := proto.Clone(request.Preference).(*api.NodePreference)
 	preference.Revision = uuid.NewString()
 	signature := operationSignature(request)
-	operation, _, err := m.acceptOperation(ctx, "set_node_preference", preference.NodeId, request.IdempotencyKey, request.ExpectedRevision, signature, func(next *api.SmartConnectSnapshot, operation *api.Operation) error {
+	operation, _, err := m.acceptOperation(ctx, "set_node_preference", preference.NodeId, request.IdempotencyKey, request.ExpectedRevision, signature, func(next *api.RuntimeOrchestrationState, operation *api.Operation) error {
 		found := false
 		for i, old := range next.NodePreferences {
 			if old.NodeId == preference.NodeId {
@@ -348,7 +346,7 @@ func (m *Manager) GetOperation(_ context.Context, request *api.GetOperationReque
 	if request.GetOperationId() == "" {
 		return nil, status.Error(codes.InvalidArgument, "operation ID is required")
 	}
-	for _, operation := range m.smart.read().Operations {
+	for _, operation := range m.runtimeState.read().Operations {
 		if operation.Id == request.OperationId {
 			return operation, nil
 		}
@@ -364,7 +362,7 @@ func (m *Manager) ListOperations(_ context.Context, request *api.ListOperationsR
 	if limit > 256 {
 		return nil, status.Error(codes.InvalidArgument, "operation limit exceeds 256")
 	}
-	operations := m.smart.read().Operations
+	operations := m.runtimeState.read().Operations
 	result := new(api.OperationList)
 	for i := len(operations) - 1; i >= 0 && len(result.Operations) < int(limit); i-- {
 		if request.GetResourceId() == "" || operations[i].ResourceId == request.ResourceId {
@@ -374,61 +372,12 @@ func (m *Manager) ListOperations(_ context.Context, request *api.ListOperationsR
 	return result, nil
 }
 
-func (m *Manager) publishSmartConnect(operationID, resourceID string) {
-	s := m.smart
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	if s.closed {
-		return
-	}
-	s.sequence++
-	event := &api.SmartConnectEvent{Sequence: s.sequence, Epoch: s.epoch, OperationId: operationID, ResourceId: resourceID, OccurredAtUnixMs: time.Now().UnixMilli(), Snapshot: proto.Clone(s.snapshot).(*api.SmartConnectSnapshot)}
-	for ch := range s.intentSubscribers {
-		select {
-		case ch <- event:
-		default:
-			close(ch)
-			delete(s.intentSubscribers, ch)
-		}
-	}
+func (m *Manager) publishRuntimeSnapshot(operationID, resourceID string) {
+	state, _ := m.GetRuntimeState(context.Background(), &emptypb.Empty{})
+	m.publishRuntime(&api.RuntimeEvent{Type: api.RuntimeEventType_RUNTIME_EVENT_TYPE_SNAPSHOT, State: state, ServiceId: resourceID})
 }
 
-func (m *Manager) SubscribeSmartConnectEvents(request *api.SmartConnectEventsRequest, stream grpc.ServerStreamingServer[api.SmartConnectEvent]) error {
-	s := m.smart
-	s.mu.Lock()
-	if s.closed {
-		s.mu.Unlock()
-		return status.Error(codes.Unavailable, "manager is closed")
-	}
-	ch := make(chan *api.SmartConnectEvent, 32)
-	s.intentSubscribers[ch] = struct{}{}
-	initial := &api.SmartConnectEvent{Sequence: s.sequence, Epoch: s.epoch, OccurredAtUnixMs: time.Now().UnixMilli(), Snapshot: proto.Clone(s.snapshot).(*api.SmartConnectSnapshot)}
-	if request.GetAfterSequence() > s.sequence {
-		initial.Sequence = 0
-	}
-	s.mu.Unlock()
-	defer func() { s.mu.Lock(); delete(s.intentSubscribers, ch); s.mu.Unlock() }()
-	if err := stream.Send(initial); err != nil {
-		return err
-	}
-	for {
-		select {
-		case <-stream.Context().Done():
-			return status.FromContextError(stream.Context().Err()).Err()
-		case <-s.done:
-			return status.Error(codes.Unavailable, "manager is closed")
-		case event, ok := <-ch:
-			if !ok {
-				return status.Error(codes.ResourceExhausted, "smart connect event consumer fell behind; reload snapshot")
-			}
-			if err := stream.Send(proto.Clone(event).(*api.SmartConnectEvent)); err != nil {
-				return err
-			}
-		}
-	}
-}
-
-func findServicePolicy(snapshot *api.SmartConnectSnapshot, serviceID string) *api.ServicePolicy {
+func findServicePolicy(snapshot *api.RuntimeOrchestrationState, serviceID string) *api.ServicePolicy {
 	for _, policy := range snapshot.Policies {
 		if policy.ServiceId == serviceID {
 			return policy
@@ -437,8 +386,8 @@ func findServicePolicy(snapshot *api.SmartConnectSnapshot, serviceID string) *ap
 	return nil
 }
 
-func (m *Manager) updateOperation(operationID, resourceID string, change func(*api.SmartConnectSnapshot, *api.Operation) error) {
-	err := m.smart.update(context.Background(), func(next *api.SmartConnectSnapshot) error {
+func (m *Manager) updateOperation(operationID, resourceID string, change func(*api.RuntimeOrchestrationState, *api.Operation) error) {
+	err := m.runtimeState.update(context.Background(), func(next *api.RuntimeOrchestrationState) error {
 		var operation *api.Operation
 		for _, candidate := range next.Operations {
 			if candidate.Id == operationID {
@@ -456,7 +405,7 @@ func (m *Manager) updateOperation(operationID, resourceID string, change func(*a
 		return nil
 	})
 	if err == nil {
-		m.publishSmartConnect(operationID, resourceID)
+		m.publishRuntimeSnapshot(operationID, resourceID)
 	}
 }
 
@@ -465,7 +414,7 @@ func (m *Manager) RequestServiceEvaluation(ctx context.Context, request *api.Req
 		return nil, status.Error(codes.InvalidArgument, "service ID is required")
 	}
 	signature := operationSignature(request)
-	operation, created, err := m.acceptOperation(ctx, "evaluate_service", request.ServiceId, request.IdempotencyKey, request.ExpectedRevision, signature, func(next *api.SmartConnectSnapshot, operation *api.Operation) error {
+	operation, created, err := m.acceptOperation(ctx, "evaluate_service", request.ServiceId, request.IdempotencyKey, request.ExpectedRevision, signature, func(next *api.RuntimeOrchestrationState, operation *api.Operation) error {
 		policy := findServicePolicy(next, request.ServiceId)
 		if policy == nil {
 			return status.Error(codes.NotFound, "service policy not found")
@@ -483,9 +432,9 @@ func (m *Manager) RequestServiceEvaluation(ctx context.Context, request *api.Req
 	if err != nil || !created {
 		return operation, err
 	}
-	m.smart.workers.Add(1)
+	m.runtimeState.workers.Add(1)
 	go func(id, serviceID, policyRevision, poolRevision string) {
-		defer m.smart.workers.Done()
+		defer m.runtimeState.workers.Done()
 		defer m.rescheduleService(serviceID, id)
 		m.runEvaluation(id, serviceID, policyRevision, poolRevision)
 	}(operation.Id, operation.ResourceId, operation.PolicyRevision, operation.NodePoolRevision)
@@ -493,14 +442,14 @@ func (m *Manager) RequestServiceEvaluation(ctx context.Context, request *api.Req
 }
 
 func (m *Manager) runEvaluation(operationID, serviceID, policyRevision, poolRevision string) {
-	m.updateOperation(operationID, serviceID, func(_ *api.SmartConnectSnapshot, operation *api.Operation) error {
+	m.updateOperation(operationID, serviceID, func(_ *api.RuntimeOrchestrationState, operation *api.Operation) error {
 		now := time.Now().UnixMilli()
 		operation.Status = api.OperationStatus_OPERATION_STATUS_RUNNING
 		operation.Phase = "evaluating"
 		operation.StartedAtUnixMs = now
 		return nil
 	})
-	snapshot := m.smart.read()
+	snapshot := m.runtimeState.read()
 	policy := findServicePolicy(snapshot, serviceID)
 	if policy == nil || policy.Revision != policyRevision {
 		m.failOperation(operationID, serviceID, "REVISION_CHANGED", status.Error(codes.Aborted, "policy changed during evaluation"))
@@ -583,7 +532,7 @@ func (m *Manager) runEvaluation(operationID, serviceID, policyRevision, poolRevi
 		m.failOperation(operationID, serviceID, "evaluation_failed", err)
 		return
 	}
-	m.updateOperation(operationID, serviceID, func(next *api.SmartConnectSnapshot, operation *api.Operation) error {
+	m.updateOperation(operationID, serviceID, func(next *api.RuntimeOrchestrationState, operation *api.Operation) error {
 		policy := findServicePolicy(next, serviceID)
 		if policy == nil || policy.Revision != policyRevision || m.subscriptions.NodePool().Revision != poolRevision {
 			operation.Status = api.OperationStatus_OPERATION_STATUS_CANCELLED
@@ -638,7 +587,7 @@ func (m *Manager) runEvaluation(operationID, serviceID, policyRevision, poolRevi
 }
 
 func (m *Manager) failOperation(operationID, resourceID, code string, cause error) {
-	m.updateOperation(operationID, resourceID, func(_ *api.SmartConnectSnapshot, operation *api.Operation) error {
+	m.updateOperation(operationID, resourceID, func(_ *api.RuntimeOrchestrationState, operation *api.Operation) error {
 		operation.Status = api.OperationStatus_OPERATION_STATUS_FAILED
 		operation.Phase = "failed"
 		operation.ErrorCode = code
@@ -648,7 +597,7 @@ func (m *Manager) failOperation(operationID, resourceID, code string, cause erro
 	})
 }
 
-func findProposal(snapshot *api.SmartConnectSnapshot, id string) *api.SwitchProposal {
+func findProposal(snapshot *api.RuntimeOrchestrationState, id string) *api.SwitchProposal {
 	for _, proposal := range snapshot.Proposals {
 		if proposal.Id == id {
 			return proposal
@@ -662,7 +611,7 @@ func (m *Manager) RejectSwitchProposal(ctx context.Context, request *api.Proposa
 		return nil, status.Error(codes.InvalidArgument, "proposal ID is required")
 	}
 	signature := operationSignature(request)
-	operation, _, err := m.acceptOperation(ctx, "reject_proposal", request.ProposalId, request.IdempotencyKey, request.ExpectedRevision, signature, func(next *api.SmartConnectSnapshot, operation *api.Operation) error {
+	operation, _, err := m.acceptOperation(ctx, "reject_proposal", request.ProposalId, request.IdempotencyKey, request.ExpectedRevision, signature, func(next *api.RuntimeOrchestrationState, operation *api.Operation) error {
 		proposal := findProposal(next, request.ProposalId)
 		if proposal == nil {
 			return status.Error(codes.NotFound, "proposal not found")
@@ -687,7 +636,7 @@ func (m *Manager) ApproveSwitchProposal(ctx context.Context, request *api.Propos
 	}
 	signature := operationSignature(request)
 	serviceID := ""
-	operation, created, err := m.acceptOperation(ctx, "approve_proposal", request.ProposalId, request.IdempotencyKey, request.ExpectedRevision, signature, func(next *api.SmartConnectSnapshot, operation *api.Operation) error {
+	operation, created, err := m.acceptOperation(ctx, "approve_proposal", request.ProposalId, request.IdempotencyKey, request.ExpectedRevision, signature, func(next *api.RuntimeOrchestrationState, operation *api.Operation) error {
 		proposal := findProposal(next, request.ProposalId)
 		if proposal == nil {
 			return status.Error(codes.NotFound, "proposal not found")
@@ -709,9 +658,9 @@ func (m *Manager) ApproveSwitchProposal(ctx context.Context, request *api.Propos
 	if err != nil || !created {
 		return operation, err
 	}
-	m.smart.workers.Add(1)
+	m.runtimeState.workers.Add(1)
 	go func() {
-		defer m.smart.workers.Done()
+		defer m.runtimeState.workers.Done()
 		m.runBindingOperation(operation.Id, serviceID, operation.ProposalId, "")
 	}()
 	return operation, nil
@@ -722,7 +671,7 @@ func (m *Manager) ForceServiceBinding(ctx context.Context, request *api.ForceSer
 		return nil, status.Error(codes.InvalidArgument, "service ID and node ID are required")
 	}
 	signature := operationSignature(request)
-	operation, created, err := m.acceptOperation(ctx, "force_binding", request.ServiceId, request.IdempotencyKey, request.ExpectedRevision, signature, func(next *api.SmartConnectSnapshot, operation *api.Operation) error {
+	operation, created, err := m.acceptOperation(ctx, "force_binding", request.ServiceId, request.IdempotencyKey, request.ExpectedRevision, signature, func(next *api.RuntimeOrchestrationState, operation *api.Operation) error {
 		policy := findServicePolicy(next, request.ServiceId)
 		if policy == nil {
 			return status.Error(codes.NotFound, "service policy not found")
@@ -738,16 +687,16 @@ func (m *Manager) ForceServiceBinding(ctx context.Context, request *api.ForceSer
 	if err != nil || !created {
 		return operation, err
 	}
-	m.smart.workers.Add(1)
+	m.runtimeState.workers.Add(1)
 	go func() {
-		defer m.smart.workers.Done()
+		defer m.runtimeState.workers.Done()
 		m.runBindingOperation(operation.Id, request.ServiceId, "", request.NodeId)
 	}()
 	return operation, nil
 }
 
 func (m *Manager) rescheduleService(serviceID, operationID string) {
-	_ = m.smart.update(context.Background(), func(next *api.SmartConnectSnapshot) error {
+	_ = m.runtimeState.update(context.Background(), func(next *api.RuntimeOrchestrationState) error {
 		policy := findServicePolicy(next, serviceID)
 		if policy == nil || policy.EvaluationIntervalSeconds == 0 {
 			return nil
@@ -769,7 +718,7 @@ func (m *Manager) rescheduleService(serviceID, operationID string) {
 }
 
 func (m *Manager) dispatchDueSmartTasks() {
-	snapshot := m.smart.read()
+	snapshot := m.runtimeState.read()
 	now := time.Now().UnixMilli()
 	for _, task := range snapshot.Tasks {
 		if task.Kind != "evaluate" || task.NextRunAtUnixMs > now {
@@ -778,7 +727,7 @@ func (m *Manager) dispatchDueSmartTasks() {
 		key := fmt.Sprintf("task:%s:%d", task.Id, task.NextRunAtUnixMs)
 		_, err := m.RequestServiceEvaluation(context.Background(), &api.RequestServiceEvaluationRequest{ServiceId: task.ServiceId, ExpectedRevision: snapshot.Revision, IdempotencyKey: key})
 		if err != nil {
-			_ = m.smart.update(context.Background(), func(next *api.SmartConnectSnapshot) error {
+			_ = m.runtimeState.update(context.Background(), func(next *api.RuntimeOrchestrationState) error {
 				for _, current := range next.Tasks {
 					if current.Id == task.Id {
 						current.Attempt++
@@ -799,7 +748,7 @@ func (m *Manager) dispatchDueSmartTasks() {
 // connectivity callback; no client process needs to stay alive.
 func (m *Manager) NotifyNetworkChanged() {
 	changed := false
-	_ = m.smart.update(context.Background(), func(next *api.SmartConnectSnapshot) error {
+	_ = m.runtimeState.update(context.Background(), func(next *api.RuntimeOrchestrationState) error {
 		now := time.Now().UnixMilli()
 		for _, result := range next.Results {
 			if result.ExpiresAtUnixMs > now {
@@ -820,18 +769,18 @@ func (m *Manager) NotifyNetworkChanged() {
 		return nil
 	})
 	if changed {
-		m.publishSmartConnect("", "network")
+		m.publishRuntimeSnapshot("", "network")
 	}
 }
 
-func (m *Manager) recoverSmartConnectOperations() {
-	for _, operation := range m.smart.read().Operations {
+func (m *Manager) recoverRuntimeOperations() {
+	for _, operation := range m.runtimeState.read().Operations {
 		if operation.Status != api.OperationStatus_OPERATION_STATUS_QUEUED && operation.Status != api.OperationStatus_OPERATION_STATUS_RUNNING {
 			continue
 		}
-		m.smart.workers.Add(1)
+		m.runtimeState.workers.Add(1)
 		go func(operation *api.Operation) {
-			defer m.smart.workers.Done()
+			defer m.runtimeState.workers.Done()
 			switch operation.Kind {
 			case "evaluate_service":
 				if operation.ProposalId != "" && operation.Phase == "applying" {
@@ -840,7 +789,7 @@ func (m *Manager) recoverSmartConnectOperations() {
 					m.runEvaluation(operation.Id, operation.ResourceId, operation.PolicyRevision, operation.NodePoolRevision)
 				}
 			case "approve_proposal":
-				snapshot := m.smart.read()
+				snapshot := m.runtimeState.read()
 				proposal := findProposal(snapshot, operation.ProposalId)
 				if proposal == nil {
 					m.failOperation(operation.Id, operation.ResourceId, "RECOVERY_FAILED", status.Error(codes.NotFound, "proposal not found during recovery"))
@@ -856,7 +805,7 @@ func (m *Manager) recoverSmartConnectOperations() {
 	}
 }
 
-func (m *Manager) nodeAllowed(snapshot *api.SmartConnectSnapshot, policy *api.ServicePolicy, nodeID string) bool {
+func (m *Manager) nodeAllowed(snapshot *api.RuntimeOrchestrationState, policy *api.ServicePolicy, nodeID string) bool {
 	if nodeID == "direct" {
 		return policy.SwitchPolicy.GetMode() == api.SwitchMode_SWITCH_MODE_DIRECT || policy.SwitchPolicy.GetAllowDirect()
 	}
@@ -918,7 +867,7 @@ func (m *Manager) nodeAllowed(snapshot *api.SmartConnectSnapshot, policy *api.Se
 	return false
 }
 
-func (m *Manager) autoAuthorized(snapshot *api.SmartConnectSnapshot, policy *api.ServicePolicy, proposal *api.SwitchProposal) bool {
+func (m *Manager) autoAuthorized(snapshot *api.RuntimeOrchestrationState, policy *api.ServicePolicy, proposal *api.SwitchProposal) bool {
 	rules := policy.SwitchPolicy
 	if rules == nil || rules.Mode != api.SwitchMode_SWITCH_MODE_AUTO_CONSTRAINED || !m.nodeAllowed(snapshot, policy, proposal.SuggestedNodeId) {
 		return false
@@ -988,7 +937,7 @@ func selectorTag(serviceID string) string {
 }
 
 func (m *Manager) runBindingOperation(operationID, serviceID, proposalID, forcedNodeID string) {
-	snapshot := m.smart.read()
+	snapshot := m.runtimeState.read()
 	policy := findServicePolicy(snapshot, serviceID)
 	if policy == nil {
 		m.failOperation(operationID, serviceID, "POLICY_NOT_FOUND", status.Error(codes.NotFound, "service policy not found"))
@@ -1023,7 +972,7 @@ func (m *Manager) runBindingOperation(operationID, serviceID, proposalID, forced
 		m.failOperation(operationID, serviceID, "POLICY_CONSTRAINT", status.Error(codes.FailedPrecondition, "node is outside policy constraints"))
 		return
 	}
-	m.updateOperation(operationID, serviceID, func(_ *api.SmartConnectSnapshot, operation *api.Operation) error {
+	m.updateOperation(operationID, serviceID, func(_ *api.RuntimeOrchestrationState, operation *api.Operation) error {
 		operation.Status = api.OperationStatus_OPERATION_STATUS_RUNNING
 		operation.Phase = "applying"
 		if operation.StartedAtUnixMs == 0 {
@@ -1074,7 +1023,7 @@ func (m *Manager) runBindingOperation(operationID, serviceID, proposalID, forced
 	if !routeFound {
 		next.ServiceRoutes = append(next.ServiceRoutes, &api.ServiceRoute{ServiceId: serviceID, Domains: append([]string(nil), policy.Domains...), SelectorTag: tag, Enabled: true})
 	}
-	binding := &api.ServiceBinding{ServiceId: serviceID, SelectorTag: tag, NodeId: nodeID, SelectedAtUnixMs: time.Now().UnixMilli(), SelectionReason: "smart-connect", SelectionPolicyRevision: policy.Revision}
+	binding := &api.ServiceBinding{ServiceId: serviceID, SelectorTag: tag, NodeId: nodeID, SelectedAtUnixMs: time.Now().UnixMilli(), SelectionReason: "policy-automation", SelectionPolicyRevision: policy.Revision}
 	if policy.BindingValiditySeconds > 0 {
 		binding.ExpiresAtUnixMs = binding.SelectedAtUnixMs + int64(policy.BindingValiditySeconds)*1000
 	}
@@ -1111,7 +1060,7 @@ func (m *Manager) runBindingOperation(operationID, serviceID, proposalID, forced
 				m.opMu.Lock()
 				_, rollbackErr := m.applyDesired(context.Background(), previous)
 				m.opMu.Unlock()
-				m.updateOperation(operationID, serviceID, func(_ *api.SmartConnectSnapshot, operation *api.Operation) error {
+				m.updateOperation(operationID, serviceID, func(_ *api.RuntimeOrchestrationState, operation *api.Operation) error {
 					operation.CompletedAtUnixMs = time.Now().UnixMilli()
 					operation.ErrorCode = "VERIFICATION_FAILED"
 					operation.ErrorMessage = verifyErr.Error()
@@ -1131,7 +1080,7 @@ func (m *Manager) runBindingOperation(operationID, serviceID, proposalID, forced
 			return
 		}
 	}
-	m.updateOperation(operationID, serviceID, func(next *api.SmartConnectSnapshot, operation *api.Operation) error {
+	m.updateOperation(operationID, serviceID, func(next *api.RuntimeOrchestrationState, operation *api.Operation) error {
 		operation.Status = api.OperationStatus_OPERATION_STATUS_SUCCEEDED
 		operation.Phase = "committed"
 		operation.RuntimeRevision = result.Revision
@@ -1213,7 +1162,7 @@ func (m *Manager) verifyServiceBinding(serviceID, selectorTag, nodeID string) er
 			return status.Error(codes.FailedPrecondition, "runtime selector did not apply requested node")
 		}
 	}
-	snapshot := m.smart.read()
+	snapshot := m.runtimeState.read()
 	probe := findProbe(snapshot, serviceID)
 	if probe == nil || nodeID == "direct" {
 		return nil
