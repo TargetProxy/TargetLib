@@ -28,10 +28,6 @@ type smartConnect struct {
 	mu                sync.Mutex
 	store             subscriptions.Store
 	snapshot          *api.SmartConnectSnapshot
-	subscribers       map[chan *api.RuntimeEvent]struct{}
-	intentSubscribers map[chan *api.SmartConnectEvent]struct{}
-	sequence          uint64
-	epoch             string
 	closed            bool
 	done              chan struct{}
 	workers           sync.WaitGroup
@@ -39,7 +35,7 @@ type smartConnect struct {
 }
 
 func newSmartConnect(ctx context.Context, store subscriptions.Store) (*smartConnect, error) {
-	s := &smartConnect{store: store, snapshot: new(api.SmartConnectSnapshot), subscribers: make(map[chan *api.RuntimeEvent]struct{}), intentSubscribers: make(map[chan *api.SmartConnectEvent]struct{}), epoch: uuid.NewString(), done: make(chan struct{}), slots: make(chan struct{}, 4)}
+	s := &smartConnect{store: store, snapshot: new(api.SmartConnectSnapshot), done: make(chan struct{}), slots: make(chan struct{}, 4)}
 	content, err := store.GetMetadata(ctx, smartMetadataKey)
 	if err != nil {
 		return nil, err
@@ -50,7 +46,6 @@ func newSmartConnect(ctx context.Context, store subscriptions.Store) (*smartConn
 	if s.snapshot.Revision == "" {
 		s.snapshot.Revision = uuid.NewString()
 	}
-	s.snapshot.RecoveryState = api.SmartRecoveryState_SMART_RECOVERY_STATE_READY
 	return s, nil
 }
 
@@ -89,17 +84,28 @@ func (s *smartConnect) close() {
 	if !s.closed {
 		s.closed = true
 		close(s.done)
-		for ch := range s.subscribers {
-			close(ch)
-			delete(s.subscribers, ch)
-		}
-		for ch := range s.intentSubscribers {
-			close(ch)
-			delete(s.intentSubscribers, ch)
-		}
 	}
 	s.mu.Unlock()
 	s.workers.Wait()
+}
+
+func (m *Manager) watchSmartConnect(ctx context.Context) {
+	m.smart.workers.Add(1)
+	go func() {
+		defer m.smart.workers.Done()
+		ticker := time.NewTicker(time.Second)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-m.smart.done:
+				return
+			case <-ticker.C:
+				m.dispatchDueSmartTasks()
+			}
+		}
+	}()
 }
 
 func validateProbe(value *api.ServiceProbe) (*api.ServiceProbe, error) {

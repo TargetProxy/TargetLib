@@ -71,29 +71,6 @@ type Blueprint struct {
 	Runtime   RuntimePlan
 }
 
-// Plan 将应用设置和订阅中间态解析为结构化的、应用拥有的运行配置计划。
-// 订阅只贡献可用节点；其 DNS、路由、运行时和出站组合配置均不透传。
-func Plan(settings Settings, source targetprofile.Profile) (Blueprint, error) {
-	if err := settings.Validate(); err != nil {
-		return Blueprint{}, err
-	}
-	inbounds, err := buildInbounds(settings)
-	if err != nil {
-		return Blueprint{}, err
-	}
-	outbounds, finalOutbound, err := planOutbounds(source.Nodes)
-	if err != nil {
-		return Blueprint{}, err
-	}
-	route := planRoute(finalOutbound, settings)
-	dns, err := planDNS(settings.ProxyMode == ProxyModeTun)
-	if err != nil {
-		return Blueprint{}, err
-	}
-	return Blueprint{Inbounds: inbounds, Outbounds: outbounds, DNS: dns, Route: route,
-		Runtime: planRuntime(settings)}, nil
-}
-
 // Emit 将 Blueprint 序列化并校验，不包含配置决策。
 func Emit(plan Blueprint) ([]byte, error) {
 	experimental := plan.Runtime.Experimental
@@ -130,12 +107,6 @@ func Build(settings Settings, source any) ([]byte, error) {
 		return nil, err
 	}
 	return Emit(plan)
-}
-
-// BuildRuntime generates configuration from the complete P0 runtime model.
-// It never selects an alternative node or configuration when the model is invalid.
-func BuildRuntime(settings Settings, model RuntimeModel) ([]byte, error) {
-	return Build(settings, model)
 }
 
 func planRuntimeModel(settings Settings, model RuntimeModel) (Blueprint, error) {
@@ -198,10 +169,6 @@ func planRuntimeModel(settings Settings, model RuntimeModel) (Blueprint, error) 
 		return Blueprint{}, err
 	}
 	return Blueprint{Inbounds: inbounds, Outbounds: outbounds, DNS: dns, Route: route, Runtime: planRuntime(settings)}, nil
-}
-
-func planOutbounds(nodes []targetprofile.Node) ([]option.Outbound, string, error) {
-	return planOutboundsWithSelectors(nodes, nil)
 }
 
 func planOutboundsWithSelectors(nodes []targetprofile.Node, selectors []Selector) ([]option.Outbound, string, error) {

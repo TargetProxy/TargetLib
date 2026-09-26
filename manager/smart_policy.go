@@ -69,6 +69,5 @@ func (m *Manager) ImportSmartConnectPolicy(ctx context.Context, request *api.Imp
 	if err != nil {
 		return nil, err
 	}
-	m.publishRuntime(&api.RuntimeEvent{Type: api.RuntimeEventType_RUNTIME_EVENT_TYPE_PROBE_DEFINITION})
 	return result, nil
 }

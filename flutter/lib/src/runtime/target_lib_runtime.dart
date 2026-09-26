@@ -105,71 +105,10 @@ final class TargetLibRuntime {
   Future<RuntimeConfig> getRuntimeConfig() async =>
       (await _requireConnection()).getRuntimeConfig();
 
-  Future<RuntimeConfig> updateRuntimeConfig(
-    RuntimeSettings settings, {
-    RuntimeModel? model,
-    String? expectedRevision,
-  }) async => (await _requireConnection()).updateRuntimeConfig(
-    settings,
-    model: model,
-    expectedRevision: expectedRevision,
-  );
-
   Future<NodePool> getNodePool() async =>
       (await _requireConnection()).getNodePool();
-  Future<ServiceProbe> putServiceProbe(ServiceProbe probe) async =>
-      (await _requireConnection()).putServiceProbe(probe);
-  Future<ServiceProbeList> listServiceProbes() async =>
-      (await _requireConnection()).listServiceProbes();
-  Future<void> removeServiceProbe(RemoveServiceProbeRequest request) async =>
-      (await _requireConnection()).removeServiceProbe(request);
-  Future<SmartConnectDiagnostics> getSmartConnectDiagnostics({
-    String? serviceId,
-  }) async => (await _requireConnection()).getSmartConnectDiagnostics(
-    serviceId: serviceId,
-  );
-  Future<ServiceSelectionPolicy> getServiceSelectionPolicy(
-    String serviceId,
-  ) async => (await _requireConnection()).getServiceSelectionPolicy(serviceId);
-  Future<ServiceSelectionPolicy> putServiceSelectionPolicy(
-    ServiceSelectionPolicy policy,
-  ) async => (await _requireConnection()).putServiceSelectionPolicy(policy);
-  Stream<ProbeResult> probeService(ProbeServiceRequest request) async* {
-    yield* (await _requireConnection()).probeService(request);
-  }
-
-  Future<QualityHistory> getQualityHistory(
-    QualityHistoryRequest request,
-  ) async => (await _requireConnection()).getQualityHistory(request);
-  Future<ServiceEvaluation> evaluateService(String serviceId) async =>
-      (await _requireConnection()).evaluateService(serviceId);
-  Stream<RuntimeEvent> subscribeRuntimeEvents() async* {
-    yield* (await _requireConnection()).subscribeRuntimeEvents();
-  }
-
-  Future<SmartConnectPolicy> exportSmartConnectPolicy() async =>
-      (await _requireConnection()).exportSmartConnectPolicy();
-  Future<SmartConnectPolicy> importSmartConnectPolicy(
-    ImportSmartConnectPolicyRequest request,
-  ) async => (await _requireConnection()).importSmartConnectPolicy(request);
   Future<RuntimeState> getRuntimeState() async =>
       (await _requireConnection()).getRuntimeState();
-  Future<ServiceBindingList> listServiceBindings() async =>
-      (await _requireConnection()).listServiceBindings();
-  Future<RuntimeConfig> applyServiceBinding(
-    ServiceBinding binding, {
-    String? expectedRevision,
-  }) async => (await _requireConnection()).applyServiceBinding(
-    binding,
-    expectedRevision: expectedRevision,
-  );
-  Future<RuntimeConfig> removeServiceBinding(
-    String serviceId, {
-    String? expectedRevision,
-  }) async => (await _requireConnection()).removeServiceBinding(
-    serviceId,
-    expectedRevision: expectedRevision,
-  );
 
   Future<SmartConnectSnapshot> getSmartConnectSnapshot() async =>
       (await _requireConnection()).getSmartConnectSnapshot();

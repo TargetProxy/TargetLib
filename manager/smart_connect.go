@@ -93,10 +93,7 @@ func (m *Manager) setApplyPhase(phase api.ConfigApplyPhase, revision string, err
 	if err != nil {
 		m.applyState.ErrorMessage = err.Error()
 	}
-	state := proto.Clone(&m.applyState).(*api.RuntimeState)
-	state.DesiredRevision = m.runtimeConfig.GetRevision()
 	m.configMu.Unlock()
-	m.publishRuntime(&api.RuntimeEvent{Type: api.RuntimeEventType_RUNTIME_EVENT_TYPE_CONFIG, State: state})
 }
 
 // Caller holds opMu. Pool reads never wait on runtime operations.

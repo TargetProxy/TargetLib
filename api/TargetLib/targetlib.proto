@@ -54,7 +54,6 @@ service TargetLib {
   rpc GetServiceSelectionPolicy(ServiceSelectionPolicyRequest) returns (ServiceSelectionPolicy);
   rpc PutServiceSelectionPolicy(ServiceSelectionPolicy) returns (ServiceSelectionPolicy);
   rpc GetSmartConnectDiagnostics(EvaluateServiceRequest) returns (SmartConnectDiagnostics);
-  rpc SubscribeRuntimeEvents(google.protobuf.Empty) returns (stream RuntimeEvent);
   rpc ExportSmartConnectPolicy(google.protobuf.Empty) returns (SmartConnectPolicy);
   rpc ImportSmartConnectPolicy(ImportSmartConnectPolicyRequest) returns (SmartConnectPolicy);
 
@@ -71,7 +70,6 @@ service TargetLib {
   rpc ForceServiceBinding(ForceServiceBindingRequest) returns (Operation);
   rpc GetOperation(GetOperationRequest) returns (Operation);
   rpc ListOperations(ListOperationsRequest) returns (OperationList);
-  rpc SubscribeSmartConnectEvents(SmartConnectEventsRequest) returns (stream SmartConnectEvent);
 }
 
 enum LogLevel {
@@ -121,7 +119,6 @@ message CapabilitiesResponse {
   bool real_time_traffic = 6;
   bool smart_connect = 7;
   bool service_probes = 8;
-  bool runtime_events = 9;
   bool smart_connect_intent_api = 10;
 }
 
@@ -482,27 +479,6 @@ message SmartConnectDiagnostics {
   string policy_revision = 3;
   int64 generated_at_unix_ms = 4;
 }
-enum RuntimeEventType {
-  RUNTIME_EVENT_TYPE_UNSPECIFIED = 0;
-  RUNTIME_EVENT_TYPE_SNAPSHOT = 1;
-  RUNTIME_EVENT_TYPE_CONFIG = 2;
-  RUNTIME_EVENT_TYPE_NODE_POOL = 3;
-  RUNTIME_EVENT_TYPE_BINDING = 4;
-  RUNTIME_EVENT_TYPE_PROBE_STARTED = 5;
-  RUNTIME_EVENT_TYPE_PROBE_COMPLETED = 6;
-  RUNTIME_EVENT_TYPE_PROBE_DEFINITION = 7;
-  RUNTIME_EVENT_TYPE_STOPPED = 8;
-}
-message RuntimeEvent {
-  // Monotonic within an event stream epoch. Reconnect starts with a snapshot.
-  uint64 sequence = 1;
-  RuntimeEventType type = 2;
-  int64 occurred_at_unix_ms = 3;
-  RuntimeState state = 4;
-  ProbeResult probe = 5;
-  string service_id = 6;
-  string node_id = 7;
-}
 // Internal persisted snapshot. Histories are local to this host/network.
 message SmartConnectSnapshot {
   repeated ServiceProbe probes = 1;
@@ -510,7 +486,6 @@ message SmartConnectSnapshot {
   repeated ServiceSelectionPolicy selection_policies = 3;
   bool enabled = 4;
   string revision = 5;
-  SmartRecoveryState recovery_state = 6;
   repeated ServicePolicy policies = 7;
   repeated SwitchProposal proposals = 8;
   repeated Operation operations = 9;
@@ -518,12 +493,6 @@ message SmartConnectSnapshot {
   repeated SchedulerTask tasks = 11;
 }
 
-enum SmartRecoveryState {
-  SMART_RECOVERY_STATE_UNSPECIFIED = 0;
-  SMART_RECOVERY_STATE_RECOVERING = 1;
-  SMART_RECOVERY_STATE_READY = 2;
-  SMART_RECOVERY_STATE_DEGRADED = 3;
-}
 enum SwitchMode {
   SWITCH_MODE_UNSPECIFIED = 0;
   SWITCH_MODE_MANUAL = 1;
@@ -544,8 +513,6 @@ message SwitchPolicy {
   uint32 minimum_dwell_seconds = 10;
   uint32 cooldown_seconds = 11;
   uint32 max_switches_per_hour = 12;
-  bool verify_after_switch = 13;
-  bool rollback_on_verification_failure = 14;
 }
 message ServicePolicy {
   string service_id = 1;
@@ -643,8 +610,6 @@ message ProposalCommandRequest { string proposal_id = 1; string expected_revisio
 message ForceServiceBindingRequest { string service_id = 1; string node_id = 2; string expected_revision = 3; string idempotency_key = 4; bool close_existing_connections = 5; }
 message GetOperationRequest { string operation_id = 1; }
 message ListOperationsRequest { string resource_id = 1; uint32 limit = 2; }
-message SmartConnectEventsRequest { uint64 after_sequence = 1; }
-message SmartConnectEvent { uint64 sequence = 1; string epoch = 2; string operation_id = 3; string resource_id = 4; int64 occurred_at_unix_ms = 5; SmartConnectSnapshot snapshot = 6; }
 // Portable probe policy only. Quality and runtime bindings remain device-local.
 message SmartConnectPolicy {
   uint32 schema_version = 1;

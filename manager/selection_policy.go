@@ -55,6 +55,5 @@ func (m *Manager) PutServiceSelectionPolicy(ctx context.Context, value *api.Serv
 	}); err != nil {
 		return nil, err
 	}
-	m.publishRuntime(&api.RuntimeEvent{Type: api.RuntimeEventType_RUNTIME_EVENT_TYPE_PROBE_DEFINITION, ServiceId: p.ServiceId})
 	return proto.Clone(p).(*api.ServiceSelectionPolicy), nil
 }

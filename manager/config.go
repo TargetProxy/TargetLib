@@ -9,31 +9,7 @@ import (
 
 	targetlibapi "github.com/loafman1120/TargetLib/api/TargetLib"
 	"github.com/loafman1120/TargetLib/config"
-	targetprofile "github.com/loafman1120/TargetLib/profile"
 )
-
-// buildRuntimeConfig 是唯一的运行配置生成路径，使用所有订阅聚合出的节点池。
-func (m *Manager) buildRuntimeConfig() ([]byte, error) {
-	m.configMu.RLock()
-	settingsProto := cloneRuntimeSettings(m.runtimeConfig.GetSettings())
-	m.configMu.RUnlock()
-	settings, err := buildSettings(settingsProto, m.cacheFilePath)
-	if err != nil {
-		return nil, err
-	}
-	return m.buildRuntimeConfigWithSettings(settings)
-}
-
-func (m *Manager) buildRuntimeConfigWithSettings(settings config.Settings) ([]byte, error) {
-	m.configMu.RLock()
-	desired := cloneRuntimeConfig(m.runtimeConfig)
-	nodes := append([]targetprofile.Node(nil), m.runtimeNodes...)
-	m.configMu.RUnlock()
-	if desired.Revision == "" {
-		nodes = m.subscriptions.NodePool().Nodes
-	}
-	return buildRuntimeConfigForModel(settings, runtimeModel(desired, nodes))
-}
 
 func buildRuntimeConfigForModel(settings config.Settings, model config.RuntimeModel) ([]byte, error) {
 	content, err := config.Build(settings, model)

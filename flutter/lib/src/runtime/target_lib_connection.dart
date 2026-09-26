@@ -143,83 +143,18 @@ final class TargetLibConnection {
       client.getRuntimeConfig(Empty(), options: options);
 
   Future<RuntimeConfig> updateRuntimeConfig(
-    RuntimeSettings settings, {
-    RuntimeModel? model,
-    String? expectedRevision,
-  }) => client.updateRuntimeConfig(
+    RuntimeSettings settings,
+  ) => client.updateRuntimeConfig(
     UpdateRuntimeConfigRequest(
       settings: settings,
-      model: model,
-      expectedRevision: expectedRevision,
     ),
     options: options,
   );
 
   Future<NodePool> getNodePool() =>
       client.getNodePool(Empty(), options: options);
-  Future<ServiceProbe> putServiceProbe(ServiceProbe probe) =>
-      client.putServiceProbe(probe, options: options);
-  Future<ServiceProbeList> listServiceProbes() =>
-      client.listServiceProbes(Empty(), options: options);
-  Future<void> removeServiceProbe(RemoveServiceProbeRequest request) async {
-    await client.removeServiceProbe(request, options: options);
-  }
-
-  Future<SmartConnectDiagnostics> getSmartConnectDiagnostics({
-    String? serviceId,
-  }) => client.getSmartConnectDiagnostics(
-    EvaluateServiceRequest(serviceId: serviceId),
-    options: options,
-  );
-  Future<ServiceSelectionPolicy> getServiceSelectionPolicy(String serviceId) =>
-      client.getServiceSelectionPolicy(
-        ServiceSelectionPolicyRequest(serviceId: serviceId),
-        options: options,
-      );
-  Future<ServiceSelectionPolicy> putServiceSelectionPolicy(
-    ServiceSelectionPolicy policy,
-  ) => client.putServiceSelectionPolicy(policy, options: options);
-  ResponseStream<ProbeResult> probeService(ProbeServiceRequest request) =>
-      client.probeService(request, options: options);
-  Future<QualityHistory> getQualityHistory(QualityHistoryRequest request) =>
-      client.getQualityHistory(request, options: options);
-  Future<ServiceEvaluation> evaluateService(String serviceId) =>
-      client.evaluateService(
-        EvaluateServiceRequest(serviceId: serviceId),
-        options: options,
-      );
-  ResponseStream<RuntimeEvent> subscribeRuntimeEvents() =>
-      client.subscribeRuntimeEvents(Empty(), options: options);
-  Future<SmartConnectPolicy> exportSmartConnectPolicy() =>
-      client.exportSmartConnectPolicy(Empty(), options: options);
-  Future<SmartConnectPolicy> importSmartConnectPolicy(
-    ImportSmartConnectPolicyRequest request,
-  ) => client.importSmartConnectPolicy(request, options: options);
   Future<RuntimeState> getRuntimeState() =>
       client.getRuntimeState(Empty(), options: options);
-  Future<ServiceBindingList> listServiceBindings() =>
-      client.listServiceBindings(Empty(), options: options);
-  Future<RuntimeConfig> applyServiceBinding(
-    ServiceBinding binding, {
-    String? expectedRevision,
-  }) => client.applyServiceBinding(
-    ApplyServiceBindingRequest(
-      binding: binding,
-      expectedRevision: expectedRevision,
-    ),
-    options: options,
-  );
-  Future<RuntimeConfig> removeServiceBinding(
-    String serviceId, {
-    String? expectedRevision,
-  }) => client.removeServiceBinding(
-    RemoveServiceBindingRequest(
-      serviceId: serviceId,
-      expectedRevision: expectedRevision,
-    ),
-    options: options,
-  );
-
   Future<SmartConnectSnapshot> getSmartConnectSnapshot() =>
       client.getSmartConnectSnapshot(Empty(), options: options);
   Future<Operation> setSmartConnectEnabled(

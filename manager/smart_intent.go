@@ -437,17 +437,6 @@ func findServicePolicy(snapshot *api.SmartConnectSnapshot, serviceID string) *ap
 	return nil
 }
 
-func updateStoredOperation(snapshot *api.SmartConnectSnapshot, operationID string, change func(*api.Operation)) bool {
-	for _, operation := range snapshot.Operations {
-		if operation.Id == operationID {
-			change(operation)
-			operation.UpdatedAtUnixMs = time.Now().UnixMilli()
-			return true
-		}
-	}
-	return false
-}
-
 func (m *Manager) updateOperation(operationID, resourceID string, change func(*api.SmartConnectSnapshot, *api.Operation) error) {
 	err := m.smart.update(context.Background(), func(next *api.SmartConnectSnapshot) error {
 		var operation *api.Operation
@@ -477,9 +466,6 @@ func (m *Manager) RequestServiceEvaluation(ctx context.Context, request *api.Req
 	}
 	signature := operationSignature(request)
 	operation, created, err := m.acceptOperation(ctx, "evaluate_service", request.ServiceId, request.IdempotencyKey, request.ExpectedRevision, signature, func(next *api.SmartConnectSnapshot, operation *api.Operation) error {
-		if !next.Enabled {
-			return status.Error(codes.FailedPrecondition, "smart connect is disabled")
-		}
 		policy := findServicePolicy(next, request.ServiceId)
 		if policy == nil {
 			return status.Error(codes.NotFound, "service policy not found")
@@ -737,9 +723,6 @@ func (m *Manager) ForceServiceBinding(ctx context.Context, request *api.ForceSer
 	}
 	signature := operationSignature(request)
 	operation, created, err := m.acceptOperation(ctx, "force_binding", request.ServiceId, request.IdempotencyKey, request.ExpectedRevision, signature, func(next *api.SmartConnectSnapshot, operation *api.Operation) error {
-		if !next.Enabled {
-			return status.Error(codes.FailedPrecondition, "smart connect is disabled")
-		}
 		policy := findServicePolicy(next, request.ServiceId)
 		if policy == nil {
 			return status.Error(codes.NotFound, "service policy not found")
@@ -850,12 +833,6 @@ func (m *Manager) recoverSmartConnectOperations() {
 		go func(operation *api.Operation) {
 			defer m.smart.workers.Done()
 			switch operation.Kind {
-			case "set_enabled":
-				if !m.smart.read().Enabled {
-					m.runDisableCleanup(operation.Id)
-				} else {
-					m.failOperation(operation.Id, operation.ResourceId, "RECOVERY_FAILED", status.Error(codes.Internal, "incomplete enable operation"))
-				}
 			case "evaluate_service":
 				if operation.ProposalId != "" && operation.Phase == "applying" {
 					m.runBindingOperation(operation.Id, operation.ResourceId, operation.ProposalId, "")

@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	boxlog "github.com/sagernet/sing-box/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -93,14 +94,32 @@ func (m *Manager) authenticate(ctx context.Context, method string) error {
 
 func (m *Manager) authenticateUnary(ctx context.Context, request any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
 	if err := m.authenticate(ctx, info.FullMethod); err != nil {
+		m.logGRPCError(info.FullMethod, err)
 		return nil, err
 	}
-	return handler(ctx, request)
+	response, err := handler(ctx, request)
+	if err != nil {
+		m.logGRPCError(info.FullMethod, err)
+	}
+	return response, err
 }
 
 func (m *Manager) authenticateStream(server any, stream grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
 	if err := m.authenticate(stream.Context(), info.FullMethod); err != nil {
+		m.logGRPCError(info.FullMethod, err)
 		return err
 	}
-	return handler(server, stream)
+	err := handler(server, stream)
+	if err != nil {
+		m.logGRPCError(info.FullMethod, err)
+	}
+	return err
+}
+
+func (m *Manager) logGRPCError(method string, err error) {
+	if m.started == nil || err == nil {
+		return
+	}
+	grpcStatus := status.Convert(err)
+	m.started.WriteMessage(boxlog.LevelError, fmt.Sprintf("gRPC ERROR %s: %s: %s", method, grpcStatus.Code(), grpcStatus.Message()))
 }

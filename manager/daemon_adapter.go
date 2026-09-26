@@ -3,13 +3,10 @@ package manager
 import (
 	"context"
 	"errors"
-	"time"
 
 	"github.com/sagernet/sing-box/daemon"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
-
-	targetlibapi "github.com/loafman1120/TargetLib/api/TargetLib"
 )
 
 // daemonAdapter isolates the sing-box daemon API from lifecycle decisions.
@@ -43,23 +40,6 @@ func (d *daemonAdapter) SubscribeGroups(request *emptypb.Empty, stream grpc.Serv
 
 func (d *daemonAdapter) URLTest(ctx context.Context, request *daemon.URLTestRequest) (*emptypb.Empty, error) {
 	return d.service.URLTest(ctx, request)
-}
-
-func runtimeState(source *daemon.ServiceStatus) *targetlibapi.ServiceState {
-	stateType := targetlibapi.ServiceStateType_SERVICE_STATE_UNSPECIFIED
-	switch source.GetStatus() {
-	case daemon.ServiceStatus_IDLE:
-		stateType = targetlibapi.ServiceStateType_SERVICE_STATE_IDLE
-	case daemon.ServiceStatus_STARTING:
-		stateType = targetlibapi.ServiceStateType_SERVICE_STATE_STARTING
-	case daemon.ServiceStatus_STARTED:
-		stateType = targetlibapi.ServiceStateType_SERVICE_STATE_RUNNING
-	case daemon.ServiceStatus_STOPPING:
-		stateType = targetlibapi.ServiceStateType_SERVICE_STATE_STOPPING
-	case daemon.ServiceStatus_FATAL:
-		stateType = targetlibapi.ServiceStateType_SERVICE_STATE_FAILED
-	}
-	return &targetlibapi.ServiceState{State: stateType, ErrorMessage: source.GetErrorMessage(), ChangedAtUnixMs: time.Now().UnixMilli()}
 }
 
 var _ latencyService = (*daemonAdapter)(nil)

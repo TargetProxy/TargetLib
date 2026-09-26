@@ -171,7 +171,6 @@ func New(ctx context.Context, options Options) (*Manager, error) {
 	}
 	m.applyState.Phase = targetlibapi.ConfigApplyPhase_CONFIG_APPLY_PHASE_READY
 	m.latency = m.daemon
-	m.recoverSmartConnectOperations()
 	m.watchSmartConnect(subscriptionContext)
 	go func() {
 		defer close(m.subscriptionDone)
@@ -226,7 +225,6 @@ func (m *Manager) GetCapabilities(context.Context, *emptypb.Empty) (*targetlibap
 		RealTimeTraffic:        true,
 		SmartConnect:           true,
 		ServiceProbes:          true,
-		RuntimeEvents:          true,
 		SmartConnectIntentApi:  true,
 	}, nil
 }

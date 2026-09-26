@@ -160,7 +160,6 @@ func (m *Manager) ProbeService(request *api.ProbeServiceRequest, stream grpc.Ser
 					<-s.slots
 					return
 				}
-				m.publishRuntime(&api.RuntimeEvent{Type: api.RuntimeEventType_RUNTIME_EVENT_TYPE_PROBE_STARTED, ServiceId: p.ServiceId, NodeId: id})
 				result := m.probeNode(ctx, p, byID[id], pool.Revision, request.Headers, attempts)
 				<-s.slots
 				if ctx.Err() != nil {
@@ -168,7 +167,6 @@ func (m *Manager) ProbeService(request *api.ProbeServiceRequest, stream grpc.Ser
 				}
 				err := m.saveQuality(ctx, result)
 				if err == nil {
-					m.publishRuntime(&api.RuntimeEvent{Type: api.RuntimeEventType_RUNTIME_EVENT_TYPE_PROBE_COMPLETED, Probe: result, ServiceId: p.ServiceId, NodeId: id})
 				}
 				select {
 				case results <- outcome{result, err}:

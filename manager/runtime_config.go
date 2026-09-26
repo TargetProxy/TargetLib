@@ -2,8 +2,6 @@ package manager
 
 import (
 	"context"
-	"errors"
-	"os"
 	"runtime"
 	"time"
 
@@ -75,37 +73,6 @@ func (m *Manager) UpdateRuntimeConfig(ctx context.Context, request *targetlibapi
 	return m.applyDesired(ctx, next)
 }
 
-func (m *Manager) commitRuntimeConfig(ctx context.Context, next *targetlibapi.RuntimeConfig, content string, running bool) error {
-	m.configMu.Lock()
-	defer m.configMu.Unlock()
-	previousContent := m.config
-
-	if running {
-		if err := m.applyConfig(content); err != nil {
-			if rollbackErr := m.applyConfig(previousContent); rollbackErr != nil {
-				m.appliedConfig = nil
-				return status.Errorf(codes.DataLoss, "apply: %v; rollback: %v", err, rollbackErr)
-			}
-			return runtimeSettingsError("update runtime config", daemon.ServiceStatus_STARTED, err)
-		}
-	}
-	if err := m.runtimeStore.Save(ctx, next); err != nil {
-		if running {
-			if rollbackErr := m.applyConfig(previousContent); rollbackErr != nil {
-				m.appliedConfig = nil
-				return status.Errorf(codes.DataLoss, "save runtime config: %v; rollback active config: %v", err, rollbackErr)
-			}
-		}
-		return status.Error(codes.Internal, err.Error())
-	}
-
-	m.runtimeConfig = next
-	if running {
-		m.config = content
-	}
-	return nil
-}
-
 const stableStatusTimeout = 15 * time.Second
 
 func (m *Manager) waitForStableStatus(ctx context.Context) (*daemon.ServiceStatus, error) {
@@ -130,11 +97,4 @@ func (m *Manager) waitForStableStatus(ctx context.Context) (*daemon.ServiceStatu
 		case <-ticker.C:
 		}
 	}
-}
-
-func runtimeSettingsError(operation string, serviceStatus daemon.ServiceStatus_Type, err error) error {
-	if errors.Is(err, os.ErrInvalid) {
-		return status.Errorf(codes.FailedPrecondition, "%s rejected while service state is %s: %v", operation, serviceStatus.String(), err)
-	}
-	return status.Errorf(codes.Internal, "%s: %v", operation, err)
 }
