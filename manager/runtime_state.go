@@ -214,43 +214,6 @@ func validHeaderName(s string) bool {
 	return true
 }
 
-func (m *Manager) PutServiceProbe(ctx context.Context, value *api.ServiceProbe) (*api.ServiceProbe, error) {
-	p, err := validateProbe(value)
-	if err != nil {
-		return nil, err
-	}
-	err = m.runtimeState.update(ctx, func(next *api.RuntimeOrchestrationState) error {
-		current := findProbe(next, p.ServiceId)
-		if current != nil && value.Revision != "" && value.Revision != current.Revision {
-			return status.Error(codes.Aborted, "probe revision changed")
-		}
-		if current == nil && value.Revision != "" {
-			return status.Error(codes.Aborted, "probe no longer exists")
-		}
-		for _, policy := range next.Policies {
-			if policy.ServiceId == p.ServiceId {
-				policy.Probes = []*api.ServiceProbe{proto.Clone(p).(*api.ServiceProbe)}
-			}
-		}
-		for i, old := range next.Probes {
-			if old.ServiceId == p.ServiceId {
-				next.Probes[i] = p
-				return nil
-			}
-		}
-		if len(next.Probes) >= 256 {
-			return status.Error(codes.ResourceExhausted, "maximum 256 service probes")
-		}
-		next.Probes = append(next.Probes, p)
-		return nil
-	})
-	if err != nil {
-		return nil, err
-	}
-	m.publishRuntime(&api.RuntimeEvent{Type: api.RuntimeEventType_RUNTIME_EVENT_TYPE_PROBE_DEFINITION, ServiceId: p.ServiceId})
-	return proto.Clone(p).(*api.ServiceProbe), nil
-}
-
 func findProbe(snapshot *api.RuntimeOrchestrationState, id string) *api.ServiceProbe {
 	for _, policy := range snapshot.Policies {
 		if policy.ServiceId == id && len(policy.Probes) > 0 {
@@ -263,52 +226,6 @@ func findProbe(snapshot *api.RuntimeOrchestrationState, id string) *api.ServiceP
 		}
 	}
 	return nil
-}
-
-func (m *Manager) RemoveServiceProbe(ctx context.Context, request *api.RemoveServiceProbeRequest) (*emptypb.Empty, error) {
-	if request.GetServiceId() == "" {
-		return nil, status.Error(codes.InvalidArgument, "service ID is required")
-	}
-	err := m.runtimeState.update(ctx, func(next *api.RuntimeOrchestrationState) error {
-		probe := findProbe(next, request.ServiceId)
-		if probe == nil {
-			return status.Error(codes.NotFound, "service probe not found")
-		}
-		if request.ExpectedRevision != "" && request.ExpectedRevision != probe.Revision {
-			return status.Error(codes.Aborted, "probe revision changed")
-		}
-		for _, policy := range next.Policies {
-			if policy.ServiceId == request.ServiceId {
-				policy.Probes = nil
-			}
-		}
-		next.Probes = removeIf(next.Probes, func(candidate *api.ServiceProbe) bool { return candidate.ServiceId == request.ServiceId })
-		return nil
-	})
-	if err != nil {
-		return nil, err
-	}
-	m.publishRuntime(&api.RuntimeEvent{Type: api.RuntimeEventType_RUNTIME_EVENT_TYPE_PROBE_DEFINITION, ServiceId: request.ServiceId})
-	return &emptypb.Empty{}, nil
-}
-
-func (m *Manager) GetQualityHistory(_ context.Context, request *api.QualityHistoryRequest) (*api.QualityHistory, error) {
-	limit := request.GetLimit()
-	if limit == 0 {
-		limit = 100
-	}
-	if limit > 1024 {
-		return nil, status.Error(codes.InvalidArgument, "history limit exceeds 1024")
-	}
-	result := new(api.QualityHistory)
-	history := m.runtimeState.read().Results
-	for i := len(history) - 1; i >= 0 && len(result.Results) < int(limit); i-- {
-		row := history[i]
-		if (request.GetServiceId() == "" || row.ServiceId == request.GetServiceId()) && (request.GetNodeId() == "" || row.NodeId == request.GetNodeId()) {
-			result.Results = append(result.Results, row)
-		}
-	}
-	return result, nil
 }
 
 func (m *Manager) saveQuality(ctx context.Context, result *api.ProbeResult) error {
@@ -375,7 +292,9 @@ func qualityReason(snapshot *api.RuntimeOrchestrationState, serviceID, nodeID st
 	return ""
 }
 
-func (m *Manager) EvaluateService(_ context.Context, request *api.EvaluateServiceRequest) (*api.ServiceEvaluation, error) {
+// evaluateService is an internal helper for the v14 evaluation pipeline.
+// It is not an RPC endpoint.
+func (m *Manager) evaluateService(_ context.Context, request *api.EvaluateServiceRequest) (*api.ServiceEvaluation, error) {
 	if request.GetServiceId() == "" {
 		return nil, status.Error(codes.InvalidArgument, "service ID is required")
 	}

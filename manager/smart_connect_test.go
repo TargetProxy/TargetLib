@@ -9,7 +9,6 @@ import (
 	"net/http/httptest"
 	"strconv"
 	"strings"
-	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -58,6 +57,28 @@ func smartTestManager(t *testing.T, store subscriptions.Store) *Manager {
 	}, checkConfig: func(context.Context, string) error { return nil }, applyConfig: func(string) error { return nil }}
 	t.Cleanup(func() { smart.close(); sub.Close() })
 	return m
+}
+
+// upsertProbePolicy creates a v14 service policy carrying a single probe and
+// returns the stored probe definition.
+func upsertProbePolicy(t *testing.T, m *Manager, serviceID, url, key string) *api.ServiceProbe {
+	t.Helper()
+	_, err := m.UpsertServicePolicy(context.Background(), &api.UpsertServicePolicyRequest{
+		Policy: &api.ServicePolicy{
+			ServiceId: serviceID,
+			Domains:   []string{"service.example"},
+			Probes:    []*api.ServiceProbe{{Url: url, TimeoutMilliseconds: 5000}},
+		},
+		IdempotencyKey: key,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	p := findProbe(m.runtimeState.read(), serviceID)
+	if p == nil {
+		t.Fatal("probe not stored")
+	}
+	return p
 }
 
 func TestSmartProbeStagesAndRegions(t *testing.T) {
@@ -175,10 +196,7 @@ func TestSmartProbeUsesSelectedOutbound(t *testing.T) {
 func TestSmartQualityPersistenceExpiryAndRanking(t *testing.T) {
 	store := &subscriptions.MemoryStore{}
 	m := smartTestManager(t, store)
-	p, err := m.PutServiceProbe(context.Background(), &api.ServiceProbe{ServiceId: "svc", Url: "https://service.example"})
-	if err != nil {
-		t.Fatal(err)
-	}
+	p := upsertProbePolicy(t, m, "svc", "https://service.example", "quality-persist")
 	nodes := m.subscriptions.NodePool().Nodes
 	now := time.Now().UnixMilli()
 	for i, node := range nodes {
@@ -187,7 +205,7 @@ func TestSmartQualityPersistenceExpiryAndRanking(t *testing.T) {
 		}
 	}
 	before := proto.Clone(m.runtimeConfig)
-	evaluation, err := m.EvaluateService(context.Background(), &api.EvaluateServiceRequest{ServiceId: "svc"})
+	evaluation, err := m.evaluateService(context.Background(), &api.EvaluateServiceRequest{ServiceId: "svc"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -208,18 +226,24 @@ func TestSmartQualityPersistenceExpiryAndRanking(t *testing.T) {
 	if got := qualityReason(restored.read(), "svc", nodes[0].ID, now+60001); got != "quality_expired" {
 		t.Fatal(got)
 	}
-	p.Url = "https://changed.example"
-	updated, err := m.PutServiceProbe(context.Background(), p)
-	if err != nil {
-		t.Fatal(err)
-	}
+	staleRevision := m.runtimeState.read().Revision
+	upsertProbePolicy(t, m, "svc", "https://changed.example", "quality-update")
+	updated := findProbe(m.runtimeState.read(), "svc")
 	if updated.Revision == p.Revision {
 		t.Fatal("definition revision unchanged")
 	}
 	if got := qualityReason(m.runtimeState.read(), "svc", nodes[0].ID, now); got != "probe_definition_changed" {
 		t.Fatal(got)
 	}
-	if _, err := m.PutServiceProbe(context.Background(), p); status.Code(err) != codes.Aborted {
+	if _, err := m.UpsertServicePolicy(context.Background(), &api.UpsertServicePolicyRequest{
+		Policy: &api.ServicePolicy{
+			ServiceId: "svc",
+			Domains:   []string{"service.example"},
+			Probes:    []*api.ServiceProbe{{Url: "https://stale.example"}},
+		},
+		ExpectedRevision: staleRevision,
+		IdempotencyKey:   "quality-stale",
+	}); status.Code(err) != codes.Aborted {
 		t.Fatalf("stale definition accepted: %v", err)
 	}
 }
@@ -229,72 +253,17 @@ func TestSmartQualityFailureDoesNotCommitOrPublish(t *testing.T) {
 	m := smartTestManager(t, store)
 	before := m.runtimeState.read()
 	store.fail = true
-	if _, err := m.PutServiceProbe(context.Background(), &api.ServiceProbe{ServiceId: "svc", Url: "https://service.example"}); err == nil {
+	if _, err := m.UpsertServicePolicy(context.Background(), &api.UpsertServicePolicyRequest{
+		Policy: &api.ServicePolicy{
+			ServiceId: "svc",
+			Probes:    []*api.ServiceProbe{{Url: "https://service.example"}},
+		},
+		IdempotencyKey: "failing-save",
+	}); err == nil {
 		t.Fatal("save succeeded")
 	}
 	if !proto.Equal(before, m.runtimeState.read()) || m.runtimeState.sequence != 0 {
 		t.Fatal("failed save changed state or published an event")
-	}
-}
-
-type probeTestStream struct {
-	grpc.ServerStream
-	ctx  context.Context
-	send func(*api.ProbeResult) error
-}
-
-func (s probeTestStream) Context() context.Context      { return s.ctx }
-func (s probeTestStream) Send(r *api.ProbeResult) error { return s.send(r) }
-
-func TestSmartProbeCancellationAndGlobalConcurrency(t *testing.T) {
-	m := smartTestManager(t, nil)
-	_, err := m.PutServiceProbe(context.Background(), &api.ServiceProbe{ServiceId: "svc", Url: "http://service.example", TimeoutMilliseconds: 5000})
-	if err != nil {
-		t.Fatal(err)
-	}
-	var active, maxActive atomic.Int32
-	entered := make(chan struct{}, 32)
-	m.probeTransport = func(context.Context, profile.Node) (*nodeProbeTransport, error) {
-		return &nodeProbeTransport{dial: func(ctx context.Context, _, _ string) (net.Conn, error) {
-			n := active.Add(1)
-			defer active.Add(-1)
-			for old := maxActive.Load(); n > old; old = maxActive.Load() {
-				if maxActive.CompareAndSwap(old, n) {
-					break
-				}
-			}
-			entered <- struct{}{}
-			<-ctx.Done()
-			return nil, ctx.Err()
-		}, close: func() error { return nil }}, nil
-	}
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	var wg sync.WaitGroup
-	for i := 0; i < 4; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			err := m.ProbeService(&api.ProbeServiceRequest{ServiceId: "svc"}, probeTestStream{ctx: ctx, send: func(*api.ProbeResult) error { return nil }})
-			if status.Code(err) != codes.Canceled {
-				t.Errorf("unexpected cancellation: %v", err)
-			}
-		}()
-	}
-	for i := 0; i < 4; i++ {
-		select {
-		case <-entered:
-		case <-time.After(3 * time.Second):
-			t.Fatal("probes did not start")
-		}
-	}
-	cancel()
-	wg.Wait()
-	if maxActive.Load() > 4 || active.Load() != 0 {
-		t.Fatalf("workers leaked or exceeded limit: max=%d active=%d", maxActive.Load(), active.Load())
-	}
-	if len(m.runtimeState.read().Results) != 0 {
-		t.Fatal("canceled probes saved as failures")
 	}
 }
 
@@ -326,7 +295,14 @@ func TestSmartGRPCProbeHistoryAndEvents(t *testing.T) {
 	if err != nil || initial.GetType() != api.RuntimeEventType_RUNTIME_EVENT_TYPE_SNAPSHOT {
 		t.Fatalf("missing snapshot: %v %v", initial, err)
 	}
-	if _, err = m.PutServiceProbe(ctx, &api.ServiceProbe{ServiceId: "svc", Url: endpoint.URL}); err != nil {
+	if _, err = m.UpsertServicePolicy(ctx, &api.UpsertServicePolicyRequest{
+		Policy: &api.ServicePolicy{
+			ServiceId: "svc",
+			Domains:   []string{"service.example"},
+			Probes:    []*api.ServiceProbe{{Url: endpoint.URL}},
+		},
+		IdempotencyKey: "grpc-probe-events",
+	}); err != nil {
 		t.Fatal(err)
 	}
 	seen := 0
@@ -340,7 +316,7 @@ func TestSmartGRPCProbeHistoryAndEvents(t *testing.T) {
 			t.Fatal("event order regressed")
 		}
 		sequence = event.Sequence
-		if event.Type == api.RuntimeEventType_RUNTIME_EVENT_TYPE_PROBE_DEFINITION {
+		if event.Type == api.RuntimeEventType_RUNTIME_EVENT_TYPE_SNAPSHOT {
 			seen++
 		}
 	}
@@ -457,10 +433,7 @@ func TestSmartValidationRejectsInvalidInputs(t *testing.T) {
 
 func TestSmartHistoryRetentionAndOldRevisionCompletion(t *testing.T) {
 	m := smartTestManager(t, nil)
-	p, err := m.PutServiceProbe(context.Background(), &api.ServiceProbe{ServiceId: "svc", Url: "https://service.example"})
-	if err != nil {
-		t.Fatal(err)
-	}
+	p := upsertProbePolicy(t, m, "svc", "https://service.example", "history-retention")
 	for i := 0; i < 40; i++ {
 		if err := m.saveQuality(context.Background(), &api.ProbeResult{Id: strconv.Itoa(i), ServiceId: "svc", NodeId: "n", ProbeRevision: p.Revision, TestedAtUnixMs: int64(i), ExpiresAtUnixMs: 10000, Stage: api.ProbeStage_PROBE_STAGE_READY}); err != nil {
 			t.Fatal(err)
@@ -477,17 +450,16 @@ func TestSmartHistoryRetentionAndOldRevisionCompletion(t *testing.T) {
 
 func TestProbeRemoval(t *testing.T) {
 	m := smartTestManager(t, nil)
-	p, err := m.PutServiceProbe(context.Background(), &api.ServiceProbe{ServiceId: "svc", Url: "https://service.example"})
-	if err != nil {
+	upsertProbePolicy(t, m, "svc", "https://service.example", "removal-create")
+	stale := m.runtimeState.read().Revision
+	upsertProbePolicy(t, m, "svc", "https://changed.example", "removal-update")
+	if _, err := m.DeleteServicePolicy(context.Background(), &api.DeleteServicePolicyRequest{ServiceId: "svc", ExpectedRevision: stale, IdempotencyKey: "removal-stale"}); status.Code(err) != codes.Aborted {
 		t.Fatal(err)
 	}
-	if _, err := m.RemoveServiceProbe(context.Background(), &api.RemoveServiceProbeRequest{ServiceId: p.ServiceId, ExpectedRevision: "stale"}); status.Code(err) != codes.Aborted {
+	if _, err := m.DeleteServicePolicy(context.Background(), &api.DeleteServicePolicyRequest{ServiceId: "svc", IdempotencyKey: "removal-delete"}); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := m.RemoveServiceProbe(context.Background(), &api.RemoveServiceProbeRequest{ServiceId: p.ServiceId, ExpectedRevision: p.Revision}); err != nil {
-		t.Fatal(err)
-	}
-	if got := qualityReason(m.runtimeState.read(), p.ServiceId, "node", time.Now().UnixMilli()); got != "probe_not_configured" {
+	if got := qualityReason(m.runtimeState.read(), "svc", "node", time.Now().UnixMilli()); got != "probe_not_configured" {
 		t.Fatal(got)
 	}
 }
@@ -523,37 +495,4 @@ func TestSmartPoolChangePublishesWithoutApplying(t *testing.T) {
 	}
 }
 
-func TestSmartCloseCancelsActiveProbes(t *testing.T) {
-	m := smartTestManager(t, nil)
-	_, err := m.PutServiceProbe(context.Background(), &api.ServiceProbe{ServiceId: "svc", Url: "http://service.example"})
-	if err != nil {
-		t.Fatal(err)
-	}
-	entered := make(chan struct{}, 2)
-	m.probeTransport = func(context.Context, profile.Node) (*nodeProbeTransport, error) {
-		return &nodeProbeTransport{dial: func(ctx context.Context, _, _ string) (net.Conn, error) {
-			entered <- struct{}{}
-			<-ctx.Done()
-			return nil, ctx.Err()
-		}, close: func() error { return nil }}, nil
-	}
-	done := make(chan error, 1)
-	go func() {
-		done <- m.ProbeService(&api.ProbeServiceRequest{ServiceId: "svc"}, probeTestStream{ctx: context.Background(), send: func(*api.ProbeResult) error { return nil }})
-	}()
-	select {
-	case <-entered:
-	case <-time.After(time.Second):
-		t.Fatal("probe not started")
-	}
-	closed := make(chan struct{})
-	go func() { m.runtimeState.close(); close(closed) }()
-	select {
-	case <-closed:
-	case <-time.After(time.Second):
-		t.Fatal("close did not cancel active probes")
-	}
-	if err := <-done; status.Code(err) != codes.Canceled {
-		t.Fatal(err)
-	}
-}
+

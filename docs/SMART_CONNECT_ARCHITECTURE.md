@@ -263,8 +263,10 @@ SubscribeRuntimeEvents
 所有写命令包含 `expected_revision` 和 `idempotency_key`，立即返回持久化 `Operation`。长时间探测、等待审批、切换和验证
 通过 operation 状态观察，不占用长 RPC。Force binding 仍必须经过节点存在性、地区和显式安全约束校验。
 
-旧的 `PutServiceProbe`、`ProbeService`、`EvaluateService` 和 `ApplyServiceBinding` 已从 gRPC 服务删除；
-探测、评估和绑定只能通过统一策略命令由核心执行。
+旧的 `PutServiceProbe`、`RemoveServiceProbe`、`ProbeService`、`GetQualityHistory`、`EvaluateService`、
+`ApplyServiceBinding`、`RemoveServiceBinding`、`ListServiceBindings`、`Get/PutServiceSelectionPolicy`
+已从 gRPC 服务、proto 消息和 `Manager` 方法中彻底删除；`EvaluateService` 仅保留为内部
+`evaluateService` 供评估流水线调用，不对外暴露。探测、评估和绑定只能通过统一策略命令由核心执行。
 
 具体请求字段、operation 语义、错误码、版本协商和兼容期限由 [GRPC.md](GRPC.md) 定义；本文列出的名称只表示领域能力，
 不能绕过 BindingController 直接调用 RuntimeController。

@@ -318,15 +318,6 @@ message NodePool {
   string revision = 1;
   repeated ProfileNode nodes = 2;
 }
-message ApplyServiceBindingRequest {
-  ServiceBinding binding = 1;
-  string expected_revision = 2;
-}
-message RemoveServiceBindingRequest {
-  string service_id = 1;
-  string expected_revision = 2;
-}
-message ServiceBindingList { repeated ServiceBinding bindings = 1; }
 enum ConfigApplyPhase {
   CONFIG_APPLY_PHASE_UNSPECIFIED = 0;
   CONFIG_APPLY_PHASE_VALIDATING = 1;
@@ -372,16 +363,6 @@ message ServiceProbe {
   uint32 packet_timeout_milliseconds = 13;
   optional double maximum_packet_loss = 14;
 }
-message ServiceProbeList { repeated ServiceProbe probes = 1; }
-message RemoveServiceProbeRequest { string service_id = 1; string expected_revision = 2; }
-message ProbeServiceRequest {
-  string service_id = 1;
-  // Empty probes all ready nodes, up to 256 per request.
-  repeated string node_ids = 2;
-  map<string, string> headers = 3;
-  uint32 attempts = 4;
-  uint32 max_concurrency = 5;
-}
 enum ProbeStage {
   PROBE_STAGE_UNSPECIFIED = 0;
   PROBE_STAGE_READY = 1;
@@ -423,15 +404,7 @@ message ProbeResult {
   uint32 packets_received = 23;
   string packet_error = 24;
 }
-message QualityHistoryRequest {
-  string service_id = 1;
-  string node_id = 2;
-  // Default 100, maximum 1024. Newest first.
-  uint32 limit = 3;
-}
-message QualityHistory { repeated ProbeResult results = 1; }
 message EvaluateServiceRequest { string service_id = 1; }
-message ServiceSelectionPolicyRequest { string service_id = 1; }
 message ServiceSelectionPolicy {
   string service_id = 1;
   repeated string preferred_countries = 2;

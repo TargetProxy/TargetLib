@@ -127,7 +127,13 @@ proposal_id, result_summary, error
 
 - `GetVersion.protocol_version` 继续作为 wire capability 基线；新增领域能力同时通过 `GetCapabilities` 细粒度声明。
 - 新 message 字段只追加新编号；删除字段必须 `reserved` 原编号和名称。
-- v12 低层 RPC 已从服务描述和生成 SDK 删除；客户端必须使用统一运行时 API。
+- v12 低层 RPC 已从服务描述和生成 SDK 删除；客户端必须使用统一运行时 API。已彻底删除、不再接受任何调用的
+  旧端点与消息：`PutServiceProbe`、`RemoveServiceProbe`（及 `RemoveServiceProbeRequest`）、`ProbeService`
+  （及 `ProbeServiceRequest`）、`GetQualityHistory`（及 `QualityHistoryRequest`/`QualityHistory`）、
+  `ApplyServiceBinding`（及 `ApplyServiceBindingRequest`）、`RemoveServiceBinding`
+  （及 `RemoveServiceBindingRequest`）、`ListServiceBindings`（及 `ServiceBindingList`）、
+  `Get/PutServiceSelectionPolicy`（及 `ServiceSelectionPolicyRequest`）、`ServiceProbeList`。
+  评估逻辑仅保留为核心内部 `evaluateService`，不经过传输层。
 - 新客户端连接旧核心时依据 capability 隐藏功能，不能在本地模拟核心缺失的策略或切换逻辑。
 - 旧客户端连接新核心时仍可使用兼容 RPC，但不能修改由新 Orchestrator 管理的资源；冲突返回 `FAILED_PRECONDITION`。
 - Store schema 版本与 protocol version 独立演进；协议兼容不代表旧核心可以安全打开新 Store。

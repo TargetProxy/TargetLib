@@ -1244,76 +1244,6 @@ final $typed_data.Uint8List nodePoolDescriptor = $convert.base64Decode(
     'CghOb2RlUG9vbBIaCghyZXZpc2lvbhgBIAEoCVIIcmV2aXNpb24SLAoFbm9kZXMYAiADKAsyFi'
     '50YXJnZXRsaWIuUHJvZmlsZU5vZGVSBW5vZGVz');
 
-@$core.Deprecated('Use applyServiceBindingRequestDescriptor instead')
-const ApplyServiceBindingRequest$json = {
-  '1': 'ApplyServiceBindingRequest',
-  '2': [
-    {
-      '1': 'binding',
-      '3': 1,
-      '4': 1,
-      '5': 11,
-      '6': '.targetlib.ServiceBinding',
-      '10': 'binding'
-    },
-    {
-      '1': 'expected_revision',
-      '3': 2,
-      '4': 1,
-      '5': 9,
-      '10': 'expectedRevision'
-    },
-  ],
-};
-
-/// Descriptor for `ApplyServiceBindingRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List applyServiceBindingRequestDescriptor =
-    $convert.base64Decode(
-        'ChpBcHBseVNlcnZpY2VCaW5kaW5nUmVxdWVzdBIzCgdiaW5kaW5nGAEgASgLMhkudGFyZ2V0bG'
-        'liLlNlcnZpY2VCaW5kaW5nUgdiaW5kaW5nEisKEWV4cGVjdGVkX3JldmlzaW9uGAIgASgJUhBl'
-        'eHBlY3RlZFJldmlzaW9u');
-
-@$core.Deprecated('Use removeServiceBindingRequestDescriptor instead')
-const RemoveServiceBindingRequest$json = {
-  '1': 'RemoveServiceBindingRequest',
-  '2': [
-    {'1': 'service_id', '3': 1, '4': 1, '5': 9, '10': 'serviceId'},
-    {
-      '1': 'expected_revision',
-      '3': 2,
-      '4': 1,
-      '5': 9,
-      '10': 'expectedRevision'
-    },
-  ],
-};
-
-/// Descriptor for `RemoveServiceBindingRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List removeServiceBindingRequestDescriptor =
-    $convert.base64Decode(
-        'ChtSZW1vdmVTZXJ2aWNlQmluZGluZ1JlcXVlc3QSHQoKc2VydmljZV9pZBgBIAEoCVIJc2Vydm'
-        'ljZUlkEisKEWV4cGVjdGVkX3JldmlzaW9uGAIgASgJUhBleHBlY3RlZFJldmlzaW9u');
-
-@$core.Deprecated('Use serviceBindingListDescriptor instead')
-const ServiceBindingList$json = {
-  '1': 'ServiceBindingList',
-  '2': [
-    {
-      '1': 'bindings',
-      '3': 1,
-      '4': 3,
-      '5': 11,
-      '6': '.targetlib.ServiceBinding',
-      '10': 'bindings'
-    },
-  ],
-};
-
-/// Descriptor for `ServiceBindingList`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List serviceBindingListDescriptor = $convert.base64Decode(
-    'ChJTZXJ2aWNlQmluZGluZ0xpc3QSNQoIYmluZGluZ3MYASADKAsyGS50YXJnZXRsaWIuU2Vydm'
-    'ljZUJpbmRpbmdSCGJpbmRpbmdz');
-
 @$core.Deprecated('Use selectorStateDescriptor instead')
 const SelectorState$json = {
   '1': 'SelectorState',
@@ -1462,86 +1392,6 @@ final $typed_data.Uint8List serviceProbeDescriptor = $convert.base64Decode(
     'c3MYDiABKAFIAFIRbWF4aW11bVBhY2tldExvc3OIAQFCFgoUX21heGltdW1fcGFja2V0X2xvc3'
     'M=');
 
-@$core.Deprecated('Use serviceProbeListDescriptor instead')
-const ServiceProbeList$json = {
-  '1': 'ServiceProbeList',
-  '2': [
-    {
-      '1': 'probes',
-      '3': 1,
-      '4': 3,
-      '5': 11,
-      '6': '.targetlib.ServiceProbe',
-      '10': 'probes'
-    },
-  ],
-};
-
-/// Descriptor for `ServiceProbeList`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List serviceProbeListDescriptor = $convert.base64Decode(
-    'ChBTZXJ2aWNlUHJvYmVMaXN0Ei8KBnByb2JlcxgBIAMoCzIXLnRhcmdldGxpYi5TZXJ2aWNlUH'
-    'JvYmVSBnByb2Jlcw==');
-
-@$core.Deprecated('Use removeServiceProbeRequestDescriptor instead')
-const RemoveServiceProbeRequest$json = {
-  '1': 'RemoveServiceProbeRequest',
-  '2': [
-    {'1': 'service_id', '3': 1, '4': 1, '5': 9, '10': 'serviceId'},
-    {
-      '1': 'expected_revision',
-      '3': 2,
-      '4': 1,
-      '5': 9,
-      '10': 'expectedRevision'
-    },
-  ],
-};
-
-/// Descriptor for `RemoveServiceProbeRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List removeServiceProbeRequestDescriptor =
-    $convert.base64Decode(
-        'ChlSZW1vdmVTZXJ2aWNlUHJvYmVSZXF1ZXN0Eh0KCnNlcnZpY2VfaWQYASABKAlSCXNlcnZpY2'
-        'VJZBIrChFleHBlY3RlZF9yZXZpc2lvbhgCIAEoCVIQZXhwZWN0ZWRSZXZpc2lvbg==');
-
-@$core.Deprecated('Use probeServiceRequestDescriptor instead')
-const ProbeServiceRequest$json = {
-  '1': 'ProbeServiceRequest',
-  '2': [
-    {'1': 'service_id', '3': 1, '4': 1, '5': 9, '10': 'serviceId'},
-    {'1': 'node_ids', '3': 2, '4': 3, '5': 9, '10': 'nodeIds'},
-    {
-      '1': 'headers',
-      '3': 3,
-      '4': 3,
-      '5': 11,
-      '6': '.targetlib.ProbeServiceRequest.HeadersEntry',
-      '10': 'headers'
-    },
-    {'1': 'attempts', '3': 4, '4': 1, '5': 13, '10': 'attempts'},
-    {'1': 'max_concurrency', '3': 5, '4': 1, '5': 13, '10': 'maxConcurrency'},
-  ],
-  '3': [ProbeServiceRequest_HeadersEntry$json],
-};
-
-@$core.Deprecated('Use probeServiceRequestDescriptor instead')
-const ProbeServiceRequest_HeadersEntry$json = {
-  '1': 'HeadersEntry',
-  '2': [
-    {'1': 'key', '3': 1, '4': 1, '5': 9, '10': 'key'},
-    {'1': 'value', '3': 2, '4': 1, '5': 9, '10': 'value'},
-  ],
-  '7': {'7': true},
-};
-
-/// Descriptor for `ProbeServiceRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List probeServiceRequestDescriptor = $convert.base64Decode(
-    'ChNQcm9iZVNlcnZpY2VSZXF1ZXN0Eh0KCnNlcnZpY2VfaWQYASABKAlSCXNlcnZpY2VJZBIZCg'
-    'hub2RlX2lkcxgCIAMoCVIHbm9kZUlkcxJFCgdoZWFkZXJzGAMgAygLMisudGFyZ2V0bGliLlBy'
-    'b2JlU2VydmljZVJlcXVlc3QuSGVhZGVyc0VudHJ5UgdoZWFkZXJzEhoKCGF0dGVtcHRzGAQgAS'
-    'gNUghhdHRlbXB0cxInCg9tYXhfY29uY3VycmVuY3kYBSABKA1SDm1heENvbmN1cnJlbmN5GjoK'
-    'DEhlYWRlcnNFbnRyeRIQCgNrZXkYASABKAlSA2tleRIUCgV2YWx1ZRgCIAEoCVIFdmFsdWU6Aj'
-    'gB');
-
 @$core.Deprecated('Use probeResultDescriptor instead')
 const ProbeResult$json = {
   '1': 'ProbeResult',
@@ -1642,41 +1492,6 @@ final $typed_data.Uint8List probeResultDescriptor = $convert.base64Decode(
     'NlbnQYFiABKA1SC3BhY2tldHNTZW50EikKEHBhY2tldHNfcmVjZWl2ZWQYFyABKA1SD3BhY2tl'
     'dHNSZWNlaXZlZBIhCgxwYWNrZXRfZXJyb3IYGCABKAlSC3BhY2tldEVycm9y');
 
-@$core.Deprecated('Use qualityHistoryRequestDescriptor instead')
-const QualityHistoryRequest$json = {
-  '1': 'QualityHistoryRequest',
-  '2': [
-    {'1': 'service_id', '3': 1, '4': 1, '5': 9, '10': 'serviceId'},
-    {'1': 'node_id', '3': 2, '4': 1, '5': 9, '10': 'nodeId'},
-    {'1': 'limit', '3': 3, '4': 1, '5': 13, '10': 'limit'},
-  ],
-};
-
-/// Descriptor for `QualityHistoryRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List qualityHistoryRequestDescriptor = $convert.base64Decode(
-    'ChVRdWFsaXR5SGlzdG9yeVJlcXVlc3QSHQoKc2VydmljZV9pZBgBIAEoCVIJc2VydmljZUlkEh'
-    'cKB25vZGVfaWQYAiABKAlSBm5vZGVJZBIUCgVsaW1pdBgDIAEoDVIFbGltaXQ=');
-
-@$core.Deprecated('Use qualityHistoryDescriptor instead')
-const QualityHistory$json = {
-  '1': 'QualityHistory',
-  '2': [
-    {
-      '1': 'results',
-      '3': 1,
-      '4': 3,
-      '5': 11,
-      '6': '.targetlib.ProbeResult',
-      '10': 'results'
-    },
-  ],
-};
-
-/// Descriptor for `QualityHistory`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List qualityHistoryDescriptor = $convert.base64Decode(
-    'Cg5RdWFsaXR5SGlzdG9yeRIwCgdyZXN1bHRzGAEgAygLMhYudGFyZ2V0bGliLlByb2JlUmVzdW'
-    'x0UgdyZXN1bHRz');
-
 @$core.Deprecated('Use evaluateServiceRequestDescriptor instead')
 const EvaluateServiceRequest$json = {
   '1': 'EvaluateServiceRequest',
@@ -1690,20 +1505,6 @@ final $typed_data.Uint8List evaluateServiceRequestDescriptor =
     $convert.base64Decode(
         'ChZFdmFsdWF0ZVNlcnZpY2VSZXF1ZXN0Eh0KCnNlcnZpY2VfaWQYASABKAlSCXNlcnZpY2VJZA'
         '==');
-
-@$core.Deprecated('Use serviceSelectionPolicyRequestDescriptor instead')
-const ServiceSelectionPolicyRequest$json = {
-  '1': 'ServiceSelectionPolicyRequest',
-  '2': [
-    {'1': 'service_id', '3': 1, '4': 1, '5': 9, '10': 'serviceId'},
-  ],
-};
-
-/// Descriptor for `ServiceSelectionPolicyRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List serviceSelectionPolicyRequestDescriptor =
-    $convert.base64Decode(
-        'Ch1TZXJ2aWNlU2VsZWN0aW9uUG9saWN5UmVxdWVzdBIdCgpzZXJ2aWNlX2lkGAEgASgJUglzZX'
-        'J2aWNlSWQ=');
 
 @$core.Deprecated('Use serviceSelectionPolicyDescriptor instead')
 const ServiceSelectionPolicy$json = {

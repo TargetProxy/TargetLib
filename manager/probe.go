@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"net/http/httptrace"
 	"net/netip"
-	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -23,7 +22,6 @@ import (
 	"github.com/sagernet/sing-box/option"
 	singjson "github.com/sagernet/sing/common/json"
 	M "github.com/sagernet/sing/common/metadata"
-	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -67,140 +65,6 @@ func (m *Manager) openProbeTransport(ctx context.Context, node profile.Node) (*n
 	return &nodeProbeTransport{dial: func(ctx context.Context, network, address string) (net.Conn, error) {
 		return outbound.DialContext(ctx, network, M.ParseSocksaddr(address))
 	}, close: instance.Close}, nil
-}
-
-func (m *Manager) ProbeService(request *api.ProbeServiceRequest, stream grpc.ServerStreamingServer[api.ProbeResult]) error {
-	if request.GetServiceId() == "" {
-		return status.Error(codes.InvalidArgument, "service ID is required")
-	}
-	if err := validateProbeHeaders(request.Headers); err != nil {
-		return err
-	}
-	if request.Attempts > 5 || request.MaxConcurrency > 4 || len(request.NodeIds) > 256 {
-		return status.Error(codes.InvalidArgument, "probe limits: 5 attempts, 4 workers, 256 nodes")
-	}
-	p := findProbe(m.runtimeState.read(), request.ServiceId)
-	if p == nil {
-		return status.Error(codes.NotFound, "service probe not found")
-	}
-	pool := m.subscriptions.NodePool()
-	byID := make(map[string]profile.Node)
-	for _, n := range pool.Nodes {
-		byID[n.ID] = n
-	}
-	ids := append([]string(nil), request.NodeIds...)
-	if len(ids) == 0 {
-		for _, n := range pool.Nodes {
-			if n.Outbound != nil && n.Phase != profile.NodeFailed {
-				ids = append(ids, n.ID)
-			}
-		}
-	}
-	if len(ids) > 256 {
-		return status.Error(codes.ResourceExhausted, "select at most 256 nodes per probe request")
-	}
-	seen := make(map[string]bool)
-	for _, id := range ids {
-		if seen[id] {
-			return status.Error(codes.InvalidArgument, "duplicate node ID")
-		}
-		seen[id] = true
-		if _, ok := byID[id]; !ok {
-			return status.Error(codes.NotFound, "probe node not found")
-		}
-	}
-	sort.Strings(ids)
-	attempts := request.Attempts
-	if attempts == 0 {
-		attempts = 1
-	}
-	concurrency := int(request.MaxConcurrency)
-	if concurrency == 0 {
-		concurrency = 4
-	}
-	ctx, cancel := context.WithCancel(stream.Context())
-	defer cancel()
-	s := m.runtimeState
-	s.mu.Lock()
-	if s.closed {
-		s.mu.Unlock()
-		return status.Error(codes.Unavailable, "manager is closed")
-	}
-	s.workers.Add(1)
-	s.mu.Unlock()
-	go func() {
-		select {
-		case <-s.done:
-			cancel()
-		case <-ctx.Done():
-		}
-	}()
-	jobs := make(chan string, len(ids))
-	for _, id := range ids {
-		jobs <- id
-	}
-	close(jobs)
-	type outcome struct {
-		result *api.ProbeResult
-		err    error
-	}
-	results := make(chan outcome, concurrency)
-	var workers sync.WaitGroup
-	for i := 0; i < concurrency; i++ {
-		workers.Add(1)
-		go func() {
-			defer workers.Done()
-			for id := range jobs {
-				select {
-				case s.slots <- struct{}{}:
-				case <-ctx.Done():
-					return
-				}
-				if ctx.Err() != nil {
-					<-s.slots
-					return
-				}
-				result := m.probeNode(ctx, p, byID[id], pool.Revision, request.Headers, attempts)
-				<-s.slots
-				if ctx.Err() != nil {
-					return
-				}
-				err := m.saveQuality(ctx, result)
-				if err == nil {
-					m.publishRuntime(&api.RuntimeEvent{
-						Type:      api.RuntimeEventType_RUNTIME_EVENT_TYPE_PROBE_COMPLETED,
-						Probe:     result,
-						ServiceId: result.ServiceId,
-						NodeId:    result.NodeId,
-					})
-				}
-				select {
-				case results <- outcome{result, err}:
-				case <-ctx.Done():
-					return
-				}
-			}
-		}()
-	}
-	finished := make(chan struct{})
-	go func() { workers.Wait(); s.workers.Done(); close(results); close(finished) }()
-	defer func() { cancel(); <-finished }()
-	for {
-		select {
-		case <-ctx.Done():
-			return status.FromContextError(ctx.Err()).Err()
-		case item, ok := <-results:
-			if !ok {
-				return nil
-			}
-			if item.err != nil {
-				return item.err
-			}
-			if err := stream.Send(item.result); err != nil {
-				return err
-			}
-		}
-	}
 }
 
 func (m *Manager) probeNode(ctx context.Context, p *api.ServiceProbe, node profile.Node, poolRevision string, headers map[string]string, attempts uint32) *api.ProbeResult {

@@ -2939,154 +2939,6 @@ func (x *NodePool) GetNodes() []*ProfileNode {
 	return nil
 }
 
-type ApplyServiceBindingRequest struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	Binding          *ServiceBinding        `protobuf:"bytes,1,opt,name=binding,proto3" json:"binding,omitempty"`
-	ExpectedRevision string                 `protobuf:"bytes,2,opt,name=expected_revision,json=expectedRevision,proto3" json:"expected_revision,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
-}
-
-func (x *ApplyServiceBindingRequest) Reset() {
-	*x = ApplyServiceBindingRequest{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[29]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ApplyServiceBindingRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ApplyServiceBindingRequest) ProtoMessage() {}
-
-func (x *ApplyServiceBindingRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[29]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ApplyServiceBindingRequest.ProtoReflect.Descriptor instead.
-func (*ApplyServiceBindingRequest) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{29}
-}
-
-func (x *ApplyServiceBindingRequest) GetBinding() *ServiceBinding {
-	if x != nil {
-		return x.Binding
-	}
-	return nil
-}
-
-func (x *ApplyServiceBindingRequest) GetExpectedRevision() string {
-	if x != nil {
-		return x.ExpectedRevision
-	}
-	return ""
-}
-
-type RemoveServiceBindingRequest struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	ServiceId        string                 `protobuf:"bytes,1,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
-	ExpectedRevision string                 `protobuf:"bytes,2,opt,name=expected_revision,json=expectedRevision,proto3" json:"expected_revision,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
-}
-
-func (x *RemoveServiceBindingRequest) Reset() {
-	*x = RemoveServiceBindingRequest{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[30]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *RemoveServiceBindingRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*RemoveServiceBindingRequest) ProtoMessage() {}
-
-func (x *RemoveServiceBindingRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[30]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use RemoveServiceBindingRequest.ProtoReflect.Descriptor instead.
-func (*RemoveServiceBindingRequest) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{30}
-}
-
-func (x *RemoveServiceBindingRequest) GetServiceId() string {
-	if x != nil {
-		return x.ServiceId
-	}
-	return ""
-}
-
-func (x *RemoveServiceBindingRequest) GetExpectedRevision() string {
-	if x != nil {
-		return x.ExpectedRevision
-	}
-	return ""
-}
-
-type ServiceBindingList struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Bindings      []*ServiceBinding      `protobuf:"bytes,1,rep,name=bindings,proto3" json:"bindings,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ServiceBindingList) Reset() {
-	*x = ServiceBindingList{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[31]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ServiceBindingList) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ServiceBindingList) ProtoMessage() {}
-
-func (x *ServiceBindingList) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[31]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ServiceBindingList.ProtoReflect.Descriptor instead.
-func (*ServiceBindingList) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{31}
-}
-
-func (x *ServiceBindingList) GetBindings() []*ServiceBinding {
-	if x != nil {
-		return x.Bindings
-	}
-	return nil
-}
-
 type SelectorState struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Desired       *SelectorConfig        `protobuf:"bytes,1,opt,name=desired,proto3" json:"desired,omitempty"`
@@ -3098,7 +2950,7 @@ type SelectorState struct {
 
 func (x *SelectorState) Reset() {
 	*x = SelectorState{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[32]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3110,7 +2962,7 @@ func (x *SelectorState) String() string {
 func (*SelectorState) ProtoMessage() {}
 
 func (x *SelectorState) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[32]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3123,7 +2975,7 @@ func (x *SelectorState) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SelectorState.ProtoReflect.Descriptor instead.
 func (*SelectorState) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{32}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *SelectorState) GetDesired() *SelectorConfig {
@@ -3157,7 +3009,7 @@ type ServiceRouteState struct {
 
 func (x *ServiceRouteState) Reset() {
 	*x = ServiceRouteState{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[33]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3169,7 +3021,7 @@ func (x *ServiceRouteState) String() string {
 func (*ServiceRouteState) ProtoMessage() {}
 
 func (x *ServiceRouteState) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[33]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3182,7 +3034,7 @@ func (x *ServiceRouteState) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ServiceRouteState.ProtoReflect.Descriptor instead.
 func (*ServiceRouteState) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{33}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *ServiceRouteState) GetDesired() *ServiceRoute {
@@ -3212,7 +3064,7 @@ type ServiceBindingState struct {
 
 func (x *ServiceBindingState) Reset() {
 	*x = ServiceBindingState{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[34]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3224,7 +3076,7 @@ func (x *ServiceBindingState) String() string {
 func (*ServiceBindingState) ProtoMessage() {}
 
 func (x *ServiceBindingState) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[34]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3237,7 +3089,7 @@ func (x *ServiceBindingState) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ServiceBindingState.ProtoReflect.Descriptor instead.
 func (*ServiceBindingState) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{34}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *ServiceBindingState) GetDesired() *ServiceBinding {
@@ -3301,7 +3153,7 @@ type ServiceProbe struct {
 
 func (x *ServiceProbe) Reset() {
 	*x = ServiceProbe{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[35]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3313,7 +3165,7 @@ func (x *ServiceProbe) String() string {
 func (*ServiceProbe) ProtoMessage() {}
 
 func (x *ServiceProbe) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[35]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3326,7 +3178,7 @@ func (x *ServiceProbe) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ServiceProbe.ProtoReflect.Descriptor instead.
 func (*ServiceProbe) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{35}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *ServiceProbe) GetServiceId() string {
@@ -3427,179 +3279,6 @@ func (x *ServiceProbe) GetMaximumPacketLoss() float64 {
 	return 0
 }
 
-type ServiceProbeList struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Probes        []*ServiceProbe        `protobuf:"bytes,1,rep,name=probes,proto3" json:"probes,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ServiceProbeList) Reset() {
-	*x = ServiceProbeList{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[36]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ServiceProbeList) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ServiceProbeList) ProtoMessage() {}
-
-func (x *ServiceProbeList) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[36]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ServiceProbeList.ProtoReflect.Descriptor instead.
-func (*ServiceProbeList) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{36}
-}
-
-func (x *ServiceProbeList) GetProbes() []*ServiceProbe {
-	if x != nil {
-		return x.Probes
-	}
-	return nil
-}
-
-type RemoveServiceProbeRequest struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	ServiceId        string                 `protobuf:"bytes,1,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
-	ExpectedRevision string                 `protobuf:"bytes,2,opt,name=expected_revision,json=expectedRevision,proto3" json:"expected_revision,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
-}
-
-func (x *RemoveServiceProbeRequest) Reset() {
-	*x = RemoveServiceProbeRequest{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[37]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *RemoveServiceProbeRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*RemoveServiceProbeRequest) ProtoMessage() {}
-
-func (x *RemoveServiceProbeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[37]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use RemoveServiceProbeRequest.ProtoReflect.Descriptor instead.
-func (*RemoveServiceProbeRequest) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{37}
-}
-
-func (x *RemoveServiceProbeRequest) GetServiceId() string {
-	if x != nil {
-		return x.ServiceId
-	}
-	return ""
-}
-
-func (x *RemoveServiceProbeRequest) GetExpectedRevision() string {
-	if x != nil {
-		return x.ExpectedRevision
-	}
-	return ""
-}
-
-type ProbeServiceRequest struct {
-	state     protoimpl.MessageState `protogen:"open.v1"`
-	ServiceId string                 `protobuf:"bytes,1,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
-	// Empty probes all ready nodes, up to 256 per request.
-	NodeIds        []string          `protobuf:"bytes,2,rep,name=node_ids,json=nodeIds,proto3" json:"node_ids,omitempty"`
-	Headers        map[string]string `protobuf:"bytes,3,rep,name=headers,proto3" json:"headers,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	Attempts       uint32            `protobuf:"varint,4,opt,name=attempts,proto3" json:"attempts,omitempty"`
-	MaxConcurrency uint32            `protobuf:"varint,5,opt,name=max_concurrency,json=maxConcurrency,proto3" json:"max_concurrency,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
-}
-
-func (x *ProbeServiceRequest) Reset() {
-	*x = ProbeServiceRequest{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[38]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ProbeServiceRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ProbeServiceRequest) ProtoMessage() {}
-
-func (x *ProbeServiceRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[38]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ProbeServiceRequest.ProtoReflect.Descriptor instead.
-func (*ProbeServiceRequest) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{38}
-}
-
-func (x *ProbeServiceRequest) GetServiceId() string {
-	if x != nil {
-		return x.ServiceId
-	}
-	return ""
-}
-
-func (x *ProbeServiceRequest) GetNodeIds() []string {
-	if x != nil {
-		return x.NodeIds
-	}
-	return nil
-}
-
-func (x *ProbeServiceRequest) GetHeaders() map[string]string {
-	if x != nil {
-		return x.Headers
-	}
-	return nil
-}
-
-func (x *ProbeServiceRequest) GetAttempts() uint32 {
-	if x != nil {
-		return x.Attempts
-	}
-	return 0
-}
-
-func (x *ProbeServiceRequest) GetMaxConcurrency() uint32 {
-	if x != nil {
-		return x.MaxConcurrency
-	}
-	return 0
-}
-
 type ProbeResult struct {
 	state               protoimpl.MessageState `protogen:"open.v1"`
 	Id                  string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -3633,7 +3312,7 @@ type ProbeResult struct {
 
 func (x *ProbeResult) Reset() {
 	*x = ProbeResult{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[39]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3645,7 +3324,7 @@ func (x *ProbeResult) String() string {
 func (*ProbeResult) ProtoMessage() {}
 
 func (x *ProbeResult) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[39]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3658,7 +3337,7 @@ func (x *ProbeResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProbeResult.ProtoReflect.Descriptor instead.
 func (*ProbeResult) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{39}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{33}
 }
 
 func (x *ProbeResult) GetId() string {
@@ -3829,111 +3508,6 @@ func (x *ProbeResult) GetPacketError() string {
 	return ""
 }
 
-type QualityHistoryRequest struct {
-	state     protoimpl.MessageState `protogen:"open.v1"`
-	ServiceId string                 `protobuf:"bytes,1,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
-	NodeId    string                 `protobuf:"bytes,2,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
-	// Default 100, maximum 1024. Newest first.
-	Limit         uint32 `protobuf:"varint,3,opt,name=limit,proto3" json:"limit,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *QualityHistoryRequest) Reset() {
-	*x = QualityHistoryRequest{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[40]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *QualityHistoryRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*QualityHistoryRequest) ProtoMessage() {}
-
-func (x *QualityHistoryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[40]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use QualityHistoryRequest.ProtoReflect.Descriptor instead.
-func (*QualityHistoryRequest) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{40}
-}
-
-func (x *QualityHistoryRequest) GetServiceId() string {
-	if x != nil {
-		return x.ServiceId
-	}
-	return ""
-}
-
-func (x *QualityHistoryRequest) GetNodeId() string {
-	if x != nil {
-		return x.NodeId
-	}
-	return ""
-}
-
-func (x *QualityHistoryRequest) GetLimit() uint32 {
-	if x != nil {
-		return x.Limit
-	}
-	return 0
-}
-
-type QualityHistory struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Results       []*ProbeResult         `protobuf:"bytes,1,rep,name=results,proto3" json:"results,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *QualityHistory) Reset() {
-	*x = QualityHistory{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[41]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *QualityHistory) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*QualityHistory) ProtoMessage() {}
-
-func (x *QualityHistory) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[41]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use QualityHistory.ProtoReflect.Descriptor instead.
-func (*QualityHistory) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{41}
-}
-
-func (x *QualityHistory) GetResults() []*ProbeResult {
-	if x != nil {
-		return x.Results
-	}
-	return nil
-}
-
 type EvaluateServiceRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ServiceId     string                 `protobuf:"bytes,1,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
@@ -3943,7 +3517,7 @@ type EvaluateServiceRequest struct {
 
 func (x *EvaluateServiceRequest) Reset() {
 	*x = EvaluateServiceRequest{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[42]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3955,7 +3529,7 @@ func (x *EvaluateServiceRequest) String() string {
 func (*EvaluateServiceRequest) ProtoMessage() {}
 
 func (x *EvaluateServiceRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[42]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3968,54 +3542,10 @@ func (x *EvaluateServiceRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EvaluateServiceRequest.ProtoReflect.Descriptor instead.
 func (*EvaluateServiceRequest) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{42}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *EvaluateServiceRequest) GetServiceId() string {
-	if x != nil {
-		return x.ServiceId
-	}
-	return ""
-}
-
-type ServiceSelectionPolicyRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	ServiceId     string                 `protobuf:"bytes,1,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ServiceSelectionPolicyRequest) Reset() {
-	*x = ServiceSelectionPolicyRequest{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[43]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ServiceSelectionPolicyRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ServiceSelectionPolicyRequest) ProtoMessage() {}
-
-func (x *ServiceSelectionPolicyRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[43]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ServiceSelectionPolicyRequest.ProtoReflect.Descriptor instead.
-func (*ServiceSelectionPolicyRequest) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{43}
-}
-
-func (x *ServiceSelectionPolicyRequest) GetServiceId() string {
 	if x != nil {
 		return x.ServiceId
 	}
@@ -4039,7 +3569,7 @@ type ServiceSelectionPolicy struct {
 
 func (x *ServiceSelectionPolicy) Reset() {
 	*x = ServiceSelectionPolicy{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[44]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4051,7 +3581,7 @@ func (x *ServiceSelectionPolicy) String() string {
 func (*ServiceSelectionPolicy) ProtoMessage() {}
 
 func (x *ServiceSelectionPolicy) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[44]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4064,7 +3594,7 @@ func (x *ServiceSelectionPolicy) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ServiceSelectionPolicy.ProtoReflect.Descriptor instead.
 func (*ServiceSelectionPolicy) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{44}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *ServiceSelectionPolicy) GetServiceId() string {
@@ -4147,7 +3677,7 @@ type ServiceCandidate struct {
 
 func (x *ServiceCandidate) Reset() {
 	*x = ServiceCandidate{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[45]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4159,7 +3689,7 @@ func (x *ServiceCandidate) String() string {
 func (*ServiceCandidate) ProtoMessage() {}
 
 func (x *ServiceCandidate) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[45]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4172,7 +3702,7 @@ func (x *ServiceCandidate) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ServiceCandidate.ProtoReflect.Descriptor instead.
 func (*ServiceCandidate) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{45}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{36}
 }
 
 func (x *ServiceCandidate) GetNodeId() string {
@@ -4245,7 +3775,7 @@ type ServiceEvaluation struct {
 
 func (x *ServiceEvaluation) Reset() {
 	*x = ServiceEvaluation{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[46]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4257,7 +3787,7 @@ func (x *ServiceEvaluation) String() string {
 func (*ServiceEvaluation) ProtoMessage() {}
 
 func (x *ServiceEvaluation) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[46]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4270,7 +3800,7 @@ func (x *ServiceEvaluation) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ServiceEvaluation.ProtoReflect.Descriptor instead.
 func (*ServiceEvaluation) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{46}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{37}
 }
 
 func (x *ServiceEvaluation) GetServiceId() string {
@@ -4334,7 +3864,7 @@ type RuntimeOrchestrationState struct {
 
 func (x *RuntimeOrchestrationState) Reset() {
 	*x = RuntimeOrchestrationState{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[47]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[38]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4346,7 +3876,7 @@ func (x *RuntimeOrchestrationState) String() string {
 func (*RuntimeOrchestrationState) ProtoMessage() {}
 
 func (x *RuntimeOrchestrationState) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[47]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[38]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4359,7 +3889,7 @@ func (x *RuntimeOrchestrationState) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RuntimeOrchestrationState.ProtoReflect.Descriptor instead.
 func (*RuntimeOrchestrationState) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{47}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{38}
 }
 
 func (x *RuntimeOrchestrationState) GetProbes() []*ServiceProbe {
@@ -4461,7 +3991,7 @@ type SwitchPolicy struct {
 
 func (x *SwitchPolicy) Reset() {
 	*x = SwitchPolicy{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[48]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[39]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4473,7 +4003,7 @@ func (x *SwitchPolicy) String() string {
 func (*SwitchPolicy) ProtoMessage() {}
 
 func (x *SwitchPolicy) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[48]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[39]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4486,7 +4016,7 @@ func (x *SwitchPolicy) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SwitchPolicy.ProtoReflect.Descriptor instead.
 func (*SwitchPolicy) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{48}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{39}
 }
 
 func (x *SwitchPolicy) GetMode() SwitchMode {
@@ -4606,7 +4136,7 @@ type ServicePolicy struct {
 
 func (x *ServicePolicy) Reset() {
 	*x = ServicePolicy{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[49]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[40]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4618,7 +4148,7 @@ func (x *ServicePolicy) String() string {
 func (*ServicePolicy) ProtoMessage() {}
 
 func (x *ServicePolicy) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[49]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[40]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4631,7 +4161,7 @@ func (x *ServicePolicy) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ServicePolicy.ProtoReflect.Descriptor instead.
 func (*ServicePolicy) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{49}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{40}
 }
 
 func (x *ServicePolicy) GetServiceId() string {
@@ -4720,7 +4250,7 @@ type ServicePolicyList struct {
 
 func (x *ServicePolicyList) Reset() {
 	*x = ServicePolicyList{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[50]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[41]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4732,7 +4262,7 @@ func (x *ServicePolicyList) String() string {
 func (*ServicePolicyList) ProtoMessage() {}
 
 func (x *ServicePolicyList) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[50]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[41]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4745,7 +4275,7 @@ func (x *ServicePolicyList) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ServicePolicyList.ProtoReflect.Descriptor instead.
 func (*ServicePolicyList) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{50}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{41}
 }
 
 func (x *ServicePolicyList) GetPolicies() []*ServicePolicy {
@@ -4770,7 +4300,7 @@ type NodePreference struct {
 
 func (x *NodePreference) Reset() {
 	*x = NodePreference{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[51]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[42]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4782,7 +4312,7 @@ func (x *NodePreference) String() string {
 func (*NodePreference) ProtoMessage() {}
 
 func (x *NodePreference) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[51]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[42]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4795,7 +4325,7 @@ func (x *NodePreference) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use NodePreference.ProtoReflect.Descriptor instead.
 func (*NodePreference) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{51}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{42}
 }
 
 func (x *NodePreference) GetNodeId() string {
@@ -4868,7 +4398,7 @@ type SwitchProposal struct {
 
 func (x *SwitchProposal) Reset() {
 	*x = SwitchProposal{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[52]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[43]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4880,7 +4410,7 @@ func (x *SwitchProposal) String() string {
 func (*SwitchProposal) ProtoMessage() {}
 
 func (x *SwitchProposal) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[52]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[43]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4893,7 +4423,7 @@ func (x *SwitchProposal) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SwitchProposal.ProtoReflect.Descriptor instead.
 func (*SwitchProposal) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{52}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{43}
 }
 
 func (x *SwitchProposal) GetId() string {
@@ -5018,7 +4548,7 @@ type Operation struct {
 
 func (x *Operation) Reset() {
 	*x = Operation{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[53]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[44]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5030,7 +4560,7 @@ func (x *Operation) String() string {
 func (*Operation) ProtoMessage() {}
 
 func (x *Operation) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[53]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[44]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5043,7 +4573,7 @@ func (x *Operation) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Operation.ProtoReflect.Descriptor instead.
 func (*Operation) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{53}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{44}
 }
 
 func (x *Operation) GetId() string {
@@ -5219,7 +4749,7 @@ type SchedulerTask struct {
 
 func (x *SchedulerTask) Reset() {
 	*x = SchedulerTask{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[54]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[45]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5231,7 +4761,7 @@ func (x *SchedulerTask) String() string {
 func (*SchedulerTask) ProtoMessage() {}
 
 func (x *SchedulerTask) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[54]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[45]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5244,7 +4774,7 @@ func (x *SchedulerTask) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SchedulerTask.ProtoReflect.Descriptor instead.
 func (*SchedulerTask) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{54}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{45}
 }
 
 func (x *SchedulerTask) GetId() string {
@@ -5333,7 +4863,7 @@ type OperationList struct {
 
 func (x *OperationList) Reset() {
 	*x = OperationList{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[55]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[46]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5345,7 +4875,7 @@ func (x *OperationList) String() string {
 func (*OperationList) ProtoMessage() {}
 
 func (x *OperationList) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[55]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[46]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5358,7 +4888,7 @@ func (x *OperationList) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OperationList.ProtoReflect.Descriptor instead.
 func (*OperationList) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{55}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{46}
 }
 
 func (x *OperationList) GetOperations() []*Operation {
@@ -5379,7 +4909,7 @@ type SetPolicyAutomationEnabledRequest struct {
 
 func (x *SetPolicyAutomationEnabledRequest) Reset() {
 	*x = SetPolicyAutomationEnabledRequest{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[56]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[47]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5391,7 +4921,7 @@ func (x *SetPolicyAutomationEnabledRequest) String() string {
 func (*SetPolicyAutomationEnabledRequest) ProtoMessage() {}
 
 func (x *SetPolicyAutomationEnabledRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[56]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[47]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5404,7 +4934,7 @@ func (x *SetPolicyAutomationEnabledRequest) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use SetPolicyAutomationEnabledRequest.ProtoReflect.Descriptor instead.
 func (*SetPolicyAutomationEnabledRequest) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{56}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{47}
 }
 
 func (x *SetPolicyAutomationEnabledRequest) GetEnabled() bool {
@@ -5439,7 +4969,7 @@ type UpsertServicePolicyRequest struct {
 
 func (x *UpsertServicePolicyRequest) Reset() {
 	*x = UpsertServicePolicyRequest{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[57]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[48]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5451,7 +4981,7 @@ func (x *UpsertServicePolicyRequest) String() string {
 func (*UpsertServicePolicyRequest) ProtoMessage() {}
 
 func (x *UpsertServicePolicyRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[57]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[48]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5464,7 +4994,7 @@ func (x *UpsertServicePolicyRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpsertServicePolicyRequest.ProtoReflect.Descriptor instead.
 func (*UpsertServicePolicyRequest) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{57}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{48}
 }
 
 func (x *UpsertServicePolicyRequest) GetPolicy() *ServicePolicy {
@@ -5499,7 +5029,7 @@ type DeleteServicePolicyRequest struct {
 
 func (x *DeleteServicePolicyRequest) Reset() {
 	*x = DeleteServicePolicyRequest{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[58]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[49]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5511,7 +5041,7 @@ func (x *DeleteServicePolicyRequest) String() string {
 func (*DeleteServicePolicyRequest) ProtoMessage() {}
 
 func (x *DeleteServicePolicyRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[58]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[49]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5524,7 +5054,7 @@ func (x *DeleteServicePolicyRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteServicePolicyRequest.ProtoReflect.Descriptor instead.
 func (*DeleteServicePolicyRequest) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{58}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{49}
 }
 
 func (x *DeleteServicePolicyRequest) GetServiceId() string {
@@ -5559,7 +5089,7 @@ type SetNodePreferenceRequest struct {
 
 func (x *SetNodePreferenceRequest) Reset() {
 	*x = SetNodePreferenceRequest{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[59]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[50]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5571,7 +5101,7 @@ func (x *SetNodePreferenceRequest) String() string {
 func (*SetNodePreferenceRequest) ProtoMessage() {}
 
 func (x *SetNodePreferenceRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[59]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[50]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5584,7 +5114,7 @@ func (x *SetNodePreferenceRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetNodePreferenceRequest.ProtoReflect.Descriptor instead.
 func (*SetNodePreferenceRequest) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{59}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{50}
 }
 
 func (x *SetNodePreferenceRequest) GetPreference() *NodePreference {
@@ -5619,7 +5149,7 @@ type RequestServiceEvaluationRequest struct {
 
 func (x *RequestServiceEvaluationRequest) Reset() {
 	*x = RequestServiceEvaluationRequest{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[60]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[51]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5631,7 +5161,7 @@ func (x *RequestServiceEvaluationRequest) String() string {
 func (*RequestServiceEvaluationRequest) ProtoMessage() {}
 
 func (x *RequestServiceEvaluationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[60]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[51]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5644,7 +5174,7 @@ func (x *RequestServiceEvaluationRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RequestServiceEvaluationRequest.ProtoReflect.Descriptor instead.
 func (*RequestServiceEvaluationRequest) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{60}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{51}
 }
 
 func (x *RequestServiceEvaluationRequest) GetServiceId() string {
@@ -5679,7 +5209,7 @@ type ProposalCommandRequest struct {
 
 func (x *ProposalCommandRequest) Reset() {
 	*x = ProposalCommandRequest{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[61]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[52]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5691,7 +5221,7 @@ func (x *ProposalCommandRequest) String() string {
 func (*ProposalCommandRequest) ProtoMessage() {}
 
 func (x *ProposalCommandRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[61]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[52]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5704,7 +5234,7 @@ func (x *ProposalCommandRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProposalCommandRequest.ProtoReflect.Descriptor instead.
 func (*ProposalCommandRequest) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{61}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{52}
 }
 
 func (x *ProposalCommandRequest) GetProposalId() string {
@@ -5741,7 +5271,7 @@ type ForceServiceBindingRequest struct {
 
 func (x *ForceServiceBindingRequest) Reset() {
 	*x = ForceServiceBindingRequest{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[62]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[53]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5753,7 +5283,7 @@ func (x *ForceServiceBindingRequest) String() string {
 func (*ForceServiceBindingRequest) ProtoMessage() {}
 
 func (x *ForceServiceBindingRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[62]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[53]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5766,7 +5296,7 @@ func (x *ForceServiceBindingRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ForceServiceBindingRequest.ProtoReflect.Descriptor instead.
 func (*ForceServiceBindingRequest) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{62}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{53}
 }
 
 func (x *ForceServiceBindingRequest) GetServiceId() string {
@@ -5813,7 +5343,7 @@ type GetOperationRequest struct {
 
 func (x *GetOperationRequest) Reset() {
 	*x = GetOperationRequest{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[63]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[54]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5825,7 +5355,7 @@ func (x *GetOperationRequest) String() string {
 func (*GetOperationRequest) ProtoMessage() {}
 
 func (x *GetOperationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[63]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[54]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5838,7 +5368,7 @@ func (x *GetOperationRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetOperationRequest.ProtoReflect.Descriptor instead.
 func (*GetOperationRequest) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{63}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{54}
 }
 
 func (x *GetOperationRequest) GetOperationId() string {
@@ -5858,7 +5388,7 @@ type ListOperationsRequest struct {
 
 func (x *ListOperationsRequest) Reset() {
 	*x = ListOperationsRequest{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[64]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[55]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5870,7 +5400,7 @@ func (x *ListOperationsRequest) String() string {
 func (*ListOperationsRequest) ProtoMessage() {}
 
 func (x *ListOperationsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[64]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[55]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5883,7 +5413,7 @@ func (x *ListOperationsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListOperationsRequest.ProtoReflect.Descriptor instead.
 func (*ListOperationsRequest) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{64}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{55}
 }
 
 func (x *ListOperationsRequest) GetResourceId() string {
@@ -5927,7 +5457,7 @@ type RuntimeState struct {
 
 func (x *RuntimeState) Reset() {
 	*x = RuntimeState{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[65]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[56]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5939,7 +5469,7 @@ func (x *RuntimeState) String() string {
 func (*RuntimeState) ProtoMessage() {}
 
 func (x *RuntimeState) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[65]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[56]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5952,7 +5482,7 @@ func (x *RuntimeState) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RuntimeState.ProtoReflect.Descriptor instead.
 func (*RuntimeState) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{65}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{56}
 }
 
 func (x *RuntimeState) GetPhase() ConfigApplyPhase {
@@ -6103,7 +5633,7 @@ type RuntimeEvent struct {
 
 func (x *RuntimeEvent) Reset() {
 	*x = RuntimeEvent{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[66]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[57]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6115,7 +5645,7 @@ func (x *RuntimeEvent) String() string {
 func (*RuntimeEvent) ProtoMessage() {}
 
 func (x *RuntimeEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[66]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[57]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6128,7 +5658,7 @@ func (x *RuntimeEvent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RuntimeEvent.ProtoReflect.Descriptor instead.
 func (*RuntimeEvent) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{66}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{57}
 }
 
 func (x *RuntimeEvent) GetSequence() uint64 {
@@ -6191,7 +5721,7 @@ type TestOutboundRequest struct {
 
 func (x *TestOutboundRequest) Reset() {
 	*x = TestOutboundRequest{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[67]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[58]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6203,7 +5733,7 @@ func (x *TestOutboundRequest) String() string {
 func (*TestOutboundRequest) ProtoMessage() {}
 
 func (x *TestOutboundRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[67]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[58]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6216,7 +5746,7 @@ func (x *TestOutboundRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TestOutboundRequest.ProtoReflect.Descriptor instead.
 func (*TestOutboundRequest) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{67}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{58}
 }
 
 func (x *TestOutboundRequest) GetOutboundTag() string {
@@ -6247,7 +5777,7 @@ type TestOutboundsRequest struct {
 
 func (x *TestOutboundsRequest) Reset() {
 	*x = TestOutboundsRequest{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[68]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[59]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6259,7 +5789,7 @@ func (x *TestOutboundsRequest) String() string {
 func (*TestOutboundsRequest) ProtoMessage() {}
 
 func (x *TestOutboundsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[68]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[59]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6272,7 +5802,7 @@ func (x *TestOutboundsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TestOutboundsRequest.ProtoReflect.Descriptor instead.
 func (*TestOutboundsRequest) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{68}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{59}
 }
 
 func (x *TestOutboundsRequest) GetOutboundTags() []string {
@@ -6309,7 +5839,7 @@ type LatencyTestResult struct {
 
 func (x *LatencyTestResult) Reset() {
 	*x = LatencyTestResult{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[69]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[60]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6321,7 +5851,7 @@ func (x *LatencyTestResult) String() string {
 func (*LatencyTestResult) ProtoMessage() {}
 
 func (x *LatencyTestResult) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[69]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[60]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6334,7 +5864,7 @@ func (x *LatencyTestResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LatencyTestResult.ProtoReflect.Descriptor instead.
 func (*LatencyTestResult) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{69}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{60}
 }
 
 func (x *LatencyTestResult) GetOutboundTag() string {
@@ -6381,7 +5911,7 @@ type ResolvedEndpoints struct {
 
 func (x *ResolvedEndpoints) Reset() {
 	*x = ResolvedEndpoints{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[70]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[61]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6393,7 +5923,7 @@ func (x *ResolvedEndpoints) String() string {
 func (*ResolvedEndpoints) ProtoMessage() {}
 
 func (x *ResolvedEndpoints) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[70]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[61]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6406,7 +5936,7 @@ func (x *ResolvedEndpoints) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ResolvedEndpoints.ProtoReflect.Descriptor instead.
 func (*ResolvedEndpoints) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{70}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{61}
 }
 
 func (x *ResolvedEndpoints) GetAddresses() []string {
@@ -6431,7 +5961,7 @@ type IpInfoResponse struct {
 
 func (x *IpInfoResponse) Reset() {
 	*x = IpInfoResponse{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[71]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[62]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6443,7 +5973,7 @@ func (x *IpInfoResponse) String() string {
 func (*IpInfoResponse) ProtoMessage() {}
 
 func (x *IpInfoResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[71]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[62]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6456,7 +5986,7 @@ func (x *IpInfoResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IpInfoResponse.ProtoReflect.Descriptor instead.
 func (*IpInfoResponse) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{71}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{62}
 }
 
 func (x *IpInfoResponse) GetIp() string {
@@ -6519,7 +6049,7 @@ type SubscriptionEvent struct {
 
 func (x *SubscriptionEvent) Reset() {
 	*x = SubscriptionEvent{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[72]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[63]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6531,7 +6061,7 @@ func (x *SubscriptionEvent) String() string {
 func (*SubscriptionEvent) ProtoMessage() {}
 
 func (x *SubscriptionEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[72]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[63]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6544,7 +6074,7 @@ func (x *SubscriptionEvent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SubscriptionEvent.ProtoReflect.Descriptor instead.
 func (*SubscriptionEvent) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{72}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{63}
 }
 
 func (x *SubscriptionEvent) GetType() SubscriptionEventType {
@@ -6748,16 +6278,7 @@ const file_api_TargetLib_targetlib_proto_rawDesc = "" +
 	"\x10service_bindings\x18\x03 \x03(\v2\x19.targetlib.ServiceBindingR\x0fserviceBindings\"T\n" +
 	"\bNodePool\x12\x1a\n" +
 	"\brevision\x18\x01 \x01(\tR\brevision\x12,\n" +
-	"\x05nodes\x18\x02 \x03(\v2\x16.targetlib.ProfileNodeR\x05nodes\"~\n" +
-	"\x1aApplyServiceBindingRequest\x123\n" +
-	"\abinding\x18\x01 \x01(\v2\x19.targetlib.ServiceBindingR\abinding\x12+\n" +
-	"\x11expected_revision\x18\x02 \x01(\tR\x10expectedRevision\"i\n" +
-	"\x1bRemoveServiceBindingRequest\x12\x1d\n" +
-	"\n" +
-	"service_id\x18\x01 \x01(\tR\tserviceId\x12+\n" +
-	"\x11expected_revision\x18\x02 \x01(\tR\x10expectedRevision\"K\n" +
-	"\x12ServiceBindingList\x125\n" +
-	"\bbindings\x18\x01 \x03(\v2\x19.targetlib.ServiceBindingR\bbindings\"\x88\x01\n" +
+	"\x05nodes\x18\x02 \x03(\v2\x16.targetlib.ProfileNodeR\x05nodes\"\x88\x01\n" +
 	"\rSelectorState\x123\n" +
 	"\adesired\x18\x01 \x01(\v2\x19.targetlib.SelectorConfigR\adesired\x12$\n" +
 	"\x0eactual_node_id\x18\x02 \x01(\tR\factualNodeId\x12\x1c\n" +
@@ -6789,23 +6310,7 @@ const file_api_TargetLib_targetlib_proto_rawDesc = "" +
 	"\fpacket_count\x18\f \x01(\rR\vpacketCount\x12>\n" +
 	"\x1bpacket_timeout_milliseconds\x18\r \x01(\rR\x19packetTimeoutMilliseconds\x123\n" +
 	"\x13maximum_packet_loss\x18\x0e \x01(\x01H\x00R\x11maximumPacketLoss\x88\x01\x01B\x16\n" +
-	"\x14_maximum_packet_loss\"C\n" +
-	"\x10ServiceProbeList\x12/\n" +
-	"\x06probes\x18\x01 \x03(\v2\x17.targetlib.ServiceProbeR\x06probes\"g\n" +
-	"\x19RemoveServiceProbeRequest\x12\x1d\n" +
-	"\n" +
-	"service_id\x18\x01 \x01(\tR\tserviceId\x12+\n" +
-	"\x11expected_revision\x18\x02 \x01(\tR\x10expectedRevision\"\x97\x02\n" +
-	"\x13ProbeServiceRequest\x12\x1d\n" +
-	"\n" +
-	"service_id\x18\x01 \x01(\tR\tserviceId\x12\x19\n" +
-	"\bnode_ids\x18\x02 \x03(\tR\anodeIds\x12E\n" +
-	"\aheaders\x18\x03 \x03(\v2+.targetlib.ProbeServiceRequest.HeadersEntryR\aheaders\x12\x1a\n" +
-	"\battempts\x18\x04 \x01(\rR\battempts\x12'\n" +
-	"\x0fmax_concurrency\x18\x05 \x01(\rR\x0emaxConcurrency\x1a:\n" +
-	"\fHeadersEntry\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xa5\a\n" +
+	"\x14_maximum_packet_loss\"\xa5\a\n" +
 	"\vProbeResult\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1d\n" +
 	"\n" +
@@ -6833,18 +6338,8 @@ const file_api_TargetLib_targetlib_proto_rawDesc = "" +
 	"\x11packet_loss_ratio\x18\x15 \x01(\x01R\x0fpacketLossRatio\x12!\n" +
 	"\fpackets_sent\x18\x16 \x01(\rR\vpacketsSent\x12)\n" +
 	"\x10packets_received\x18\x17 \x01(\rR\x0fpacketsReceived\x12!\n" +
-	"\fpacket_error\x18\x18 \x01(\tR\vpacketError\"e\n" +
-	"\x15QualityHistoryRequest\x12\x1d\n" +
-	"\n" +
-	"service_id\x18\x01 \x01(\tR\tserviceId\x12\x17\n" +
-	"\anode_id\x18\x02 \x01(\tR\x06nodeId\x12\x14\n" +
-	"\x05limit\x18\x03 \x01(\rR\x05limit\"B\n" +
-	"\x0eQualityHistory\x120\n" +
-	"\aresults\x18\x01 \x03(\v2\x16.targetlib.ProbeResultR\aresults\"7\n" +
+	"\fpacket_error\x18\x18 \x01(\tR\vpacketError\"7\n" +
 	"\x16EvaluateServiceRequest\x12\x1d\n" +
-	"\n" +
-	"service_id\x18\x01 \x01(\tR\tserviceId\">\n" +
-	"\x1dServiceSelectionPolicyRequest\x12\x1d\n" +
 	"\n" +
 	"service_id\x18\x01 \x01(\tR\tserviceId\"\xfe\x02\n" +
 	"\x16ServiceSelectionPolicy\x12\x1d\n" +
@@ -7264,7 +6759,7 @@ func file_api_TargetLib_targetlib_proto_rawDescGZIP() []byte {
 }
 
 var file_api_TargetLib_targetlib_proto_enumTypes = make([]protoimpl.EnumInfo, 15)
-var file_api_TargetLib_targetlib_proto_msgTypes = make([]protoimpl.MessageInfo, 75)
+var file_api_TargetLib_targetlib_proto_msgTypes = make([]protoimpl.MessageInfo, 65)
 var file_api_TargetLib_targetlib_proto_goTypes = []any{
 	(LogLevel)(0),                               // 0: targetlib.LogLevel
 	(ServiceStateType)(0),                       // 1: targetlib.ServiceStateType
@@ -7310,60 +6805,50 @@ var file_api_TargetLib_targetlib_proto_goTypes = []any{
 	(*ServiceBinding)(nil),                      // 41: targetlib.ServiceBinding
 	(*RuntimeModel)(nil),                        // 42: targetlib.RuntimeModel
 	(*NodePool)(nil),                            // 43: targetlib.NodePool
-	(*ApplyServiceBindingRequest)(nil),          // 44: targetlib.ApplyServiceBindingRequest
-	(*RemoveServiceBindingRequest)(nil),         // 45: targetlib.RemoveServiceBindingRequest
-	(*ServiceBindingList)(nil),                  // 46: targetlib.ServiceBindingList
-	(*SelectorState)(nil),                       // 47: targetlib.SelectorState
-	(*ServiceRouteState)(nil),                   // 48: targetlib.ServiceRouteState
-	(*ServiceBindingState)(nil),                 // 49: targetlib.ServiceBindingState
-	(*ServiceProbe)(nil),                        // 50: targetlib.ServiceProbe
-	(*ServiceProbeList)(nil),                    // 51: targetlib.ServiceProbeList
-	(*RemoveServiceProbeRequest)(nil),           // 52: targetlib.RemoveServiceProbeRequest
-	(*ProbeServiceRequest)(nil),                 // 53: targetlib.ProbeServiceRequest
-	(*ProbeResult)(nil),                         // 54: targetlib.ProbeResult
-	(*QualityHistoryRequest)(nil),               // 55: targetlib.QualityHistoryRequest
-	(*QualityHistory)(nil),                      // 56: targetlib.QualityHistory
-	(*EvaluateServiceRequest)(nil),              // 57: targetlib.EvaluateServiceRequest
-	(*ServiceSelectionPolicyRequest)(nil),       // 58: targetlib.ServiceSelectionPolicyRequest
-	(*ServiceSelectionPolicy)(nil),              // 59: targetlib.ServiceSelectionPolicy
-	(*ServiceCandidate)(nil),                    // 60: targetlib.ServiceCandidate
-	(*ServiceEvaluation)(nil),                   // 61: targetlib.ServiceEvaluation
-	(*RuntimeOrchestrationState)(nil),           // 62: targetlib.RuntimeOrchestrationState
-	(*SwitchPolicy)(nil),                        // 63: targetlib.SwitchPolicy
-	(*ServicePolicy)(nil),                       // 64: targetlib.ServicePolicy
-	(*ServicePolicyList)(nil),                   // 65: targetlib.ServicePolicyList
-	(*NodePreference)(nil),                      // 66: targetlib.NodePreference
-	(*SwitchProposal)(nil),                      // 67: targetlib.SwitchProposal
-	(*Operation)(nil),                           // 68: targetlib.Operation
-	(*SchedulerTask)(nil),                       // 69: targetlib.SchedulerTask
-	(*OperationList)(nil),                       // 70: targetlib.OperationList
-	(*SetPolicyAutomationEnabledRequest)(nil),   // 71: targetlib.SetPolicyAutomationEnabledRequest
-	(*UpsertServicePolicyRequest)(nil),          // 72: targetlib.UpsertServicePolicyRequest
-	(*DeleteServicePolicyRequest)(nil),          // 73: targetlib.DeleteServicePolicyRequest
-	(*SetNodePreferenceRequest)(nil),            // 74: targetlib.SetNodePreferenceRequest
-	(*RequestServiceEvaluationRequest)(nil),     // 75: targetlib.RequestServiceEvaluationRequest
-	(*ProposalCommandRequest)(nil),              // 76: targetlib.ProposalCommandRequest
-	(*ForceServiceBindingRequest)(nil),          // 77: targetlib.ForceServiceBindingRequest
-	(*GetOperationRequest)(nil),                 // 78: targetlib.GetOperationRequest
-	(*ListOperationsRequest)(nil),               // 79: targetlib.ListOperationsRequest
-	(*RuntimeState)(nil),                        // 80: targetlib.RuntimeState
-	(*RuntimeEvent)(nil),                        // 81: targetlib.RuntimeEvent
-	(*TestOutboundRequest)(nil),                 // 82: targetlib.TestOutboundRequest
-	(*TestOutboundsRequest)(nil),                // 83: targetlib.TestOutboundsRequest
-	(*LatencyTestResult)(nil),                   // 84: targetlib.LatencyTestResult
-	(*ResolvedEndpoints)(nil),                   // 85: targetlib.ResolvedEndpoints
-	(*IpInfoResponse)(nil),                      // 86: targetlib.IpInfoResponse
-	(*SubscriptionEvent)(nil),                   // 87: targetlib.SubscriptionEvent
-	nil,                                         // 88: targetlib.AddSubscriptionRequest.HeadersEntry
-	nil,                                         // 89: targetlib.ProbeServiceRequest.HeadersEntry
-	(*emptypb.Empty)(nil),                       // 90: google.protobuf.Empty
+	(*SelectorState)(nil),                       // 44: targetlib.SelectorState
+	(*ServiceRouteState)(nil),                   // 45: targetlib.ServiceRouteState
+	(*ServiceBindingState)(nil),                 // 46: targetlib.ServiceBindingState
+	(*ServiceProbe)(nil),                        // 47: targetlib.ServiceProbe
+	(*ProbeResult)(nil),                         // 48: targetlib.ProbeResult
+	(*EvaluateServiceRequest)(nil),              // 49: targetlib.EvaluateServiceRequest
+	(*ServiceSelectionPolicy)(nil),              // 50: targetlib.ServiceSelectionPolicy
+	(*ServiceCandidate)(nil),                    // 51: targetlib.ServiceCandidate
+	(*ServiceEvaluation)(nil),                   // 52: targetlib.ServiceEvaluation
+	(*RuntimeOrchestrationState)(nil),           // 53: targetlib.RuntimeOrchestrationState
+	(*SwitchPolicy)(nil),                        // 54: targetlib.SwitchPolicy
+	(*ServicePolicy)(nil),                       // 55: targetlib.ServicePolicy
+	(*ServicePolicyList)(nil),                   // 56: targetlib.ServicePolicyList
+	(*NodePreference)(nil),                      // 57: targetlib.NodePreference
+	(*SwitchProposal)(nil),                      // 58: targetlib.SwitchProposal
+	(*Operation)(nil),                           // 59: targetlib.Operation
+	(*SchedulerTask)(nil),                       // 60: targetlib.SchedulerTask
+	(*OperationList)(nil),                       // 61: targetlib.OperationList
+	(*SetPolicyAutomationEnabledRequest)(nil),   // 62: targetlib.SetPolicyAutomationEnabledRequest
+	(*UpsertServicePolicyRequest)(nil),          // 63: targetlib.UpsertServicePolicyRequest
+	(*DeleteServicePolicyRequest)(nil),          // 64: targetlib.DeleteServicePolicyRequest
+	(*SetNodePreferenceRequest)(nil),            // 65: targetlib.SetNodePreferenceRequest
+	(*RequestServiceEvaluationRequest)(nil),     // 66: targetlib.RequestServiceEvaluationRequest
+	(*ProposalCommandRequest)(nil),              // 67: targetlib.ProposalCommandRequest
+	(*ForceServiceBindingRequest)(nil),          // 68: targetlib.ForceServiceBindingRequest
+	(*GetOperationRequest)(nil),                 // 69: targetlib.GetOperationRequest
+	(*ListOperationsRequest)(nil),               // 70: targetlib.ListOperationsRequest
+	(*RuntimeState)(nil),                        // 71: targetlib.RuntimeState
+	(*RuntimeEvent)(nil),                        // 72: targetlib.RuntimeEvent
+	(*TestOutboundRequest)(nil),                 // 73: targetlib.TestOutboundRequest
+	(*TestOutboundsRequest)(nil),                // 74: targetlib.TestOutboundsRequest
+	(*LatencyTestResult)(nil),                   // 75: targetlib.LatencyTestResult
+	(*ResolvedEndpoints)(nil),                   // 76: targetlib.ResolvedEndpoints
+	(*IpInfoResponse)(nil),                      // 77: targetlib.IpInfoResponse
+	(*SubscriptionEvent)(nil),                   // 78: targetlib.SubscriptionEvent
+	nil,                                         // 79: targetlib.AddSubscriptionRequest.HeadersEntry
+	(*emptypb.Empty)(nil),                       // 80: google.protobuf.Empty
 }
 var file_api_TargetLib_targetlib_proto_depIdxs = []int32{
 	0,   // 0: targetlib.LogMessage.level:type_name -> targetlib.LogLevel
 	15,  // 1: targetlib.LogBatch.messages:type_name -> targetlib.LogMessage
 	22,  // 2: targetlib.OperationResponse.state:type_name -> targetlib.ServiceState
 	1,   // 3: targetlib.ServiceState.state:type_name -> targetlib.ServiceStateType
-	88,  // 4: targetlib.AddSubscriptionRequest.headers:type_name -> targetlib.AddSubscriptionRequest.HeadersEntry
+	79,  // 4: targetlib.AddSubscriptionRequest.headers:type_name -> targetlib.AddSubscriptionRequest.HeadersEntry
 	32,  // 5: targetlib.SubscriptionList.subscriptions:type_name -> targetlib.SubscriptionView
 	11,  // 6: targetlib.SubscriptionView.status:type_name -> targetlib.SubscriptionStatus
 	12,  // 7: targetlib.SubscriptionView.stage:type_name -> targetlib.SubscriptionUpdateStage
@@ -7383,140 +6868,135 @@ var file_api_TargetLib_targetlib_proto_depIdxs = []int32{
 	40,  // 21: targetlib.RuntimeModel.service_routes:type_name -> targetlib.ServiceRoute
 	41,  // 22: targetlib.RuntimeModel.service_bindings:type_name -> targetlib.ServiceBinding
 	34,  // 23: targetlib.NodePool.nodes:type_name -> targetlib.ProfileNode
-	41,  // 24: targetlib.ApplyServiceBindingRequest.binding:type_name -> targetlib.ServiceBinding
-	41,  // 25: targetlib.ServiceBindingList.bindings:type_name -> targetlib.ServiceBinding
-	39,  // 26: targetlib.SelectorState.desired:type_name -> targetlib.SelectorConfig
-	40,  // 27: targetlib.ServiceRouteState.desired:type_name -> targetlib.ServiceRoute
-	41,  // 28: targetlib.ServiceBindingState.desired:type_name -> targetlib.ServiceBinding
-	50,  // 29: targetlib.ServiceProbeList.probes:type_name -> targetlib.ServiceProbe
-	89,  // 30: targetlib.ProbeServiceRequest.headers:type_name -> targetlib.ProbeServiceRequest.HeadersEntry
-	5,   // 31: targetlib.ProbeResult.stage:type_name -> targetlib.ProbeStage
-	54,  // 32: targetlib.QualityHistory.results:type_name -> targetlib.ProbeResult
-	54,  // 33: targetlib.ServiceCandidate.latest:type_name -> targetlib.ProbeResult
-	60,  // 34: targetlib.ServiceEvaluation.candidates:type_name -> targetlib.ServiceCandidate
-	50,  // 35: targetlib.RuntimeOrchestrationState.probes:type_name -> targetlib.ServiceProbe
-	54,  // 36: targetlib.RuntimeOrchestrationState.results:type_name -> targetlib.ProbeResult
-	59,  // 37: targetlib.RuntimeOrchestrationState.selection_policies:type_name -> targetlib.ServiceSelectionPolicy
-	6,   // 38: targetlib.RuntimeOrchestrationState.recovery_state:type_name -> targetlib.RuntimeRecoveryState
-	64,  // 39: targetlib.RuntimeOrchestrationState.policies:type_name -> targetlib.ServicePolicy
-	67,  // 40: targetlib.RuntimeOrchestrationState.proposals:type_name -> targetlib.SwitchProposal
-	68,  // 41: targetlib.RuntimeOrchestrationState.operations:type_name -> targetlib.Operation
-	66,  // 42: targetlib.RuntimeOrchestrationState.node_preferences:type_name -> targetlib.NodePreference
-	69,  // 43: targetlib.RuntimeOrchestrationState.tasks:type_name -> targetlib.SchedulerTask
-	7,   // 44: targetlib.SwitchPolicy.mode:type_name -> targetlib.SwitchMode
-	50,  // 45: targetlib.ServicePolicy.probes:type_name -> targetlib.ServiceProbe
-	59,  // 46: targetlib.ServicePolicy.selection:type_name -> targetlib.ServiceSelectionPolicy
-	63,  // 47: targetlib.ServicePolicy.switch_policy:type_name -> targetlib.SwitchPolicy
-	64,  // 48: targetlib.ServicePolicyList.policies:type_name -> targetlib.ServicePolicy
-	60,  // 49: targetlib.SwitchProposal.candidates:type_name -> targetlib.ServiceCandidate
-	8,   // 50: targetlib.Operation.status:type_name -> targetlib.OperationStatus
-	68,  // 51: targetlib.OperationList.operations:type_name -> targetlib.Operation
-	64,  // 52: targetlib.UpsertServicePolicyRequest.policy:type_name -> targetlib.ServicePolicy
-	66,  // 53: targetlib.SetNodePreferenceRequest.preference:type_name -> targetlib.NodePreference
-	4,   // 54: targetlib.RuntimeState.phase:type_name -> targetlib.ConfigApplyPhase
-	47,  // 55: targetlib.RuntimeState.selectors:type_name -> targetlib.SelectorState
-	48,  // 56: targetlib.RuntimeState.service_routes:type_name -> targetlib.ServiceRouteState
-	49,  // 57: targetlib.RuntimeState.service_bindings:type_name -> targetlib.ServiceBindingState
-	6,   // 58: targetlib.RuntimeState.recovery_state:type_name -> targetlib.RuntimeRecoveryState
-	64,  // 59: targetlib.RuntimeState.policies:type_name -> targetlib.ServicePolicy
-	67,  // 60: targetlib.RuntimeState.proposals:type_name -> targetlib.SwitchProposal
-	68,  // 61: targetlib.RuntimeState.operations:type_name -> targetlib.Operation
-	66,  // 62: targetlib.RuntimeState.node_preferences:type_name -> targetlib.NodePreference
-	69,  // 63: targetlib.RuntimeState.tasks:type_name -> targetlib.SchedulerTask
-	54,  // 64: targetlib.RuntimeState.quality_history:type_name -> targetlib.ProbeResult
-	9,   // 65: targetlib.RuntimeEvent.type:type_name -> targetlib.RuntimeEventType
-	80,  // 66: targetlib.RuntimeEvent.state:type_name -> targetlib.RuntimeState
-	54,  // 67: targetlib.RuntimeEvent.probe:type_name -> targetlib.ProbeResult
-	10,  // 68: targetlib.LatencyTestResult.status:type_name -> targetlib.LatencyTestStatus
-	14,  // 69: targetlib.SubscriptionEvent.type:type_name -> targetlib.SubscriptionEventType
-	32,  // 70: targetlib.SubscriptionEvent.subscription:type_name -> targetlib.SubscriptionView
-	90,  // 71: targetlib.TargetLib.GetVersion:input_type -> google.protobuf.Empty
-	90,  // 72: targetlib.TargetLib.GetCapabilities:input_type -> google.protobuf.Empty
-	90,  // 73: targetlib.TargetLib.Start:input_type -> google.protobuf.Empty
-	90,  // 74: targetlib.TargetLib.Restart:input_type -> google.protobuf.Empty
-	90,  // 75: targetlib.TargetLib.Stop:input_type -> google.protobuf.Empty
-	90,  // 76: targetlib.TargetLib.GetState:input_type -> google.protobuf.Empty
-	90,  // 77: targetlib.TargetLib.SubscribeState:input_type -> google.protobuf.Empty
-	90,  // 78: targetlib.TargetLib.SubscribeLogs:input_type -> google.protobuf.Empty
-	23,  // 79: targetlib.TargetLib.SubscribeTraffic:input_type -> targetlib.TrafficRequest
-	17,  // 80: targetlib.TargetLib.SelectOutbound:input_type -> targetlib.SelectOutboundRequest
-	18,  // 81: targetlib.TargetLib.CloseConnection:input_type -> targetlib.CloseConnectionRequest
-	90,  // 82: targetlib.TargetLib.CloseAllConnections:input_type -> google.protobuf.Empty
-	90,  // 83: targetlib.TargetLib.ListSubscriptions:input_type -> google.protobuf.Empty
-	25,  // 84: targetlib.TargetLib.GetSubscription:input_type -> targetlib.SubscriptionId
-	26,  // 85: targetlib.TargetLib.AddSubscription:input_type -> targetlib.AddSubscriptionRequest
-	25,  // 86: targetlib.TargetLib.RemoveSubscription:input_type -> targetlib.SubscriptionId
-	27,  // 87: targetlib.TargetLib.RenameSubscription:input_type -> targetlib.RenameSubscriptionRequest
-	28,  // 88: targetlib.TargetLib.SetSubscriptionEnabled:input_type -> targetlib.SetSubscriptionEnabledRequest
-	29,  // 89: targetlib.TargetLib.ConfigureSubscriptionUpdates:input_type -> targetlib.ConfigureSubscriptionUpdatesRequest
-	25,  // 90: targetlib.TargetLib.UpdateSubscription:input_type -> targetlib.SubscriptionId
-	90,  // 91: targetlib.TargetLib.GetRuntimeConfig:input_type -> google.protobuf.Empty
-	38,  // 92: targetlib.TargetLib.UpdateRuntimeConfig:input_type -> targetlib.UpdateRuntimeConfigRequest
-	82,  // 93: targetlib.TargetLib.TestOutbound:input_type -> targetlib.TestOutboundRequest
-	83,  // 94: targetlib.TargetLib.TestOutbounds:input_type -> targetlib.TestOutboundsRequest
-	30,  // 95: targetlib.TargetLib.GetResolvedEndpoints:input_type -> targetlib.ResolvedEndpointsRequest
-	90,  // 96: targetlib.TargetLib.SubscribeSubscriptionEvents:input_type -> google.protobuf.Empty
-	90,  // 97: targetlib.TargetLib.GetIpInfo:input_type -> google.protobuf.Empty
-	90,  // 98: targetlib.TargetLib.GetNodePool:input_type -> google.protobuf.Empty
-	90,  // 99: targetlib.TargetLib.GetRuntimeState:input_type -> google.protobuf.Empty
-	90,  // 100: targetlib.TargetLib.SubscribeRuntimeEvents:input_type -> google.protobuf.Empty
-	71,  // 101: targetlib.TargetLib.SetPolicyAutomationEnabled:input_type -> targetlib.SetPolicyAutomationEnabledRequest
-	90,  // 102: targetlib.TargetLib.ListServicePolicies:input_type -> google.protobuf.Empty
-	72,  // 103: targetlib.TargetLib.UpsertServicePolicy:input_type -> targetlib.UpsertServicePolicyRequest
-	73,  // 104: targetlib.TargetLib.DeleteServicePolicy:input_type -> targetlib.DeleteServicePolicyRequest
-	74,  // 105: targetlib.TargetLib.SetNodePreference:input_type -> targetlib.SetNodePreferenceRequest
-	75,  // 106: targetlib.TargetLib.RequestServiceEvaluation:input_type -> targetlib.RequestServiceEvaluationRequest
-	76,  // 107: targetlib.TargetLib.ApproveSwitchProposal:input_type -> targetlib.ProposalCommandRequest
-	76,  // 108: targetlib.TargetLib.RejectSwitchProposal:input_type -> targetlib.ProposalCommandRequest
-	77,  // 109: targetlib.TargetLib.ForceServiceBinding:input_type -> targetlib.ForceServiceBindingRequest
-	78,  // 110: targetlib.TargetLib.GetOperation:input_type -> targetlib.GetOperationRequest
-	79,  // 111: targetlib.TargetLib.ListOperations:input_type -> targetlib.ListOperationsRequest
-	19,  // 112: targetlib.TargetLib.GetVersion:output_type -> targetlib.VersionResponse
-	20,  // 113: targetlib.TargetLib.GetCapabilities:output_type -> targetlib.CapabilitiesResponse
-	21,  // 114: targetlib.TargetLib.Start:output_type -> targetlib.OperationResponse
-	21,  // 115: targetlib.TargetLib.Restart:output_type -> targetlib.OperationResponse
-	21,  // 116: targetlib.TargetLib.Stop:output_type -> targetlib.OperationResponse
-	22,  // 117: targetlib.TargetLib.GetState:output_type -> targetlib.ServiceState
-	22,  // 118: targetlib.TargetLib.SubscribeState:output_type -> targetlib.ServiceState
-	16,  // 119: targetlib.TargetLib.SubscribeLogs:output_type -> targetlib.LogBatch
-	24,  // 120: targetlib.TargetLib.SubscribeTraffic:output_type -> targetlib.TrafficStatus
-	90,  // 121: targetlib.TargetLib.SelectOutbound:output_type -> google.protobuf.Empty
-	90,  // 122: targetlib.TargetLib.CloseConnection:output_type -> google.protobuf.Empty
-	90,  // 123: targetlib.TargetLib.CloseAllConnections:output_type -> google.protobuf.Empty
-	31,  // 124: targetlib.TargetLib.ListSubscriptions:output_type -> targetlib.SubscriptionList
-	32,  // 125: targetlib.TargetLib.GetSubscription:output_type -> targetlib.SubscriptionView
-	32,  // 126: targetlib.TargetLib.AddSubscription:output_type -> targetlib.SubscriptionView
-	90,  // 127: targetlib.TargetLib.RemoveSubscription:output_type -> google.protobuf.Empty
-	32,  // 128: targetlib.TargetLib.RenameSubscription:output_type -> targetlib.SubscriptionView
-	32,  // 129: targetlib.TargetLib.SetSubscriptionEnabled:output_type -> targetlib.SubscriptionView
-	32,  // 130: targetlib.TargetLib.ConfigureSubscriptionUpdates:output_type -> targetlib.SubscriptionView
-	35,  // 131: targetlib.TargetLib.UpdateSubscription:output_type -> targetlib.SubscriptionUpdateResult
-	37,  // 132: targetlib.TargetLib.GetRuntimeConfig:output_type -> targetlib.RuntimeConfig
-	37,  // 133: targetlib.TargetLib.UpdateRuntimeConfig:output_type -> targetlib.RuntimeConfig
-	84,  // 134: targetlib.TargetLib.TestOutbound:output_type -> targetlib.LatencyTestResult
-	84,  // 135: targetlib.TargetLib.TestOutbounds:output_type -> targetlib.LatencyTestResult
-	85,  // 136: targetlib.TargetLib.GetResolvedEndpoints:output_type -> targetlib.ResolvedEndpoints
-	87,  // 137: targetlib.TargetLib.SubscribeSubscriptionEvents:output_type -> targetlib.SubscriptionEvent
-	86,  // 138: targetlib.TargetLib.GetIpInfo:output_type -> targetlib.IpInfoResponse
-	43,  // 139: targetlib.TargetLib.GetNodePool:output_type -> targetlib.NodePool
-	80,  // 140: targetlib.TargetLib.GetRuntimeState:output_type -> targetlib.RuntimeState
-	81,  // 141: targetlib.TargetLib.SubscribeRuntimeEvents:output_type -> targetlib.RuntimeEvent
-	68,  // 142: targetlib.TargetLib.SetPolicyAutomationEnabled:output_type -> targetlib.Operation
-	65,  // 143: targetlib.TargetLib.ListServicePolicies:output_type -> targetlib.ServicePolicyList
-	68,  // 144: targetlib.TargetLib.UpsertServicePolicy:output_type -> targetlib.Operation
-	68,  // 145: targetlib.TargetLib.DeleteServicePolicy:output_type -> targetlib.Operation
-	68,  // 146: targetlib.TargetLib.SetNodePreference:output_type -> targetlib.Operation
-	68,  // 147: targetlib.TargetLib.RequestServiceEvaluation:output_type -> targetlib.Operation
-	68,  // 148: targetlib.TargetLib.ApproveSwitchProposal:output_type -> targetlib.Operation
-	68,  // 149: targetlib.TargetLib.RejectSwitchProposal:output_type -> targetlib.Operation
-	68,  // 150: targetlib.TargetLib.ForceServiceBinding:output_type -> targetlib.Operation
-	68,  // 151: targetlib.TargetLib.GetOperation:output_type -> targetlib.Operation
-	70,  // 152: targetlib.TargetLib.ListOperations:output_type -> targetlib.OperationList
-	112, // [112:153] is the sub-list for method output_type
-	71,  // [71:112] is the sub-list for method input_type
-	71,  // [71:71] is the sub-list for extension type_name
-	71,  // [71:71] is the sub-list for extension extendee
-	0,   // [0:71] is the sub-list for field type_name
+	39,  // 24: targetlib.SelectorState.desired:type_name -> targetlib.SelectorConfig
+	40,  // 25: targetlib.ServiceRouteState.desired:type_name -> targetlib.ServiceRoute
+	41,  // 26: targetlib.ServiceBindingState.desired:type_name -> targetlib.ServiceBinding
+	5,   // 27: targetlib.ProbeResult.stage:type_name -> targetlib.ProbeStage
+	48,  // 28: targetlib.ServiceCandidate.latest:type_name -> targetlib.ProbeResult
+	51,  // 29: targetlib.ServiceEvaluation.candidates:type_name -> targetlib.ServiceCandidate
+	47,  // 30: targetlib.RuntimeOrchestrationState.probes:type_name -> targetlib.ServiceProbe
+	48,  // 31: targetlib.RuntimeOrchestrationState.results:type_name -> targetlib.ProbeResult
+	50,  // 32: targetlib.RuntimeOrchestrationState.selection_policies:type_name -> targetlib.ServiceSelectionPolicy
+	6,   // 33: targetlib.RuntimeOrchestrationState.recovery_state:type_name -> targetlib.RuntimeRecoveryState
+	55,  // 34: targetlib.RuntimeOrchestrationState.policies:type_name -> targetlib.ServicePolicy
+	58,  // 35: targetlib.RuntimeOrchestrationState.proposals:type_name -> targetlib.SwitchProposal
+	59,  // 36: targetlib.RuntimeOrchestrationState.operations:type_name -> targetlib.Operation
+	57,  // 37: targetlib.RuntimeOrchestrationState.node_preferences:type_name -> targetlib.NodePreference
+	60,  // 38: targetlib.RuntimeOrchestrationState.tasks:type_name -> targetlib.SchedulerTask
+	7,   // 39: targetlib.SwitchPolicy.mode:type_name -> targetlib.SwitchMode
+	47,  // 40: targetlib.ServicePolicy.probes:type_name -> targetlib.ServiceProbe
+	50,  // 41: targetlib.ServicePolicy.selection:type_name -> targetlib.ServiceSelectionPolicy
+	54,  // 42: targetlib.ServicePolicy.switch_policy:type_name -> targetlib.SwitchPolicy
+	55,  // 43: targetlib.ServicePolicyList.policies:type_name -> targetlib.ServicePolicy
+	51,  // 44: targetlib.SwitchProposal.candidates:type_name -> targetlib.ServiceCandidate
+	8,   // 45: targetlib.Operation.status:type_name -> targetlib.OperationStatus
+	59,  // 46: targetlib.OperationList.operations:type_name -> targetlib.Operation
+	55,  // 47: targetlib.UpsertServicePolicyRequest.policy:type_name -> targetlib.ServicePolicy
+	57,  // 48: targetlib.SetNodePreferenceRequest.preference:type_name -> targetlib.NodePreference
+	4,   // 49: targetlib.RuntimeState.phase:type_name -> targetlib.ConfigApplyPhase
+	44,  // 50: targetlib.RuntimeState.selectors:type_name -> targetlib.SelectorState
+	45,  // 51: targetlib.RuntimeState.service_routes:type_name -> targetlib.ServiceRouteState
+	46,  // 52: targetlib.RuntimeState.service_bindings:type_name -> targetlib.ServiceBindingState
+	6,   // 53: targetlib.RuntimeState.recovery_state:type_name -> targetlib.RuntimeRecoveryState
+	55,  // 54: targetlib.RuntimeState.policies:type_name -> targetlib.ServicePolicy
+	58,  // 55: targetlib.RuntimeState.proposals:type_name -> targetlib.SwitchProposal
+	59,  // 56: targetlib.RuntimeState.operations:type_name -> targetlib.Operation
+	57,  // 57: targetlib.RuntimeState.node_preferences:type_name -> targetlib.NodePreference
+	60,  // 58: targetlib.RuntimeState.tasks:type_name -> targetlib.SchedulerTask
+	48,  // 59: targetlib.RuntimeState.quality_history:type_name -> targetlib.ProbeResult
+	9,   // 60: targetlib.RuntimeEvent.type:type_name -> targetlib.RuntimeEventType
+	71,  // 61: targetlib.RuntimeEvent.state:type_name -> targetlib.RuntimeState
+	48,  // 62: targetlib.RuntimeEvent.probe:type_name -> targetlib.ProbeResult
+	10,  // 63: targetlib.LatencyTestResult.status:type_name -> targetlib.LatencyTestStatus
+	14,  // 64: targetlib.SubscriptionEvent.type:type_name -> targetlib.SubscriptionEventType
+	32,  // 65: targetlib.SubscriptionEvent.subscription:type_name -> targetlib.SubscriptionView
+	80,  // 66: targetlib.TargetLib.GetVersion:input_type -> google.protobuf.Empty
+	80,  // 67: targetlib.TargetLib.GetCapabilities:input_type -> google.protobuf.Empty
+	80,  // 68: targetlib.TargetLib.Start:input_type -> google.protobuf.Empty
+	80,  // 69: targetlib.TargetLib.Restart:input_type -> google.protobuf.Empty
+	80,  // 70: targetlib.TargetLib.Stop:input_type -> google.protobuf.Empty
+	80,  // 71: targetlib.TargetLib.GetState:input_type -> google.protobuf.Empty
+	80,  // 72: targetlib.TargetLib.SubscribeState:input_type -> google.protobuf.Empty
+	80,  // 73: targetlib.TargetLib.SubscribeLogs:input_type -> google.protobuf.Empty
+	23,  // 74: targetlib.TargetLib.SubscribeTraffic:input_type -> targetlib.TrafficRequest
+	17,  // 75: targetlib.TargetLib.SelectOutbound:input_type -> targetlib.SelectOutboundRequest
+	18,  // 76: targetlib.TargetLib.CloseConnection:input_type -> targetlib.CloseConnectionRequest
+	80,  // 77: targetlib.TargetLib.CloseAllConnections:input_type -> google.protobuf.Empty
+	80,  // 78: targetlib.TargetLib.ListSubscriptions:input_type -> google.protobuf.Empty
+	25,  // 79: targetlib.TargetLib.GetSubscription:input_type -> targetlib.SubscriptionId
+	26,  // 80: targetlib.TargetLib.AddSubscription:input_type -> targetlib.AddSubscriptionRequest
+	25,  // 81: targetlib.TargetLib.RemoveSubscription:input_type -> targetlib.SubscriptionId
+	27,  // 82: targetlib.TargetLib.RenameSubscription:input_type -> targetlib.RenameSubscriptionRequest
+	28,  // 83: targetlib.TargetLib.SetSubscriptionEnabled:input_type -> targetlib.SetSubscriptionEnabledRequest
+	29,  // 84: targetlib.TargetLib.ConfigureSubscriptionUpdates:input_type -> targetlib.ConfigureSubscriptionUpdatesRequest
+	25,  // 85: targetlib.TargetLib.UpdateSubscription:input_type -> targetlib.SubscriptionId
+	80,  // 86: targetlib.TargetLib.GetRuntimeConfig:input_type -> google.protobuf.Empty
+	38,  // 87: targetlib.TargetLib.UpdateRuntimeConfig:input_type -> targetlib.UpdateRuntimeConfigRequest
+	73,  // 88: targetlib.TargetLib.TestOutbound:input_type -> targetlib.TestOutboundRequest
+	74,  // 89: targetlib.TargetLib.TestOutbounds:input_type -> targetlib.TestOutboundsRequest
+	30,  // 90: targetlib.TargetLib.GetResolvedEndpoints:input_type -> targetlib.ResolvedEndpointsRequest
+	80,  // 91: targetlib.TargetLib.SubscribeSubscriptionEvents:input_type -> google.protobuf.Empty
+	80,  // 92: targetlib.TargetLib.GetIpInfo:input_type -> google.protobuf.Empty
+	80,  // 93: targetlib.TargetLib.GetNodePool:input_type -> google.protobuf.Empty
+	80,  // 94: targetlib.TargetLib.GetRuntimeState:input_type -> google.protobuf.Empty
+	80,  // 95: targetlib.TargetLib.SubscribeRuntimeEvents:input_type -> google.protobuf.Empty
+	62,  // 96: targetlib.TargetLib.SetPolicyAutomationEnabled:input_type -> targetlib.SetPolicyAutomationEnabledRequest
+	80,  // 97: targetlib.TargetLib.ListServicePolicies:input_type -> google.protobuf.Empty
+	63,  // 98: targetlib.TargetLib.UpsertServicePolicy:input_type -> targetlib.UpsertServicePolicyRequest
+	64,  // 99: targetlib.TargetLib.DeleteServicePolicy:input_type -> targetlib.DeleteServicePolicyRequest
+	65,  // 100: targetlib.TargetLib.SetNodePreference:input_type -> targetlib.SetNodePreferenceRequest
+	66,  // 101: targetlib.TargetLib.RequestServiceEvaluation:input_type -> targetlib.RequestServiceEvaluationRequest
+	67,  // 102: targetlib.TargetLib.ApproveSwitchProposal:input_type -> targetlib.ProposalCommandRequest
+	67,  // 103: targetlib.TargetLib.RejectSwitchProposal:input_type -> targetlib.ProposalCommandRequest
+	68,  // 104: targetlib.TargetLib.ForceServiceBinding:input_type -> targetlib.ForceServiceBindingRequest
+	69,  // 105: targetlib.TargetLib.GetOperation:input_type -> targetlib.GetOperationRequest
+	70,  // 106: targetlib.TargetLib.ListOperations:input_type -> targetlib.ListOperationsRequest
+	19,  // 107: targetlib.TargetLib.GetVersion:output_type -> targetlib.VersionResponse
+	20,  // 108: targetlib.TargetLib.GetCapabilities:output_type -> targetlib.CapabilitiesResponse
+	21,  // 109: targetlib.TargetLib.Start:output_type -> targetlib.OperationResponse
+	21,  // 110: targetlib.TargetLib.Restart:output_type -> targetlib.OperationResponse
+	21,  // 111: targetlib.TargetLib.Stop:output_type -> targetlib.OperationResponse
+	22,  // 112: targetlib.TargetLib.GetState:output_type -> targetlib.ServiceState
+	22,  // 113: targetlib.TargetLib.SubscribeState:output_type -> targetlib.ServiceState
+	16,  // 114: targetlib.TargetLib.SubscribeLogs:output_type -> targetlib.LogBatch
+	24,  // 115: targetlib.TargetLib.SubscribeTraffic:output_type -> targetlib.TrafficStatus
+	80,  // 116: targetlib.TargetLib.SelectOutbound:output_type -> google.protobuf.Empty
+	80,  // 117: targetlib.TargetLib.CloseConnection:output_type -> google.protobuf.Empty
+	80,  // 118: targetlib.TargetLib.CloseAllConnections:output_type -> google.protobuf.Empty
+	31,  // 119: targetlib.TargetLib.ListSubscriptions:output_type -> targetlib.SubscriptionList
+	32,  // 120: targetlib.TargetLib.GetSubscription:output_type -> targetlib.SubscriptionView
+	32,  // 121: targetlib.TargetLib.AddSubscription:output_type -> targetlib.SubscriptionView
+	80,  // 122: targetlib.TargetLib.RemoveSubscription:output_type -> google.protobuf.Empty
+	32,  // 123: targetlib.TargetLib.RenameSubscription:output_type -> targetlib.SubscriptionView
+	32,  // 124: targetlib.TargetLib.SetSubscriptionEnabled:output_type -> targetlib.SubscriptionView
+	32,  // 125: targetlib.TargetLib.ConfigureSubscriptionUpdates:output_type -> targetlib.SubscriptionView
+	35,  // 126: targetlib.TargetLib.UpdateSubscription:output_type -> targetlib.SubscriptionUpdateResult
+	37,  // 127: targetlib.TargetLib.GetRuntimeConfig:output_type -> targetlib.RuntimeConfig
+	37,  // 128: targetlib.TargetLib.UpdateRuntimeConfig:output_type -> targetlib.RuntimeConfig
+	75,  // 129: targetlib.TargetLib.TestOutbound:output_type -> targetlib.LatencyTestResult
+	75,  // 130: targetlib.TargetLib.TestOutbounds:output_type -> targetlib.LatencyTestResult
+	76,  // 131: targetlib.TargetLib.GetResolvedEndpoints:output_type -> targetlib.ResolvedEndpoints
+	78,  // 132: targetlib.TargetLib.SubscribeSubscriptionEvents:output_type -> targetlib.SubscriptionEvent
+	77,  // 133: targetlib.TargetLib.GetIpInfo:output_type -> targetlib.IpInfoResponse
+	43,  // 134: targetlib.TargetLib.GetNodePool:output_type -> targetlib.NodePool
+	71,  // 135: targetlib.TargetLib.GetRuntimeState:output_type -> targetlib.RuntimeState
+	72,  // 136: targetlib.TargetLib.SubscribeRuntimeEvents:output_type -> targetlib.RuntimeEvent
+	59,  // 137: targetlib.TargetLib.SetPolicyAutomationEnabled:output_type -> targetlib.Operation
+	56,  // 138: targetlib.TargetLib.ListServicePolicies:output_type -> targetlib.ServicePolicyList
+	59,  // 139: targetlib.TargetLib.UpsertServicePolicy:output_type -> targetlib.Operation
+	59,  // 140: targetlib.TargetLib.DeleteServicePolicy:output_type -> targetlib.Operation
+	59,  // 141: targetlib.TargetLib.SetNodePreference:output_type -> targetlib.Operation
+	59,  // 142: targetlib.TargetLib.RequestServiceEvaluation:output_type -> targetlib.Operation
+	59,  // 143: targetlib.TargetLib.ApproveSwitchProposal:output_type -> targetlib.Operation
+	59,  // 144: targetlib.TargetLib.RejectSwitchProposal:output_type -> targetlib.Operation
+	59,  // 145: targetlib.TargetLib.ForceServiceBinding:output_type -> targetlib.Operation
+	59,  // 146: targetlib.TargetLib.GetOperation:output_type -> targetlib.Operation
+	61,  // 147: targetlib.TargetLib.ListOperations:output_type -> targetlib.OperationList
+	107, // [107:148] is the sub-list for method output_type
+	66,  // [66:107] is the sub-list for method input_type
+	66,  // [66:66] is the sub-list for extension type_name
+	66,  // [66:66] is the sub-list for extension extendee
+	0,   // [0:66] is the sub-list for field type_name
 }
 
 func init() { file_api_TargetLib_targetlib_proto_init() }
@@ -7525,14 +7005,14 @@ func file_api_TargetLib_targetlib_proto_init() {
 		return
 	}
 	file_api_TargetLib_targetlib_proto_msgTypes[11].OneofWrappers = []any{}
-	file_api_TargetLib_targetlib_proto_msgTypes[35].OneofWrappers = []any{}
+	file_api_TargetLib_targetlib_proto_msgTypes[32].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_TargetLib_targetlib_proto_rawDesc), len(file_api_TargetLib_targetlib_proto_rawDesc)),
 			NumEnums:      15,
-			NumMessages:   75,
+			NumMessages:   65,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -281,6 +281,8 @@ func (m *Manager) DeleteServicePolicy(ctx context.Context, request *api.DeleteSe
 		if len(next.Policies) == before {
 			return status.Error(codes.NotFound, "service policy not found")
 		}
+		next.Probes = removeIf(next.Probes, func(probe *api.ServiceProbe) bool { return probe.ServiceId == request.ServiceId })
+		next.SelectionPolicies = removeIf(next.SelectionPolicies, func(selection *api.ServiceSelectionPolicy) bool { return selection.ServiceId == request.ServiceId })
 		next.Proposals = removeIf(next.Proposals, func(proposal *api.SwitchProposal) bool { return proposal.ServiceId == request.ServiceId })
 		next.Tasks = removeIf(next.Tasks, func(task *api.SchedulerTask) bool { return task.ServiceId == request.ServiceId })
 		operation.Phase = "cleanup"
@@ -509,7 +511,7 @@ func (m *Manager) runEvaluation(operationID, serviceID, policyRevision, poolRevi
 			}(node)
 		}
 		workers.Wait()
-		evaluation, err = m.EvaluateService(context.Background(), &api.EvaluateServiceRequest{ServiceId: serviceID})
+		evaluation, err = m.evaluateService(context.Background(), &api.EvaluateServiceRequest{ServiceId: serviceID})
 		if err == nil {
 			for _, candidate := range evaluation.Candidates {
 				if reason := failures[candidate.NodeId]; reason != "" {
