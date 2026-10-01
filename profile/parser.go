@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"slices"
 	"strings"
 
 	C "github.com/sagernet/sing-box/constant"
@@ -93,26 +94,25 @@ func Parse(raw []byte) (Parsed, error) {
 	return Parsed{Profile: result, NodesHash: hex.EncodeToString(sum[:])}, nil
 }
 
+var nodeTypes = []string{
+	C.TypeSOCKS,
+	C.TypeHTTP,
+	C.TypeShadowsocks,
+	C.TypeVMess,
+	C.TypeTrojan,
+	C.TypeNaive,
+	C.TypeHysteria,
+	C.TypeTor,
+	C.TypeSSH,
+	C.TypeShadowTLS,
+	C.TypeAnyTLS,
+	C.TypeVLESS,
+	C.TypeTUIC,
+	C.TypeHysteria2,
+}
+
 func isNodeType(value string) bool {
-	switch value {
-	case C.TypeSOCKS,
-		C.TypeHTTP,
-		C.TypeShadowsocks,
-		C.TypeVMess,
-		C.TypeTrojan,
-		C.TypeNaive,
-		C.TypeHysteria,
-		C.TypeTor,
-		C.TypeSSH,
-		C.TypeShadowTLS,
-		C.TypeAnyTLS,
-		C.TypeVLESS,
-		C.TypeTUIC,
-		C.TypeHysteria2:
-		return true
-	default:
-		return false
-	}
+	return slices.Contains(nodeTypes, value)
 }
 
 func sanitizeOutboundJSON(outboundType string, outbound map[string]any) {

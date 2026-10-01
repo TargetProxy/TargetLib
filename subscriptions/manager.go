@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net"
 	"net/url"
-	"sort"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -214,7 +214,7 @@ func (m *Manager) ResolvedEndpoints(enabledOnly bool) []string {
 	for prefix := range set {
 		out = append(out, prefix)
 	}
-	sort.Strings(out)
+	slices.Sort(out)
 	return out
 }
 
@@ -229,7 +229,7 @@ func (m *Manager) List() []Subscription {
 	for _, item := range state.items {
 		out = append(out, cloneSubscription(item))
 	}
-	sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
+	slices.SortFunc(out, func(a, b Subscription) int { return strings.Compare(a.Name, b.Name) })
 	return out
 }
 
@@ -496,17 +496,17 @@ func profileView(source targetprofile.Profile) ProfileView {
 	for index, node := range source.Nodes {
 		nodes[index] = NodeView{Tag: node.ID, SubscriptionID: node.SubscriptionID, Name: node.Name, Type: node.Type, CountryCode: node.CountryCode, Server: node.Server, Port: node.Port, Phase: node.Phase, Error: node.Error}
 	}
-	sort.Slice(nodes, func(i, j int) bool {
-		if nodes[i].Name != nodes[j].Name {
-			return nodes[i].Name < nodes[j].Name
+	slices.SortFunc(nodes, func(a, b NodeView) int {
+		if c := strings.Compare(a.Name, b.Name); c != 0 {
+			return c
 		}
-		if nodes[i].Type != nodes[j].Type {
-			return nodes[i].Type < nodes[j].Type
+		if c := strings.Compare(a.Type, b.Type); c != 0 {
+			return c
 		}
-		if nodes[i].Server != nodes[j].Server {
-			return nodes[i].Server < nodes[j].Server
+		if c := strings.Compare(a.Server, b.Server); c != 0 {
+			return c
 		}
-		return nodes[i].Port < nodes[j].Port
+		return a.Port - b.Port
 	})
 	view := ProfileView{Nodes: nodes}
 	return view

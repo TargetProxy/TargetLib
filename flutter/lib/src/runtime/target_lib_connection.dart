@@ -81,7 +81,7 @@ final class TargetLibConnection {
         final client = TargetLibClient(candidate.channel);
         try {
           await client
-              .getVersion(Empty(), options: options)
+              .getState(Empty(), options: options)
               .timeout(const Duration(milliseconds: 250));
           for (final unused in channels) {
             if (!identical(unused.channel, candidate.channel)) {
@@ -121,8 +121,6 @@ final class TargetLibConnection {
   }
 
   Future<OperationResponse> start() => client.start(Empty(), options: options);
-  Future<CapabilitiesResponse> capabilities() =>
-      client.getCapabilities(Empty(), options: options);
 
   Future<OperationResponse> restart() =>
       client.restart(Empty(), options: options);
@@ -130,6 +128,12 @@ final class TargetLibConnection {
   Future<OperationResponse> stop() => client.stop(Empty(), options: options);
 
   Future<ServiceState> state() => client.getState(Empty(), options: options);
+
+  ResponseStream<ServiceState> subscribeState() =>
+      client.subscribeState(Empty(), options: options);
+
+  ResponseStream<LogBatch> subscribeLogs() =>
+      client.subscribeLogs(Empty(), options: options);
 
   ResponseStream<TrafficStatus> subscribeTraffic({
     Duration interval = const Duration(seconds: 1),
@@ -142,44 +146,87 @@ final class TargetLibConnection {
       client.getRuntimeConfig(Empty(), options: options);
 
   Future<RuntimeConfig> updateRuntimeConfig(
-    RuntimeSettings settings,
-  ) => client.updateRuntimeConfig(
-    UpdateRuntimeConfigRequest(
-      settings: settings,
-    ),
-    options: options,
-  );
+    RuntimeSettings settings, {
+    String expectedRevision = '',
+  }) => client.updateRuntimeConfig(
+        UpdateRuntimeConfigRequest(
+          settings: settings,
+          expectedRevision: expectedRevision,
+        ),
+        options: options,
+      );
+
+  Future<void> closeConnection(String id) async {
+    await client.closeConnection(
+      CloseConnectionRequest(id: id),
+      options: options,
+    );
+  }
+
+  Future<void> closeAllConnections() async {
+    await client.closeAllConnections(Empty(), options: options);
+  }
+
+  Future<SubscriptionList> listSubscriptions() =>
+      client.listSubscriptions(Empty(), options: options);
+
+  Future<SubscriptionView> getSubscription(String id) =>
+      client.getSubscription(SubscriptionId(id: id), options: options);
+
+  Future<SubscriptionView> addSubscription(AddSubscriptionRequest request) =>
+      client.addSubscription(request, options: options);
+
+  Future<void> removeSubscription(String id) async {
+    await client.removeSubscription(SubscriptionId(id: id), options: options);
+  }
+
+  Future<SubscriptionView> renameSubscription(
+    RenameSubscriptionRequest request,
+  ) => client.renameSubscription(request, options: options);
+
+  Future<SubscriptionView> setSubscriptionEnabled(
+    SetSubscriptionEnabledRequest request,
+  ) => client.setSubscriptionEnabled(request, options: options);
+
+  Future<SubscriptionView> configureSubscriptionUpdates(
+    ConfigureSubscriptionUpdatesRequest request,
+  ) => client.configureSubscriptionUpdates(request, options: options);
+
+  Future<SubscriptionUpdateResult> updateSubscription(String id) =>
+      client.updateSubscription(SubscriptionId(id: id), options: options);
+
+  Future<ResolvedEndpoints> getResolvedEndpoints({bool enabledOnly = false}) =>
+      client.getResolvedEndpoints(
+        ResolvedEndpointsRequest(enabledOnly: enabledOnly),
+        options: options,
+      );
+
+  ResponseStream<SubscriptionEvent> subscribeSubscriptionEvents() =>
+      client.subscribeSubscriptionEvents(Empty(), options: options);
+
+  Future<IpInfoResponse> getIpInfo() =>
+      client.getIpInfo(Empty(), options: options);
 
   Future<NodePool> getNodePool() =>
       client.getNodePool(Empty(), options: options);
-  Future<RuntimeState> getRuntimeState() =>
-      client.getRuntimeState(Empty(), options: options);
-  Future<Operation> setPolicyAutomationEnabled(
-    SetPolicyAutomationEnabledRequest request,
-  ) => client.setPolicyAutomationEnabled(request, options: options);
-  Future<ServicePolicyList> listServicePolicies() =>
-      client.listServicePolicies(Empty(), options: options);
-  Future<Operation> upsertServicePolicy(UpsertServicePolicyRequest request) =>
-      client.upsertServicePolicy(request, options: options);
-  Future<Operation> deleteServicePolicy(DeleteServicePolicyRequest request) =>
-      client.deleteServicePolicy(request, options: options);
-  Future<Operation> setNodePreference(SetNodePreferenceRequest request) =>
-      client.setNodePreference(request, options: options);
-  Future<Operation> requestServiceEvaluation(
-    RequestServiceEvaluationRequest request,
-  ) => client.requestServiceEvaluation(request, options: options);
-  Future<Operation> approveSwitchProposal(ProposalCommandRequest request) =>
-      client.approveSwitchProposal(request, options: options);
-  Future<Operation> rejectSwitchProposal(ProposalCommandRequest request) =>
-      client.rejectSwitchProposal(request, options: options);
-  Future<Operation> forceServiceBinding(ForceServiceBindingRequest request) =>
-      client.forceServiceBinding(request, options: options);
-  Future<Operation> getOperation(String operationId) => client.getOperation(
-    GetOperationRequest(operationId: operationId),
-    options: options,
-  );
-  Future<OperationList> listOperations(ListOperationsRequest request) =>
-      client.listOperations(request, options: options);
-  ResponseStream<RuntimeEvent> subscribeRuntimeEvents() =>
-      client.subscribeRuntimeEvents(Empty(), options: options);
+  Future<SelectNodeResponse> selectNode(String nodeId) =>
+      client.selectNode(SelectNodeRequest(nodeId: nodeId), options: options);
+  Future<ProxyStatus> getProxyStatus() =>
+      client.getProxyStatus(Empty(), options: options);
+  Future<RouteInfo> upsertRoute(UpsertRouteRequest request) =>
+      client.upsertRoute(request, options: options);
+  Future<void> deleteRoute(String serviceId) async {
+    await client.deleteRoute(
+      DeleteRouteRequest(serviceId: serviceId),
+      options: options,
+    );
+  }
+
+  Future<RouteList> listRoutes() => client.listRoutes(Empty(), options: options);
+
+  Future<SelectNodeResponse> selectRouteNode(String serviceId, String nodeId) =>
+      client.selectRouteNode(
+        SelectRouteNodeRequest(serviceId: serviceId, nodeId: nodeId),
+        options: options,
+      );
 }

@@ -1,304 +1,271 @@
-# TargetLib 架构
+# TargetLib 架构设计
 
-TargetLib 将订阅管理、Smart Connect 策略与编排、配置生成和 sing-box 生命周期封装在共享的 Go 核心中。
-Flutter、FFI 和 gRPC 只负责传递用户意图、平台能力和状态，不承担订阅下载、探测调度、候选评分、
-绑定决策或运行时配置构造。该边界保证 UI 被挂起后，核心仍能独立维持代理和后台任务。
+TargetLib 是跨平台 sing-box 管理库，为图形化代理客户端提供核心能力。共享 Go 核心封装订阅管理、节点切换、配置生成和 sing-box 生命周期，gRPC 提供简单同步的控制接口。
 
-## 文档体系
+## 文档索引
 
-三份文档共同定义架构，发生歧义时按下列所有权解释，不在多处复制同一规则：
-
-| 文档 | 权威范围 | 不重复定义 |
-| --- | --- | --- |
-| 本文 | 系统分层、模块依赖、部署拓扑、启动恢复和端到端数据流 | Smart Connect 字段细节和具体 RPC wire contract |
-| [Smart Connect 目标架构](SMART_CONNECT_ARCHITECTURE.md) | 领域模型、策略、调度器、决策、切换状态机、不变量和验收标准 | 通用订阅解析和协议传输细节 |
-| [gRPC 能力总览](GRPC.md) | 当前 RPC、目标意图 API、并发控制、幂等、错误码和兼容策略 | 领域算法和 sing-box 配置生成 |
-
-当前代码事实与目标设计必须明确标注。`现有 v14` 表示已经存在于 proto/实现；`目标` 表示仍待平台宿主或产品客户端完成的迁移方向。
-
-## 分层与依赖方向
-
-```mermaid
-flowchart TB
-    CLIENT["Client UI<br/>Target / other clients"]
-    TRANSPORT["Transport adapters<br/>gRPC / FFI / Flutter SDK"]
-    APP["Application services<br/>commands / queries / operations"]
-    DOMAIN["Domain<br/>subscriptions / Smart Connect / runtime intent"]
-    INFRA["Infrastructure<br/>Badger / scheduler / HTTP / platform callbacks"]
-    RUNTIME["Runtime adapter<br/>config.Build / sing-box daemon"]
-    HOST["Platform host<br/>TUN / protect / foreground service / key store"]
-
-    CLIENT --> TRANSPORT
-    TRANSPORT --> APP
-    APP --> DOMAIN
-    DOMAIN --> INFRA
-    DOMAIN --> RUNTIME
-    RUNTIME --> HOST
-    INFRA --> HOST
-```
-
-依赖只能从外层指向内层接口。proto 类型不得成为领域存储模型；gRPC handler 只做认证、校验、类型转换和应用服务调用。
-领域层不能依赖 Flutter、Android Activity 或某个 RPC 是否保持连接。`config` 只消费规范化运行意图，不读取 UI 状态或执行评分。
-
-## 模块职责
-
-| 模块 | 职责 |
+| 文档 | 内容 |
 | --- | --- |
-| `api/TargetLib` | gRPC 协议与传输模型 |
-| `subscriptions` | 订阅更新、调度、存储、事件和端点解析 |
-| `profile` | 节点中间态与 sing-box 节点解析 |
-| `config` | `NodePool + RuntimeSettings + ServiceRoutes` 到 sing-box 配置的唯一生成路径 |
-| `manager/smartconnect`（目标） | 策略、持久化调度、探测编排、唯一决策引擎、proposal、绑定状态机和审计 |
-| `manager` | 节点池与运行时协调、selector/绑定事务、运行事件和生命周期 |
-| `ffi/native`、`flutter` | 平台接入、意图命令、snapshot/event 传输和客户端绑定 |
+| 本文 | 系统架构、数据流、核心边界 |
+| [GRPC.md](GRPC.md) | gRPC 接口设计、RPC 分组、使用场景 |
+| [GRPC_V2_DESIGN.md](GRPC_V2_DESIGN.md) | 新接口设计理念（参考文档）|
 
-```mermaid
-flowchart LR
-    HOST["Flutter / native host"] --> API["gRPC / FFI"]
-    API --> ORCH["Smart Connect Orchestrator"]
-    API --> MANAGER["manager"]
-    ORCH --> MANAGER
-    ORCH <--> SCSTORE["policy / quality / task / operation store"]
-    MANAGER --> SUB["subscriptions"]
-    SUB --> PROFILE["node-only Profiles"]
-    PROFILE --> POOL["统一 NodePool<br/>稳定 node_id / 来源"]
-    POOL --> CONFIG["config.Plan + config.Emit"]
-    MANAGER --> SETTINGS["runtime Settings"]
-    SETTINGS --> CONFIG
-    ROUTES["ServiceRoutes + ServiceBindings"] --> CONFIG
-    SRS["工作目录 cn.srs<br/>Loyalsoldier GeoIP"] --> CONFIG
-    CONFIG --> BOX["sing-box runtime"]
-    SUB <--> STORE["encrypted subscription store"]
-    MANAGER <--> RSTORE["runtime snapshot store"]
-```
+---
 
-## 核心边界
-
-- 前端只发送添加、删除、更新、审批、强制绑定和启停等意图级命令，并渲染核心 snapshot。
-- Smart Connect 策略、节点偏好、评分、调度任务、proposal 和 binding 只在 TargetLib 中持久化。
-- 产品客户端不得构造或替换完整 `RuntimeModel`；该接口迁移后仅用于兼容、诊断和底层测试。
-- 原始订阅配置只作为解析输入，运行时只消费节点中间态 `profile.Profile`。
-- `profile` 在持久化前统一规范化供应商节点；供应商 ALPN 和已移除的 TLS 字段不会进入节点中间态。
-- 服务商提供的 DNS、路由、rule set、入站、selector/urltest 分组和运行时选项不会透传。
-- `rule` 路由模式只使用 TargetLib 随运行目录提供的本地 [`cn.srs`](https://github.com/Loyalsoldier/geoip/tree/release/srs)，中国大陆目标 IP 直连，其余流量使用 `proxy`。
-- 仓库中的规则源文件位于 `internal/ruleset/cn.srs`；服务构建脚本将它放到可执行文件旁，安装脚本再将它复制到 sing-box 工作目录。
-- `config.Build(settings, profileOrRuntimeModel)` 是最终 sing-box 配置的唯一生成入口，运行时模型包含节点池、selector、服务路由和绑定。
-- `config.Emit` 只序列化 Blueprint 并校验结果，不再解析和重写完整 JSON 文档。
-- TUN、系统密钥、私有存储路径和 socket protect 等平台能力由宿主实现。
-
-配置生成分为一次规划和一次输出：
-
-```text
-NodePool + RuntimeSettings + ServiceRoutes + local cn.srs -> config.Plan -> Blueprint -> config.Emit -> sing-box JSON
-```
-
-## 目标部署与生命周期
-
-下表描述长期所有权目标，不代表所有平台已经完成发布、签名或后台恢复验收；实现状态必须由 capability 和平台测试确认。
-
-| 平台 | 长期运行所有者 | 客户端通信 | 关键恢复要求 |
-| --- | --- | --- | --- |
-| Windows | 安装器注册的 TargetLib service | 本机 TCP / socket | 服务启动时恢复 runtime snapshot、任务和 operation |
-| Linux | systemd TargetLib service | 本机 TCP / Unix socket | systemd 重启后恢复，socket 权限限制本地访问 |
-| macOS | launchd/native host | 本机 TCP / Unix socket | launchd 恢复与平台网络变化回调 |
-| Android | 独立 `:targetlib` 前台 `VpnService` 进程 | 应用私有 socket / 本机控制通道 | `START_STICKY` 空 Intent、TUN 重建、Store 恢复、Flutter 脱离后继续 |
-| iOS | Network Extension | 受限平台 IPC | extension 生命周期内恢复；宿主 UI 不是运行时所有者 |
-
-统一启动顺序：
-
-1. 平台宿主准备私有目录、密钥、TUN/socket protect 等能力。
-2. 打开 Store，校验 schema，并执行前向迁移。
-3. 加载订阅、节点快照、策略、runtime snapshot、operation 和 scheduler task。
-4. 恢复 sing-box 并读回实际 selector；不一致时进入 recovering/degraded，而不是伪装 ready。
-5. 恢复到期任务和未来 deadline。
-6. 开放写命令，发布新的 snapshot/event epoch。
-
-停止时先拒绝新写操作，再取消可取消探测、完成或回滚原子提交、保存 checkpoint，最后停止数据平面。
-客户端断开不属于停止条件。
-
-## 订阅到 sing-box
+## 系统全景
 
 ```mermaid
 flowchart TB
-    A["订阅地址"] --> B{"更新触发"}
-    B -->|手动| C["gRPC / 宿主命令"]
-    B -->|定时| D["Scheduler"]
-    C --> E["subscriptions.Manager"]
-    D --> E
-
-    subgraph UPDATE["订阅更新"]
-        E --> F["singleflight 合并同一订阅的并发更新"]
-        F --> G["HTTPFetcher<br/>HTTPS、重试、ETag、Last-Modified"]
-        G --> H{"HTTP 结果"}
-        H -->|304 未修改| I["更新流量、过期时间等元数据"]
-        H -->|200 新内容| J["ParseProfile + 节点规范化"]
-        H -->|下载失败| X["保留上次可用 Profile<br/>记录失败并安排重试"]
-        J --> K["节点中间态 Profile<br/>稳定 ID、无供应商 ALPN、<br/>typed outbound、NodesHash"]
-        J -.-> DROP["丢弃服务商配置<br/>DNS、规则、rule set、入站、<br/>代理组和运行时选项"]
-        K --> L["解析节点服务器地址<br/>生成 ResolvedEndpoints"]
-        L --> M["候选订阅快照"]
+    subgraph UI["Target UI (Flutter/Desktop)"]
+        USER[用户操作]
     end
-
-    I --> N["单写 Coordinator"]
-    X --> N
-    M --> N
-    N --> O["发布 NodePool revision"]
-    O --> P["质量状态标记为 stale"]
-    P --> SC["Smart Connect Orchestrator<br/>持久化重新评估任务"]
-    SC --> Q{"是否产生已授权 binding operation？"}
-    Q -->|否 / 等待审批| R0["仅持久化节点池与任务"]
-    Q -->|是| R["构建候选运行时模型"]
-
-    subgraph BUILD["sing-box 配置生成"]
-        SRS["运行目录中的 cn.srs"] --> S
-        R --> S["NodePool + RuntimeSettings<br/>+ ServiceRoutes/Bindings"]
-        S --> T["config.Plan"]
-        T --> T1["应用入站<br/>Mixed / TUN"]
-        T --> T2["节点出站 + 独立 selectors"]
-        T --> T3["域名路由、DNS<br/>与本地 cn.srs rule set"]
-        T --> T4["日志、缓存、Clash API"]
-        T1 --> U["config.Emit"]
-        T2 --> U
-        T3 --> U
-        T4 --> U
-        U --> V["一次序列化<br/>生成 sing-box JSON"]
-        V --> W["校验配置"]
+    
+    subgraph TRANSPORT["传输层"]
+        GRPC[gRPC Handler<br/>认证/校验/类型转换]
     end
-
-    W -->|校验或加载失败| Y["拒绝候选配置<br/>继续使用旧运行时"]
-    W -->|通过| Z["applyConfig 热加载"]
-    Z --> AA["运行中的 sing-box"]
-    R0 --> AB["发布 NodePool 事件"]
-    Z -->|成功| AB2["提交 Runtime revision<br/>发布 READY 事件"]
-    Z -->|持久化失败| AC["回滚 sing-box 与 revision"]
-    AB2 --> AA
+    
+    subgraph CORE["Go Core (manager)"]
+        direction TB
+        SUBM[subscriptions.Manager<br/>下载/解析/调度]
+        CTRL[runtime_controller.go<br/>SelectNode/UpsertRoute]
+        BUILD[config.Build<br/>Plan→Blueprint→Emit]
+        
+        SUBM --> POOL[(NodePool<br/>稳定 node_id)]
+        CTRL --> BUILD
+        POOL -.读取.-> CTRL
+    end
+    
+    subgraph PERSIST["持久化"]
+        BADGER[(Badger Store<br/>订阅/配置/状态)]
+    end
+    
+    subgraph RUNTIME["sing-box Runtime"]
+        BOX[daemon.StartedService<br/>live select/reload]
+    end
+    
+    USER -->|RPC 调用| GRPC
+    GRPC -->|应用服务| CTRL
+    GRPC -->|订阅管理| SUBM
+    SUBM -.持久化.-> BADGER
+    CTRL -.保存配置.-> BADGER
+    BUILD -->|生成配置| BOX
+    BOX -.验证成功.-> CTRL
+    BOX -.回滚.-> CTRL
+    
+    style CORE fill:#e1f5ff
+    style RUNTIME fill:#fff4e6
+    style PERSIST fill:#f3e5f5
 ```
 
-## Smart Connect 质量、决策与切换
+**依赖方向**：只能从外层指向内层。gRPC handler 不承担业务逻辑，manager 不依赖 Flutter/Activity 存活，config.Build 只消费规范化模型。
 
-协议版本 14 已实现服务策略、持久化调度、质量历史、候选评估、proposal、operation、授权切换、验证与回滚，
-由后台编排器管理完整生命周期。Android 独立进程宿主和产品客户端收口仍按迁移计划推进，详见
-[Smart Connect 目标架构](SMART_CONNECT_ARCHITECTURE.md)。
+---
+
+## 核心数据流
+
+### 订阅 → 节点池
 
 ```mermaid
 flowchart LR
-    TRIGGER["用户意图 / deadline / pool / network"] --> SCHED["Persistent Scheduler"]
-    SCHED --> PROBE["Probe Engine"]
-    PROBE --> QUALITY["Quality Store"]
-    QUALITY --> EVAL["Decision Engine"]
-    POLICY["Service + Switch Policy"] --> EVAL
-    EVAL --> PROPOSAL["Persistent SwitchProposal"]
-    PROPOSAL --> AUTH{"授权模式"}
-    AUTH -->|MANUAL| WAIT["等待客户端审批"]
-    AUTH -->|AUTO_CONSTRAINED| APPLY["Binding Controller"]
-    WAIT --> APPLY
-    APPLY --> LIVE{"可 live select?"}
-    LIVE -->|是| SELECT["SelectOutbound"]
-    LIVE -->|否| RELOAD["validate + reload"]
-    SELECT --> VERIFY["读回 + 服务验证"]
-    RELOAD --> VERIFY
-    VERIFY --> COMMIT["binding / operation / audit"]
-    VERIFY -->|失败| ROLLBACK["last-known-good rollback"]
-    COMMIT --> SNAPSHOT["Snapshot + Event"]
-    ROLLBACK --> SNAPSHOT
+    UI[UI: 添加订阅] -->|AddSubscription| SUB[subscriptions.Manager]
+    SUB -->|HTTP 下载| FETCH[解析 + 规范化]
+    FETCH -->|singleflight 去重| PARSE[生成稳定 node_id]
+    PARSE -->|失败保留上次| POOL[(NodePool)]
+    POOL -.存储.-> STORE[(Badger)]
+    POOL -->|GetNodePool RPC| UI
 ```
 
-探测器始终是只读质量来源。Decision Engine 只生成 proposal；Binding Controller 根据 `MANUAL`、
-`AUTO_CONSTRAINED`、`LOCKED` 或 `DIRECT` 决定是否进入切换事务。自动模式也必须遵守地区、订阅、驻留时间、
-冷却期和频率限制，不得把探测失败直接等同于切换授权。
+**关键点**：
+- 原始订阅只作解析输入，供应商的 DNS/路由/rule set 不透传
+- `node_id` 基于订阅 ID + 节点特征生成，订阅更新后保持稳定
+- 失败时保留上次可用节点池，新订阅失败则回滚
 
-`RuntimeState` 是客户端权威读模型，事件仅作为变化通知。客户端断开或错过事件不会影响后台任务，重连后读取 `RuntimeState` 即可恢复。
-
-## 端到端命令流程
+### 节点切换（Layer 1）
 
 ```mermaid
 sequenceDiagram
     participant UI as Target UI
-    participant API as Intent API
-    participant ORCH as Orchestrator
-    participant STORE as State Store
-    participant PROBE as Probe/Decision
-    participant RUN as RuntimeController
-    participant BOX as sing-box
+    participant RPC as gRPC
+    participant M as manager
+    participant C as config.Build
+    participant B as sing-box
 
-    UI->>API: RequestServiceEvaluation(idempotency_key)
-    API->>ORCH: validated command
-    ORCH->>STORE: create QUEUED operation + task
-    API-->>UI: operation_id
-    ORCH->>PROBE: evaluate immutable revisions
-    PROBE-->>ORCH: candidates + explanation
-    ORCH->>STORE: proposal + WAITING_APPROVAL/APPLYING
-    alt MANUAL
-        UI->>API: ApproveSwitchProposal
-        API->>ORCH: approval command
+    UI->>RPC: SelectNode(node_id)
+    RPC->>M: 验证节点存在
+    M->>M: 更新 proxy selector
+    M->>C: 生成配置
+    C->>M: sing-box JSON
+    
+    alt 运行中
+        M->>B: live select "proxy" → node_id
+        B-->>M: 验证成功
+        M->>M: 持久化配置
+        M-->>UI: 成功（同步）
+    else 未运行
+        M->>M: 保存配置
+        M-->>UI: 成功（下次启动生效）
     end
-    ORCH->>RUN: apply authorized binding
-    RUN->>BOX: live select or validated reload
-    RUN->>BOX: read actual selector
-    RUN-->>ORCH: applied / rollback result
-    ORCH->>STORE: binding + operation + audit transaction
-    ORCH-->>UI: event invalidation
-    UI->>API: GetRuntimeState
-    API-->>UI: authoritative committed state
+    
+    Note over M,B: 失败时自动回滚上次节点
 ```
 
-RPC 超时或 UI 挂起不会取消已经持久化的 operation。客户端使用相同幂等键重试并取得同一 operation。
+### 规则分流（Layer 2）
 
-## 中间态规范化与恢复
+```mermaid
+sequenceDiagram
+    participant UI as Target UI
+    participant RPC as gRPC
+    participant M as manager
+    participant C as config.Build
+    participant B as sing-box
 
-`profile.Parse` 在生成 `Node.OutboundJSON` 和类型化 `Node.Outbound` 之前执行节点规范化。供应商指定的 ALPN、
-已移除的 ECH 字段和过期的 uTLS 指纹在这一边界被处理，因此持久化表示与运行时表示保持同一不变量。
+    UI->>RPC: UpsertRoute(service_id, domains, node_id)
+    RPC->>M: 验证节点
+    M->>M: 分配 selector tag "route-{service_id}"
+    M->>M: 构造 ServiceRoute + Selector
+    M->>C: 生成完整配置
+    C->>M: sing-box JSON
+    
+    alt 首次创建（新 selector）
+        M->>B: reload（需重启）
+        B-->>M: 运行时验证
+        M->>M: 持久化
+        M-->>UI: RouteInfo
+    else 切换节点（已有 selector）
+        M->>B: live select "route-{service_id}" → node_id
+        B-->>M: 验证成功
+        M->>M: 持久化
+        M-->>UI: 成功
+    end
+```
 
-Badger 加载节点时通过 `profile.RestoreNodeOutbound` 从已规范化的持久化表示重建仅供运行时使用的类型化出站。
-完成上述处理后，`config.Emit` 无需构造 `map[string]any` 遍历整份配置，其固定流程为一次 `MarshalContext`
-和一次最终 `validateConfig`。
+---
 
-## Smart Connect 运行时模型与迁移
+## 配置生成流程
 
-多个订阅分别解析为 `Profile`，再合并为统一 `NodePool`。节点通过订阅作用域内规范化连接信息生成稳定 `node_id`，并保留 `subscription_id` 来源。
-`ServiceRoute` 将域名映射到独立 selector；一个节点可加入多个 selector，各 selector 的当前选择互不影响。
-`ServiceBinding` 持久化服务、selector、节点和 revision，重启后恢复并由运行时状态确认是否生效。
+```mermaid
+flowchart TB
+    INPUT["输入<br/>NodePool + RuntimeSettings + Selectors + Routes + Bindings"]
+    
+    subgraph BUILD["config.Build"]
+        direction TB
+        PLAN[Plan<br/>规划 inbound/DNS/outbound/route]
+        BLUE[Blueprint<br/>构造中间表示]
+        EMIT[Emit<br/>序列化为 sing-box JSON]
+        
+        PLAN --> BLUE
+        BLUE --> EMIT
+    end
+    
+    OUTPUT["输出<br/>sing-box 配置 + cn.srs"]
+    
+    INPUT --> BUILD
+    BUILD --> OUTPUT
+    
+    NOTE1["• rule 模式：大陆直连（cn.srs），其余走 proxy<br/>• direct 模式：全部直连<br/>• all 模式：全部走代理"]
+    
+    BUILD -.规则.-> NOTE1
+    
+    style BUILD fill:#e8f5e9
+```
 
-配置应用采用 `VALIDATING -> BUILDING -> APPLYING -> READY/FAILED` 事务；失败时恢复当前生效配置。
-旧 v12 低层流程已从服务描述删除。v14 产品流程由核心持久化 proposal 和 operation：手动模式等待客户端审批，
-受约束自动模式由核心执行，locked 模式只报告故障。首次创建路由允许 reload；后续同 selector 切换优先 live select。
+**config.Build 职责**：
+- **唯一入口**：所有 sing-box 配置生成必须经过此函数
+- **不透传供应商配置**：订阅的 DNS/路由/rule set/入站/代理组不进入运行时
+- **确定性**：相同输入产生相同输出，无隐式状态
 
-迁移完成后，客户端不能直接决定 selector 成员、服务路由或 binding 元数据，也不能独立实现候选评分。
+---
 
-## 一致性与失败处理
+## 失败处理与一致性
 
-订阅更新由单写协调器串行提交。同一订阅的并发更新会被合并；下载或解析失败时保留上次可用节点并延迟重试。
-
-所有变更以不可变 policy、node-pool、quality、binding 或 runtime revision 提交。节点池更新、质量结果、候选评估和配置应用彼此解耦；
-只有通过授权检查的 binding operation 才进入配置事务。运行时加载失败不会提交新 revision，持久化或切换后验证失败则恢复
-last-known-good；回滚失败进入明确的 degraded 状态。operation 持久化后才发布事件，客户端 RPC 取消不撤销已经开始的原子提交。
-
-## 失败与一致性矩阵
-
-| 失败点 | 核心行为 | 对外状态 |
+| 失败点 | 核心行为 | 客户端体验 |
 | --- | --- | --- |
-| 策略或 revision 冲突 | 不启动任务或废弃旧结果 | `ABORTED`，返回当前 revision |
-| 订阅下载/解析失败 | 保留最后可用 profile，按策略退避 | subscription failed；binding 不变 |
-| 探测失败或取消 | 保存明确阶段；取消不记作节点故障 | operation failed/cancelled；不切换 |
-| 无合格候选 | 保存 evaluation 和排除原因 | proposal 不产生；binding 不变 |
-| live select 失败 | 保持旧 selector | operation failed；actual 仍为旧节点 |
-| reload 失败 | 重载 previous config | failed 或 rolled-back |
-| 切换后验证失败 | 恢复 last-known-good | `ROLLED_BACK`；记录验证原因 |
-| Store 提交失败 | 运行时切回旧状态；回滚失败进入 degraded | 不发布 committed 事件 |
-| 事件消费者掉线 | 关闭流，核心任务继续 | 客户端重连后读取 snapshot |
-| TargetLib 进程死亡 | 平台宿主重启后执行恢复顺序 | 新 epoch；未决 operation 被恢复或终结 |
+| 订阅下载/解析失败 | 保留上次可用节点池，按策略退避重试 | 订阅状态显示 failed；现有节点仍可切换 |
+| 节点不在池中 | 拒绝切换请求 | SelectNode 返回 `NOT_FOUND` |
+| live select 失败 | 保持旧节点不变 | 返回错误，UI 显示切换失败 |
+| reload 失败 | 重载上次可用配置 | 返回错误，运行时恢复到上次状态 |
+| 配置保存失败 | 运行时回滚，不发布事件 | 返回错误，配置未改变 |
+| 客户端断开 | 核心继续运行，不影响代理 | 重连后调用 GetProxyStatus 恢复 UI |
+| sing-box 崩溃 | 平台重启 service，恢复上次配置 | 状态变为 failed，显示错误信息 |
 
-## 架构追踪矩阵
+**核心原则**：
+- **同步 RPC 失败 = 无副作用**：SelectNode 失败时，节点选择不变
+- **异步故障不传播**：订阅更新失败不影响当前代理运行
+- **回滚优于降级**：配置应用失败时恢复 last-known-good
+- **客户端无状态**：UI 断开重连后通过 GetProxyStatus/ListRoutes 恢复，无需额外同步
 
-| 用户能力 | 领域所有者 | 写入状态 | 目标 RPC | 运行时动作 |
-| --- | --- | --- | --- | --- |
-| 启停 Smart Connect | Orchestrator | enabled、operation | `SetPolicyAutomationEnabled` | 创建或清理核心自有路由 |
-| 编辑服务策略 | PolicyService | policy revision、tasks | `UpsertServicePolicy` | 仅标记失效，不直接切换 |
-| 重新评估 | Scheduler/DecisionEngine | operation、quality、proposal | `RequestServiceEvaluation` | 隔离探测，不改主 selector |
-| 批准推荐 | BindingController | approval、binding operation | `ApproveSwitchProposal` | live select 或 reload |
-| 强制选择节点 | BindingController | audited intent、operation | `ForceServiceBinding` | 校验后切换并验证 |
-| 查看状态 | QueryService | snapshot | `GetRuntimeState` | 读回 actual，不产生副作用 |
-| 后台状态通知 | EventJournal | cursor/epoch | `SubscribeRuntimeEvents` | 仅通知 snapshot 已变化 |
+---
 
-目标 RPC 的 wire contract、幂等和错误语义以 [GRPC.md](GRPC.md) 为准；策略和状态转换以
-[SMART_CONNECT_ARCHITECTURE.md](SMART_CONNECT_ARCHITECTURE.md) 为准。
+## 平台部署
+
+| 平台 | 运行方式 | 通信方式 | 关键恢复要求 |
+| --- | --- | --- | --- |
+| Windows | 系统服务 | TCP 127.0.0.1:19090 | 服务启动时恢复配置和状态 |
+| Linux | systemd service | TCP / Unix socket | systemd 重启后恢复 |
+| macOS | launchd / 独立进程 | TCP / Unix socket | launchd 恢复与网络变化回调 |
+| Android | 前台 VpnService（独立进程）| 进程内通信 | START_STICKY 空 Intent、TUN 重建、Flutter 脱离后继续 |
+| iOS | Network Extension | 受限 IPC | extension 生命周期内恢复 |
+
+### Android 特殊要求
+
+- **独立进程**：`:targetlib` 前台 VpnService 独立于 Flutter Activity
+- **生命周期**：Activity 销毁不影响代理运行
+- **恢复**：`START_STICKY` 确保系统杀死后自动重启
+- **通信**：Flutter 通过本地 socket 连接核心（非跨进程）
+
+---
+
+## 架构优化建议
+
+### 当前流程存在的优化空间
+
+**1. 配置生成与验证可前置**
+- 现状：`SelectNode` → 构造 selector → `prepareRuntimeContent` → 运行时应用
+- 问题：配置生成和验证发生在持锁期间，阻塞其他操作
+- 优化：验证节点可用性后立即释放锁，异步生成配置并应用
+
+**2. live select 验证冗余**
+- 现状：调用 `daemon.SelectOutbound` 后，通过 `SubscribeGroups` 读回验证
+- 问题：需要订阅流并等待下一次状态推送
+- 优化：sing-box 的 selector API 同步返回错误，可直接判断成功/失败
+
+**3. 节点池与配置生成耦合**
+- 现状：每次切换都要遍历完整节点池生成配置
+- 问题：订阅有 1000+ 节点时，只切换 1 个节点却要序列化全部
+- 优化：使用增量更新或配置模板，只替换变化的 selector
+
+**4. Store 写入在关键路径**
+- 现状：live select 成功后立即 `SaveSnapshot`，失败则回滚
+- 问题：存储慢会阻塞 RPC 返回，用户体验差
+- 优化：先返回成功，异步持久化，失败时记录日志并重试
+
+**5. 规则分流首次创建代价高**
+- 现状：`UpsertRoute` 创建新规则时必须 reload（因为新增 selector）
+- 问题：reload 会短暂断开连接
+- 优化：预创建常用服务的 selector（如 `route-netflix`），只修改其 members
+
+### 推荐优化优先级
+
+**P0（立即）**：
+- 缩小 `opMu` 锁粒度：配置生成移出临界区
+- 移除 live select 的流式验证：依赖 API 返回值
+
+**P1（短期）**：
+- 增量配置更新：selector 变更不重新序列化所有节点
+- 异步持久化：live select 成功后先返回，后台保存
+
+**P2（长期）**：
+- 配置模板机制：预留 selector slots，避免 reload
+- 节点池分片：大订阅场景下按区域/类型分组
+
+---
+
+## 核心边界与约束
+
+- **gRPC 只是传输层**：不承担运行时策略、评分、探测调度
+- **selector/route/binding 构造由核心独占**：客户端只提供 `node_id` 和 `domains`
+- **原始订阅只作解析输入**：供应商的运行时选项不透传
+- **config.Build 是唯一入口**：所有 sing-box 配置生成必须经过此函数
+- **TUN/密钥/存储路径由宿主实现**：平台能力通过回调注入
+- **Flutter UI 只提交意图并渲染 snapshot**：不实现评分、探测调度或构造完整 RuntimeModel
+- **Android 长期任务由前台 VPN service 执行**：不依赖 Activity/Flutter engine 存活

@@ -1,7 +1,6 @@
 package profile
 
 import (
-	"regexp"
 	"strings"
 )
 
@@ -83,7 +82,25 @@ func containsAlias(name, alias string) bool {
 	if strings.Contains(alias, " ") || hasNonASCII(alias) {
 		return strings.Contains(name, alias)
 	}
-	return regexp.MustCompile(`(^|[^a-z])` + regexp.QuoteMeta(alias) + `([^a-z]|$)`).MatchString(name)
+	return containsWord(name, alias)
+}
+
+func containsWord(text, word string) bool {
+	for offset := 0; offset+len(word) <= len(text); {
+		index := strings.Index(text[offset:], word)
+		if index < 0 {
+			return false
+		}
+		start := offset + index
+		end := start + len(word)
+		leftOK := start == 0 || text[start-1] < 'a' || text[start-1] > 'z'
+		rightOK := end == len(text) || text[end] < 'a' || text[end] > 'z'
+		if leftOK && rightOK {
+			return true
+		}
+		offset = start + 1
+	}
+	return false
 }
 
 func hasNonASCII(value string) bool {

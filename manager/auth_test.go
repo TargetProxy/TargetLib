@@ -41,7 +41,7 @@ func TestIntentAuthenticationUsesPersistentControlToken(t *testing.T) {
 	if err := m.authenticate(good, method); err != nil {
 		t.Fatal(err)
 	}
-	if err := m.authenticate(context.Background(), "/targetlib.TargetLib/GetVersion"); err != nil {
+	if err := m.authenticate(context.Background(), "/targetlib.TargetLib/GetState"); err != nil {
 		t.Fatal(err)
 	}
 }

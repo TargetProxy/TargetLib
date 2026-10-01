@@ -5,7 +5,7 @@ import (
 	"net/netip"
 	"path/filepath"
 	"runtime"
-	"sort"
+	"slices"
 	"strings"
 	"time"
 
@@ -149,12 +149,15 @@ func planRuntimeModel(settings Settings, model RuntimeModel) (Blueprint, error) 
 				}})
 			}
 		}
-		sort.Slice(serviceRules, func(i, j int) bool {
-			a, b := serviceRules[i].DefaultOptions.DomainSuffix[0], serviceRules[j].DefaultOptions.DomainSuffix[0]
-			if len(a) != len(b) {
-				return len(a) > len(b)
+		slices.SortFunc(serviceRules, func(a, b option.Rule) int {
+			x, y := a.DefaultOptions.DomainSuffix[0], b.DefaultOptions.DomainSuffix[0]
+			if len(x) != len(y) {
+				if len(x) > len(y) {
+					return -1
+				}
+				return 1
 			}
-			return a < b
+			return strings.Compare(x, y)
 		})
 		prefix := 1
 		if settings.ProxyMode == ProxyModeTun {

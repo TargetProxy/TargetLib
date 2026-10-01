@@ -20,8 +20,6 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	TargetLib_GetVersion_FullMethodName                   = "/targetlib.TargetLib/GetVersion"
-	TargetLib_GetCapabilities_FullMethodName              = "/targetlib.TargetLib/GetCapabilities"
 	TargetLib_Start_FullMethodName                        = "/targetlib.TargetLib/Start"
 	TargetLib_Restart_FullMethodName                      = "/targetlib.TargetLib/Restart"
 	TargetLib_Stop_FullMethodName                         = "/targetlib.TargetLib/Stop"
@@ -29,7 +27,6 @@ const (
 	TargetLib_SubscribeState_FullMethodName               = "/targetlib.TargetLib/SubscribeState"
 	TargetLib_SubscribeLogs_FullMethodName                = "/targetlib.TargetLib/SubscribeLogs"
 	TargetLib_SubscribeTraffic_FullMethodName             = "/targetlib.TargetLib/SubscribeTraffic"
-	TargetLib_SelectOutbound_FullMethodName               = "/targetlib.TargetLib/SelectOutbound"
 	TargetLib_CloseConnection_FullMethodName              = "/targetlib.TargetLib/CloseConnection"
 	TargetLib_CloseAllConnections_FullMethodName          = "/targetlib.TargetLib/CloseAllConnections"
 	TargetLib_ListSubscriptions_FullMethodName            = "/targetlib.TargetLib/ListSubscriptions"
@@ -40,35 +37,25 @@ const (
 	TargetLib_SetSubscriptionEnabled_FullMethodName       = "/targetlib.TargetLib/SetSubscriptionEnabled"
 	TargetLib_ConfigureSubscriptionUpdates_FullMethodName = "/targetlib.TargetLib/ConfigureSubscriptionUpdates"
 	TargetLib_UpdateSubscription_FullMethodName           = "/targetlib.TargetLib/UpdateSubscription"
-	TargetLib_GetRuntimeConfig_FullMethodName             = "/targetlib.TargetLib/GetRuntimeConfig"
-	TargetLib_UpdateRuntimeConfig_FullMethodName          = "/targetlib.TargetLib/UpdateRuntimeConfig"
-	TargetLib_TestOutbound_FullMethodName                 = "/targetlib.TargetLib/TestOutbound"
-	TargetLib_TestOutbounds_FullMethodName                = "/targetlib.TargetLib/TestOutbounds"
 	TargetLib_GetResolvedEndpoints_FullMethodName         = "/targetlib.TargetLib/GetResolvedEndpoints"
 	TargetLib_SubscribeSubscriptionEvents_FullMethodName  = "/targetlib.TargetLib/SubscribeSubscriptionEvents"
-	TargetLib_GetIpInfo_FullMethodName                    = "/targetlib.TargetLib/GetIpInfo"
 	TargetLib_GetNodePool_FullMethodName                  = "/targetlib.TargetLib/GetNodePool"
-	TargetLib_GetRuntimeState_FullMethodName              = "/targetlib.TargetLib/GetRuntimeState"
-	TargetLib_SubscribeRuntimeEvents_FullMethodName       = "/targetlib.TargetLib/SubscribeRuntimeEvents"
-	TargetLib_SetPolicyAutomationEnabled_FullMethodName   = "/targetlib.TargetLib/SetPolicyAutomationEnabled"
-	TargetLib_ListServicePolicies_FullMethodName          = "/targetlib.TargetLib/ListServicePolicies"
-	TargetLib_UpsertServicePolicy_FullMethodName          = "/targetlib.TargetLib/UpsertServicePolicy"
-	TargetLib_DeleteServicePolicy_FullMethodName          = "/targetlib.TargetLib/DeleteServicePolicy"
-	TargetLib_SetNodePreference_FullMethodName            = "/targetlib.TargetLib/SetNodePreference"
-	TargetLib_RequestServiceEvaluation_FullMethodName     = "/targetlib.TargetLib/RequestServiceEvaluation"
-	TargetLib_ApproveSwitchProposal_FullMethodName        = "/targetlib.TargetLib/ApproveSwitchProposal"
-	TargetLib_RejectSwitchProposal_FullMethodName         = "/targetlib.TargetLib/RejectSwitchProposal"
-	TargetLib_ForceServiceBinding_FullMethodName          = "/targetlib.TargetLib/ForceServiceBinding"
-	TargetLib_GetOperation_FullMethodName                 = "/targetlib.TargetLib/GetOperation"
-	TargetLib_ListOperations_FullMethodName               = "/targetlib.TargetLib/ListOperations"
+	TargetLib_SelectNode_FullMethodName                   = "/targetlib.TargetLib/SelectNode"
+	TargetLib_GetProxyStatus_FullMethodName               = "/targetlib.TargetLib/GetProxyStatus"
+	TargetLib_GetRuntimeConfig_FullMethodName             = "/targetlib.TargetLib/GetRuntimeConfig"
+	TargetLib_UpdateRuntimeConfig_FullMethodName          = "/targetlib.TargetLib/UpdateRuntimeConfig"
+	TargetLib_GetIpInfo_FullMethodName                    = "/targetlib.TargetLib/GetIpInfo"
+	TargetLib_UpsertRoute_FullMethodName                  = "/targetlib.TargetLib/UpsertRoute"
+	TargetLib_DeleteRoute_FullMethodName                  = "/targetlib.TargetLib/DeleteRoute"
+	TargetLib_ListRoutes_FullMethodName                   = "/targetlib.TargetLib/ListRoutes"
+	TargetLib_SelectRouteNode_FullMethodName              = "/targetlib.TargetLib/SelectRouteNode"
 )
 
 // TargetLibClient is the client API for TargetLib service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type TargetLibClient interface {
-	GetVersion(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*VersionResponse, error)
-	GetCapabilities(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*CapabilitiesResponse, error)
+	// Layer 1: Basic Proxy Control
 	Start(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*OperationResponse, error)
 	Restart(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*OperationResponse, error)
 	Stop(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*OperationResponse, error)
@@ -76,7 +63,6 @@ type TargetLibClient interface {
 	SubscribeState(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ServiceState], error)
 	SubscribeLogs(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[LogBatch], error)
 	SubscribeTraffic(ctx context.Context, in *TrafficRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[TrafficStatus], error)
-	SelectOutbound(ctx context.Context, in *SelectOutboundRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	CloseConnection(ctx context.Context, in *CloseConnectionRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	CloseAllConnections(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	ListSubscriptions(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*SubscriptionList, error)
@@ -87,32 +73,19 @@ type TargetLibClient interface {
 	SetSubscriptionEnabled(ctx context.Context, in *SetSubscriptionEnabledRequest, opts ...grpc.CallOption) (*SubscriptionView, error)
 	ConfigureSubscriptionUpdates(ctx context.Context, in *ConfigureSubscriptionUpdatesRequest, opts ...grpc.CallOption) (*SubscriptionView, error)
 	UpdateSubscription(ctx context.Context, in *SubscriptionId, opts ...grpc.CallOption) (*SubscriptionUpdateResult, error)
-	// Returns the backend-owned desired runtime configuration.
-	GetRuntimeConfig(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*RuntimeConfig, error)
-	// Validates and persists the desired configuration. If the core is running,
-	// it is reloaded immediately; otherwise it is used on the next start.
-	UpdateRuntimeConfig(ctx context.Context, in *UpdateRuntimeConfigRequest, opts ...grpc.CallOption) (*RuntimeConfig, error)
-	TestOutbound(ctx context.Context, in *TestOutboundRequest, opts ...grpc.CallOption) (*LatencyTestResult, error)
-	TestOutbounds(ctx context.Context, in *TestOutboundsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[LatencyTestResult], error)
 	GetResolvedEndpoints(ctx context.Context, in *ResolvedEndpointsRequest, opts ...grpc.CallOption) (*ResolvedEndpoints, error)
 	SubscribeSubscriptionEvents(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[SubscriptionEvent], error)
-	// IP geolocation query (egress from the backend).
-	GetIpInfo(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*IpInfoResponse, error)
 	GetNodePool(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*NodePool, error)
-	GetRuntimeState(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*RuntimeState, error)
-	SubscribeRuntimeEvents(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[RuntimeEvent], error)
-	// Policy automation is part of the runtime control plane. Commands return a durable operation.
-	SetPolicyAutomationEnabled(ctx context.Context, in *SetPolicyAutomationEnabledRequest, opts ...grpc.CallOption) (*Operation, error)
-	ListServicePolicies(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ServicePolicyList, error)
-	UpsertServicePolicy(ctx context.Context, in *UpsertServicePolicyRequest, opts ...grpc.CallOption) (*Operation, error)
-	DeleteServicePolicy(ctx context.Context, in *DeleteServicePolicyRequest, opts ...grpc.CallOption) (*Operation, error)
-	SetNodePreference(ctx context.Context, in *SetNodePreferenceRequest, opts ...grpc.CallOption) (*Operation, error)
-	RequestServiceEvaluation(ctx context.Context, in *RequestServiceEvaluationRequest, opts ...grpc.CallOption) (*Operation, error)
-	ApproveSwitchProposal(ctx context.Context, in *ProposalCommandRequest, opts ...grpc.CallOption) (*Operation, error)
-	RejectSwitchProposal(ctx context.Context, in *ProposalCommandRequest, opts ...grpc.CallOption) (*Operation, error)
-	ForceServiceBinding(ctx context.Context, in *ForceServiceBindingRequest, opts ...grpc.CallOption) (*Operation, error)
-	GetOperation(ctx context.Context, in *GetOperationRequest, opts ...grpc.CallOption) (*Operation, error)
-	ListOperations(ctx context.Context, in *ListOperationsRequest, opts ...grpc.CallOption) (*OperationList, error)
+	SelectNode(ctx context.Context, in *SelectNodeRequest, opts ...grpc.CallOption) (*SelectNodeResponse, error)
+	GetProxyStatus(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ProxyStatus, error)
+	GetRuntimeConfig(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*RuntimeConfig, error)
+	UpdateRuntimeConfig(ctx context.Context, in *UpdateRuntimeConfigRequest, opts ...grpc.CallOption) (*RuntimeConfig, error)
+	GetIpInfo(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*IpInfoResponse, error)
+	// Layer 2: Rule-based Routing
+	UpsertRoute(ctx context.Context, in *UpsertRouteRequest, opts ...grpc.CallOption) (*RouteInfo, error)
+	DeleteRoute(ctx context.Context, in *DeleteRouteRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	ListRoutes(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*RouteList, error)
+	SelectRouteNode(ctx context.Context, in *SelectRouteNodeRequest, opts ...grpc.CallOption) (*SelectNodeResponse, error)
 }
 
 type targetLibClient struct {
@@ -121,26 +94,6 @@ type targetLibClient struct {
 
 func NewTargetLibClient(cc grpc.ClientConnInterface) TargetLibClient {
 	return &targetLibClient{cc}
-}
-
-func (c *targetLibClient) GetVersion(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*VersionResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(VersionResponse)
-	err := c.cc.Invoke(ctx, TargetLib_GetVersion_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *targetLibClient) GetCapabilities(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*CapabilitiesResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CapabilitiesResponse)
-	err := c.cc.Invoke(ctx, TargetLib_GetCapabilities_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
 }
 
 func (c *targetLibClient) Start(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*OperationResponse, error) {
@@ -239,16 +192,6 @@ func (c *targetLibClient) SubscribeTraffic(ctx context.Context, in *TrafficReque
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type TargetLib_SubscribeTrafficClient = grpc.ServerStreamingClient[TrafficStatus]
-
-func (c *targetLibClient) SelectOutbound(ctx context.Context, in *SelectOutboundRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, TargetLib_SelectOutbound_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
 
 func (c *targetLibClient) CloseConnection(ctx context.Context, in *CloseConnectionRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
@@ -350,6 +293,65 @@ func (c *targetLibClient) UpdateSubscription(ctx context.Context, in *Subscripti
 	return out, nil
 }
 
+func (c *targetLibClient) GetResolvedEndpoints(ctx context.Context, in *ResolvedEndpointsRequest, opts ...grpc.CallOption) (*ResolvedEndpoints, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ResolvedEndpoints)
+	err := c.cc.Invoke(ctx, TargetLib_GetResolvedEndpoints_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *targetLibClient) SubscribeSubscriptionEvents(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[SubscriptionEvent], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &TargetLib_ServiceDesc.Streams[3], TargetLib_SubscribeSubscriptionEvents_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[emptypb.Empty, SubscriptionEvent]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type TargetLib_SubscribeSubscriptionEventsClient = grpc.ServerStreamingClient[SubscriptionEvent]
+
+func (c *targetLibClient) GetNodePool(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*NodePool, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(NodePool)
+	err := c.cc.Invoke(ctx, TargetLib_GetNodePool_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *targetLibClient) SelectNode(ctx context.Context, in *SelectNodeRequest, opts ...grpc.CallOption) (*SelectNodeResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SelectNodeResponse)
+	err := c.cc.Invoke(ctx, TargetLib_SelectNode_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *targetLibClient) GetProxyStatus(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ProxyStatus, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ProxyStatus)
+	err := c.cc.Invoke(ctx, TargetLib_GetProxyStatus_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *targetLibClient) GetRuntimeConfig(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*RuntimeConfig, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(RuntimeConfig)
@@ -370,64 +372,6 @@ func (c *targetLibClient) UpdateRuntimeConfig(ctx context.Context, in *UpdateRun
 	return out, nil
 }
 
-func (c *targetLibClient) TestOutbound(ctx context.Context, in *TestOutboundRequest, opts ...grpc.CallOption) (*LatencyTestResult, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(LatencyTestResult)
-	err := c.cc.Invoke(ctx, TargetLib_TestOutbound_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *targetLibClient) TestOutbounds(ctx context.Context, in *TestOutboundsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[LatencyTestResult], error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &TargetLib_ServiceDesc.Streams[3], TargetLib_TestOutbounds_FullMethodName, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &grpc.GenericClientStream[TestOutboundsRequest, LatencyTestResult]{ClientStream: stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
-}
-
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type TargetLib_TestOutboundsClient = grpc.ServerStreamingClient[LatencyTestResult]
-
-func (c *targetLibClient) GetResolvedEndpoints(ctx context.Context, in *ResolvedEndpointsRequest, opts ...grpc.CallOption) (*ResolvedEndpoints, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ResolvedEndpoints)
-	err := c.cc.Invoke(ctx, TargetLib_GetResolvedEndpoints_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *targetLibClient) SubscribeSubscriptionEvents(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[SubscriptionEvent], error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &TargetLib_ServiceDesc.Streams[4], TargetLib_SubscribeSubscriptionEvents_FullMethodName, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &grpc.GenericClientStream[emptypb.Empty, SubscriptionEvent]{ClientStream: stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
-}
-
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type TargetLib_SubscribeSubscriptionEventsClient = grpc.ServerStreamingClient[SubscriptionEvent]
-
 func (c *targetLibClient) GetIpInfo(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*IpInfoResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(IpInfoResponse)
@@ -438,149 +382,40 @@ func (c *targetLibClient) GetIpInfo(ctx context.Context, in *emptypb.Empty, opts
 	return out, nil
 }
 
-func (c *targetLibClient) GetNodePool(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*NodePool, error) {
+func (c *targetLibClient) UpsertRoute(ctx context.Context, in *UpsertRouteRequest, opts ...grpc.CallOption) (*RouteInfo, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(NodePool)
-	err := c.cc.Invoke(ctx, TargetLib_GetNodePool_FullMethodName, in, out, cOpts...)
+	out := new(RouteInfo)
+	err := c.cc.Invoke(ctx, TargetLib_UpsertRoute_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *targetLibClient) GetRuntimeState(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*RuntimeState, error) {
+func (c *targetLibClient) DeleteRoute(ctx context.Context, in *DeleteRouteRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(RuntimeState)
-	err := c.cc.Invoke(ctx, TargetLib_GetRuntimeState_FullMethodName, in, out, cOpts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, TargetLib_DeleteRoute_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *targetLibClient) SubscribeRuntimeEvents(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[RuntimeEvent], error) {
+func (c *targetLibClient) ListRoutes(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*RouteList, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &TargetLib_ServiceDesc.Streams[5], TargetLib_SubscribeRuntimeEvents_FullMethodName, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &grpc.GenericClientStream[emptypb.Empty, RuntimeEvent]{ClientStream: stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
-}
-
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type TargetLib_SubscribeRuntimeEventsClient = grpc.ServerStreamingClient[RuntimeEvent]
-
-func (c *targetLibClient) SetPolicyAutomationEnabled(ctx context.Context, in *SetPolicyAutomationEnabledRequest, opts ...grpc.CallOption) (*Operation, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Operation)
-	err := c.cc.Invoke(ctx, TargetLib_SetPolicyAutomationEnabled_FullMethodName, in, out, cOpts...)
+	out := new(RouteList)
+	err := c.cc.Invoke(ctx, TargetLib_ListRoutes_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *targetLibClient) ListServicePolicies(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ServicePolicyList, error) {
+func (c *targetLibClient) SelectRouteNode(ctx context.Context, in *SelectRouteNodeRequest, opts ...grpc.CallOption) (*SelectNodeResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ServicePolicyList)
-	err := c.cc.Invoke(ctx, TargetLib_ListServicePolicies_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *targetLibClient) UpsertServicePolicy(ctx context.Context, in *UpsertServicePolicyRequest, opts ...grpc.CallOption) (*Operation, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Operation)
-	err := c.cc.Invoke(ctx, TargetLib_UpsertServicePolicy_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *targetLibClient) DeleteServicePolicy(ctx context.Context, in *DeleteServicePolicyRequest, opts ...grpc.CallOption) (*Operation, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Operation)
-	err := c.cc.Invoke(ctx, TargetLib_DeleteServicePolicy_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *targetLibClient) SetNodePreference(ctx context.Context, in *SetNodePreferenceRequest, opts ...grpc.CallOption) (*Operation, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Operation)
-	err := c.cc.Invoke(ctx, TargetLib_SetNodePreference_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *targetLibClient) RequestServiceEvaluation(ctx context.Context, in *RequestServiceEvaluationRequest, opts ...grpc.CallOption) (*Operation, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Operation)
-	err := c.cc.Invoke(ctx, TargetLib_RequestServiceEvaluation_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *targetLibClient) ApproveSwitchProposal(ctx context.Context, in *ProposalCommandRequest, opts ...grpc.CallOption) (*Operation, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Operation)
-	err := c.cc.Invoke(ctx, TargetLib_ApproveSwitchProposal_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *targetLibClient) RejectSwitchProposal(ctx context.Context, in *ProposalCommandRequest, opts ...grpc.CallOption) (*Operation, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Operation)
-	err := c.cc.Invoke(ctx, TargetLib_RejectSwitchProposal_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *targetLibClient) ForceServiceBinding(ctx context.Context, in *ForceServiceBindingRequest, opts ...grpc.CallOption) (*Operation, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Operation)
-	err := c.cc.Invoke(ctx, TargetLib_ForceServiceBinding_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *targetLibClient) GetOperation(ctx context.Context, in *GetOperationRequest, opts ...grpc.CallOption) (*Operation, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Operation)
-	err := c.cc.Invoke(ctx, TargetLib_GetOperation_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *targetLibClient) ListOperations(ctx context.Context, in *ListOperationsRequest, opts ...grpc.CallOption) (*OperationList, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(OperationList)
-	err := c.cc.Invoke(ctx, TargetLib_ListOperations_FullMethodName, in, out, cOpts...)
+	out := new(SelectNodeResponse)
+	err := c.cc.Invoke(ctx, TargetLib_SelectRouteNode_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -591,8 +426,7 @@ func (c *targetLibClient) ListOperations(ctx context.Context, in *ListOperations
 // All implementations must embed UnimplementedTargetLibServer
 // for forward compatibility.
 type TargetLibServer interface {
-	GetVersion(context.Context, *emptypb.Empty) (*VersionResponse, error)
-	GetCapabilities(context.Context, *emptypb.Empty) (*CapabilitiesResponse, error)
+	// Layer 1: Basic Proxy Control
 	Start(context.Context, *emptypb.Empty) (*OperationResponse, error)
 	Restart(context.Context, *emptypb.Empty) (*OperationResponse, error)
 	Stop(context.Context, *emptypb.Empty) (*OperationResponse, error)
@@ -600,7 +434,6 @@ type TargetLibServer interface {
 	SubscribeState(*emptypb.Empty, grpc.ServerStreamingServer[ServiceState]) error
 	SubscribeLogs(*emptypb.Empty, grpc.ServerStreamingServer[LogBatch]) error
 	SubscribeTraffic(*TrafficRequest, grpc.ServerStreamingServer[TrafficStatus]) error
-	SelectOutbound(context.Context, *SelectOutboundRequest) (*emptypb.Empty, error)
 	CloseConnection(context.Context, *CloseConnectionRequest) (*emptypb.Empty, error)
 	CloseAllConnections(context.Context, *emptypb.Empty) (*emptypb.Empty, error)
 	ListSubscriptions(context.Context, *emptypb.Empty) (*SubscriptionList, error)
@@ -611,32 +444,19 @@ type TargetLibServer interface {
 	SetSubscriptionEnabled(context.Context, *SetSubscriptionEnabledRequest) (*SubscriptionView, error)
 	ConfigureSubscriptionUpdates(context.Context, *ConfigureSubscriptionUpdatesRequest) (*SubscriptionView, error)
 	UpdateSubscription(context.Context, *SubscriptionId) (*SubscriptionUpdateResult, error)
-	// Returns the backend-owned desired runtime configuration.
-	GetRuntimeConfig(context.Context, *emptypb.Empty) (*RuntimeConfig, error)
-	// Validates and persists the desired configuration. If the core is running,
-	// it is reloaded immediately; otherwise it is used on the next start.
-	UpdateRuntimeConfig(context.Context, *UpdateRuntimeConfigRequest) (*RuntimeConfig, error)
-	TestOutbound(context.Context, *TestOutboundRequest) (*LatencyTestResult, error)
-	TestOutbounds(*TestOutboundsRequest, grpc.ServerStreamingServer[LatencyTestResult]) error
 	GetResolvedEndpoints(context.Context, *ResolvedEndpointsRequest) (*ResolvedEndpoints, error)
 	SubscribeSubscriptionEvents(*emptypb.Empty, grpc.ServerStreamingServer[SubscriptionEvent]) error
-	// IP geolocation query (egress from the backend).
-	GetIpInfo(context.Context, *emptypb.Empty) (*IpInfoResponse, error)
 	GetNodePool(context.Context, *emptypb.Empty) (*NodePool, error)
-	GetRuntimeState(context.Context, *emptypb.Empty) (*RuntimeState, error)
-	SubscribeRuntimeEvents(*emptypb.Empty, grpc.ServerStreamingServer[RuntimeEvent]) error
-	// Policy automation is part of the runtime control plane. Commands return a durable operation.
-	SetPolicyAutomationEnabled(context.Context, *SetPolicyAutomationEnabledRequest) (*Operation, error)
-	ListServicePolicies(context.Context, *emptypb.Empty) (*ServicePolicyList, error)
-	UpsertServicePolicy(context.Context, *UpsertServicePolicyRequest) (*Operation, error)
-	DeleteServicePolicy(context.Context, *DeleteServicePolicyRequest) (*Operation, error)
-	SetNodePreference(context.Context, *SetNodePreferenceRequest) (*Operation, error)
-	RequestServiceEvaluation(context.Context, *RequestServiceEvaluationRequest) (*Operation, error)
-	ApproveSwitchProposal(context.Context, *ProposalCommandRequest) (*Operation, error)
-	RejectSwitchProposal(context.Context, *ProposalCommandRequest) (*Operation, error)
-	ForceServiceBinding(context.Context, *ForceServiceBindingRequest) (*Operation, error)
-	GetOperation(context.Context, *GetOperationRequest) (*Operation, error)
-	ListOperations(context.Context, *ListOperationsRequest) (*OperationList, error)
+	SelectNode(context.Context, *SelectNodeRequest) (*SelectNodeResponse, error)
+	GetProxyStatus(context.Context, *emptypb.Empty) (*ProxyStatus, error)
+	GetRuntimeConfig(context.Context, *emptypb.Empty) (*RuntimeConfig, error)
+	UpdateRuntimeConfig(context.Context, *UpdateRuntimeConfigRequest) (*RuntimeConfig, error)
+	GetIpInfo(context.Context, *emptypb.Empty) (*IpInfoResponse, error)
+	// Layer 2: Rule-based Routing
+	UpsertRoute(context.Context, *UpsertRouteRequest) (*RouteInfo, error)
+	DeleteRoute(context.Context, *DeleteRouteRequest) (*emptypb.Empty, error)
+	ListRoutes(context.Context, *emptypb.Empty) (*RouteList, error)
+	SelectRouteNode(context.Context, *SelectRouteNodeRequest) (*SelectNodeResponse, error)
 	mustEmbedUnimplementedTargetLibServer()
 }
 
@@ -647,12 +467,6 @@ type TargetLibServer interface {
 // pointer dereference when methods are called.
 type UnimplementedTargetLibServer struct{}
 
-func (UnimplementedTargetLibServer) GetVersion(context.Context, *emptypb.Empty) (*VersionResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method GetVersion not implemented")
-}
-func (UnimplementedTargetLibServer) GetCapabilities(context.Context, *emptypb.Empty) (*CapabilitiesResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method GetCapabilities not implemented")
-}
 func (UnimplementedTargetLibServer) Start(context.Context, *emptypb.Empty) (*OperationResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Start not implemented")
 }
@@ -673,9 +487,6 @@ func (UnimplementedTargetLibServer) SubscribeLogs(*emptypb.Empty, grpc.ServerStr
 }
 func (UnimplementedTargetLibServer) SubscribeTraffic(*TrafficRequest, grpc.ServerStreamingServer[TrafficStatus]) error {
 	return status.Error(codes.Unimplemented, "method SubscribeTraffic not implemented")
-}
-func (UnimplementedTargetLibServer) SelectOutbound(context.Context, *SelectOutboundRequest) (*emptypb.Empty, error) {
-	return nil, status.Error(codes.Unimplemented, "method SelectOutbound not implemented")
 }
 func (UnimplementedTargetLibServer) CloseConnection(context.Context, *CloseConnectionRequest) (*emptypb.Empty, error) {
 	return nil, status.Error(codes.Unimplemented, "method CloseConnection not implemented")
@@ -707,68 +518,41 @@ func (UnimplementedTargetLibServer) ConfigureSubscriptionUpdates(context.Context
 func (UnimplementedTargetLibServer) UpdateSubscription(context.Context, *SubscriptionId) (*SubscriptionUpdateResult, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateSubscription not implemented")
 }
-func (UnimplementedTargetLibServer) GetRuntimeConfig(context.Context, *emptypb.Empty) (*RuntimeConfig, error) {
-	return nil, status.Error(codes.Unimplemented, "method GetRuntimeConfig not implemented")
-}
-func (UnimplementedTargetLibServer) UpdateRuntimeConfig(context.Context, *UpdateRuntimeConfigRequest) (*RuntimeConfig, error) {
-	return nil, status.Error(codes.Unimplemented, "method UpdateRuntimeConfig not implemented")
-}
-func (UnimplementedTargetLibServer) TestOutbound(context.Context, *TestOutboundRequest) (*LatencyTestResult, error) {
-	return nil, status.Error(codes.Unimplemented, "method TestOutbound not implemented")
-}
-func (UnimplementedTargetLibServer) TestOutbounds(*TestOutboundsRequest, grpc.ServerStreamingServer[LatencyTestResult]) error {
-	return status.Error(codes.Unimplemented, "method TestOutbounds not implemented")
-}
 func (UnimplementedTargetLibServer) GetResolvedEndpoints(context.Context, *ResolvedEndpointsRequest) (*ResolvedEndpoints, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetResolvedEndpoints not implemented")
 }
 func (UnimplementedTargetLibServer) SubscribeSubscriptionEvents(*emptypb.Empty, grpc.ServerStreamingServer[SubscriptionEvent]) error {
 	return status.Error(codes.Unimplemented, "method SubscribeSubscriptionEvents not implemented")
 }
-func (UnimplementedTargetLibServer) GetIpInfo(context.Context, *emptypb.Empty) (*IpInfoResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method GetIpInfo not implemented")
-}
 func (UnimplementedTargetLibServer) GetNodePool(context.Context, *emptypb.Empty) (*NodePool, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetNodePool not implemented")
 }
-func (UnimplementedTargetLibServer) GetRuntimeState(context.Context, *emptypb.Empty) (*RuntimeState, error) {
-	return nil, status.Error(codes.Unimplemented, "method GetRuntimeState not implemented")
+func (UnimplementedTargetLibServer) SelectNode(context.Context, *SelectNodeRequest) (*SelectNodeResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method SelectNode not implemented")
 }
-func (UnimplementedTargetLibServer) SubscribeRuntimeEvents(*emptypb.Empty, grpc.ServerStreamingServer[RuntimeEvent]) error {
-	return status.Error(codes.Unimplemented, "method SubscribeRuntimeEvents not implemented")
+func (UnimplementedTargetLibServer) GetProxyStatus(context.Context, *emptypb.Empty) (*ProxyStatus, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetProxyStatus not implemented")
 }
-func (UnimplementedTargetLibServer) SetPolicyAutomationEnabled(context.Context, *SetPolicyAutomationEnabledRequest) (*Operation, error) {
-	return nil, status.Error(codes.Unimplemented, "method SetPolicyAutomationEnabled not implemented")
+func (UnimplementedTargetLibServer) GetRuntimeConfig(context.Context, *emptypb.Empty) (*RuntimeConfig, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetRuntimeConfig not implemented")
 }
-func (UnimplementedTargetLibServer) ListServicePolicies(context.Context, *emptypb.Empty) (*ServicePolicyList, error) {
-	return nil, status.Error(codes.Unimplemented, "method ListServicePolicies not implemented")
+func (UnimplementedTargetLibServer) UpdateRuntimeConfig(context.Context, *UpdateRuntimeConfigRequest) (*RuntimeConfig, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateRuntimeConfig not implemented")
 }
-func (UnimplementedTargetLibServer) UpsertServicePolicy(context.Context, *UpsertServicePolicyRequest) (*Operation, error) {
-	return nil, status.Error(codes.Unimplemented, "method UpsertServicePolicy not implemented")
+func (UnimplementedTargetLibServer) GetIpInfo(context.Context, *emptypb.Empty) (*IpInfoResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetIpInfo not implemented")
 }
-func (UnimplementedTargetLibServer) DeleteServicePolicy(context.Context, *DeleteServicePolicyRequest) (*Operation, error) {
-	return nil, status.Error(codes.Unimplemented, "method DeleteServicePolicy not implemented")
+func (UnimplementedTargetLibServer) UpsertRoute(context.Context, *UpsertRouteRequest) (*RouteInfo, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpsertRoute not implemented")
 }
-func (UnimplementedTargetLibServer) SetNodePreference(context.Context, *SetNodePreferenceRequest) (*Operation, error) {
-	return nil, status.Error(codes.Unimplemented, "method SetNodePreference not implemented")
+func (UnimplementedTargetLibServer) DeleteRoute(context.Context, *DeleteRouteRequest) (*emptypb.Empty, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteRoute not implemented")
 }
-func (UnimplementedTargetLibServer) RequestServiceEvaluation(context.Context, *RequestServiceEvaluationRequest) (*Operation, error) {
-	return nil, status.Error(codes.Unimplemented, "method RequestServiceEvaluation not implemented")
+func (UnimplementedTargetLibServer) ListRoutes(context.Context, *emptypb.Empty) (*RouteList, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListRoutes not implemented")
 }
-func (UnimplementedTargetLibServer) ApproveSwitchProposal(context.Context, *ProposalCommandRequest) (*Operation, error) {
-	return nil, status.Error(codes.Unimplemented, "method ApproveSwitchProposal not implemented")
-}
-func (UnimplementedTargetLibServer) RejectSwitchProposal(context.Context, *ProposalCommandRequest) (*Operation, error) {
-	return nil, status.Error(codes.Unimplemented, "method RejectSwitchProposal not implemented")
-}
-func (UnimplementedTargetLibServer) ForceServiceBinding(context.Context, *ForceServiceBindingRequest) (*Operation, error) {
-	return nil, status.Error(codes.Unimplemented, "method ForceServiceBinding not implemented")
-}
-func (UnimplementedTargetLibServer) GetOperation(context.Context, *GetOperationRequest) (*Operation, error) {
-	return nil, status.Error(codes.Unimplemented, "method GetOperation not implemented")
-}
-func (UnimplementedTargetLibServer) ListOperations(context.Context, *ListOperationsRequest) (*OperationList, error) {
-	return nil, status.Error(codes.Unimplemented, "method ListOperations not implemented")
+func (UnimplementedTargetLibServer) SelectRouteNode(context.Context, *SelectRouteNodeRequest) (*SelectNodeResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method SelectRouteNode not implemented")
 }
 func (UnimplementedTargetLibServer) mustEmbedUnimplementedTargetLibServer() {}
 func (UnimplementedTargetLibServer) testEmbeddedByValue()                   {}
@@ -789,42 +573,6 @@ func RegisterTargetLibServer(s grpc.ServiceRegistrar, srv TargetLibServer) {
 		t.testEmbeddedByValue()
 	}
 	s.RegisterService(&TargetLib_ServiceDesc, srv)
-}
-
-func _TargetLib_GetVersion_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TargetLibServer).GetVersion(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TargetLib_GetVersion_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TargetLibServer).GetVersion(ctx, req.(*emptypb.Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TargetLib_GetCapabilities_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TargetLibServer).GetCapabilities(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TargetLib_GetCapabilities_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TargetLibServer).GetCapabilities(ctx, req.(*emptypb.Empty))
-	}
-	return interceptor(ctx, in, info, handler)
 }
 
 func _TargetLib_Start_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -931,24 +679,6 @@ func _TargetLib_SubscribeTraffic_Handler(srv interface{}, stream grpc.ServerStre
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type TargetLib_SubscribeTrafficServer = grpc.ServerStreamingServer[TrafficStatus]
-
-func _TargetLib_SelectOutbound_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SelectOutboundRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TargetLibServer).SelectOutbound(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TargetLib_SelectOutbound_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TargetLibServer).SelectOutbound(ctx, req.(*SelectOutboundRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
 
 func _TargetLib_CloseConnection_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CloseConnectionRequest)
@@ -1130,6 +860,89 @@ func _TargetLib_UpdateSubscription_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TargetLib_GetResolvedEndpoints_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ResolvedEndpointsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TargetLibServer).GetResolvedEndpoints(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TargetLib_GetResolvedEndpoints_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TargetLibServer).GetResolvedEndpoints(ctx, req.(*ResolvedEndpointsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TargetLib_SubscribeSubscriptionEvents_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(emptypb.Empty)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(TargetLibServer).SubscribeSubscriptionEvents(m, &grpc.GenericServerStream[emptypb.Empty, SubscriptionEvent]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type TargetLib_SubscribeSubscriptionEventsServer = grpc.ServerStreamingServer[SubscriptionEvent]
+
+func _TargetLib_GetNodePool_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TargetLibServer).GetNodePool(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TargetLib_GetNodePool_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TargetLibServer).GetNodePool(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TargetLib_SelectNode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SelectNodeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TargetLibServer).SelectNode(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TargetLib_SelectNode_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TargetLibServer).SelectNode(ctx, req.(*SelectNodeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TargetLib_GetProxyStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TargetLibServer).GetProxyStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TargetLib_GetProxyStatus_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TargetLibServer).GetProxyStatus(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _TargetLib_GetRuntimeConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
@@ -1166,64 +979,6 @@ func _TargetLib_UpdateRuntimeConfig_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TargetLib_TestOutbound_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(TestOutboundRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TargetLibServer).TestOutbound(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TargetLib_TestOutbound_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TargetLibServer).TestOutbound(ctx, req.(*TestOutboundRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TargetLib_TestOutbounds_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(TestOutboundsRequest)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
-	}
-	return srv.(TargetLibServer).TestOutbounds(m, &grpc.GenericServerStream[TestOutboundsRequest, LatencyTestResult]{ServerStream: stream})
-}
-
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type TargetLib_TestOutboundsServer = grpc.ServerStreamingServer[LatencyTestResult]
-
-func _TargetLib_GetResolvedEndpoints_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ResolvedEndpointsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TargetLibServer).GetResolvedEndpoints(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TargetLib_GetResolvedEndpoints_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TargetLibServer).GetResolvedEndpoints(ctx, req.(*ResolvedEndpointsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TargetLib_SubscribeSubscriptionEvents_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(emptypb.Empty)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
-	}
-	return srv.(TargetLibServer).SubscribeSubscriptionEvents(m, &grpc.GenericServerStream[emptypb.Empty, SubscriptionEvent]{ServerStream: stream})
-}
-
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type TargetLib_SubscribeSubscriptionEventsServer = grpc.ServerStreamingServer[SubscriptionEvent]
-
 func _TargetLib_GetIpInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
@@ -1242,247 +997,74 @@ func _TargetLib_GetIpInfo_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TargetLib_GetNodePool_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _TargetLib_UpsertRoute_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpsertRouteRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TargetLibServer).UpsertRoute(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TargetLib_UpsertRoute_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TargetLibServer).UpsertRoute(ctx, req.(*UpsertRouteRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TargetLib_DeleteRoute_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteRouteRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TargetLibServer).DeleteRoute(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TargetLib_DeleteRoute_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TargetLibServer).DeleteRoute(ctx, req.(*DeleteRouteRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TargetLib_ListRoutes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TargetLibServer).GetNodePool(ctx, in)
+		return srv.(TargetLibServer).ListRoutes(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: TargetLib_GetNodePool_FullMethodName,
+		FullMethod: TargetLib_ListRoutes_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TargetLibServer).GetNodePool(ctx, req.(*emptypb.Empty))
+		return srv.(TargetLibServer).ListRoutes(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TargetLib_GetRuntimeState_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
+func _TargetLib_SelectRouteNode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SelectRouteNodeRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TargetLibServer).GetRuntimeState(ctx, in)
+		return srv.(TargetLibServer).SelectRouteNode(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: TargetLib_GetRuntimeState_FullMethodName,
+		FullMethod: TargetLib_SelectRouteNode_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TargetLibServer).GetRuntimeState(ctx, req.(*emptypb.Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TargetLib_SubscribeRuntimeEvents_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(emptypb.Empty)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
-	}
-	return srv.(TargetLibServer).SubscribeRuntimeEvents(m, &grpc.GenericServerStream[emptypb.Empty, RuntimeEvent]{ServerStream: stream})
-}
-
-// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type TargetLib_SubscribeRuntimeEventsServer = grpc.ServerStreamingServer[RuntimeEvent]
-
-func _TargetLib_SetPolicyAutomationEnabled_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SetPolicyAutomationEnabledRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TargetLibServer).SetPolicyAutomationEnabled(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TargetLib_SetPolicyAutomationEnabled_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TargetLibServer).SetPolicyAutomationEnabled(ctx, req.(*SetPolicyAutomationEnabledRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TargetLib_ListServicePolicies_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TargetLibServer).ListServicePolicies(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TargetLib_ListServicePolicies_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TargetLibServer).ListServicePolicies(ctx, req.(*emptypb.Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TargetLib_UpsertServicePolicy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpsertServicePolicyRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TargetLibServer).UpsertServicePolicy(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TargetLib_UpsertServicePolicy_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TargetLibServer).UpsertServicePolicy(ctx, req.(*UpsertServicePolicyRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TargetLib_DeleteServicePolicy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteServicePolicyRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TargetLibServer).DeleteServicePolicy(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TargetLib_DeleteServicePolicy_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TargetLibServer).DeleteServicePolicy(ctx, req.(*DeleteServicePolicyRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TargetLib_SetNodePreference_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SetNodePreferenceRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TargetLibServer).SetNodePreference(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TargetLib_SetNodePreference_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TargetLibServer).SetNodePreference(ctx, req.(*SetNodePreferenceRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TargetLib_RequestServiceEvaluation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RequestServiceEvaluationRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TargetLibServer).RequestServiceEvaluation(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TargetLib_RequestServiceEvaluation_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TargetLibServer).RequestServiceEvaluation(ctx, req.(*RequestServiceEvaluationRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TargetLib_ApproveSwitchProposal_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ProposalCommandRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TargetLibServer).ApproveSwitchProposal(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TargetLib_ApproveSwitchProposal_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TargetLibServer).ApproveSwitchProposal(ctx, req.(*ProposalCommandRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TargetLib_RejectSwitchProposal_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ProposalCommandRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TargetLibServer).RejectSwitchProposal(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TargetLib_RejectSwitchProposal_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TargetLibServer).RejectSwitchProposal(ctx, req.(*ProposalCommandRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TargetLib_ForceServiceBinding_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ForceServiceBindingRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TargetLibServer).ForceServiceBinding(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TargetLib_ForceServiceBinding_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TargetLibServer).ForceServiceBinding(ctx, req.(*ForceServiceBindingRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TargetLib_GetOperation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetOperationRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TargetLibServer).GetOperation(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TargetLib_GetOperation_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TargetLibServer).GetOperation(ctx, req.(*GetOperationRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TargetLib_ListOperations_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListOperationsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TargetLibServer).ListOperations(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TargetLib_ListOperations_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TargetLibServer).ListOperations(ctx, req.(*ListOperationsRequest))
+		return srv.(TargetLibServer).SelectRouteNode(ctx, req.(*SelectRouteNodeRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1494,14 +1076,6 @@ var TargetLib_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "targetlib.TargetLib",
 	HandlerType: (*TargetLibServer)(nil),
 	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "GetVersion",
-			Handler:    _TargetLib_GetVersion_Handler,
-		},
-		{
-			MethodName: "GetCapabilities",
-			Handler:    _TargetLib_GetCapabilities_Handler,
-		},
 		{
 			MethodName: "Start",
 			Handler:    _TargetLib_Start_Handler,
@@ -1517,10 +1091,6 @@ var TargetLib_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetState",
 			Handler:    _TargetLib_GetState_Handler,
-		},
-		{
-			MethodName: "SelectOutbound",
-			Handler:    _TargetLib_SelectOutbound_Handler,
 		},
 		{
 			MethodName: "CloseConnection",
@@ -1563,6 +1133,22 @@ var TargetLib_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _TargetLib_UpdateSubscription_Handler,
 		},
 		{
+			MethodName: "GetResolvedEndpoints",
+			Handler:    _TargetLib_GetResolvedEndpoints_Handler,
+		},
+		{
+			MethodName: "GetNodePool",
+			Handler:    _TargetLib_GetNodePool_Handler,
+		},
+		{
+			MethodName: "SelectNode",
+			Handler:    _TargetLib_SelectNode_Handler,
+		},
+		{
+			MethodName: "GetProxyStatus",
+			Handler:    _TargetLib_GetProxyStatus_Handler,
+		},
+		{
 			MethodName: "GetRuntimeConfig",
 			Handler:    _TargetLib_GetRuntimeConfig_Handler,
 		},
@@ -1571,68 +1157,24 @@ var TargetLib_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _TargetLib_UpdateRuntimeConfig_Handler,
 		},
 		{
-			MethodName: "TestOutbound",
-			Handler:    _TargetLib_TestOutbound_Handler,
-		},
-		{
-			MethodName: "GetResolvedEndpoints",
-			Handler:    _TargetLib_GetResolvedEndpoints_Handler,
-		},
-		{
 			MethodName: "GetIpInfo",
 			Handler:    _TargetLib_GetIpInfo_Handler,
 		},
 		{
-			MethodName: "GetNodePool",
-			Handler:    _TargetLib_GetNodePool_Handler,
+			MethodName: "UpsertRoute",
+			Handler:    _TargetLib_UpsertRoute_Handler,
 		},
 		{
-			MethodName: "GetRuntimeState",
-			Handler:    _TargetLib_GetRuntimeState_Handler,
+			MethodName: "DeleteRoute",
+			Handler:    _TargetLib_DeleteRoute_Handler,
 		},
 		{
-			MethodName: "SetPolicyAutomationEnabled",
-			Handler:    _TargetLib_SetPolicyAutomationEnabled_Handler,
+			MethodName: "ListRoutes",
+			Handler:    _TargetLib_ListRoutes_Handler,
 		},
 		{
-			MethodName: "ListServicePolicies",
-			Handler:    _TargetLib_ListServicePolicies_Handler,
-		},
-		{
-			MethodName: "UpsertServicePolicy",
-			Handler:    _TargetLib_UpsertServicePolicy_Handler,
-		},
-		{
-			MethodName: "DeleteServicePolicy",
-			Handler:    _TargetLib_DeleteServicePolicy_Handler,
-		},
-		{
-			MethodName: "SetNodePreference",
-			Handler:    _TargetLib_SetNodePreference_Handler,
-		},
-		{
-			MethodName: "RequestServiceEvaluation",
-			Handler:    _TargetLib_RequestServiceEvaluation_Handler,
-		},
-		{
-			MethodName: "ApproveSwitchProposal",
-			Handler:    _TargetLib_ApproveSwitchProposal_Handler,
-		},
-		{
-			MethodName: "RejectSwitchProposal",
-			Handler:    _TargetLib_RejectSwitchProposal_Handler,
-		},
-		{
-			MethodName: "ForceServiceBinding",
-			Handler:    _TargetLib_ForceServiceBinding_Handler,
-		},
-		{
-			MethodName: "GetOperation",
-			Handler:    _TargetLib_GetOperation_Handler,
-		},
-		{
-			MethodName: "ListOperations",
-			Handler:    _TargetLib_ListOperations_Handler,
+			MethodName: "SelectRouteNode",
+			Handler:    _TargetLib_SelectRouteNode_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
@@ -1652,18 +1194,8 @@ var TargetLib_ServiceDesc = grpc.ServiceDesc{
 			ServerStreams: true,
 		},
 		{
-			StreamName:    "TestOutbounds",
-			Handler:       _TargetLib_TestOutbounds_Handler,
-			ServerStreams: true,
-		},
-		{
 			StreamName:    "SubscribeSubscriptionEvents",
 			Handler:       _TargetLib_SubscribeSubscriptionEvents_Handler,
-			ServerStreams: true,
-		},
-		{
-			StreamName:    "SubscribeRuntimeEvents",
-			Handler:       _TargetLib_SubscribeRuntimeEvents_Handler,
 			ServerStreams: true,
 		},
 	},

@@ -70,7 +70,7 @@ func loadControlToken(basePath, supplied string) (string, error) {
 func intentMethod(method string) bool {
 	name := method[strings.LastIndex(method, "/")+1:]
 	switch name {
-	case "SetPolicyAutomationEnabled", "ListServicePolicies", "UpsertServicePolicy", "DeleteServicePolicy", "SetNodePreference", "RequestServiceEvaluation", "ApproveSwitchProposal", "RejectSwitchProposal", "ForceServiceBinding", "GetOperation", "ListOperations":
+	case "SetPolicyAutomationEnabled", "UpsertServicePolicy", "DeleteServicePolicy", "SetNodePreference", "RequestServiceEvaluation", "ApproveSwitchProposal", "RejectSwitchProposal", "ForceServiceBinding", "GetOperation":
 		return true
 	default:
 		return false

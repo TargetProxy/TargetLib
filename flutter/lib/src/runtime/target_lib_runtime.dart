@@ -5,8 +5,8 @@ import 'package:path_provider/path_provider.dart';
 
 import '../targetlib_logger.dart';
 import 'target_lib_connection.dart';
+import 'target_lib_api.dart';
 import 'target_lib_host.dart';
-import '../generated/api/TargetLib/targetlib.pb.dart';
 
 /// Cross-platform connection to the installer-managed TargetLib service.
 final class TargetLibRuntime {
@@ -18,6 +18,11 @@ final class TargetLibRuntime {
   bool _hostStarted = false;
 
   TargetLibConnection? get connection => _connection;
+  TargetLibConfig get config => TargetLibConfig(_requireConnection);
+  TargetLibProxy get proxy => TargetLibProxy(_requireConnection);
+  TargetLibSubscriptions get subscriptions =>
+      TargetLibSubscriptions(_requireConnection);
+  TargetLibRoutes get routes => TargetLibRoutes(_requireConnection);
   static bool get isSupported =>
       Platform.isWindows ||
       Platform.isLinux ||
@@ -88,59 +93,6 @@ final class TargetLibRuntime {
       await _host.stop();
       _hostStarted = false;
     }
-  }
-
-  Future<OperationResponse> start() async =>
-      (await _requireConnection()).start();
-  Future<CapabilitiesResponse> capabilities() async =>
-      (await _requireConnection()).capabilities();
-
-  Future<OperationResponse> restart() async =>
-      (await _requireConnection()).restart();
-
-  Future<OperationResponse> stop() async => (await _requireConnection()).stop();
-
-  Future<ServiceState> state() async => (await _requireConnection()).state();
-
-  Future<RuntimeConfig> getRuntimeConfig() async =>
-      (await _requireConnection()).getRuntimeConfig();
-
-  Future<NodePool> getNodePool() async =>
-      (await _requireConnection()).getNodePool();
-  Future<RuntimeState> getRuntimeState() async =>
-      (await _requireConnection()).getRuntimeState();
-
-  Future<Operation> setPolicyAutomationEnabled(
-    SetPolicyAutomationEnabledRequest request,
-  ) async => (await _requireConnection()).setPolicyAutomationEnabled(request);
-  Future<ServicePolicyList> listServicePolicies() async =>
-      (await _requireConnection()).listServicePolicies();
-  Future<Operation> upsertServicePolicy(
-    UpsertServicePolicyRequest request,
-  ) async => (await _requireConnection()).upsertServicePolicy(request);
-  Future<Operation> deleteServicePolicy(
-    DeleteServicePolicyRequest request,
-  ) async => (await _requireConnection()).deleteServicePolicy(request);
-  Future<Operation> setNodePreference(SetNodePreferenceRequest request) async =>
-      (await _requireConnection()).setNodePreference(request);
-  Future<Operation> requestServiceEvaluation(
-    RequestServiceEvaluationRequest request,
-  ) async => (await _requireConnection()).requestServiceEvaluation(request);
-  Future<Operation> approveSwitchProposal(
-    ProposalCommandRequest request,
-  ) async => (await _requireConnection()).approveSwitchProposal(request);
-  Future<Operation> rejectSwitchProposal(
-    ProposalCommandRequest request,
-  ) async => (await _requireConnection()).rejectSwitchProposal(request);
-  Future<Operation> forceServiceBinding(
-    ForceServiceBindingRequest request,
-  ) async => (await _requireConnection()).forceServiceBinding(request);
-  Future<Operation> getOperation(String operationId) async =>
-      (await _requireConnection()).getOperation(operationId);
-  Future<OperationList> listOperations(ListOperationsRequest request) async =>
-      (await _requireConnection()).listOperations(request);
-  Stream<RuntimeEvent> subscribeRuntimeEvents() async* {
-    yield* (await _requireConnection()).subscribeRuntimeEvents();
   }
 
   Future<TargetLibConnection> _requireConnection() async {

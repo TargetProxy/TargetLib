@@ -144,11 +144,7 @@ func assertVersionHandshake(t *testing.T, client targetlibapi.TargetLibClient) {
 	t.Helper()
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
-	version, err := client.GetVersion(ctx, &emptypb.Empty{})
-	if err != nil {
+	if _, err := client.GetState(ctx, &emptypb.Empty{}); err != nil {
 		t.Fatal(err)
-	}
-	if version.GetProtocolVersion() != ProtocolVersion {
-		t.Fatalf("protocol version = %d, want %d", version.GetProtocolVersion(), ProtocolVersion)
 	}
 }

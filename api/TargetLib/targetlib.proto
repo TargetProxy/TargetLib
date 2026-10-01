@@ -7,8 +7,7 @@ option go_package = "github.com/loafman1120/TargetLib/api/TargetLib;targetlib";
 import "google/protobuf/empty.proto";
 
 service TargetLib {
-  rpc GetVersion(google.protobuf.Empty) returns (VersionResponse);
-  rpc GetCapabilities(google.protobuf.Empty) returns (CapabilitiesResponse);
+  // Layer 1: Basic Proxy Control
   rpc Start(google.protobuf.Empty) returns (OperationResponse);
   rpc Restart(google.protobuf.Empty) returns (OperationResponse);
   rpc Stop(google.protobuf.Empty) returns (OperationResponse);
@@ -16,7 +15,6 @@ service TargetLib {
   rpc SubscribeState(google.protobuf.Empty) returns (stream ServiceState);
   rpc SubscribeLogs(google.protobuf.Empty) returns (stream LogBatch);
   rpc SubscribeTraffic(TrafficRequest) returns (stream TrafficStatus);
-  rpc SelectOutbound(SelectOutboundRequest) returns (google.protobuf.Empty);
   rpc CloseConnection(CloseConnectionRequest) returns (google.protobuf.Empty);
   rpc CloseAllConnections(google.protobuf.Empty) returns (google.protobuf.Empty);
 
@@ -28,36 +26,22 @@ service TargetLib {
   rpc SetSubscriptionEnabled(SetSubscriptionEnabledRequest) returns (SubscriptionView);
   rpc ConfigureSubscriptionUpdates(ConfigureSubscriptionUpdatesRequest) returns (SubscriptionView);
   rpc UpdateSubscription(SubscriptionId) returns (SubscriptionUpdateResult);
-  // Returns the backend-owned desired runtime configuration.
-  rpc GetRuntimeConfig(google.protobuf.Empty) returns (RuntimeConfig);
-  // Validates and persists the desired configuration. If the core is running,
-  // it is reloaded immediately; otherwise it is used on the next start.
-  rpc UpdateRuntimeConfig(UpdateRuntimeConfigRequest) returns (RuntimeConfig);
-  rpc TestOutbound(TestOutboundRequest) returns (LatencyTestResult);
-  rpc TestOutbounds(TestOutboundsRequest) returns (stream LatencyTestResult);
   rpc GetResolvedEndpoints(ResolvedEndpointsRequest) returns (ResolvedEndpoints);
   rpc SubscribeSubscriptionEvents(google.protobuf.Empty) returns (stream SubscriptionEvent);
 
-  // IP geolocation query (egress from the backend).
-  rpc GetIpInfo(google.protobuf.Empty) returns (IpInfoResponse);
   rpc GetNodePool(google.protobuf.Empty) returns (NodePool);
-  rpc GetRuntimeState(google.protobuf.Empty) returns (RuntimeState);
-  rpc SubscribeRuntimeEvents(google.protobuf.Empty) returns (stream RuntimeEvent);
-  // Service policy, evaluation, binding, and operation state are exposed by
-  // the unified policy commands below and RuntimeState.
+  rpc SelectNode(SelectNodeRequest) returns (SelectNodeResponse);
+  rpc GetProxyStatus(google.protobuf.Empty) returns (ProxyStatus);
 
-  // Policy automation is part of the runtime control plane. Commands return a durable operation.
-  rpc SetPolicyAutomationEnabled(SetPolicyAutomationEnabledRequest) returns (Operation);
-  rpc ListServicePolicies(google.protobuf.Empty) returns (ServicePolicyList);
-  rpc UpsertServicePolicy(UpsertServicePolicyRequest) returns (Operation);
-  rpc DeleteServicePolicy(DeleteServicePolicyRequest) returns (Operation);
-  rpc SetNodePreference(SetNodePreferenceRequest) returns (Operation);
-  rpc RequestServiceEvaluation(RequestServiceEvaluationRequest) returns (Operation);
-  rpc ApproveSwitchProposal(ProposalCommandRequest) returns (Operation);
-  rpc RejectSwitchProposal(ProposalCommandRequest) returns (Operation);
-  rpc ForceServiceBinding(ForceServiceBindingRequest) returns (Operation);
-  rpc GetOperation(GetOperationRequest) returns (Operation);
-  rpc ListOperations(ListOperationsRequest) returns (OperationList);
+  rpc GetRuntimeConfig(google.protobuf.Empty) returns (RuntimeConfig);
+  rpc UpdateRuntimeConfig(UpdateRuntimeConfigRequest) returns (RuntimeConfig);
+  rpc GetIpInfo(google.protobuf.Empty) returns (IpInfoResponse);
+
+  // Layer 2: Rule-based Routing
+  rpc UpsertRoute(UpsertRouteRequest) returns (RouteInfo);
+  rpc DeleteRoute(DeleteRouteRequest) returns (google.protobuf.Empty);
+  rpc ListRoutes(google.protobuf.Empty) returns (RouteList);
+  rpc SelectRouteNode(SelectRouteNodeRequest) returns (SelectNodeResponse);
 }
 
 enum LogLevel {
@@ -81,34 +65,8 @@ message LogBatch {
   bool reset = 2;
 }
 
-message SelectOutboundRequest {
-  string group_tag = 1;
-  string outbound_tag = 2;
-}
-
 message CloseConnectionRequest {
   string id = 1;
-}
-
-message VersionResponse {
-  string targetlib_version = 1;
-  string sing_box_version = 2;
-  string go_version = 3;
-  uint32 protocol_version = 4;
-}
-
-message CapabilitiesResponse {
-  string platform = 1;
-  reserved 2;
-  reserved "system_proxy";
-  bool platform_vpn = 3;
-  reserved 4;
-  bool subscription_management = 5;
-  bool real_time_traffic = 6;
-  bool policy_automation = 7;
-  bool service_probes = 8;
-  bool runtime_events = 9;
-  bool policy_automation_api = 10;
 }
 
 message OperationResponse {
@@ -131,16 +89,13 @@ message ServiceState {
 }
 
 message TrafficRequest {
-  // Zero uses one second. The accepted range is 250-5000 milliseconds.
   uint32 interval_milliseconds = 1;
 }
 
 message TrafficStatus {
-  // False when the runtime is stopped or its traffic manager is unavailable.
   bool available = 1;
   int64 upload_bytes_per_second = 2;
   int64 download_bytes_per_second = 3;
-  // Totals belong to the current sing-box runtime and reset when it restarts.
   int64 upload_total_bytes = 4;
   int64 download_total_bytes = 5;
   int32 inbound_connections = 6;
@@ -154,8 +109,6 @@ message SubscriptionId {
 }
 
 message AddSubscriptionRequest {
-  reserved 8;
-  reserved "activate";
   string id = 1;
   string name = 2;
   string url = 3;
@@ -187,8 +140,6 @@ message ResolvedEndpointsRequest {
 }
 
 message SubscriptionList {
-  reserved 2;
-  reserved "active_id";
   repeated SubscriptionView subscriptions = 1;
 }
 
@@ -209,7 +160,6 @@ message SubscriptionView {
   int64 upload_bytes = 14;
   int64 download_bytes = 15;
   int64 total_bytes = 16;
-  // 订阅协议响应头元数据，服务器未提供时为零值。
   int64 expires_at_unix_ms = 17;
   string title = 18;
   string web_page_url = 19;
@@ -219,8 +169,6 @@ message SubscriptionView {
 
 message ProfileView {
   repeated ProfileNode nodes = 1;
-  reserved 2 to 6;
-  reserved "groups", "custom_outbounds", "custom_inbounds", "route_rule_count", "dns";
 }
 
 message ProfileNode {
@@ -230,8 +178,6 @@ message ProfileNode {
   string type = 3;
   string server = 4;
   int32 port = 5;
-  reserved 6;
-  reserved "group_tags";
   ProfileNodePhase phase = 7;
   string error_message = 8;
   string country_code = 9;
@@ -242,7 +188,6 @@ message SubscriptionUpdateResult {
   bool changed = 2;
   bool not_modified = 3;
   int64 duration_milliseconds = 4;
-  // One-shot diagnostics for an explicit update. These bytes are not persisted.
   bytes original_config = 5;
   bytes generated_config = 6;
 }
@@ -279,10 +224,6 @@ message RuntimeConfig {
 
 message UpdateRuntimeConfigRequest {
   RuntimeSettings settings = 1;
-  // When present, replaces the complete selector/route/binding model.
-  // When absent, preserves it (legacy settings-only updates).
-  RuntimeModel model = 2;
-  // Empty disables optimistic concurrency checking.
   string expected_revision = 3;
 }
 
@@ -291,13 +232,15 @@ message SelectorConfig {
   repeated string node_ids = 2;
   string selected_node_id = 3;
 }
+
 message ServiceRoute {
   string service_id = 1;
-  // DNS suffixes, including the apex. More-specific domains take precedence.
   repeated string domains = 2;
   string selector_tag = 3;
   bool enabled = 4;
+  string display_name = 5;
 }
+
 message ServiceBinding {
   string service_id = 1;
   string selector_tag = 2;
@@ -309,346 +252,73 @@ message ServiceBinding {
   string selection_reason = 8;
   string selection_policy_revision = 9;
 }
+
 message RuntimeModel {
   repeated SelectorConfig selectors = 1;
   repeated ServiceRoute service_routes = 2;
   repeated ServiceBinding service_bindings = 3;
 }
+
 message NodePool {
   string revision = 1;
   repeated ProfileNode nodes = 2;
 }
-enum ConfigApplyPhase {
-  CONFIG_APPLY_PHASE_UNSPECIFIED = 0;
-  CONFIG_APPLY_PHASE_VALIDATING = 1;
-  CONFIG_APPLY_PHASE_BUILDING = 2;
-  CONFIG_APPLY_PHASE_APPLYING = 3;
-  CONFIG_APPLY_PHASE_READY = 4;
-  CONFIG_APPLY_PHASE_FAILED = 5;
-}
-message SelectorState {
-  SelectorConfig desired = 1;
-  string actual_node_id = 2;
-  bool effective = 3;
-}
-message ServiceRouteState {
-  ServiceRoute desired = 1;
-  bool effective = 2;
-}
-message ServiceBindingState {
-  ServiceBinding desired = 1;
-  bool effective = 2;
-  bool node_available = 3;
-  bool needs_evaluation = 4;
-  string evaluation_reason = 5;
-}
 
-// Probe definitions contain no credentials. Request headers are transient.
-message ServiceProbe {
-  string service_id = 1;
-  string url = 2;
-  repeated uint32 expected_status = 3;
-  string body_contains = 4;
-  repeated string allowed_countries = 5;
-  // Optional JSON endpoint returning {"ip":"...","country":"US"}.
-  string egress_url = 6;
-  // Optional service response header containing an ISO country code.
-  string service_country_header = 7;
-  uint32 timeout_milliseconds = 8;
-  uint32 validity_seconds = 9;
-  string revision = 10;
-  // Optional RFC 862 UDP echo endpoint controlled by the host/operator.
-  string udp_echo_address = 11;
-  uint32 packet_count = 12;
-  uint32 packet_timeout_milliseconds = 13;
-  optional double maximum_packet_loss = 14;
-}
-enum ProbeStage {
-  PROBE_STAGE_UNSPECIFIED = 0;
-  PROBE_STAGE_READY = 1;
-  PROBE_STAGE_DNS = 2;
-  PROBE_STAGE_TCP = 3;
-  PROBE_STAGE_TLS = 4;
-  PROBE_STAGE_HTTP = 5;
-  PROBE_STAGE_AUTH = 6;
-  PROBE_STAGE_TIMEOUT = 7;
-  PROBE_STAGE_REGION = 8;
-  PROBE_STAGE_CONTENT = 9;
-  PROBE_STAGE_NODE = 10;
-  PROBE_STAGE_EGRESS = 11;
-}
-message ProbeResult {
-  string id = 1;
-  string service_id = 2;
-  string node_id = 3;
-  string node_pool_revision = 4;
-  string probe_revision = 5;
-  ProbeStage stage = 6;
-  string error_message = 7;
-  int64 tested_at_unix_ms = 8;
-  int64 expires_at_unix_ms = 9;
-  uint32 latency_milliseconds = 10;
-  uint32 http_status = 11;
-  string declared_country = 12;
-  string observed_country = 13;
-  string service_country = 14;
-  string egress_ip = 15;
-  uint32 attempts = 16;
-  uint32 successes = 17;
-  // Failed application probes / attempts, not ICMP or UDP packet loss.
-  double failure_ratio = 18;
-  uint32 jitter_milliseconds = 19;
-  bool packet_loss_available = 20;
-  double packet_loss_ratio = 21;
-  uint32 packets_sent = 22;
-  uint32 packets_received = 23;
-  string packet_error = 24;
-}
-message EvaluateServiceRequest { string service_id = 1; }
-message ServiceSelectionPolicy {
-  string service_id = 1;
-  repeated string preferred_countries = 2;
-  repeated string subscription_ids = 3;
-  repeated string excluded_node_ids = 4;
-  repeated string favorite_node_ids = 5;
-  bool allow_direct = 6;
-  uint32 max_candidates = 7;
-  string revision = 8;
-  string expected_revision = 9;
-}
-message ServiceCandidate {
+// Layer 1: Node Selection
+message SelectNodeRequest {
   string node_id = 1;
-  bool eligible = 2;
-  double score = 3;
-  string reason = 4;
-  ProbeResult latest = 5;
-  double success_ratio = 6;
-  double mean_latency_milliseconds = 7;
-  // Recent half mean latency minus older half; positive means slower.
-  double latency_trend_milliseconds = 8;
-}
-message ServiceEvaluation {
-  string service_id = 1;
-  string node_pool_revision = 2;
-  string runtime_revision = 3;
-  repeated ServiceCandidate candidates = 4;
-  int64 evaluated_at_unix_ms = 5;
-  string probe_revision = 6;
-}
-// Internal persisted snapshot. Histories are local to this host/network.
-enum RuntimeRecoveryState {
-  RUNTIME_RECOVERY_STATE_UNSPECIFIED = 0;
-  RUNTIME_RECOVERY_STATE_RECOVERING = 1;
-  RUNTIME_RECOVERY_STATE_READY = 2;
-  RUNTIME_RECOVERY_STATE_DEGRADED = 3;
 }
 
-message RuntimeOrchestrationState {
-  repeated ServiceProbe probes = 1;
-  repeated ProbeResult results = 2;
-  repeated ServiceSelectionPolicy selection_policies = 3;
-  bool enabled = 4;
-  string revision = 5;
-  RuntimeRecoveryState recovery_state = 6;
-  repeated ServicePolicy policies = 7;
-  repeated SwitchProposal proposals = 8;
-  repeated Operation operations = 9;
-  repeated NodePreference node_preferences = 10;
-  repeated SchedulerTask tasks = 11;
+message SelectNodeResponse {
+  string node_id = 1;
+  string node_name = 2;
+  bool applied_immediately = 3;
+  string error_message = 4;
 }
 
-enum SwitchMode {
-  SWITCH_MODE_UNSPECIFIED = 0;
-  SWITCH_MODE_MANUAL = 1;
-  SWITCH_MODE_AUTO_CONSTRAINED = 2;
-  SWITCH_MODE_LOCKED = 3;
-  SWITCH_MODE_DIRECT = 4;
+message ProxyStatus {
+  ServiceStateType service_state = 1;
+  string selected_node_id = 2;
+  string selected_node_name = 3;
+  string actual_node_id = 4;
+  bool effective = 5;
+  int64 selected_at_unix_ms = 6;
+  bool node_available = 7;
+  string unavailable_reason = 8;
 }
-message SwitchPolicy {
-  SwitchMode mode = 1;
-  repeated string allowed_countries = 2;
-  repeated string allowed_subscription_ids = 3;
-  bool allow_cross_country = 4;
-  bool allow_cross_subscription = 5;
-  bool allow_direct = 6;
-  uint32 consecutive_failures = 7;
-  double minimum_score_delta = 8;
-  double minimum_health_score = 9;
-  uint32 minimum_dwell_seconds = 10;
-  uint32 cooldown_seconds = 11;
-  uint32 max_switches_per_hour = 12;
-  bool verify_after_switch = 13;
-  bool rollback_on_verification_failure = 14;
-}
-message ServicePolicy {
+
+// Layer 2: Rule-based Routing
+message UpsertRouteRequest {
   string service_id = 1;
   string display_name = 2;
   repeated string domains = 3;
-  repeated ServiceProbe probes = 4;
-  ServiceSelectionPolicy selection = 5;
-  SwitchPolicy switch_policy = 6;
-  string revision = 7;
-  uint32 schema_version = 8;
-  uint32 quality_validity_seconds = 9;
-  uint32 binding_validity_seconds = 10;
-  uint32 evaluation_interval_seconds = 11;
-}
-message ServicePolicyList { repeated ServicePolicy policies = 1; }
-message NodePreference {
-  string node_id = 1;
-  bool enabled = 2;
-  bool excluded = 3;
-  bool favorite = 4;
-  repeated string labels = 5;
-  int32 subscription_priority = 6;
-  string revision = 7;
-}
-message SwitchProposal {
-  string id = 1;
-  string service_id = 2;
-  string current_node_id = 3;
-  string suggested_node_id = 4;
-  repeated ServiceCandidate candidates = 5;
-  string reason = 6;
-  string policy_revision = 7;
-  string node_pool_revision = 8;
-  string binding_revision = 9;
-  int64 created_at_unix_ms = 10;
-  int64 expires_at_unix_ms = 11;
-  bool auto_authorized = 12;
-  bool approved = 13;
-}
-enum OperationStatus {
-  OPERATION_STATUS_UNSPECIFIED = 0;
-  OPERATION_STATUS_QUEUED = 1;
-  OPERATION_STATUS_RUNNING = 2;
-  OPERATION_STATUS_WAITING_APPROVAL = 3;
-  OPERATION_STATUS_SUCCEEDED = 4;
-  OPERATION_STATUS_FAILED = 5;
-  OPERATION_STATUS_CANCELLED = 6;
-  OPERATION_STATUS_ROLLED_BACK = 7;
-}
-message Operation {
-  string id = 1;
-  string kind = 2;
-  string resource_id = 3;
-  string idempotency_key = 4;
-  OperationStatus status = 5;
-  string phase = 6;
-  uint32 progress_current = 7;
-  uint32 progress_total = 8;
-  int64 created_at_unix_ms = 9;
-  int64 started_at_unix_ms = 10;
-  int64 updated_at_unix_ms = 11;
-  int64 completed_at_unix_ms = 12;
-  string policy_revision = 13;
-  string node_pool_revision = 14;
-  string binding_revision = 15;
-  string runtime_revision = 16;
-  string proposal_id = 17;
-  string result_summary = 18;
-  string error_code = 19;
-  string error_message = 20;
-  // Server-owned hash used to reject idempotency-key reuse with another payload.
-  string request_signature = 21;
-  string desired_node_id = 22;
-}
-message SchedulerTask {
-  string id = 1;
-  string service_id = 2;
-  string kind = 3;
-  string reason = 4;
-  string policy_revision = 5;
-  string node_pool_revision = 6;
-  int64 next_run_at_unix_ms = 7;
-  uint32 attempt = 8;
-  uint32 backoff_seconds = 9;
-  int64 deadline_unix_ms = 10;
-  string operation_id = 11;
-}
-message OperationList { repeated Operation operations = 1; }
-message SetPolicyAutomationEnabledRequest { bool enabled = 1; string expected_revision = 2; string idempotency_key = 3; }
-message UpsertServicePolicyRequest { ServicePolicy policy = 1; string expected_revision = 2; string idempotency_key = 3; }
-message DeleteServicePolicyRequest { string service_id = 1; string expected_revision = 2; string idempotency_key = 3; }
-message SetNodePreferenceRequest { NodePreference preference = 1; string expected_revision = 2; string idempotency_key = 3; }
-message RequestServiceEvaluationRequest { string service_id = 1; string expected_revision = 2; string idempotency_key = 3; }
-message ProposalCommandRequest { string proposal_id = 1; string expected_revision = 2; string idempotency_key = 3; }
-message ForceServiceBindingRequest { string service_id = 1; string node_id = 2; string expected_revision = 3; string idempotency_key = 4; bool close_existing_connections = 5; }
-message GetOperationRequest { string operation_id = 1; }
-message ListOperationsRequest { string resource_id = 1; uint32 limit = 2; }
-message RuntimeState {
-  ConfigApplyPhase phase = 1;
-  string attempted_revision = 2;
-  string desired_revision = 3;
-  string applied_revision = 4;
-  string error_message = 5;
-  bool running = 6;
-  repeated SelectorState selectors = 7;
-  repeated ServiceRouteState service_routes = 8;
-  repeated ServiceBindingState service_bindings = 9;
-  string node_pool_revision = 10;
-  bool policy_automation_enabled = 11;
-  string policy_revision = 12;
-  RuntimeRecoveryState recovery_state = 13;
-  repeated ServicePolicy policies = 14;
-  repeated SwitchProposal proposals = 15;
-  repeated Operation operations = 16;
-  repeated NodePreference node_preferences = 17;
-  repeated SchedulerTask tasks = 18;
-  repeated ProbeResult quality_history = 19;
+  string node_id = 4;
+  bool enabled = 5;
 }
 
-enum RuntimeEventType {
-  RUNTIME_EVENT_TYPE_UNSPECIFIED = 0;
-  RUNTIME_EVENT_TYPE_SNAPSHOT = 1;
-  RUNTIME_EVENT_TYPE_CONFIG = 2;
-  RUNTIME_EVENT_TYPE_NODE_POOL = 3;
-  RUNTIME_EVENT_TYPE_BINDING = 4;
-  RUNTIME_EVENT_TYPE_PROBE_STARTED = 5;
-  RUNTIME_EVENT_TYPE_PROBE_COMPLETED = 6;
-  RUNTIME_EVENT_TYPE_PROBE_DEFINITION = 7;
-  RUNTIME_EVENT_TYPE_STOPPED = 8;
+message RouteInfo {
+  string service_id = 1;
+  string display_name = 2;
+  repeated string domains = 3;
+  string selector_tag = 4;
+  string current_node_id = 5;
+  string current_node_name = 6;
+  bool enabled = 7;
+  bool effective = 8;
 }
 
-message RuntimeEvent {
-  uint64 sequence = 1;
-  RuntimeEventType type = 2;
-  int64 occurred_at_unix_ms = 3;
-  RuntimeState state = 4;
-  ProbeResult probe = 5;
-  string service_id = 6;
-  string node_id = 7;
+message DeleteRouteRequest {
+  string service_id = 1;
 }
 
-message TestOutboundRequest {
-  string outbound_tag = 1;
-  // Zero uses the server default. Values above 60 seconds are rejected.
-  uint32 timeout_milliseconds = 2;
+message RouteList {
+  repeated RouteInfo routes = 1;
+  RouteInfo default_route = 2;
 }
 
-message TestOutboundsRequest {
-  repeated string outbound_tags = 1;
-  // Zero uses the server default. Values above 60 seconds are rejected.
-  uint32 timeout_milliseconds = 2;
-  // Number of URLTest groups tested concurrently. Zero uses the server
-  // default; the server caps this at four.
-  uint32 max_concurrency = 3;
-}
-
-enum LatencyTestStatus {
-  LATENCY_TEST_STATUS_UNSPECIFIED = 0;
-  LATENCY_TEST_STATUS_SUCCESS = 1;
-  LATENCY_TEST_STATUS_FAILED = 2;
-  LATENCY_TEST_STATUS_TIMEOUT = 3;
-  LATENCY_TEST_STATUS_NOT_FOUND = 4;
-}
-
-message LatencyTestResult {
-  string outbound_tag = 1;
-  LatencyTestStatus status = 2;
-  uint32 delay_milliseconds = 3;
-  int64 tested_at_unix_ms = 4;
-  string error_message = 5;
+message SelectRouteNodeRequest {
+  string service_id = 1;
+  string node_id = 2;
 }
 
 message ResolvedEndpoints {

@@ -3,9 +3,11 @@ package manager
 import (
 	"context"
 	"errors"
+	"io"
 
 	"github.com/sagernet/sing-box/daemon"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -42,4 +44,19 @@ func (d *daemonAdapter) URLTest(ctx context.Context, request *daemon.URLTestRequ
 	return d.service.URLTest(ctx, request)
 }
 
-var _ latencyService = (*daemonAdapter)(nil)
+var errStatusReceived = errors.New("status received")
+
+type firstStatusReceiver struct {
+	status *daemon.ServiceStatus
+}
+
+func (r *firstStatusReceiver) Send(value *daemon.ServiceStatus) error {
+	r.status = value
+	return errStatusReceived
+}
+func (*firstStatusReceiver) SetHeader(metadata.MD) error  { return nil }
+func (*firstStatusReceiver) SendHeader(metadata.MD) error { return nil }
+func (*firstStatusReceiver) SetTrailer(metadata.MD)       {}
+func (*firstStatusReceiver) Context() context.Context     { return context.Background() }
+func (*firstStatusReceiver) SendMsg(any) error            { return nil }
+func (*firstStatusReceiver) RecvMsg(any) error            { return io.EOF }

@@ -33,20 +33,7 @@ class TargetLibClient extends $grpc.Client {
 
   TargetLibClient(super.channel, {super.options, super.interceptors});
 
-  $grpc.ResponseFuture<$1.VersionResponse> getVersion(
-    $0.Empty request, {
-    $grpc.CallOptions? options,
-  }) {
-    return $createUnaryCall(_$getVersion, request, options: options);
-  }
-
-  $grpc.ResponseFuture<$1.CapabilitiesResponse> getCapabilities(
-    $0.Empty request, {
-    $grpc.CallOptions? options,
-  }) {
-    return $createUnaryCall(_$getCapabilities, request, options: options);
-  }
-
+  /// Layer 1: Basic Proxy Control
   $grpc.ResponseFuture<$1.OperationResponse> start(
     $0.Empty request, {
     $grpc.CallOptions? options,
@@ -100,13 +87,6 @@ class TargetLibClient extends $grpc.Client {
     return $createStreamingCall(
         _$subscribeTraffic, $async.Stream.fromIterable([request]),
         options: options);
-  }
-
-  $grpc.ResponseFuture<$0.Empty> selectOutbound(
-    $1.SelectOutboundRequest request, {
-    $grpc.CallOptions? options,
-  }) {
-    return $createUnaryCall(_$selectOutbound, request, options: options);
   }
 
   $grpc.ResponseFuture<$0.Empty> closeConnection(
@@ -181,39 +161,6 @@ class TargetLibClient extends $grpc.Client {
     return $createUnaryCall(_$updateSubscription, request, options: options);
   }
 
-  /// Returns the backend-owned desired runtime configuration.
-  $grpc.ResponseFuture<$1.RuntimeConfig> getRuntimeConfig(
-    $0.Empty request, {
-    $grpc.CallOptions? options,
-  }) {
-    return $createUnaryCall(_$getRuntimeConfig, request, options: options);
-  }
-
-  /// Validates and persists the desired configuration. If the core is running,
-  /// it is reloaded immediately; otherwise it is used on the next start.
-  $grpc.ResponseFuture<$1.RuntimeConfig> updateRuntimeConfig(
-    $1.UpdateRuntimeConfigRequest request, {
-    $grpc.CallOptions? options,
-  }) {
-    return $createUnaryCall(_$updateRuntimeConfig, request, options: options);
-  }
-
-  $grpc.ResponseFuture<$1.LatencyTestResult> testOutbound(
-    $1.TestOutboundRequest request, {
-    $grpc.CallOptions? options,
-  }) {
-    return $createUnaryCall(_$testOutbound, request, options: options);
-  }
-
-  $grpc.ResponseStream<$1.LatencyTestResult> testOutbounds(
-    $1.TestOutboundsRequest request, {
-    $grpc.CallOptions? options,
-  }) {
-    return $createStreamingCall(
-        _$testOutbounds, $async.Stream.fromIterable([request]),
-        options: options);
-  }
-
   $grpc.ResponseFuture<$1.ResolvedEndpoints> getResolvedEndpoints(
     $1.ResolvedEndpointsRequest request, {
     $grpc.CallOptions? options,
@@ -230,14 +177,6 @@ class TargetLibClient extends $grpc.Client {
         options: options);
   }
 
-  /// IP geolocation query (egress from the backend).
-  $grpc.ResponseFuture<$1.IpInfoResponse> getIpInfo(
-    $0.Empty request, {
-    $grpc.CallOptions? options,
-  }) {
-    return $createUnaryCall(_$getIpInfo, request, options: options);
-  }
-
   $grpc.ResponseFuture<$1.NodePool> getNodePool(
     $0.Empty request, {
     $grpc.CallOptions? options,
@@ -245,113 +184,72 @@ class TargetLibClient extends $grpc.Client {
     return $createUnaryCall(_$getNodePool, request, options: options);
   }
 
-  $grpc.ResponseFuture<$1.RuntimeState> getRuntimeState(
+  $grpc.ResponseFuture<$1.SelectNodeResponse> selectNode(
+    $1.SelectNodeRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$selectNode, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$1.ProxyStatus> getProxyStatus(
     $0.Empty request, {
     $grpc.CallOptions? options,
   }) {
-    return $createUnaryCall(_$getRuntimeState, request, options: options);
+    return $createUnaryCall(_$getProxyStatus, request, options: options);
   }
 
-  $grpc.ResponseStream<$1.RuntimeEvent> subscribeRuntimeEvents(
+  $grpc.ResponseFuture<$1.RuntimeConfig> getRuntimeConfig(
     $0.Empty request, {
     $grpc.CallOptions? options,
   }) {
-    return $createStreamingCall(
-        _$subscribeRuntimeEvents, $async.Stream.fromIterable([request]),
-        options: options);
+    return $createUnaryCall(_$getRuntimeConfig, request, options: options);
   }
 
-  /// Policy automation is part of the runtime control plane. Commands return a durable operation.
-  $grpc.ResponseFuture<$1.Operation> setPolicyAutomationEnabled(
-    $1.SetPolicyAutomationEnabledRequest request, {
+  $grpc.ResponseFuture<$1.RuntimeConfig> updateRuntimeConfig(
+    $1.UpdateRuntimeConfigRequest request, {
     $grpc.CallOptions? options,
   }) {
-    return $createUnaryCall(_$setPolicyAutomationEnabled, request,
-        options: options);
+    return $createUnaryCall(_$updateRuntimeConfig, request, options: options);
   }
 
-  $grpc.ResponseFuture<$1.ServicePolicyList> listServicePolicies(
+  $grpc.ResponseFuture<$1.IpInfoResponse> getIpInfo(
     $0.Empty request, {
     $grpc.CallOptions? options,
   }) {
-    return $createUnaryCall(_$listServicePolicies, request, options: options);
+    return $createUnaryCall(_$getIpInfo, request, options: options);
   }
 
-  $grpc.ResponseFuture<$1.Operation> upsertServicePolicy(
-    $1.UpsertServicePolicyRequest request, {
+  /// Layer 2: Rule-based Routing
+  $grpc.ResponseFuture<$1.RouteInfo> upsertRoute(
+    $1.UpsertRouteRequest request, {
     $grpc.CallOptions? options,
   }) {
-    return $createUnaryCall(_$upsertServicePolicy, request, options: options);
+    return $createUnaryCall(_$upsertRoute, request, options: options);
   }
 
-  $grpc.ResponseFuture<$1.Operation> deleteServicePolicy(
-    $1.DeleteServicePolicyRequest request, {
+  $grpc.ResponseFuture<$0.Empty> deleteRoute(
+    $1.DeleteRouteRequest request, {
     $grpc.CallOptions? options,
   }) {
-    return $createUnaryCall(_$deleteServicePolicy, request, options: options);
+    return $createUnaryCall(_$deleteRoute, request, options: options);
   }
 
-  $grpc.ResponseFuture<$1.Operation> setNodePreference(
-    $1.SetNodePreferenceRequest request, {
+  $grpc.ResponseFuture<$1.RouteList> listRoutes(
+    $0.Empty request, {
     $grpc.CallOptions? options,
   }) {
-    return $createUnaryCall(_$setNodePreference, request, options: options);
+    return $createUnaryCall(_$listRoutes, request, options: options);
   }
 
-  $grpc.ResponseFuture<$1.Operation> requestServiceEvaluation(
-    $1.RequestServiceEvaluationRequest request, {
+  $grpc.ResponseFuture<$1.SelectNodeResponse> selectRouteNode(
+    $1.SelectRouteNodeRequest request, {
     $grpc.CallOptions? options,
   }) {
-    return $createUnaryCall(_$requestServiceEvaluation, request,
-        options: options);
-  }
-
-  $grpc.ResponseFuture<$1.Operation> approveSwitchProposal(
-    $1.ProposalCommandRequest request, {
-    $grpc.CallOptions? options,
-  }) {
-    return $createUnaryCall(_$approveSwitchProposal, request, options: options);
-  }
-
-  $grpc.ResponseFuture<$1.Operation> rejectSwitchProposal(
-    $1.ProposalCommandRequest request, {
-    $grpc.CallOptions? options,
-  }) {
-    return $createUnaryCall(_$rejectSwitchProposal, request, options: options);
-  }
-
-  $grpc.ResponseFuture<$1.Operation> forceServiceBinding(
-    $1.ForceServiceBindingRequest request, {
-    $grpc.CallOptions? options,
-  }) {
-    return $createUnaryCall(_$forceServiceBinding, request, options: options);
-  }
-
-  $grpc.ResponseFuture<$1.Operation> getOperation(
-    $1.GetOperationRequest request, {
-    $grpc.CallOptions? options,
-  }) {
-    return $createUnaryCall(_$getOperation, request, options: options);
-  }
-
-  $grpc.ResponseFuture<$1.OperationList> listOperations(
-    $1.ListOperationsRequest request, {
-    $grpc.CallOptions? options,
-  }) {
-    return $createUnaryCall(_$listOperations, request, options: options);
+    return $createUnaryCall(_$selectRouteNode, request, options: options);
   }
 
   // method descriptors
 
-  static final _$getVersion = $grpc.ClientMethod<$0.Empty, $1.VersionResponse>(
-      '/targetlib.TargetLib/GetVersion',
-      ($0.Empty value) => value.writeToBuffer(),
-      $1.VersionResponse.fromBuffer);
-  static final _$getCapabilities =
-      $grpc.ClientMethod<$0.Empty, $1.CapabilitiesResponse>(
-          '/targetlib.TargetLib/GetCapabilities',
-          ($0.Empty value) => value.writeToBuffer(),
-          $1.CapabilitiesResponse.fromBuffer);
   static final _$start = $grpc.ClientMethod<$0.Empty, $1.OperationResponse>(
       '/targetlib.TargetLib/Start',
       ($0.Empty value) => value.writeToBuffer(),
@@ -381,11 +279,6 @@ class TargetLibClient extends $grpc.Client {
           '/targetlib.TargetLib/SubscribeTraffic',
           ($1.TrafficRequest value) => value.writeToBuffer(),
           $1.TrafficStatus.fromBuffer);
-  static final _$selectOutbound =
-      $grpc.ClientMethod<$1.SelectOutboundRequest, $0.Empty>(
-          '/targetlib.TargetLib/SelectOutbound',
-          ($1.SelectOutboundRequest value) => value.writeToBuffer(),
-          $0.Empty.fromBuffer);
   static final _$closeConnection =
       $grpc.ClientMethod<$1.CloseConnectionRequest, $0.Empty>(
           '/targetlib.TargetLib/CloseConnection',
@@ -435,26 +328,6 @@ class TargetLibClient extends $grpc.Client {
           '/targetlib.TargetLib/UpdateSubscription',
           ($1.SubscriptionId value) => value.writeToBuffer(),
           $1.SubscriptionUpdateResult.fromBuffer);
-  static final _$getRuntimeConfig =
-      $grpc.ClientMethod<$0.Empty, $1.RuntimeConfig>(
-          '/targetlib.TargetLib/GetRuntimeConfig',
-          ($0.Empty value) => value.writeToBuffer(),
-          $1.RuntimeConfig.fromBuffer);
-  static final _$updateRuntimeConfig =
-      $grpc.ClientMethod<$1.UpdateRuntimeConfigRequest, $1.RuntimeConfig>(
-          '/targetlib.TargetLib/UpdateRuntimeConfig',
-          ($1.UpdateRuntimeConfigRequest value) => value.writeToBuffer(),
-          $1.RuntimeConfig.fromBuffer);
-  static final _$testOutbound =
-      $grpc.ClientMethod<$1.TestOutboundRequest, $1.LatencyTestResult>(
-          '/targetlib.TargetLib/TestOutbound',
-          ($1.TestOutboundRequest value) => value.writeToBuffer(),
-          $1.LatencyTestResult.fromBuffer);
-  static final _$testOutbounds =
-      $grpc.ClientMethod<$1.TestOutboundsRequest, $1.LatencyTestResult>(
-          '/targetlib.TargetLib/TestOutbounds',
-          ($1.TestOutboundsRequest value) => value.writeToBuffer(),
-          $1.LatencyTestResult.fromBuffer);
   static final _$getResolvedEndpoints =
       $grpc.ClientMethod<$1.ResolvedEndpointsRequest, $1.ResolvedEndpoints>(
           '/targetlib.TargetLib/GetResolvedEndpoints',
@@ -465,79 +338,52 @@ class TargetLibClient extends $grpc.Client {
           '/targetlib.TargetLib/SubscribeSubscriptionEvents',
           ($0.Empty value) => value.writeToBuffer(),
           $1.SubscriptionEvent.fromBuffer);
-  static final _$getIpInfo = $grpc.ClientMethod<$0.Empty, $1.IpInfoResponse>(
-      '/targetlib.TargetLib/GetIpInfo',
-      ($0.Empty value) => value.writeToBuffer(),
-      $1.IpInfoResponse.fromBuffer);
   static final _$getNodePool = $grpc.ClientMethod<$0.Empty, $1.NodePool>(
       '/targetlib.TargetLib/GetNodePool',
       ($0.Empty value) => value.writeToBuffer(),
       $1.NodePool.fromBuffer);
-  static final _$getRuntimeState =
-      $grpc.ClientMethod<$0.Empty, $1.RuntimeState>(
-          '/targetlib.TargetLib/GetRuntimeState',
+  static final _$selectNode =
+      $grpc.ClientMethod<$1.SelectNodeRequest, $1.SelectNodeResponse>(
+          '/targetlib.TargetLib/SelectNode',
+          ($1.SelectNodeRequest value) => value.writeToBuffer(),
+          $1.SelectNodeResponse.fromBuffer);
+  static final _$getProxyStatus = $grpc.ClientMethod<$0.Empty, $1.ProxyStatus>(
+      '/targetlib.TargetLib/GetProxyStatus',
+      ($0.Empty value) => value.writeToBuffer(),
+      $1.ProxyStatus.fromBuffer);
+  static final _$getRuntimeConfig =
+      $grpc.ClientMethod<$0.Empty, $1.RuntimeConfig>(
+          '/targetlib.TargetLib/GetRuntimeConfig',
           ($0.Empty value) => value.writeToBuffer(),
-          $1.RuntimeState.fromBuffer);
-  static final _$subscribeRuntimeEvents =
-      $grpc.ClientMethod<$0.Empty, $1.RuntimeEvent>(
-          '/targetlib.TargetLib/SubscribeRuntimeEvents',
-          ($0.Empty value) => value.writeToBuffer(),
-          $1.RuntimeEvent.fromBuffer);
-  static final _$setPolicyAutomationEnabled =
-      $grpc.ClientMethod<$1.SetPolicyAutomationEnabledRequest, $1.Operation>(
-          '/targetlib.TargetLib/SetPolicyAutomationEnabled',
-          ($1.SetPolicyAutomationEnabledRequest value) => value.writeToBuffer(),
-          $1.Operation.fromBuffer);
-  static final _$listServicePolicies =
-      $grpc.ClientMethod<$0.Empty, $1.ServicePolicyList>(
-          '/targetlib.TargetLib/ListServicePolicies',
-          ($0.Empty value) => value.writeToBuffer(),
-          $1.ServicePolicyList.fromBuffer);
-  static final _$upsertServicePolicy =
-      $grpc.ClientMethod<$1.UpsertServicePolicyRequest, $1.Operation>(
-          '/targetlib.TargetLib/UpsertServicePolicy',
-          ($1.UpsertServicePolicyRequest value) => value.writeToBuffer(),
-          $1.Operation.fromBuffer);
-  static final _$deleteServicePolicy =
-      $grpc.ClientMethod<$1.DeleteServicePolicyRequest, $1.Operation>(
-          '/targetlib.TargetLib/DeleteServicePolicy',
-          ($1.DeleteServicePolicyRequest value) => value.writeToBuffer(),
-          $1.Operation.fromBuffer);
-  static final _$setNodePreference =
-      $grpc.ClientMethod<$1.SetNodePreferenceRequest, $1.Operation>(
-          '/targetlib.TargetLib/SetNodePreference',
-          ($1.SetNodePreferenceRequest value) => value.writeToBuffer(),
-          $1.Operation.fromBuffer);
-  static final _$requestServiceEvaluation =
-      $grpc.ClientMethod<$1.RequestServiceEvaluationRequest, $1.Operation>(
-          '/targetlib.TargetLib/RequestServiceEvaluation',
-          ($1.RequestServiceEvaluationRequest value) => value.writeToBuffer(),
-          $1.Operation.fromBuffer);
-  static final _$approveSwitchProposal =
-      $grpc.ClientMethod<$1.ProposalCommandRequest, $1.Operation>(
-          '/targetlib.TargetLib/ApproveSwitchProposal',
-          ($1.ProposalCommandRequest value) => value.writeToBuffer(),
-          $1.Operation.fromBuffer);
-  static final _$rejectSwitchProposal =
-      $grpc.ClientMethod<$1.ProposalCommandRequest, $1.Operation>(
-          '/targetlib.TargetLib/RejectSwitchProposal',
-          ($1.ProposalCommandRequest value) => value.writeToBuffer(),
-          $1.Operation.fromBuffer);
-  static final _$forceServiceBinding =
-      $grpc.ClientMethod<$1.ForceServiceBindingRequest, $1.Operation>(
-          '/targetlib.TargetLib/ForceServiceBinding',
-          ($1.ForceServiceBindingRequest value) => value.writeToBuffer(),
-          $1.Operation.fromBuffer);
-  static final _$getOperation =
-      $grpc.ClientMethod<$1.GetOperationRequest, $1.Operation>(
-          '/targetlib.TargetLib/GetOperation',
-          ($1.GetOperationRequest value) => value.writeToBuffer(),
-          $1.Operation.fromBuffer);
-  static final _$listOperations =
-      $grpc.ClientMethod<$1.ListOperationsRequest, $1.OperationList>(
-          '/targetlib.TargetLib/ListOperations',
-          ($1.ListOperationsRequest value) => value.writeToBuffer(),
-          $1.OperationList.fromBuffer);
+          $1.RuntimeConfig.fromBuffer);
+  static final _$updateRuntimeConfig =
+      $grpc.ClientMethod<$1.UpdateRuntimeConfigRequest, $1.RuntimeConfig>(
+          '/targetlib.TargetLib/UpdateRuntimeConfig',
+          ($1.UpdateRuntimeConfigRequest value) => value.writeToBuffer(),
+          $1.RuntimeConfig.fromBuffer);
+  static final _$getIpInfo = $grpc.ClientMethod<$0.Empty, $1.IpInfoResponse>(
+      '/targetlib.TargetLib/GetIpInfo',
+      ($0.Empty value) => value.writeToBuffer(),
+      $1.IpInfoResponse.fromBuffer);
+  static final _$upsertRoute =
+      $grpc.ClientMethod<$1.UpsertRouteRequest, $1.RouteInfo>(
+          '/targetlib.TargetLib/UpsertRoute',
+          ($1.UpsertRouteRequest value) => value.writeToBuffer(),
+          $1.RouteInfo.fromBuffer);
+  static final _$deleteRoute =
+      $grpc.ClientMethod<$1.DeleteRouteRequest, $0.Empty>(
+          '/targetlib.TargetLib/DeleteRoute',
+          ($1.DeleteRouteRequest value) => value.writeToBuffer(),
+          $0.Empty.fromBuffer);
+  static final _$listRoutes = $grpc.ClientMethod<$0.Empty, $1.RouteList>(
+      '/targetlib.TargetLib/ListRoutes',
+      ($0.Empty value) => value.writeToBuffer(),
+      $1.RouteList.fromBuffer);
+  static final _$selectRouteNode =
+      $grpc.ClientMethod<$1.SelectRouteNodeRequest, $1.SelectNodeResponse>(
+          '/targetlib.TargetLib/SelectRouteNode',
+          ($1.SelectRouteNodeRequest value) => value.writeToBuffer(),
+          $1.SelectNodeResponse.fromBuffer);
 }
 
 @$pb.GrpcServiceName('targetlib.TargetLib')
@@ -545,20 +391,6 @@ abstract class TargetLibServiceBase extends $grpc.Service {
   $core.String get $name => 'targetlib.TargetLib';
 
   TargetLibServiceBase() {
-    $addMethod($grpc.ServiceMethod<$0.Empty, $1.VersionResponse>(
-        'GetVersion',
-        getVersion_Pre,
-        false,
-        false,
-        ($core.List<$core.int> value) => $0.Empty.fromBuffer(value),
-        ($1.VersionResponse value) => value.writeToBuffer()));
-    $addMethod($grpc.ServiceMethod<$0.Empty, $1.CapabilitiesResponse>(
-        'GetCapabilities',
-        getCapabilities_Pre,
-        false,
-        false,
-        ($core.List<$core.int> value) => $0.Empty.fromBuffer(value),
-        ($1.CapabilitiesResponse value) => value.writeToBuffer()));
     $addMethod($grpc.ServiceMethod<$0.Empty, $1.OperationResponse>(
         'Start',
         start_Pre,
@@ -608,14 +440,6 @@ abstract class TargetLibServiceBase extends $grpc.Service {
         true,
         ($core.List<$core.int> value) => $1.TrafficRequest.fromBuffer(value),
         ($1.TrafficStatus value) => value.writeToBuffer()));
-    $addMethod($grpc.ServiceMethod<$1.SelectOutboundRequest, $0.Empty>(
-        'SelectOutbound',
-        selectOutbound_Pre,
-        false,
-        false,
-        ($core.List<$core.int> value) =>
-            $1.SelectOutboundRequest.fromBuffer(value),
-        ($0.Empty value) => value.writeToBuffer()));
     $addMethod($grpc.ServiceMethod<$1.CloseConnectionRequest, $0.Empty>(
         'CloseConnection',
         closeConnection_Pre,
@@ -697,40 +521,6 @@ abstract class TargetLibServiceBase extends $grpc.Service {
             ($core.List<$core.int> value) =>
                 $1.SubscriptionId.fromBuffer(value),
             ($1.SubscriptionUpdateResult value) => value.writeToBuffer()));
-    $addMethod($grpc.ServiceMethod<$0.Empty, $1.RuntimeConfig>(
-        'GetRuntimeConfig',
-        getRuntimeConfig_Pre,
-        false,
-        false,
-        ($core.List<$core.int> value) => $0.Empty.fromBuffer(value),
-        ($1.RuntimeConfig value) => value.writeToBuffer()));
-    $addMethod(
-        $grpc.ServiceMethod<$1.UpdateRuntimeConfigRequest, $1.RuntimeConfig>(
-            'UpdateRuntimeConfig',
-            updateRuntimeConfig_Pre,
-            false,
-            false,
-            ($core.List<$core.int> value) =>
-                $1.UpdateRuntimeConfigRequest.fromBuffer(value),
-            ($1.RuntimeConfig value) => value.writeToBuffer()));
-    $addMethod(
-        $grpc.ServiceMethod<$1.TestOutboundRequest, $1.LatencyTestResult>(
-            'TestOutbound',
-            testOutbound_Pre,
-            false,
-            false,
-            ($core.List<$core.int> value) =>
-                $1.TestOutboundRequest.fromBuffer(value),
-            ($1.LatencyTestResult value) => value.writeToBuffer()));
-    $addMethod(
-        $grpc.ServiceMethod<$1.TestOutboundsRequest, $1.LatencyTestResult>(
-            'TestOutbounds',
-            testOutbounds_Pre,
-            false,
-            true,
-            ($core.List<$core.int> value) =>
-                $1.TestOutboundsRequest.fromBuffer(value),
-            ($1.LatencyTestResult value) => value.writeToBuffer()));
     $addMethod(
         $grpc.ServiceMethod<$1.ResolvedEndpointsRequest, $1.ResolvedEndpoints>(
             'GetResolvedEndpoints',
@@ -747,13 +537,6 @@ abstract class TargetLibServiceBase extends $grpc.Service {
         true,
         ($core.List<$core.int> value) => $0.Empty.fromBuffer(value),
         ($1.SubscriptionEvent value) => value.writeToBuffer()));
-    $addMethod($grpc.ServiceMethod<$0.Empty, $1.IpInfoResponse>(
-        'GetIpInfo',
-        getIpInfo_Pre,
-        false,
-        false,
-        ($core.List<$core.int> value) => $0.Empty.fromBuffer(value),
-        ($1.IpInfoResponse value) => value.writeToBuffer()));
     $addMethod($grpc.ServiceMethod<$0.Empty, $1.NodePool>(
         'GetNodePool',
         getNodePool_Pre,
@@ -761,126 +544,76 @@ abstract class TargetLibServiceBase extends $grpc.Service {
         false,
         ($core.List<$core.int> value) => $0.Empty.fromBuffer(value),
         ($1.NodePool value) => value.writeToBuffer()));
-    $addMethod($grpc.ServiceMethod<$0.Empty, $1.RuntimeState>(
-        'GetRuntimeState',
-        getRuntimeState_Pre,
+    $addMethod($grpc.ServiceMethod<$1.SelectNodeRequest, $1.SelectNodeResponse>(
+        'SelectNode',
+        selectNode_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) => $1.SelectNodeRequest.fromBuffer(value),
+        ($1.SelectNodeResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.Empty, $1.ProxyStatus>(
+        'GetProxyStatus',
+        getProxyStatus_Pre,
         false,
         false,
         ($core.List<$core.int> value) => $0.Empty.fromBuffer(value),
-        ($1.RuntimeState value) => value.writeToBuffer()));
-    $addMethod($grpc.ServiceMethod<$0.Empty, $1.RuntimeEvent>(
-        'SubscribeRuntimeEvents',
-        subscribeRuntimeEvents_Pre,
+        ($1.ProxyStatus value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.Empty, $1.RuntimeConfig>(
+        'GetRuntimeConfig',
+        getRuntimeConfig_Pre,
         false,
-        true,
+        false,
         ($core.List<$core.int> value) => $0.Empty.fromBuffer(value),
-        ($1.RuntimeEvent value) => value.writeToBuffer()));
+        ($1.RuntimeConfig value) => value.writeToBuffer()));
     $addMethod(
-        $grpc.ServiceMethod<$1.SetPolicyAutomationEnabledRequest, $1.Operation>(
-            'SetPolicyAutomationEnabled',
-            setPolicyAutomationEnabled_Pre,
+        $grpc.ServiceMethod<$1.UpdateRuntimeConfigRequest, $1.RuntimeConfig>(
+            'UpdateRuntimeConfig',
+            updateRuntimeConfig_Pre,
             false,
             false,
             ($core.List<$core.int> value) =>
-                $1.SetPolicyAutomationEnabledRequest.fromBuffer(value),
-            ($1.Operation value) => value.writeToBuffer()));
-    $addMethod($grpc.ServiceMethod<$0.Empty, $1.ServicePolicyList>(
-        'ListServicePolicies',
-        listServicePolicies_Pre,
+                $1.UpdateRuntimeConfigRequest.fromBuffer(value),
+            ($1.RuntimeConfig value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.Empty, $1.IpInfoResponse>(
+        'GetIpInfo',
+        getIpInfo_Pre,
         false,
         false,
         ($core.List<$core.int> value) => $0.Empty.fromBuffer(value),
-        ($1.ServicePolicyList value) => value.writeToBuffer()));
-    $addMethod($grpc.ServiceMethod<$1.UpsertServicePolicyRequest, $1.Operation>(
-        'UpsertServicePolicy',
-        upsertServicePolicy_Pre,
+        ($1.IpInfoResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$1.UpsertRouteRequest, $1.RouteInfo>(
+        'UpsertRoute',
+        upsertRoute_Pre,
         false,
         false,
         ($core.List<$core.int> value) =>
-            $1.UpsertServicePolicyRequest.fromBuffer(value),
-        ($1.Operation value) => value.writeToBuffer()));
-    $addMethod($grpc.ServiceMethod<$1.DeleteServicePolicyRequest, $1.Operation>(
-        'DeleteServicePolicy',
-        deleteServicePolicy_Pre,
+            $1.UpsertRouteRequest.fromBuffer(value),
+        ($1.RouteInfo value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$1.DeleteRouteRequest, $0.Empty>(
+        'DeleteRoute',
+        deleteRoute_Pre,
         false,
         false,
         ($core.List<$core.int> value) =>
-            $1.DeleteServicePolicyRequest.fromBuffer(value),
-        ($1.Operation value) => value.writeToBuffer()));
-    $addMethod($grpc.ServiceMethod<$1.SetNodePreferenceRequest, $1.Operation>(
-        'SetNodePreference',
-        setNodePreference_Pre,
+            $1.DeleteRouteRequest.fromBuffer(value),
+        ($0.Empty value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.Empty, $1.RouteList>(
+        'ListRoutes',
+        listRoutes_Pre,
         false,
         false,
-        ($core.List<$core.int> value) =>
-            $1.SetNodePreferenceRequest.fromBuffer(value),
-        ($1.Operation value) => value.writeToBuffer()));
+        ($core.List<$core.int> value) => $0.Empty.fromBuffer(value),
+        ($1.RouteList value) => value.writeToBuffer()));
     $addMethod(
-        $grpc.ServiceMethod<$1.RequestServiceEvaluationRequest, $1.Operation>(
-            'RequestServiceEvaluation',
-            requestServiceEvaluation_Pre,
+        $grpc.ServiceMethod<$1.SelectRouteNodeRequest, $1.SelectNodeResponse>(
+            'SelectRouteNode',
+            selectRouteNode_Pre,
             false,
             false,
             ($core.List<$core.int> value) =>
-                $1.RequestServiceEvaluationRequest.fromBuffer(value),
-            ($1.Operation value) => value.writeToBuffer()));
-    $addMethod($grpc.ServiceMethod<$1.ProposalCommandRequest, $1.Operation>(
-        'ApproveSwitchProposal',
-        approveSwitchProposal_Pre,
-        false,
-        false,
-        ($core.List<$core.int> value) =>
-            $1.ProposalCommandRequest.fromBuffer(value),
-        ($1.Operation value) => value.writeToBuffer()));
-    $addMethod($grpc.ServiceMethod<$1.ProposalCommandRequest, $1.Operation>(
-        'RejectSwitchProposal',
-        rejectSwitchProposal_Pre,
-        false,
-        false,
-        ($core.List<$core.int> value) =>
-            $1.ProposalCommandRequest.fromBuffer(value),
-        ($1.Operation value) => value.writeToBuffer()));
-    $addMethod($grpc.ServiceMethod<$1.ForceServiceBindingRequest, $1.Operation>(
-        'ForceServiceBinding',
-        forceServiceBinding_Pre,
-        false,
-        false,
-        ($core.List<$core.int> value) =>
-            $1.ForceServiceBindingRequest.fromBuffer(value),
-        ($1.Operation value) => value.writeToBuffer()));
-    $addMethod($grpc.ServiceMethod<$1.GetOperationRequest, $1.Operation>(
-        'GetOperation',
-        getOperation_Pre,
-        false,
-        false,
-        ($core.List<$core.int> value) =>
-            $1.GetOperationRequest.fromBuffer(value),
-        ($1.Operation value) => value.writeToBuffer()));
-    $addMethod($grpc.ServiceMethod<$1.ListOperationsRequest, $1.OperationList>(
-        'ListOperations',
-        listOperations_Pre,
-        false,
-        false,
-        ($core.List<$core.int> value) =>
-            $1.ListOperationsRequest.fromBuffer(value),
-        ($1.OperationList value) => value.writeToBuffer()));
+                $1.SelectRouteNodeRequest.fromBuffer(value),
+            ($1.SelectNodeResponse value) => value.writeToBuffer()));
   }
-
-  $async.Future<$1.VersionResponse> getVersion_Pre(
-      $grpc.ServiceCall $call, $async.Future<$0.Empty> $request) async {
-    return getVersion($call, await $request);
-  }
-
-  $async.Future<$1.VersionResponse> getVersion(
-      $grpc.ServiceCall call, $0.Empty request);
-
-  $async.Future<$1.CapabilitiesResponse> getCapabilities_Pre(
-      $grpc.ServiceCall $call, $async.Future<$0.Empty> $request) async {
-    return getCapabilities($call, await $request);
-  }
-
-  $async.Future<$1.CapabilitiesResponse> getCapabilities(
-      $grpc.ServiceCall call, $0.Empty request);
 
   $async.Future<$1.OperationResponse> start_Pre(
       $grpc.ServiceCall $call, $async.Future<$0.Empty> $request) async {
@@ -937,14 +670,6 @@ abstract class TargetLibServiceBase extends $grpc.Service {
 
   $async.Stream<$1.TrafficStatus> subscribeTraffic(
       $grpc.ServiceCall call, $1.TrafficRequest request);
-
-  $async.Future<$0.Empty> selectOutbound_Pre($grpc.ServiceCall $call,
-      $async.Future<$1.SelectOutboundRequest> $request) async {
-    return selectOutbound($call, await $request);
-  }
-
-  $async.Future<$0.Empty> selectOutbound(
-      $grpc.ServiceCall call, $1.SelectOutboundRequest request);
 
   $async.Future<$0.Empty> closeConnection_Pre($grpc.ServiceCall $call,
       $async.Future<$1.CloseConnectionRequest> $request) async {
@@ -1032,39 +757,6 @@ abstract class TargetLibServiceBase extends $grpc.Service {
   $async.Future<$1.SubscriptionUpdateResult> updateSubscription(
       $grpc.ServiceCall call, $1.SubscriptionId request);
 
-  $async.Future<$1.RuntimeConfig> getRuntimeConfig_Pre(
-      $grpc.ServiceCall $call, $async.Future<$0.Empty> $request) async {
-    return getRuntimeConfig($call, await $request);
-  }
-
-  $async.Future<$1.RuntimeConfig> getRuntimeConfig(
-      $grpc.ServiceCall call, $0.Empty request);
-
-  $async.Future<$1.RuntimeConfig> updateRuntimeConfig_Pre(
-      $grpc.ServiceCall $call,
-      $async.Future<$1.UpdateRuntimeConfigRequest> $request) async {
-    return updateRuntimeConfig($call, await $request);
-  }
-
-  $async.Future<$1.RuntimeConfig> updateRuntimeConfig(
-      $grpc.ServiceCall call, $1.UpdateRuntimeConfigRequest request);
-
-  $async.Future<$1.LatencyTestResult> testOutbound_Pre($grpc.ServiceCall $call,
-      $async.Future<$1.TestOutboundRequest> $request) async {
-    return testOutbound($call, await $request);
-  }
-
-  $async.Future<$1.LatencyTestResult> testOutbound(
-      $grpc.ServiceCall call, $1.TestOutboundRequest request);
-
-  $async.Stream<$1.LatencyTestResult> testOutbounds_Pre($grpc.ServiceCall $call,
-      $async.Future<$1.TestOutboundsRequest> $request) async* {
-    yield* testOutbounds($call, await $request);
-  }
-
-  $async.Stream<$1.LatencyTestResult> testOutbounds(
-      $grpc.ServiceCall call, $1.TestOutboundsRequest request);
-
   $async.Future<$1.ResolvedEndpoints> getResolvedEndpoints_Pre(
       $grpc.ServiceCall $call,
       $async.Future<$1.ResolvedEndpointsRequest> $request) async {
@@ -1082,14 +774,6 @@ abstract class TargetLibServiceBase extends $grpc.Service {
   $async.Stream<$1.SubscriptionEvent> subscribeSubscriptionEvents(
       $grpc.ServiceCall call, $0.Empty request);
 
-  $async.Future<$1.IpInfoResponse> getIpInfo_Pre(
-      $grpc.ServiceCall $call, $async.Future<$0.Empty> $request) async {
-    return getIpInfo($call, await $request);
-  }
-
-  $async.Future<$1.IpInfoResponse> getIpInfo(
-      $grpc.ServiceCall call, $0.Empty request);
-
   $async.Future<$1.NodePool> getNodePool_Pre(
       $grpc.ServiceCall $call, $async.Future<$0.Empty> $request) async {
     return getNodePool($call, await $request);
@@ -1098,109 +782,77 @@ abstract class TargetLibServiceBase extends $grpc.Service {
   $async.Future<$1.NodePool> getNodePool(
       $grpc.ServiceCall call, $0.Empty request);
 
-  $async.Future<$1.RuntimeState> getRuntimeState_Pre(
+  $async.Future<$1.SelectNodeResponse> selectNode_Pre($grpc.ServiceCall $call,
+      $async.Future<$1.SelectNodeRequest> $request) async {
+    return selectNode($call, await $request);
+  }
+
+  $async.Future<$1.SelectNodeResponse> selectNode(
+      $grpc.ServiceCall call, $1.SelectNodeRequest request);
+
+  $async.Future<$1.ProxyStatus> getProxyStatus_Pre(
       $grpc.ServiceCall $call, $async.Future<$0.Empty> $request) async {
-    return getRuntimeState($call, await $request);
+    return getProxyStatus($call, await $request);
   }
 
-  $async.Future<$1.RuntimeState> getRuntimeState(
+  $async.Future<$1.ProxyStatus> getProxyStatus(
       $grpc.ServiceCall call, $0.Empty request);
 
-  $async.Stream<$1.RuntimeEvent> subscribeRuntimeEvents_Pre(
-      $grpc.ServiceCall $call, $async.Future<$0.Empty> $request) async* {
-    yield* subscribeRuntimeEvents($call, await $request);
-  }
-
-  $async.Stream<$1.RuntimeEvent> subscribeRuntimeEvents(
-      $grpc.ServiceCall call, $0.Empty request);
-
-  $async.Future<$1.Operation> setPolicyAutomationEnabled_Pre(
-      $grpc.ServiceCall $call,
-      $async.Future<$1.SetPolicyAutomationEnabledRequest> $request) async {
-    return setPolicyAutomationEnabled($call, await $request);
-  }
-
-  $async.Future<$1.Operation> setPolicyAutomationEnabled(
-      $grpc.ServiceCall call, $1.SetPolicyAutomationEnabledRequest request);
-
-  $async.Future<$1.ServicePolicyList> listServicePolicies_Pre(
+  $async.Future<$1.RuntimeConfig> getRuntimeConfig_Pre(
       $grpc.ServiceCall $call, $async.Future<$0.Empty> $request) async {
-    return listServicePolicies($call, await $request);
+    return getRuntimeConfig($call, await $request);
   }
 
-  $async.Future<$1.ServicePolicyList> listServicePolicies(
+  $async.Future<$1.RuntimeConfig> getRuntimeConfig(
       $grpc.ServiceCall call, $0.Empty request);
 
-  $async.Future<$1.Operation> upsertServicePolicy_Pre($grpc.ServiceCall $call,
-      $async.Future<$1.UpsertServicePolicyRequest> $request) async {
-    return upsertServicePolicy($call, await $request);
-  }
-
-  $async.Future<$1.Operation> upsertServicePolicy(
-      $grpc.ServiceCall call, $1.UpsertServicePolicyRequest request);
-
-  $async.Future<$1.Operation> deleteServicePolicy_Pre($grpc.ServiceCall $call,
-      $async.Future<$1.DeleteServicePolicyRequest> $request) async {
-    return deleteServicePolicy($call, await $request);
-  }
-
-  $async.Future<$1.Operation> deleteServicePolicy(
-      $grpc.ServiceCall call, $1.DeleteServicePolicyRequest request);
-
-  $async.Future<$1.Operation> setNodePreference_Pre($grpc.ServiceCall $call,
-      $async.Future<$1.SetNodePreferenceRequest> $request) async {
-    return setNodePreference($call, await $request);
-  }
-
-  $async.Future<$1.Operation> setNodePreference(
-      $grpc.ServiceCall call, $1.SetNodePreferenceRequest request);
-
-  $async.Future<$1.Operation> requestServiceEvaluation_Pre(
+  $async.Future<$1.RuntimeConfig> updateRuntimeConfig_Pre(
       $grpc.ServiceCall $call,
-      $async.Future<$1.RequestServiceEvaluationRequest> $request) async {
-    return requestServiceEvaluation($call, await $request);
+      $async.Future<$1.UpdateRuntimeConfigRequest> $request) async {
+    return updateRuntimeConfig($call, await $request);
   }
 
-  $async.Future<$1.Operation> requestServiceEvaluation(
-      $grpc.ServiceCall call, $1.RequestServiceEvaluationRequest request);
+  $async.Future<$1.RuntimeConfig> updateRuntimeConfig(
+      $grpc.ServiceCall call, $1.UpdateRuntimeConfigRequest request);
 
-  $async.Future<$1.Operation> approveSwitchProposal_Pre($grpc.ServiceCall $call,
-      $async.Future<$1.ProposalCommandRequest> $request) async {
-    return approveSwitchProposal($call, await $request);
+  $async.Future<$1.IpInfoResponse> getIpInfo_Pre(
+      $grpc.ServiceCall $call, $async.Future<$0.Empty> $request) async {
+    return getIpInfo($call, await $request);
   }
 
-  $async.Future<$1.Operation> approveSwitchProposal(
-      $grpc.ServiceCall call, $1.ProposalCommandRequest request);
+  $async.Future<$1.IpInfoResponse> getIpInfo(
+      $grpc.ServiceCall call, $0.Empty request);
 
-  $async.Future<$1.Operation> rejectSwitchProposal_Pre($grpc.ServiceCall $call,
-      $async.Future<$1.ProposalCommandRequest> $request) async {
-    return rejectSwitchProposal($call, await $request);
+  $async.Future<$1.RouteInfo> upsertRoute_Pre($grpc.ServiceCall $call,
+      $async.Future<$1.UpsertRouteRequest> $request) async {
+    return upsertRoute($call, await $request);
   }
 
-  $async.Future<$1.Operation> rejectSwitchProposal(
-      $grpc.ServiceCall call, $1.ProposalCommandRequest request);
+  $async.Future<$1.RouteInfo> upsertRoute(
+      $grpc.ServiceCall call, $1.UpsertRouteRequest request);
 
-  $async.Future<$1.Operation> forceServiceBinding_Pre($grpc.ServiceCall $call,
-      $async.Future<$1.ForceServiceBindingRequest> $request) async {
-    return forceServiceBinding($call, await $request);
+  $async.Future<$0.Empty> deleteRoute_Pre($grpc.ServiceCall $call,
+      $async.Future<$1.DeleteRouteRequest> $request) async {
+    return deleteRoute($call, await $request);
   }
 
-  $async.Future<$1.Operation> forceServiceBinding(
-      $grpc.ServiceCall call, $1.ForceServiceBindingRequest request);
+  $async.Future<$0.Empty> deleteRoute(
+      $grpc.ServiceCall call, $1.DeleteRouteRequest request);
 
-  $async.Future<$1.Operation> getOperation_Pre($grpc.ServiceCall $call,
-      $async.Future<$1.GetOperationRequest> $request) async {
-    return getOperation($call, await $request);
+  $async.Future<$1.RouteList> listRoutes_Pre(
+      $grpc.ServiceCall $call, $async.Future<$0.Empty> $request) async {
+    return listRoutes($call, await $request);
   }
 
-  $async.Future<$1.Operation> getOperation(
-      $grpc.ServiceCall call, $1.GetOperationRequest request);
+  $async.Future<$1.RouteList> listRoutes(
+      $grpc.ServiceCall call, $0.Empty request);
 
-  $async.Future<$1.OperationList> listOperations_Pre($grpc.ServiceCall $call,
-      $async.Future<$1.ListOperationsRequest> $request) async {
-    return listOperations($call, await $request);
+  $async.Future<$1.SelectNodeResponse> selectRouteNode_Pre(
+      $grpc.ServiceCall $call,
+      $async.Future<$1.SelectRouteNodeRequest> $request) async {
+    return selectRouteNode($call, await $request);
   }
 
-  $async.Future<$1.OperationList> listOperations(
-      $grpc.ServiceCall call, $1.ListOperationsRequest request);
+  $async.Future<$1.SelectNodeResponse> selectRouteNode(
+      $grpc.ServiceCall call, $1.SelectRouteNodeRequest request);
 }

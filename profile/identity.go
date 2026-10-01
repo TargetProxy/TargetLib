@@ -4,7 +4,8 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
-	"sort"
+	"slices"
+	"strings"
 )
 
 // WithSource gives nodes a subscription-scoped identity based on their
@@ -28,6 +29,6 @@ func WithSource(source Profile, subscriptionID string) Profile {
 		seen[node.ID] = true
 		result.Nodes = append(result.Nodes, node)
 	}
-	sort.Slice(result.Nodes, func(i, j int) bool { return result.Nodes[i].ID < result.Nodes[j].ID })
+	slices.SortFunc(result.Nodes, func(a, b Node) int { return strings.Compare(a.ID, b.ID) })
 	return result
 }

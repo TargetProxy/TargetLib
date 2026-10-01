@@ -2,7 +2,7 @@ package config
 
 import (
 	"fmt"
-	"sort"
+	"slices"
 	"strings"
 )
 
@@ -39,7 +39,7 @@ func NormalizeRuntimeModel(model RuntimeModel) (RuntimeModel, error) {
 			}
 			selector.NodeIDs = append(selector.NodeIDs, "direct")
 		}
-		sort.Strings(selector.NodeIDs)
+		slices.Sort(selector.NodeIDs)
 		found := false
 		seen := make(map[string]bool)
 		for _, id := range selector.NodeIDs {
@@ -63,6 +63,9 @@ func NormalizeRuntimeModel(model RuntimeModel) (RuntimeModel, error) {
 	for index, route := range model.ServiceRoutes {
 		if strings.TrimSpace(route.ServiceID) == "" || route.ServiceID != strings.TrimSpace(route.ServiceID) {
 			return fail("service ID is required")
+		}
+		if route.ServiceID == DefaultServiceID {
+			return fail("default service takes no route")
 		}
 		if _, ok := routes[route.ServiceID]; ok {
 			return fail("duplicate service")
@@ -88,12 +91,26 @@ func NormalizeRuntimeModel(model RuntimeModel) (RuntimeModel, error) {
 			}
 			route.Domains[i] = domain
 		}
-		sort.Strings(route.Domains)
+		slices.Sort(route.Domains)
 		routes[route.ServiceID] = route
 		model.ServiceRoutes[index] = route
 	}
 	bound := make(map[string]bool)
 	for _, binding := range model.ServiceBindings {
+		if binding.ServiceID == DefaultServiceID {
+			if binding.Selector != "proxy" {
+				return fail("default service binds the proxy selector")
+			}
+			selector, ok := selectors["proxy"]
+			if !ok {
+				return fail("default service requires the proxy selector")
+			}
+			if binding.Outbound != selector.Selected {
+				return fail("binding and selector selection disagree")
+			}
+			bound[binding.ServiceID] = true
+			continue
+		}
 		route, ok := routes[binding.ServiceID]
 		if !ok || route.Selector != binding.Selector || bound[binding.ServiceID] {
 			return fail("invalid or duplicate service binding")
@@ -108,10 +125,10 @@ func NormalizeRuntimeModel(model RuntimeModel) (RuntimeModel, error) {
 	for _, selector := range selectors {
 		model.Selectors = append(model.Selectors, selector)
 	}
-	sort.Slice(model.Selectors, func(i, j int) bool { return model.Selectors[i].Tag < model.Selectors[j].Tag })
+	slices.SortFunc(model.Selectors, func(a, b Selector) int { return strings.Compare(a.Tag, b.Tag) })
 	// More-specific suffixes take precedence; lexical order breaks ties.
-	sort.Slice(model.ServiceRoutes, func(i, j int) bool {
-		return model.ServiceRoutes[i].ServiceID < model.ServiceRoutes[j].ServiceID
+	slices.SortFunc(model.ServiceRoutes, func(a, b ServiceRoute) int {
+		return strings.Compare(a.ServiceID, b.ServiceID)
 	})
 	return model, nil
 }

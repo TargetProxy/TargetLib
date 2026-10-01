@@ -14,9 +14,8 @@ import (
 )
 
 const (
-	badgerSchemaVersion  byte = 2
-	badgerPrefix              = "subscription/"
-	badgerMetadataPrefix      = "meta/runtime/"
+	badgerPrefix         = "subscription/"
+	badgerMetadataPrefix = "meta/runtime/"
 )
 
 type BadgerStore struct {
@@ -59,8 +58,7 @@ func OpenBadgerStore(path string, key []byte) (*BadgerStore, error) {
 		WithNumCompactors(2).
 		WithValueLogFileSize(8 << 20).
 		WithValueLogMaxEntries(10000).
-		WithNumGoroutines(2).
-		WithExternalMagic(uint16(badgerSchemaVersion))
+		WithNumGoroutines(2)
 	db, err := badger.Open(options)
 	if err != nil {
 		return nil, fmt.Errorf("open subscription database: %w", err)
@@ -105,11 +103,10 @@ func (s *BadgerStore) encodeSubscription(item Subscription) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	value := append([]byte{badgerSchemaVersion}, encoded...)
-	if int64(len(value)) >= s.db.MaxBatchSize() {
+	if int64(len(encoded)) >= s.db.MaxBatchSize() {
 		return nil, fmt.Errorf("subscription record exceeds %d bytes", s.db.MaxBatchSize())
 	}
-	return value, nil
+	return encoded, nil
 }
 
 func (s *BadgerStore) Update(ctx context.Context, update func(StoreTx) error) error {
@@ -164,11 +161,8 @@ func metadataKey(key string) []byte {
 }
 
 func (s *BadgerStore) decodeSubscription(value []byte) (Subscription, error) {
-	if len(value) == 0 || value[0] != badgerSchemaVersion {
-		return Subscription{}, errors.New("unsupported subscription record version")
-	}
 	var item Subscription
-	if err := s.decode.Unmarshal(value[1:], &item); err != nil {
+	if err := s.decode.Unmarshal(value, &item); err != nil {
 		return Subscription{}, err
 	}
 	if err := restoreNodeOutbounds(&item.Profile); err != nil {

@@ -37,12 +37,20 @@ func (s runtimeConfigStore) SaveSnapshot(ctx context.Context, value *targetlibap
 	})
 }
 
-func (s runtimeConfigStore) saveSnapshotTx(tx subscriptions.StoreTx, value *targetlibapi.RuntimeConfig, nodes []targetprofile.Node) error {
-	content, err := proto.Marshal(value)
+func marshalRuntimeSnapshot(value *targetlibapi.RuntimeConfig, nodes []targetprofile.Node) (content, nodeContent []byte, err error) {
+	content, err = proto.Marshal(value)
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
-	nodeContent, err := json.Marshal(nodes)
+	nodeContent, err = json.Marshal(nodes)
+	if err != nil {
+		return nil, nil, err
+	}
+	return content, nodeContent, nil
+}
+
+func (s runtimeConfigStore) saveSnapshotTx(tx subscriptions.StoreTx, value *targetlibapi.RuntimeConfig, nodes []targetprofile.Node) error {
+	content, nodeContent, err := marshalRuntimeSnapshot(value, nodes)
 	if err != nil {
 		return err
 	}

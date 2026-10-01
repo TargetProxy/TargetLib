@@ -34,6 +34,7 @@ type program struct {
 
 	mu     sync.Mutex
 	server *manager.Server
+	done   chan struct{}
 }
 
 func main() {
@@ -102,7 +103,10 @@ func (p *program) Start(service.Service) error {
 		return err
 	}
 	p.server = server
+	done := make(chan struct{})
+	p.done = done
 	go func() {
+		defer close(done)
 		serveErr := server.Serve()
 		if serveErr != nil && !errors.Is(serveErr, grpc.ErrServerStopped) && p.logger != nil {
 			_ = p.logger.Errorf("gRPC server stopped: %v", serveErr)
@@ -115,10 +119,15 @@ func (p *program) Stop(service.Service) error {
 	// 先从程序状态中摘除服务，再关闭实例，避免并发启动看到半关闭状态。
 	p.mu.Lock()
 	server := p.server
+	done := p.done
 	p.server = nil
+	p.done = nil
 	p.mu.Unlock()
 	if server != nil {
 		server.Close()
+	}
+	if done != nil {
+		<-done
 	}
 	return nil
 }

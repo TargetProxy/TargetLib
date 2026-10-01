@@ -4,7 +4,7 @@ import (
 	"context"
 	"net"
 	"net/netip"
-	"sort"
+	"slices"
 )
 
 type Resolver interface {
@@ -41,6 +41,6 @@ func ResolveEndpoints(ctx context.Context, resolver Resolver, nodes []Node) []st
 	for address := range set {
 		out = append(out, address)
 	}
-	sort.Strings(out)
+	slices.Sort(out)
 	return out
 }

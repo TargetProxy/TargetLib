@@ -178,15 +178,29 @@ function Wait-ServiceRemoved {
     throw "Service $Name was not removed within ${Seconds}s."
 }
 
+function Wait-ProcessRemoved {
+    param([int]$ProcessId, [int]$Seconds)
+    if ($ProcessId -le 0) { return }
+    try {
+        Wait-Process -Id $ProcessId -Timeout $Seconds -ErrorAction Stop
+    } catch [Microsoft.PowerShell.Commands.ProcessCommandException] {
+        if (Get-Process -Id $ProcessId -ErrorAction SilentlyContinue) {
+            throw "TargetLib process $ProcessId was not released within ${Seconds}s."
+        }
+    }
+}
+
 function Remove-RegisteredService {
     param([string]$Name, [int]$Seconds)
     $service = Get-Service -Name $Name -ErrorAction SilentlyContinue
     if (-not $service) { return }
+    $processId = [int]((Get-CimInstance Win32_Service -Filter "Name='$Name'" -ErrorAction SilentlyContinue).ProcessId)
     if ($service.Status -ne [ServiceProcess.ServiceControllerStatus]::Stopped) {
         Stop-Service -Name $Name -Force
         Wait-ServiceState -Name $Name -Status Stopped -Seconds $Seconds
     }
     $service.Dispose()
+    Wait-ProcessRemoved -ProcessId $processId -Seconds $Seconds
     & sc.exe delete $Name | Out-Host
     if ($LASTEXITCODE -ne 0) {
         throw "sc.exe delete $Name failed with exit code $LASTEXITCODE."

@@ -34,6 +34,10 @@ type Node struct {
 	Outbound *option.Outbound `json:"-" cbor:"-"`
 }
 
+func (n *Node) IsAvailable() bool {
+	return n.Outbound != nil && n.Phase != NodeFailed
+}
+
 // Profile 是传给 config.Build 的节点快照。
 type Profile struct {
 	Nodes []Node

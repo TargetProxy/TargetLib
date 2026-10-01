@@ -4,8 +4,10 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"slices"
+	"strings"
+
 	targetprofile "github.com/loafman1120/TargetLib/profile"
-	"sort"
 )
 
 type NodePool struct {
@@ -21,7 +23,7 @@ func (m *Manager) NodePool() NodePool {
 			pool.Nodes = append(pool.Nodes, cloneNodes(item.Profile.Nodes)...)
 		}
 	}
-	sort.Slice(pool.Nodes, func(i, j int) bool { return pool.Nodes[i].ID < pool.Nodes[j].ID })
+	slices.SortFunc(pool.Nodes, func(a, b targetprofile.Node) int { return strings.Compare(a.ID, b.ID) })
 	content, _ := json.Marshal(pool.Nodes)
 	sum := sha256.Sum256(content)
 	pool.Revision = hex.EncodeToString(sum[:])

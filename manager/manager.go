@@ -6,8 +6,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"runtime"
-	"runtime/debug"
 	"sync"
 	"time"
 
@@ -21,7 +19,6 @@ import (
 	"github.com/sagernet/sing/service"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -41,26 +38,19 @@ type Manager struct {
 	subscriptionDone   chan struct{}
 	subscriptionStore  io.Closer
 
-	opMu           sync.Mutex
-	configMu       sync.RWMutex
-	config         string
-	runtimeConfig  *targetlibapi.RuntimeConfig
-	runtimeNodes   []targetprofile.Node
-	applyState     targetlibapi.RuntimeState
-	appliedConfig  *targetlibapi.RuntimeConfig
-	checkConfig    func(context.Context, string) error
-	readStatus     func() (*daemon.ServiceStatus, error)
-	runtimeStore   runtimeConfigStore
-	cacheFilePath  string
-	applyConfig    func(string) error
-	latency        latencyService
-	latencyMu      sync.Mutex
-	latencyGroups  map[string]chan struct{}
-	close          sync.Once
-	runtimeState   *runtimeStateStore
-	probeContext   func(context.Context) context.Context
-	probeTransport func(context.Context, targetprofile.Node) (*nodeProbeTransport, error)
-	controlToken   string
+	opMu          sync.Mutex
+	configMu      sync.RWMutex
+	config        string
+	runtimeConfig *targetlibapi.RuntimeConfig
+	runtimeNodes  []targetprofile.Node
+	appliedConfig *targetlibapi.RuntimeConfig
+	checkConfig   func(context.Context, string) error
+	readStatus    func() (*daemon.ServiceStatus, error)
+	runtimeStore  runtimeConfigStore
+	cacheFilePath string
+	applyConfig   func(string) error
+	close         sync.Once
+	controlToken  string
 }
 
 func Setup(options Options) error {
@@ -130,22 +120,15 @@ func New(ctx context.Context, options Options) (*Manager, error) {
 		return nil, err
 	}
 	m := &Manager{
-		Handler: subscriptioncore.NewHandler(subscriptionManager), subscriptions: subscriptionManager,
-		subscriptionCancel: cancelSubscriptions, subscriptionDone: make(chan struct{}),
-		runtimeConfig: runtimeConfig, runtimeStore: runtimeStore,
-		cacheFilePath: cacheFilePath,
-		controlToken:  controlToken,
+		Handler:            subscriptioncore.NewHandler(subscriptionManager),
+		subscriptions:      subscriptionManager,
+		subscriptionCancel: cancelSubscriptions,
+		subscriptionDone:   make(chan struct{}),
+		runtimeConfig:      runtimeConfig,
+		runtimeStore:       runtimeStore,
+		cacheFilePath:      cacheFilePath,
+		controlToken:       controlToken,
 	}
-	m.runtimeState, err = newRuntimeStateStore(ctx, sharedStore)
-	if err != nil {
-		cancelSubscriptions()
-		subscriptionManager.Close()
-		if closer, ok := sharedStore.(io.Closer); ok {
-			_ = closer.Close()
-		}
-		return nil, err
-	}
-	m.probeContext = func(probeCtx context.Context) context.Context { return serviceContext(probeCtx, options) }
 	if closer, ok := sharedStore.(io.Closer); ok {
 		m.subscriptionStore = closer
 	}
@@ -169,9 +152,6 @@ func New(ctx context.Context, options Options) (*Manager, error) {
 		subscriptionManager.Close()
 		return nil, err
 	}
-	m.applyState.Phase = targetlibapi.ConfigApplyPhase_CONFIG_APPLY_PHASE_READY
-	m.latency = m.daemon
-	m.watchRuntimeState(subscriptionContext)
 	go func() {
 		defer close(m.subscriptionDone)
 		_ = subscriptionManager.Run(subscriptionContext)
@@ -206,27 +186,6 @@ func serviceContext(ctx context.Context, options Options) context.Context {
 		service.MustRegister[adapter.PlatformInterface](ctx, platform)
 	}
 	return ctx
-}
-
-func (m *Manager) GetVersion(context.Context, *emptypb.Empty) (*targetlibapi.VersionResponse, error) {
-	return &targetlibapi.VersionResponse{
-		TargetlibVersion: projectVersion(),
-		SingBoxVersion:   libbox.Version(),
-		GoVersion:        runtime.Version(),
-		ProtocolVersion:  ProtocolVersion,
-	}, nil
-}
-
-func (m *Manager) GetCapabilities(context.Context, *emptypb.Empty) (*targetlibapi.CapabilitiesResponse, error) {
-	return &targetlibapi.CapabilitiesResponse{
-		Platform:               runtime.GOOS,
-		PlatformVpn:            runtime.GOOS == "android" || runtime.GOOS == "ios",
-		SubscriptionManagement: true,
-		RealTimeTraffic:        true,
-		PolicyAutomation:       true,
-		ServiceProbes:          true,
-		PolicyAutomationApi:    true,
-	}, nil
 }
 
 func (m *Manager) Start(_ context.Context, _ *emptypb.Empty) (*targetlibapi.OperationResponse, error) {
@@ -289,7 +248,6 @@ func (m *Manager) StopService() error {
 	m.configMu.Lock()
 	m.appliedConfig = nil
 	m.configMu.Unlock()
-	m.publishRuntime(&targetlibapi.RuntimeEvent{Type: targetlibapi.RuntimeEventType_RUNTIME_EVENT_TYPE_STOPPED})
 	return nil
 }
 
@@ -360,13 +318,6 @@ func (m *Manager) UpdateSubscription(ctx context.Context, request *targetlibapi.
 	return result, nil
 }
 
-func (m *Manager) SelectOutbound(ctx context.Context, request *targetlibapi.SelectOutboundRequest) (*emptypb.Empty, error) {
-	if request == nil || request.GetGroupTag() == "" || request.GetOutboundTag() == "" {
-		return nil, status.Error(codes.InvalidArgument, "group_tag and outbound_tag are required")
-	}
-	return m.selectRuntimeOutbound(ctx, request)
-}
-
 func (m *Manager) CloseConnection(ctx context.Context, request *targetlibapi.CloseConnectionRequest) (*emptypb.Empty, error) {
 	if request == nil || request.GetId() == "" {
 		return nil, status.Error(codes.InvalidArgument, "connection id is required")
@@ -426,9 +377,6 @@ func (platformHandler) ConnectSSHAgent() (int32, error) {
 func (m *Manager) Close() {
 	m.close.Do(func() {
 		m.subscriptionCancel()
-		if m.runtimeState != nil {
-			m.runtimeState.close()
-		}
 		<-m.subscriptionDone
 		m.subscriptions.Close()
 		m.opMu.Lock()
@@ -444,6 +392,10 @@ func (m *Manager) Close() {
 	})
 }
 
+// NotifyNetworkChanged is retained for platform hosts; network changes do not
+// alter the shared runtime model and therefore require no manager-side action.
+func (m *Manager) NotifyNetworkChanged() {}
+
 func (m *Manager) operationResponse() (*targetlibapi.OperationResponse, error) {
 	current, err := m.currentStatus()
 	if err != nil {
@@ -452,11 +404,12 @@ func (m *Manager) operationResponse() (*targetlibapi.OperationResponse, error) {
 	return &targetlibapi.OperationResponse{State: managerState(current)}, nil
 }
 
-var errStatusReceived = errors.New("status received")
-
 func (m *Manager) currentStatus() (*daemon.ServiceStatus, error) {
 	if m.readStatus != nil {
 		return m.readStatus()
+	}
+	if m.daemon != nil {
+		return m.daemon.Status()
 	}
 	receiver := new(firstStatusReceiver)
 	err := m.started.SubscribeServiceStatus(&emptypb.Empty{}, receiver)
@@ -490,56 +443,29 @@ func managerState(source *daemon.ServiceStatus) *targetlibapi.ServiceState {
 	}
 }
 
-type firstStatusReceiver struct {
-	status *daemon.ServiceStatus
-}
-
-func (r *firstStatusReceiver) Send(value *daemon.ServiceStatus) error {
-	r.status = value
-	return errStatusReceived
-}
-func (*firstStatusReceiver) SetHeader(metadata.MD) error  { return nil }
-func (*firstStatusReceiver) SendHeader(metadata.MD) error { return nil }
-func (*firstStatusReceiver) SetTrailer(metadata.MD)       {}
-func (*firstStatusReceiver) Context() context.Context     { return context.Background() }
-func (*firstStatusReceiver) SendMsg(any) error            { return nil }
-func (*firstStatusReceiver) RecvMsg(any) error            { return io.EOF }
-
-type streamRelay struct{ target grpc.ServerStream }
-
-func (r streamRelay) SetHeader(md metadata.MD) error  { return r.target.SetHeader(md) }
-func (r streamRelay) SendHeader(md metadata.MD) error { return r.target.SendHeader(md) }
-func (r streamRelay) SetTrailer(md metadata.MD)       { r.target.SetTrailer(md) }
-func (r streamRelay) Context() context.Context        { return r.target.Context() }
-func (r streamRelay) SendMsg(value any) error         { return r.target.SendMsg(value) }
-func (r streamRelay) RecvMsg(value any) error         { return r.target.RecvMsg(value) }
-
 type statusRelay struct {
-	streamRelay
-	server grpc.ServerStreamingServer[targetlibapi.ServiceState]
-}
-
-func newStatusRelay(server grpc.ServerStreamingServer[targetlibapi.ServiceState]) *statusRelay {
-	return &statusRelay{streamRelay: streamRelay{target: server}, server: server}
+	grpc.ServerStreamingServer[targetlibapi.ServiceState]
 }
 
 type logRelay struct {
-	streamRelay
-	server grpc.ServerStreamingServer[targetlibapi.LogBatch]
+	grpc.ServerStreamingServer[targetlibapi.LogBatch]
 }
 
 type trafficRelay struct {
-	streamRelay
-	server   grpc.ServerStreamingServer[targetlibapi.TrafficStatus]
+	grpc.ServerStreamingServer[targetlibapi.TrafficStatus]
 	interval time.Duration
 }
 
+func newStatusRelay(server grpc.ServerStreamingServer[targetlibapi.ServiceState]) *statusRelay {
+	return &statusRelay{server}
+}
+
 func newLogRelay(server grpc.ServerStreamingServer[targetlibapi.LogBatch]) *logRelay {
-	return &logRelay{streamRelay: streamRelay{target: server}, server: server}
+	return &logRelay{server}
 }
 
 func newTrafficRelay(server grpc.ServerStreamingServer[targetlibapi.TrafficStatus], interval time.Duration) *trafficRelay {
-	return &trafficRelay{streamRelay: streamRelay{target: server}, server: server, interval: interval}
+	return &trafficRelay{ServerStreamingServer: server, interval: interval}
 }
 
 func (r *logRelay) Send(value *daemon.Log) error {
@@ -557,15 +483,15 @@ func (r *logRelay) Send(value *daemon.Log) error {
 	if len(batch.Messages) == 0 && !batch.Reset_ {
 		return nil
 	}
-	return r.server.Send(batch)
+	return r.ServerStreamingServer.Send(batch)
 }
 
 func (r *statusRelay) Send(value *daemon.ServiceStatus) error {
-	return r.server.Send(managerState(value))
+	return r.ServerStreamingServer.Send(managerState(value))
 }
 
 func (r *trafficRelay) Send(value *daemon.Status) error {
-	return r.server.Send(trafficStatus(value, r.interval, time.Now()))
+	return r.ServerStreamingServer.Send(trafficStatus(value, r.interval, time.Now()))
 }
 
 const (
@@ -604,13 +530,6 @@ func bytesPerSecond(bytes int64, interval time.Duration) int64 {
 		return 0
 	}
 	return int64(float64(bytes) / interval.Seconds())
-}
-
-func projectVersion() string {
-	if info, ok := debug.ReadBuildInfo(); ok && info.Main.Version != "" && info.Main.Version != "(devel)" {
-		return info.Main.Version
-	}
-	return "devel"
 }
 
 var _ daemon.PlatformHandler = platformHandler{}

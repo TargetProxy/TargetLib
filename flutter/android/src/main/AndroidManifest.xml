@@ -2,13 +2,13 @@
           package="top.loafman.targetlib">
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE"/>
     <application>
         <service
                 android:name=".TargetlibVpnService"
                 android:process=":targetlib"
                 android:permission="android.permission.BIND_VPN_SERVICE"
-                android:foregroundServiceType="systemExempted"
+                android:foregroundServiceType="connectedDevice"
                 android:exported="false">
             <intent-filter>
                 <action android:name="android.net.VpnService"/>

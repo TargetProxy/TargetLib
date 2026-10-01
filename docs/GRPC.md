@@ -1,148 +1,302 @@
-# gRPC 能力总览
+# gRPC 接口
 
-TargetLib gRPC 是共享 Go 核心的远程控制与数据传输层，共提供 **41 个 RPC**，其中 **6 个服务端流式 RPC**。当前协议版本为 **14**，协议定义见 [`targetlib.proto`](../api/TargetLib/targetlib.proto)。
+TargetLib gRPC 为图形化代理客户端提供远程控制接口。
+接口分两层：**基础代理**（单节点）、**规则分流**（多规则多节点）。
+协议定义见 [`targetlib.proto`](../api/TargetLib/targetlib.proto)，架构见 [DESIGN.md](DESIGN.md)。
 
-本文是传输契约文档：系统分层和部署见 [DESIGN.md](DESIGN.md)，Smart Connect 领域状态机和不变量见
-[SMART_CONNECT_ARCHITECTURE.md](SMART_CONNECT_ARCHITECTURE.md)。RPC handler 不承载策略，只负责认证、基础校验、
-wire/领域类型转换以及调用应用服务。
+---
 
-| 分类 | RPC | 能力 |
+## 接口分层
+
+| 层级 | 功能 | RPC 数量 | 对应 sing-box 模式 |
+| --- | --- | --- | --- |
+| **Layer 1: 基础代理** | 订阅、切换、启停 | 20 个 | route_mode = DIRECT / ALL |
+| **Layer 2: 规则分流** | 域名规则管理 | 4 个 | route_mode = RULE |
+
+---
+
+## Layer 1: 核心代理
+
+### 生命周期
+
+| RPC | 类型 | 说明 |
 | --- | --- | --- |
-| 版本与能力 | `GetVersion`、`GetCapabilities` | 查询 TargetLib、sing-box、Go、协议版本及平台能力。 |
-| 生命周期 | `Start`、`Restart`、`Stop`、`GetState`、`SubscribeState`* | 控制 sing-box，查询或订阅 `idle/starting/running/stopping/failed` 状态。 |
-| 日志与流量 | `SubscribeLogs`*、`SubscribeTraffic`* | 流式接收分级日志，以及实时速率、累计流量和连接数；流量采样间隔为 250–5000 ms。 |
-| 连接控制 | `SelectOutbound`、`CloseConnection`、`CloseAllConnections` | 切换 selector 出站，关闭指定或全部连接。 |
-| 订阅管理 | `ListSubscriptions`、`GetSubscription`、`AddSubscription`、`RemoveSubscription`、`RenameSubscription`、`SetSubscriptionEnabled`、`ConfigureSubscriptionUpdates`、`UpdateSubscription` | 管理订阅、自动更新和手动更新；返回状态、节点、流量额度及服务商元数据。显式更新还可返回原始与生成配置用于诊断。 |
-| 节点池 | `GetNodePool` | 返回所有启用订阅的统一节点池、来源和稳定节点 ID。 |
-| 订阅事件 | `SubscribeSubscriptionEvents`*、`GetResolvedEndpoints` | 订阅添加、更新、删除及阶段事件，查询节点解析后的服务器地址。 |
-| 运行时配置 | `GetRuntimeConfig`、`UpdateRuntimeConfig` | 管理监听地址、mixed 端口、Mixed/TUN、IPv6 和路由模式；校验并持久化，运行中热加载，失败时回滚。 |
-| 延迟测试 | `TestOutbound`、`TestOutbounds`* | 测试单个或批量节点；区分成功、失败、超时和未找到，超时上限 60 秒，并发度最多 4。 |
-| 出口信息 | `GetIpInfo` | 查询后端出口的 IP、国家、城市、ISP、组织和 AS 信息。 |
-| 运行状态与事件 | `GetRuntimeState`、`SubscribeRuntimeEvents`* | 唯一权威快照和事件流，包含配置阶段、节点池、绑定、策略、proposal、operation、任务和质量历史。 |
-| 策略自动化 | `SetPolicyAutomationEnabled`、`ListServicePolicies`、`UpsertServicePolicy`、`DeleteServicePolicy` | 由核心持久化和执行完整服务策略、探测、候选评估及切换约束。 |
-| 节点偏好与评估 | `SetNodePreference`、`RequestServiceEvaluation` | 提交核心意图，返回持久化 operation。 |
-| 切换审批 | `ApproveSwitchProposal`、`RejectSwitchProposal`、`ForceServiceBinding` | 审批或强制表达切换意图，核心负责校验、应用和回滚。 |
-| 操作查询 | `GetOperation`、`ListOperations` | 查询后台任务状态和最终结果。 |
+| `Start` | 命令 | 启动 sing-box；重复调用返回 `FAILED_PRECONDITION` |
+| `Stop` | 命令 | 停止 sing-box |
+| `Restart` | 命令 | 重启（热加载配置）|
+| `GetState` | 查询 | 运行状态：idle/starting/running/stopping/failed |
+| `SubscribeState` | 流 | 监听状态变化 |
+| `SubscribeLogs` | 流 | 日志流（仅 ERROR+）|
+| `SubscribeTraffic` | 流 | 流量统计（间隔 250-5000ms）|
 
-`*` 表示服务端流式 RPC。
+### 订阅管理
 
-## 统一运行时 API
-
-协议版本 14 以后台 operation 和 `RuntimeState` 权威快照取代客户端长流程编排。Smart Connect
-不再有独立的 API 面；所有策略、探测、评分、绑定和生命周期状态都属于运行时控制面：
-
-| 分类 | RPC | 语义 |
+| RPC | 类型 | 说明 |
 | --- | --- | --- |
-| 总体状态 | `GetRuntimeState` | 一次返回运行配置、策略自动化、全部服务、binding、proposal、operation、deadline 和各类 revision。 |
-| 开关 | `SetPolicyAutomationEnabled` | 以 expected revision 和幂等键启停策略编排；关闭时事务化清理核心拥有的运行模型。 |
-| 服务策略 | `ListServicePolicies`、`UpsertServicePolicy`、`DeleteServicePolicy` | 管理由核心持久化的完整服务、探测和切换策略。 |
-| 节点偏好 | `SetNodePreference` | 保存启用、排除、收藏、标签和订阅优先级，自动使相关评估失效。 |
-| 评估 | `RequestServiceEvaluation` | 创建持久化 operation，由后台 scheduler/probe/decision engine 执行。 |
-| 审批 | `ApproveSwitchProposal`、`RejectSwitchProposal` | 处理 `MANUAL` proposal；审批前重新检查所有 revision。 |
-| 强制绑定 | `ForceServiceBinding` | 表达用户意图，仍由核心完成约束校验、切换、验证和回滚。 |
-| 操作查询 | `GetOperation`、`ListOperations` | 查询 UI 挂起期间继续执行的任务及最终结果。 |
-| 事件 | `SubscribeRuntimeEvents`* | 订阅统一运行时变化通知；间断时要求重新读取 `RuntimeState`。 |
+| `ListSubscriptions` | 查询 | 列出所有订阅 |
+| `GetSubscription` | 查询 | 查询单个订阅 |
+| `AddSubscription` | 命令 | 添加订阅；`update_now=true` 失败则回滚 |
+| `RemoveSubscription` | 命令 | 删除订阅 |
+| `UpdateSubscription` | 命令 | 手动更新；返回 changed/not_modified |
+| `RenameSubscription` | 命令 | 重命名 |
+| `SetSubscriptionEnabled` | 命令 | 启用/禁用；禁用的订阅不进节点池 |
+| `ConfigureSubscriptionUpdates` | 命令 | 配置自动更新（最小间隔 5 分钟）|
+| `GetNodePool` | 查询 | 获取节点池（所有启用订阅的节点）|
+| `GetResolvedEndpoints` | 查询 | 节点地址列表（用于 VPN 排除）|
+| `SubscribeSubscriptionEvents` | 流 | 订阅事件：added/updated/removed |
 
-### 命令与查询分离
+**NodePool 结构：**
+```protobuf
+message NodePool {
+  string revision = 1;
+  repeated ProfileNode nodes = 2;
+}
 
-- Query RPC 无副作用，读取一次一致的 `RuntimeState` 或 operation；不得隐式启动探测、刷新订阅或切换节点。
-- Command RPC 表达用户意图，完成持久化受理后返回 `Operation`；不得等待整个后台工作流完成。
-- Event RPC 只通知状态变化，不能作为唯一事实源，也不能要求订阅者持续在线以保证任务执行。
-- 评估和切换只能由核心 scheduler、decision engine 和 runtime controller 执行。
-
-领域状态与协议入口的对应关系：
-
-| 领域状态转换 | 接受命令 | 查询方式 |
-| --- | --- | --- |
-| disabled -> enabled | `SetPolicyAutomationEnabled` | `RuntimeState.policy_automation_enabled` |
-| idle -> evaluating | `RequestServiceEvaluation` | operation + active task |
-| evaluating -> proposal ready | 无客户端命令，由核心推进 | `RuntimeState` proposal / operation |
-| waiting approval -> applying | `ApproveSwitchProposal` | proposal approval + operation |
-| any stable binding -> applying | `ForceServiceBinding` | binding operation |
-| applying -> committed/rolled-back | 无客户端命令，由 RuntimeController 推进 | operation + actual/last-known-good binding |
-| enabled -> disabled | `SetPolicyAutomationEnabled` | `RuntimeState` + cleanup operation |
-
-所有写命令必须包含：
-
-- `expected_revision`：防止覆盖新策略或绑定；
-- `idempotency_key`：重连和超时重试不会创建重复任务；
-- 调用方意图和可审计来源；
-- 可选 deadline，但 deadline 不能中断已开始的原子提交。
-
-长时间评估、等待审批、运行时切换和验证均返回持久化 `Operation`，不能让 RPC 生命周期成为任务生命周期。
-Operation 状态统一为 `QUEUED/RUNNING/WAITING_APPROVAL/SUCCEEDED/FAILED/CANCELLED/ROLLED_BACK`。
-
-### 幂等和并发
-
-- 幂等键的作用域为调用方身份、RPC 类型和目标资源。
-- 同一键与相同规范化请求必须返回同一个 operation；同一键对应不同请求返回 `ALREADY_EXISTS`。
-- `expected_revision` 必须引用被修改聚合的 revision，而不是任意全局时间戳。
-- revision 冲突返回 `ABORTED`，并在结构化 detail 中提供资源类型、资源 ID 和当前 revision。
-- 一个服务只能有一个 active evaluation 和一个 active switch；重复等价请求合并，不等价请求排队或返回 `FAILED_PRECONDITION`。
-- RPC deadline 只控制调用等待。operation 提交前可取消；进入运行时原子提交后必须完成 commit 或 rollback。
-
-### Operation 最小字段
-
-目标 wire model 至少包含：
-
-```text
-id, kind, resource_id, idempotency_key
-status, phase, progress_current, progress_total
-created_at, started_at, updated_at, completed_at
-policy_revision, node_pool_revision, binding_revision, runtime_revision
-proposal_id, result_summary, error
+message ProfileNode {
+  string tag = 1;              // node_id（用于 SelectNode）
+  string subscription_id = 10;
+  string name = 2;
+  string type = 3;
+  string server = 4;
+  int32 port = 5;
+  string country_code = 9;     // "HK", "US" 等
+  ProfileNodePhase phase = 7;  // ready/failed
+  string error_message = 8;
+}
 ```
 
-`error` 使用稳定 machine code、可本地化 message key 和已脱敏 detail；不能只返回服务端拼接字符串。
+### 节点切换（新增）
 
-### 错误语义
+```protobuf
+rpc SelectNode(SelectNodeRequest) returns (SelectNodeResponse);
 
-| gRPC code | 使用场景 | 客户端处理 |
+message SelectNodeRequest {
+  string node_id = 1;  // 来自 NodePool 的 node.tag
+}
+
+message SelectNodeResponse {
+  string node_id = 1;
+  string node_name = 2;
+  bool applied_immediately = 3;  // true: live select; false: 已保存
+  string error_message = 4;
+}
+```
+
+**行为：**
+- 运行中：live select 立即返回
+- 未运行：保存配置，下次启动生效
+- 失败自动回滚
+
+**示例：**
+```typescript
+const response = await client.selectNode({ nodeId: 'hk-node-01' });
+showToast(`已切换到 ${response.nodeName}`);
+```
+
+### 状态查询（新增）
+
+```protobuf
+rpc GetProxyStatus(Empty) returns (ProxyStatus);
+
+message ProxyStatus {
+  ServiceStateType service_state = 1;
+  string selected_node_id = 2;
+  string selected_node_name = 3;
+  string actual_node_id = 4;       // 运行时读回
+  bool effective = 5;               // selected == actual
+  int64 selected_at_unix_ms = 6;
+  bool node_available = 7;
+  string unavailable_reason = 8;
+}
+```
+
+### 配置管理
+
+| RPC | 类型 | 说明 |
 | --- | --- | --- |
-| `INVALID_ARGUMENT` | 字段、域名、地区、探测或策略不合法 | 修正输入，不自动重试 |
-| `UNAUTHENTICATED` / `PERMISSION_DENIED` | 本地控制端认证失败或调用方无权执行操作 | 重新建立可信会话或停止 |
-| `NOT_FOUND` | policy、proposal、operation、node 不存在 | 刷新 `RuntimeState` |
-| `ALREADY_EXISTS` | 幂等键复用但 payload 不同 | 生成新键或读取原 operation |
-| `FAILED_PRECONDITION` | 生命周期、授权或 active operation 不允许当前命令 | 展示所需前置动作 |
-| `ABORTED` | expected revision 过期 | 读取 `RuntimeState` 后重新决策 |
-| `RESOURCE_EXHAUSTED` | 并发、队列或事件消费者超限 | 按 retry hint 退避；事件流重读 `RuntimeState` |
-| `UNAVAILABLE` | 核心恢复中、平台网络或运行时暂不可用 | 有上限退避，不改变本地事实状态 |
-| `INTERNAL` | 未分类内部失败且运行时已保持或恢复 | 查询 operation/`RuntimeState` 确认状态 |
-| `DATA_LOSS` | runtime/store 回滚也失败，状态无法保证 | 显示 degraded，禁止自动重试切换 |
+| `GetRuntimeConfig` | 查询 | 运行时配置（settings + selectors + routes）|
+| `UpdateRuntimeConfig` | 命令 | 更新 settings（listen_address, proxy_mode 等）|
 
-错误响应应通过标准 status details 携带 `reason`、`resource`、`current_revision`、`operation_id` 和可选 `retry_after`。
+---
 
-## RuntimeState 与事件恢复
+## Layer 2: 规则分流
 
-- `RuntimeState` 是事实源，事件只是失效通知和增量体验优化。
-- 客户端首次连接、进程恢复、sequence 跳变或 `ResourceExhausted` 后必须重新读取 `RuntimeState`。
-- 近期 operation 和关键事件需持久化；Flutter isolate 挂起不能导致结果丢失。
-- 服务重启后 sequence 从新的运行时实例开始，客户端必须重新读取 `RuntimeState`。
-- 客户端不根据单个事件推导最终 binding，必须使用 `RuntimeState`/operation 确认 committed 或 rolled-back。
+**本质：** sing-box 的 `route_mode = RULE` 管理接口。核心提供内置大陆直连（cn.srs），Layer 2 允许动态添加自定义域名规则。
 
-事件消息至少包含单调 `sequence`、事件类型、资源 ID 和发生时间。
-事件 payload 可以只包含摘要；任何需要展示或决策的完整状态都从 `RuntimeState` 读取。
+**使用场景：**
+- 大陆直连，国外走代理（内置）
+- Netflix 走美国节点
+- ChatGPT 走特定节点
+- 其他流量走默认代理节点
 
-## 版本与兼容
+```protobuf
+rpc UpsertRoute(UpsertRouteRequest) returns (RouteInfo);
+rpc DeleteRoute(DeleteRouteRequest) returns (Empty);
+rpc ListRoutes(Empty) returns (RouteList);
+rpc SelectRouteNode(SelectRouteNodeRequest) returns (SelectNodeResponse);
 
-- `GetVersion.protocol_version` 继续作为 wire capability 基线；新增领域能力同时通过 `GetCapabilities` 细粒度声明。
-- 新 message 字段只追加新编号；删除字段必须 `reserved` 原编号和名称。
-- v12 低层 RPC 已从服务描述和生成 SDK 删除；客户端必须使用统一运行时 API。已彻底删除、不再接受任何调用的
-  旧端点与消息：`PutServiceProbe`、`RemoveServiceProbe`（及 `RemoveServiceProbeRequest`）、`ProbeService`
-  （及 `ProbeServiceRequest`）、`GetQualityHistory`（及 `QualityHistoryRequest`/`QualityHistory`）、
-  `ApplyServiceBinding`（及 `ApplyServiceBindingRequest`）、`RemoveServiceBinding`
-  （及 `RemoveServiceBindingRequest`）、`ListServiceBindings`（及 `ServiceBindingList`）、
-  `Get/PutServiceSelectionPolicy`（及 `ServiceSelectionPolicyRequest`）、`ServiceProbeList`。
-  评估逻辑仅保留为核心内部 `evaluateService`，不经过传输层。
-- 新客户端连接旧核心时依据 capability 隐藏功能，不能在本地模拟核心缺失的策略或切换逻辑。
-- 旧客户端连接新核心时仍可使用兼容 RPC，但不能修改由新 Orchestrator 管理的资源；冲突返回 `FAILED_PRECONDITION`。
-- Store schema 版本与 protocol version 独立演进；协议兼容不代表旧核心可以安全打开新 Store。
+message UpsertRouteRequest {
+  string service_id = 1;        // "netflix"
+  string display_name = 2;      // "Netflix 专线"
+  repeated string domains = 3;  // ["netflix.com", "nflxvideo.net"]
+  string node_id = 4;
+  bool enabled = 5;
+}
 
-## 传输与边界
+message RouteInfo {
+  string service_id = 1;
+  string display_name = 2;
+  repeated string domains = 3;
+  string selector_tag = 4;      // 核心分配（内部使用）
+  string current_node_id = 5;
+  string current_node_name = 6;
+  bool enabled = 7;
+  bool effective = 8;           // running + enabled
+}
+```
 
-- 同时监听本机 TCP `127.0.0.1:19090` 和 `<basePath>/targetlib.sock` Unix socket。
-- 策略自动化 RPC 要求 `Authorization: Bearer <token>`；核心首次启动在 `<basePath>/control.token` 生成私有 token，Flutter SDK 自动读取并携带。
-- Android 优先使用应用私有 Unix socket；桌面 TCP 会话应使用安装时生成、存放于平台安全存储的本地凭据。
-- gRPC 只传递订阅、启停、选择和运行设置等粗粒度命令，不接受或透传完整的服务商 sing-box 配置。
-- 目标产品路径也不接受客户端构造的完整 runtime model；运行模型只能由共享核心生成。
-- 订阅解析、节点规范化、策略、调度、评分、配置生成、live select、热加载、验证和失败回滚均由共享 Go 核心负责。
+**工作原理：**
+```
+route_mode = RULE 时：
+1. 大陆域名/IP → direct（内置 cn.srs）
+2. UpsertRoute 创建的规则 → 对应 selector → 指定节点
+3. 其他流量 → proxy selector → 默认节点（SelectNode）
+```
+
+**示例：**
+```typescript
+// 1. 设置为规则分流模式
+await client.updateRuntimeConfig({
+  settings: { routeMode: 'RULE' }
+});
+
+// 2. 创建 Netflix 规则
+await client.upsertRoute({
+  serviceId: 'netflix',
+  displayName: 'Netflix 专线',
+  domains: ['netflix.com', 'nflxvideo.net'],
+  nodeId: 'us-node-01',
+  enabled: true,
+});
+
+// 3. 切换 Netflix 规则的节点
+await client.selectRouteNode({
+  serviceId: 'netflix',
+  nodeId: 'us-node-02',
+});
+
+// 4. 切换默认代理节点（其他流量）
+await client.selectNode({ nodeId: 'hk-node-01' });
+```
+
+**效果：**
+- 访问 `netflix.com` → 走美国节点 `us-node-02`
+- 访问国内网站 → 直连
+- 访问其他国外网站 → 走香港节点 `hk-node-01`
+
+---
+
+## 完整 RPC 列表
+
+### Layer 1: 基础代理（20 个）
+
+**生命周期（7）：** `Start`, `Stop`, `Restart`, `GetState`, `SubscribeState`, `SubscribeLogs`, `SubscribeTraffic`
+
+**订阅（11）：** `ListSubscriptions`, `GetSubscription`, `AddSubscription`, `RemoveSubscription`, `UpdateSubscription`, `RenameSubscription`, `SetSubscriptionEnabled`, `ConfigureSubscriptionUpdates`, `GetNodePool`, `GetResolvedEndpoints`, `SubscribeSubscriptionEvents`
+
+**节点切换（2，新增）：** `SelectNode`, `GetProxyStatus`
+
+### Layer 2: 规则分流（4 个，新增）
+
+`UpsertRoute`, `DeleteRoute`, `ListRoutes`, `SelectRouteNode`
+
+### 配置与工具（4 个）
+
+`GetRuntimeConfig`, `UpdateRuntimeConfig`, `GetIpInfo`, `CloseConnection`, `CloseAllConnections`
+
+### 兼容接口（deprecated）
+
+| 旧 RPC | 替代方案 |
+| --- | --- |
+| `ForceServiceBinding` | `SelectNode` / `SelectRouteNode` |
+| `GetRuntimeState` | `GetProxyStatus` + `ListRoutes` |
+| Smart Connect 复杂 RPC | Layer 3 简化接口 |
+
+---
+
+## 传输与安全
+
+### 端点
+
+- TCP: `127.0.0.1:19090`
+- Unix Socket: `<basePath>/targetlib.sock`
+
+### 认证
+
+**需要 `Authorization: Bearer <token>` 的 RPC：**
+- Layer 2: `UpsertRoute`, `DeleteRoute`, `SelectRouteNode`
+- 配置: `UpdateRuntimeConfig`
+- 兼容: `ForceServiceBinding` 等遗留 RPC
+
+Token 存储在 `<basePath>/control.token`，Flutter SDK 自动读取。
+
+---
+
+## 错误处理
+
+| gRPC Code | 场景 | 客户端处理 |
+| --- | --- | --- |
+| `INVALID_ARGUMENT` | 参数错误 | 显示错误 |
+| `NOT_FOUND` | 节点/订阅/路由不存在 | 刷新列表 |
+| `FAILED_PRECONDITION` | 前置条件失败 | 显示当前状态 |
+| `UNAVAILABLE` | 服务不可用 | 重连 |
+| `UNAUTHENTICATED` | Token 无效 | 重新读取 token |
+| `INTERNAL` | 内部错误 | 显示错误日志入口 |
+
+**常见错误消息：**
+- `"node not found"`: 节点不在池中
+- `"service is already running"`: 重复启动
+- `"live select failed"`: 运行时切换失败（已回滚）
+
+---
+
+## Route Mode 说明
+
+| 模式 | 说明 | 适用层级 |
+| --- | --- | --- |
+| `DIRECT` | 全部直连，不走代理 | Layer 1 |
+| `ALL` | 全部走代理 | Layer 1（SelectNode 选择节点）|
+| `RULE` | 规则分流 | Layer 1 + Layer 2 |
+
+**RULE 模式流量分配：**
+```
+请求域名 example.com
+  ↓
+匹配 UpsertRoute 创建的规则？
+  ├─ 是 → 走规则指定的节点
+  └─ 否 → 匹配大陆规则（cn.srs）？
+           ├─ 是 → 直连
+           └─ 否 → 走默认代理节点（SelectNode）
+```
+
+---
+
+## 对比：旧设计 vs 新设计
+
+| 功能 | 旧设计 | 新设计 |
+| --- | --- | --- |
+| 切换节点 | 异步 Operation + 轮询 | 同步 SelectNode |
+| 前置条件 | 必须先创建 ServicePolicy | 无需 policy |
+| 客户端复杂度 | operation/proposal/revision | 只需 node_id |
+| RPC 数量 | 5+ 次 | 1 次 |
+| 规则分流 | 通过复杂 policy 间接创建 | UpsertRoute 直接管理 |
+
+---
+
+## 迁移计划
+
+| 阶段 | 内容 |
+| --- | --- |
+| **阶段 1（立即）** | 实现 `SelectNode` + `GetProxyStatus` |
+| **阶段 2（短期）** | 实现 Layer 2 规则分流管理 |
+| **阶段 3（长期）** | 标记旧接口 deprecated，最终移除 |

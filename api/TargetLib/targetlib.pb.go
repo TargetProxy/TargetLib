@@ -245,434 +245,6 @@ func (RouteMode) EnumDescriptor() ([]byte, []int) {
 	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{3}
 }
 
-type ConfigApplyPhase int32
-
-const (
-	ConfigApplyPhase_CONFIG_APPLY_PHASE_UNSPECIFIED ConfigApplyPhase = 0
-	ConfigApplyPhase_CONFIG_APPLY_PHASE_VALIDATING  ConfigApplyPhase = 1
-	ConfigApplyPhase_CONFIG_APPLY_PHASE_BUILDING    ConfigApplyPhase = 2
-	ConfigApplyPhase_CONFIG_APPLY_PHASE_APPLYING    ConfigApplyPhase = 3
-	ConfigApplyPhase_CONFIG_APPLY_PHASE_READY       ConfigApplyPhase = 4
-	ConfigApplyPhase_CONFIG_APPLY_PHASE_FAILED      ConfigApplyPhase = 5
-)
-
-// Enum value maps for ConfigApplyPhase.
-var (
-	ConfigApplyPhase_name = map[int32]string{
-		0: "CONFIG_APPLY_PHASE_UNSPECIFIED",
-		1: "CONFIG_APPLY_PHASE_VALIDATING",
-		2: "CONFIG_APPLY_PHASE_BUILDING",
-		3: "CONFIG_APPLY_PHASE_APPLYING",
-		4: "CONFIG_APPLY_PHASE_READY",
-		5: "CONFIG_APPLY_PHASE_FAILED",
-	}
-	ConfigApplyPhase_value = map[string]int32{
-		"CONFIG_APPLY_PHASE_UNSPECIFIED": 0,
-		"CONFIG_APPLY_PHASE_VALIDATING":  1,
-		"CONFIG_APPLY_PHASE_BUILDING":    2,
-		"CONFIG_APPLY_PHASE_APPLYING":    3,
-		"CONFIG_APPLY_PHASE_READY":       4,
-		"CONFIG_APPLY_PHASE_FAILED":      5,
-	}
-)
-
-func (x ConfigApplyPhase) Enum() *ConfigApplyPhase {
-	p := new(ConfigApplyPhase)
-	*p = x
-	return p
-}
-
-func (x ConfigApplyPhase) String() string {
-	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
-}
-
-func (ConfigApplyPhase) Descriptor() protoreflect.EnumDescriptor {
-	return file_api_TargetLib_targetlib_proto_enumTypes[4].Descriptor()
-}
-
-func (ConfigApplyPhase) Type() protoreflect.EnumType {
-	return &file_api_TargetLib_targetlib_proto_enumTypes[4]
-}
-
-func (x ConfigApplyPhase) Number() protoreflect.EnumNumber {
-	return protoreflect.EnumNumber(x)
-}
-
-// Deprecated: Use ConfigApplyPhase.Descriptor instead.
-func (ConfigApplyPhase) EnumDescriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{4}
-}
-
-type ProbeStage int32
-
-const (
-	ProbeStage_PROBE_STAGE_UNSPECIFIED ProbeStage = 0
-	ProbeStage_PROBE_STAGE_READY       ProbeStage = 1
-	ProbeStage_PROBE_STAGE_DNS         ProbeStage = 2
-	ProbeStage_PROBE_STAGE_TCP         ProbeStage = 3
-	ProbeStage_PROBE_STAGE_TLS         ProbeStage = 4
-	ProbeStage_PROBE_STAGE_HTTP        ProbeStage = 5
-	ProbeStage_PROBE_STAGE_AUTH        ProbeStage = 6
-	ProbeStage_PROBE_STAGE_TIMEOUT     ProbeStage = 7
-	ProbeStage_PROBE_STAGE_REGION      ProbeStage = 8
-	ProbeStage_PROBE_STAGE_CONTENT     ProbeStage = 9
-	ProbeStage_PROBE_STAGE_NODE        ProbeStage = 10
-	ProbeStage_PROBE_STAGE_EGRESS      ProbeStage = 11
-)
-
-// Enum value maps for ProbeStage.
-var (
-	ProbeStage_name = map[int32]string{
-		0:  "PROBE_STAGE_UNSPECIFIED",
-		1:  "PROBE_STAGE_READY",
-		2:  "PROBE_STAGE_DNS",
-		3:  "PROBE_STAGE_TCP",
-		4:  "PROBE_STAGE_TLS",
-		5:  "PROBE_STAGE_HTTP",
-		6:  "PROBE_STAGE_AUTH",
-		7:  "PROBE_STAGE_TIMEOUT",
-		8:  "PROBE_STAGE_REGION",
-		9:  "PROBE_STAGE_CONTENT",
-		10: "PROBE_STAGE_NODE",
-		11: "PROBE_STAGE_EGRESS",
-	}
-	ProbeStage_value = map[string]int32{
-		"PROBE_STAGE_UNSPECIFIED": 0,
-		"PROBE_STAGE_READY":       1,
-		"PROBE_STAGE_DNS":         2,
-		"PROBE_STAGE_TCP":         3,
-		"PROBE_STAGE_TLS":         4,
-		"PROBE_STAGE_HTTP":        5,
-		"PROBE_STAGE_AUTH":        6,
-		"PROBE_STAGE_TIMEOUT":     7,
-		"PROBE_STAGE_REGION":      8,
-		"PROBE_STAGE_CONTENT":     9,
-		"PROBE_STAGE_NODE":        10,
-		"PROBE_STAGE_EGRESS":      11,
-	}
-)
-
-func (x ProbeStage) Enum() *ProbeStage {
-	p := new(ProbeStage)
-	*p = x
-	return p
-}
-
-func (x ProbeStage) String() string {
-	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
-}
-
-func (ProbeStage) Descriptor() protoreflect.EnumDescriptor {
-	return file_api_TargetLib_targetlib_proto_enumTypes[5].Descriptor()
-}
-
-func (ProbeStage) Type() protoreflect.EnumType {
-	return &file_api_TargetLib_targetlib_proto_enumTypes[5]
-}
-
-func (x ProbeStage) Number() protoreflect.EnumNumber {
-	return protoreflect.EnumNumber(x)
-}
-
-// Deprecated: Use ProbeStage.Descriptor instead.
-func (ProbeStage) EnumDescriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{5}
-}
-
-// Internal persisted snapshot. Histories are local to this host/network.
-type RuntimeRecoveryState int32
-
-const (
-	RuntimeRecoveryState_RUNTIME_RECOVERY_STATE_UNSPECIFIED RuntimeRecoveryState = 0
-	RuntimeRecoveryState_RUNTIME_RECOVERY_STATE_RECOVERING  RuntimeRecoveryState = 1
-	RuntimeRecoveryState_RUNTIME_RECOVERY_STATE_READY       RuntimeRecoveryState = 2
-	RuntimeRecoveryState_RUNTIME_RECOVERY_STATE_DEGRADED    RuntimeRecoveryState = 3
-)
-
-// Enum value maps for RuntimeRecoveryState.
-var (
-	RuntimeRecoveryState_name = map[int32]string{
-		0: "RUNTIME_RECOVERY_STATE_UNSPECIFIED",
-		1: "RUNTIME_RECOVERY_STATE_RECOVERING",
-		2: "RUNTIME_RECOVERY_STATE_READY",
-		3: "RUNTIME_RECOVERY_STATE_DEGRADED",
-	}
-	RuntimeRecoveryState_value = map[string]int32{
-		"RUNTIME_RECOVERY_STATE_UNSPECIFIED": 0,
-		"RUNTIME_RECOVERY_STATE_RECOVERING":  1,
-		"RUNTIME_RECOVERY_STATE_READY":       2,
-		"RUNTIME_RECOVERY_STATE_DEGRADED":    3,
-	}
-)
-
-func (x RuntimeRecoveryState) Enum() *RuntimeRecoveryState {
-	p := new(RuntimeRecoveryState)
-	*p = x
-	return p
-}
-
-func (x RuntimeRecoveryState) String() string {
-	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
-}
-
-func (RuntimeRecoveryState) Descriptor() protoreflect.EnumDescriptor {
-	return file_api_TargetLib_targetlib_proto_enumTypes[6].Descriptor()
-}
-
-func (RuntimeRecoveryState) Type() protoreflect.EnumType {
-	return &file_api_TargetLib_targetlib_proto_enumTypes[6]
-}
-
-func (x RuntimeRecoveryState) Number() protoreflect.EnumNumber {
-	return protoreflect.EnumNumber(x)
-}
-
-// Deprecated: Use RuntimeRecoveryState.Descriptor instead.
-func (RuntimeRecoveryState) EnumDescriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{6}
-}
-
-type SwitchMode int32
-
-const (
-	SwitchMode_SWITCH_MODE_UNSPECIFIED      SwitchMode = 0
-	SwitchMode_SWITCH_MODE_MANUAL           SwitchMode = 1
-	SwitchMode_SWITCH_MODE_AUTO_CONSTRAINED SwitchMode = 2
-	SwitchMode_SWITCH_MODE_LOCKED           SwitchMode = 3
-	SwitchMode_SWITCH_MODE_DIRECT           SwitchMode = 4
-)
-
-// Enum value maps for SwitchMode.
-var (
-	SwitchMode_name = map[int32]string{
-		0: "SWITCH_MODE_UNSPECIFIED",
-		1: "SWITCH_MODE_MANUAL",
-		2: "SWITCH_MODE_AUTO_CONSTRAINED",
-		3: "SWITCH_MODE_LOCKED",
-		4: "SWITCH_MODE_DIRECT",
-	}
-	SwitchMode_value = map[string]int32{
-		"SWITCH_MODE_UNSPECIFIED":      0,
-		"SWITCH_MODE_MANUAL":           1,
-		"SWITCH_MODE_AUTO_CONSTRAINED": 2,
-		"SWITCH_MODE_LOCKED":           3,
-		"SWITCH_MODE_DIRECT":           4,
-	}
-)
-
-func (x SwitchMode) Enum() *SwitchMode {
-	p := new(SwitchMode)
-	*p = x
-	return p
-}
-
-func (x SwitchMode) String() string {
-	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
-}
-
-func (SwitchMode) Descriptor() protoreflect.EnumDescriptor {
-	return file_api_TargetLib_targetlib_proto_enumTypes[7].Descriptor()
-}
-
-func (SwitchMode) Type() protoreflect.EnumType {
-	return &file_api_TargetLib_targetlib_proto_enumTypes[7]
-}
-
-func (x SwitchMode) Number() protoreflect.EnumNumber {
-	return protoreflect.EnumNumber(x)
-}
-
-// Deprecated: Use SwitchMode.Descriptor instead.
-func (SwitchMode) EnumDescriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{7}
-}
-
-type OperationStatus int32
-
-const (
-	OperationStatus_OPERATION_STATUS_UNSPECIFIED      OperationStatus = 0
-	OperationStatus_OPERATION_STATUS_QUEUED           OperationStatus = 1
-	OperationStatus_OPERATION_STATUS_RUNNING          OperationStatus = 2
-	OperationStatus_OPERATION_STATUS_WAITING_APPROVAL OperationStatus = 3
-	OperationStatus_OPERATION_STATUS_SUCCEEDED        OperationStatus = 4
-	OperationStatus_OPERATION_STATUS_FAILED           OperationStatus = 5
-	OperationStatus_OPERATION_STATUS_CANCELLED        OperationStatus = 6
-	OperationStatus_OPERATION_STATUS_ROLLED_BACK      OperationStatus = 7
-)
-
-// Enum value maps for OperationStatus.
-var (
-	OperationStatus_name = map[int32]string{
-		0: "OPERATION_STATUS_UNSPECIFIED",
-		1: "OPERATION_STATUS_QUEUED",
-		2: "OPERATION_STATUS_RUNNING",
-		3: "OPERATION_STATUS_WAITING_APPROVAL",
-		4: "OPERATION_STATUS_SUCCEEDED",
-		5: "OPERATION_STATUS_FAILED",
-		6: "OPERATION_STATUS_CANCELLED",
-		7: "OPERATION_STATUS_ROLLED_BACK",
-	}
-	OperationStatus_value = map[string]int32{
-		"OPERATION_STATUS_UNSPECIFIED":      0,
-		"OPERATION_STATUS_QUEUED":           1,
-		"OPERATION_STATUS_RUNNING":          2,
-		"OPERATION_STATUS_WAITING_APPROVAL": 3,
-		"OPERATION_STATUS_SUCCEEDED":        4,
-		"OPERATION_STATUS_FAILED":           5,
-		"OPERATION_STATUS_CANCELLED":        6,
-		"OPERATION_STATUS_ROLLED_BACK":      7,
-	}
-)
-
-func (x OperationStatus) Enum() *OperationStatus {
-	p := new(OperationStatus)
-	*p = x
-	return p
-}
-
-func (x OperationStatus) String() string {
-	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
-}
-
-func (OperationStatus) Descriptor() protoreflect.EnumDescriptor {
-	return file_api_TargetLib_targetlib_proto_enumTypes[8].Descriptor()
-}
-
-func (OperationStatus) Type() protoreflect.EnumType {
-	return &file_api_TargetLib_targetlib_proto_enumTypes[8]
-}
-
-func (x OperationStatus) Number() protoreflect.EnumNumber {
-	return protoreflect.EnumNumber(x)
-}
-
-// Deprecated: Use OperationStatus.Descriptor instead.
-func (OperationStatus) EnumDescriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{8}
-}
-
-type RuntimeEventType int32
-
-const (
-	RuntimeEventType_RUNTIME_EVENT_TYPE_UNSPECIFIED      RuntimeEventType = 0
-	RuntimeEventType_RUNTIME_EVENT_TYPE_SNAPSHOT         RuntimeEventType = 1
-	RuntimeEventType_RUNTIME_EVENT_TYPE_CONFIG           RuntimeEventType = 2
-	RuntimeEventType_RUNTIME_EVENT_TYPE_NODE_POOL        RuntimeEventType = 3
-	RuntimeEventType_RUNTIME_EVENT_TYPE_BINDING          RuntimeEventType = 4
-	RuntimeEventType_RUNTIME_EVENT_TYPE_PROBE_STARTED    RuntimeEventType = 5
-	RuntimeEventType_RUNTIME_EVENT_TYPE_PROBE_COMPLETED  RuntimeEventType = 6
-	RuntimeEventType_RUNTIME_EVENT_TYPE_PROBE_DEFINITION RuntimeEventType = 7
-	RuntimeEventType_RUNTIME_EVENT_TYPE_STOPPED          RuntimeEventType = 8
-)
-
-// Enum value maps for RuntimeEventType.
-var (
-	RuntimeEventType_name = map[int32]string{
-		0: "RUNTIME_EVENT_TYPE_UNSPECIFIED",
-		1: "RUNTIME_EVENT_TYPE_SNAPSHOT",
-		2: "RUNTIME_EVENT_TYPE_CONFIG",
-		3: "RUNTIME_EVENT_TYPE_NODE_POOL",
-		4: "RUNTIME_EVENT_TYPE_BINDING",
-		5: "RUNTIME_EVENT_TYPE_PROBE_STARTED",
-		6: "RUNTIME_EVENT_TYPE_PROBE_COMPLETED",
-		7: "RUNTIME_EVENT_TYPE_PROBE_DEFINITION",
-		8: "RUNTIME_EVENT_TYPE_STOPPED",
-	}
-	RuntimeEventType_value = map[string]int32{
-		"RUNTIME_EVENT_TYPE_UNSPECIFIED":      0,
-		"RUNTIME_EVENT_TYPE_SNAPSHOT":         1,
-		"RUNTIME_EVENT_TYPE_CONFIG":           2,
-		"RUNTIME_EVENT_TYPE_NODE_POOL":        3,
-		"RUNTIME_EVENT_TYPE_BINDING":          4,
-		"RUNTIME_EVENT_TYPE_PROBE_STARTED":    5,
-		"RUNTIME_EVENT_TYPE_PROBE_COMPLETED":  6,
-		"RUNTIME_EVENT_TYPE_PROBE_DEFINITION": 7,
-		"RUNTIME_EVENT_TYPE_STOPPED":          8,
-	}
-)
-
-func (x RuntimeEventType) Enum() *RuntimeEventType {
-	p := new(RuntimeEventType)
-	*p = x
-	return p
-}
-
-func (x RuntimeEventType) String() string {
-	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
-}
-
-func (RuntimeEventType) Descriptor() protoreflect.EnumDescriptor {
-	return file_api_TargetLib_targetlib_proto_enumTypes[9].Descriptor()
-}
-
-func (RuntimeEventType) Type() protoreflect.EnumType {
-	return &file_api_TargetLib_targetlib_proto_enumTypes[9]
-}
-
-func (x RuntimeEventType) Number() protoreflect.EnumNumber {
-	return protoreflect.EnumNumber(x)
-}
-
-// Deprecated: Use RuntimeEventType.Descriptor instead.
-func (RuntimeEventType) EnumDescriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{9}
-}
-
-type LatencyTestStatus int32
-
-const (
-	LatencyTestStatus_LATENCY_TEST_STATUS_UNSPECIFIED LatencyTestStatus = 0
-	LatencyTestStatus_LATENCY_TEST_STATUS_SUCCESS     LatencyTestStatus = 1
-	LatencyTestStatus_LATENCY_TEST_STATUS_FAILED      LatencyTestStatus = 2
-	LatencyTestStatus_LATENCY_TEST_STATUS_TIMEOUT     LatencyTestStatus = 3
-	LatencyTestStatus_LATENCY_TEST_STATUS_NOT_FOUND   LatencyTestStatus = 4
-)
-
-// Enum value maps for LatencyTestStatus.
-var (
-	LatencyTestStatus_name = map[int32]string{
-		0: "LATENCY_TEST_STATUS_UNSPECIFIED",
-		1: "LATENCY_TEST_STATUS_SUCCESS",
-		2: "LATENCY_TEST_STATUS_FAILED",
-		3: "LATENCY_TEST_STATUS_TIMEOUT",
-		4: "LATENCY_TEST_STATUS_NOT_FOUND",
-	}
-	LatencyTestStatus_value = map[string]int32{
-		"LATENCY_TEST_STATUS_UNSPECIFIED": 0,
-		"LATENCY_TEST_STATUS_SUCCESS":     1,
-		"LATENCY_TEST_STATUS_FAILED":      2,
-		"LATENCY_TEST_STATUS_TIMEOUT":     3,
-		"LATENCY_TEST_STATUS_NOT_FOUND":   4,
-	}
-)
-
-func (x LatencyTestStatus) Enum() *LatencyTestStatus {
-	p := new(LatencyTestStatus)
-	*p = x
-	return p
-}
-
-func (x LatencyTestStatus) String() string {
-	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
-}
-
-func (LatencyTestStatus) Descriptor() protoreflect.EnumDescriptor {
-	return file_api_TargetLib_targetlib_proto_enumTypes[10].Descriptor()
-}
-
-func (LatencyTestStatus) Type() protoreflect.EnumType {
-	return &file_api_TargetLib_targetlib_proto_enumTypes[10]
-}
-
-func (x LatencyTestStatus) Number() protoreflect.EnumNumber {
-	return protoreflect.EnumNumber(x)
-}
-
-// Deprecated: Use LatencyTestStatus.Descriptor instead.
-func (LatencyTestStatus) EnumDescriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{10}
-}
-
 type SubscriptionStatus int32
 
 const (
@@ -712,11 +284,11 @@ func (x SubscriptionStatus) String() string {
 }
 
 func (SubscriptionStatus) Descriptor() protoreflect.EnumDescriptor {
-	return file_api_TargetLib_targetlib_proto_enumTypes[11].Descriptor()
+	return file_api_TargetLib_targetlib_proto_enumTypes[4].Descriptor()
 }
 
 func (SubscriptionStatus) Type() protoreflect.EnumType {
-	return &file_api_TargetLib_targetlib_proto_enumTypes[11]
+	return &file_api_TargetLib_targetlib_proto_enumTypes[4]
 }
 
 func (x SubscriptionStatus) Number() protoreflect.EnumNumber {
@@ -725,7 +297,7 @@ func (x SubscriptionStatus) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use SubscriptionStatus.Descriptor instead.
 func (SubscriptionStatus) EnumDescriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{11}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{4}
 }
 
 type SubscriptionUpdateStage int32
@@ -776,11 +348,11 @@ func (x SubscriptionUpdateStage) String() string {
 }
 
 func (SubscriptionUpdateStage) Descriptor() protoreflect.EnumDescriptor {
-	return file_api_TargetLib_targetlib_proto_enumTypes[12].Descriptor()
+	return file_api_TargetLib_targetlib_proto_enumTypes[5].Descriptor()
 }
 
 func (SubscriptionUpdateStage) Type() protoreflect.EnumType {
-	return &file_api_TargetLib_targetlib_proto_enumTypes[12]
+	return &file_api_TargetLib_targetlib_proto_enumTypes[5]
 }
 
 func (x SubscriptionUpdateStage) Number() protoreflect.EnumNumber {
@@ -789,7 +361,7 @@ func (x SubscriptionUpdateStage) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use SubscriptionUpdateStage.Descriptor instead.
 func (SubscriptionUpdateStage) EnumDescriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{12}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{5}
 }
 
 type ProfileNodePhase int32
@@ -831,11 +403,11 @@ func (x ProfileNodePhase) String() string {
 }
 
 func (ProfileNodePhase) Descriptor() protoreflect.EnumDescriptor {
-	return file_api_TargetLib_targetlib_proto_enumTypes[13].Descriptor()
+	return file_api_TargetLib_targetlib_proto_enumTypes[6].Descriptor()
 }
 
 func (ProfileNodePhase) Type() protoreflect.EnumType {
-	return &file_api_TargetLib_targetlib_proto_enumTypes[13]
+	return &file_api_TargetLib_targetlib_proto_enumTypes[6]
 }
 
 func (x ProfileNodePhase) Number() protoreflect.EnumNumber {
@@ -844,7 +416,7 @@ func (x ProfileNodePhase) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use ProfileNodePhase.Descriptor instead.
 func (ProfileNodePhase) EnumDescriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{13}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{6}
 }
 
 type SubscriptionEventType int32
@@ -886,11 +458,11 @@ func (x SubscriptionEventType) String() string {
 }
 
 func (SubscriptionEventType) Descriptor() protoreflect.EnumDescriptor {
-	return file_api_TargetLib_targetlib_proto_enumTypes[14].Descriptor()
+	return file_api_TargetLib_targetlib_proto_enumTypes[7].Descriptor()
 }
 
 func (SubscriptionEventType) Type() protoreflect.EnumType {
-	return &file_api_TargetLib_targetlib_proto_enumTypes[14]
+	return &file_api_TargetLib_targetlib_proto_enumTypes[7]
 }
 
 func (x SubscriptionEventType) Number() protoreflect.EnumNumber {
@@ -899,7 +471,7 @@ func (x SubscriptionEventType) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use SubscriptionEventType.Descriptor instead.
 func (SubscriptionEventType) EnumDescriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{14}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{7}
 }
 
 type LogMessage struct {
@@ -1006,58 +578,6 @@ func (x *LogBatch) GetReset_() bool {
 	return false
 }
 
-type SelectOutboundRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	GroupTag      string                 `protobuf:"bytes,1,opt,name=group_tag,json=groupTag,proto3" json:"group_tag,omitempty"`
-	OutboundTag   string                 `protobuf:"bytes,2,opt,name=outbound_tag,json=outboundTag,proto3" json:"outbound_tag,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *SelectOutboundRequest) Reset() {
-	*x = SelectOutboundRequest{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[2]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *SelectOutboundRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SelectOutboundRequest) ProtoMessage() {}
-
-func (x *SelectOutboundRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[2]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SelectOutboundRequest.ProtoReflect.Descriptor instead.
-func (*SelectOutboundRequest) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *SelectOutboundRequest) GetGroupTag() string {
-	if x != nil {
-		return x.GroupTag
-	}
-	return ""
-}
-
-func (x *SelectOutboundRequest) GetOutboundTag() string {
-	if x != nil {
-		return x.OutboundTag
-	}
-	return ""
-}
-
 type CloseConnectionRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -1067,7 +587,7 @@ type CloseConnectionRequest struct {
 
 func (x *CloseConnectionRequest) Reset() {
 	*x = CloseConnectionRequest{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[3]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1079,7 +599,7 @@ func (x *CloseConnectionRequest) String() string {
 func (*CloseConnectionRequest) ProtoMessage() {}
 
 func (x *CloseConnectionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[3]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1092,7 +612,7 @@ func (x *CloseConnectionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CloseConnectionRequest.ProtoReflect.Descriptor instead.
 func (*CloseConnectionRequest) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{3}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *CloseConnectionRequest) GetId() string {
@@ -1100,174 +620,6 @@ func (x *CloseConnectionRequest) GetId() string {
 		return x.Id
 	}
 	return ""
-}
-
-type VersionResponse struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	TargetlibVersion string                 `protobuf:"bytes,1,opt,name=targetlib_version,json=targetlibVersion,proto3" json:"targetlib_version,omitempty"`
-	SingBoxVersion   string                 `protobuf:"bytes,2,opt,name=sing_box_version,json=singBoxVersion,proto3" json:"sing_box_version,omitempty"`
-	GoVersion        string                 `protobuf:"bytes,3,opt,name=go_version,json=goVersion,proto3" json:"go_version,omitempty"`
-	ProtocolVersion  uint32                 `protobuf:"varint,4,opt,name=protocol_version,json=protocolVersion,proto3" json:"protocol_version,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
-}
-
-func (x *VersionResponse) Reset() {
-	*x = VersionResponse{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[4]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *VersionResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*VersionResponse) ProtoMessage() {}
-
-func (x *VersionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[4]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use VersionResponse.ProtoReflect.Descriptor instead.
-func (*VersionResponse) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{4}
-}
-
-func (x *VersionResponse) GetTargetlibVersion() string {
-	if x != nil {
-		return x.TargetlibVersion
-	}
-	return ""
-}
-
-func (x *VersionResponse) GetSingBoxVersion() string {
-	if x != nil {
-		return x.SingBoxVersion
-	}
-	return ""
-}
-
-func (x *VersionResponse) GetGoVersion() string {
-	if x != nil {
-		return x.GoVersion
-	}
-	return ""
-}
-
-func (x *VersionResponse) GetProtocolVersion() uint32 {
-	if x != nil {
-		return x.ProtocolVersion
-	}
-	return 0
-}
-
-type CapabilitiesResponse struct {
-	state                  protoimpl.MessageState `protogen:"open.v1"`
-	Platform               string                 `protobuf:"bytes,1,opt,name=platform,proto3" json:"platform,omitempty"`
-	PlatformVpn            bool                   `protobuf:"varint,3,opt,name=platform_vpn,json=platformVpn,proto3" json:"platform_vpn,omitempty"`
-	SubscriptionManagement bool                   `protobuf:"varint,5,opt,name=subscription_management,json=subscriptionManagement,proto3" json:"subscription_management,omitempty"`
-	RealTimeTraffic        bool                   `protobuf:"varint,6,opt,name=real_time_traffic,json=realTimeTraffic,proto3" json:"real_time_traffic,omitempty"`
-	PolicyAutomation       bool                   `protobuf:"varint,7,opt,name=policy_automation,json=policyAutomation,proto3" json:"policy_automation,omitempty"`
-	ServiceProbes          bool                   `protobuf:"varint,8,opt,name=service_probes,json=serviceProbes,proto3" json:"service_probes,omitempty"`
-	RuntimeEvents          bool                   `protobuf:"varint,9,opt,name=runtime_events,json=runtimeEvents,proto3" json:"runtime_events,omitempty"`
-	PolicyAutomationApi    bool                   `protobuf:"varint,10,opt,name=policy_automation_api,json=policyAutomationApi,proto3" json:"policy_automation_api,omitempty"`
-	unknownFields          protoimpl.UnknownFields
-	sizeCache              protoimpl.SizeCache
-}
-
-func (x *CapabilitiesResponse) Reset() {
-	*x = CapabilitiesResponse{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[5]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *CapabilitiesResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*CapabilitiesResponse) ProtoMessage() {}
-
-func (x *CapabilitiesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[5]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use CapabilitiesResponse.ProtoReflect.Descriptor instead.
-func (*CapabilitiesResponse) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{5}
-}
-
-func (x *CapabilitiesResponse) GetPlatform() string {
-	if x != nil {
-		return x.Platform
-	}
-	return ""
-}
-
-func (x *CapabilitiesResponse) GetPlatformVpn() bool {
-	if x != nil {
-		return x.PlatformVpn
-	}
-	return false
-}
-
-func (x *CapabilitiesResponse) GetSubscriptionManagement() bool {
-	if x != nil {
-		return x.SubscriptionManagement
-	}
-	return false
-}
-
-func (x *CapabilitiesResponse) GetRealTimeTraffic() bool {
-	if x != nil {
-		return x.RealTimeTraffic
-	}
-	return false
-}
-
-func (x *CapabilitiesResponse) GetPolicyAutomation() bool {
-	if x != nil {
-		return x.PolicyAutomation
-	}
-	return false
-}
-
-func (x *CapabilitiesResponse) GetServiceProbes() bool {
-	if x != nil {
-		return x.ServiceProbes
-	}
-	return false
-}
-
-func (x *CapabilitiesResponse) GetRuntimeEvents() bool {
-	if x != nil {
-		return x.RuntimeEvents
-	}
-	return false
-}
-
-func (x *CapabilitiesResponse) GetPolicyAutomationApi() bool {
-	if x != nil {
-		return x.PolicyAutomationApi
-	}
-	return false
 }
 
 type OperationResponse struct {
@@ -1279,7 +631,7 @@ type OperationResponse struct {
 
 func (x *OperationResponse) Reset() {
 	*x = OperationResponse{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[6]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1291,7 +643,7 @@ func (x *OperationResponse) String() string {
 func (*OperationResponse) ProtoMessage() {}
 
 func (x *OperationResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[6]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1304,7 +656,7 @@ func (x *OperationResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OperationResponse.ProtoReflect.Descriptor instead.
 func (*OperationResponse) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{6}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *OperationResponse) GetState() *ServiceState {
@@ -1325,7 +677,7 @@ type ServiceState struct {
 
 func (x *ServiceState) Reset() {
 	*x = ServiceState{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[7]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1337,7 +689,7 @@ func (x *ServiceState) String() string {
 func (*ServiceState) ProtoMessage() {}
 
 func (x *ServiceState) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[7]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1350,7 +702,7 @@ func (x *ServiceState) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ServiceState.ProtoReflect.Descriptor instead.
 func (*ServiceState) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{7}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *ServiceState) GetState() ServiceStateType {
@@ -1375,16 +727,15 @@ func (x *ServiceState) GetChangedAtUnixMs() int64 {
 }
 
 type TrafficRequest struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// Zero uses one second. The accepted range is 250-5000 milliseconds.
-	IntervalMilliseconds uint32 `protobuf:"varint,1,opt,name=interval_milliseconds,json=intervalMilliseconds,proto3" json:"interval_milliseconds,omitempty"`
+	state                protoimpl.MessageState `protogen:"open.v1"`
+	IntervalMilliseconds uint32                 `protobuf:"varint,1,opt,name=interval_milliseconds,json=intervalMilliseconds,proto3" json:"interval_milliseconds,omitempty"`
 	unknownFields        protoimpl.UnknownFields
 	sizeCache            protoimpl.SizeCache
 }
 
 func (x *TrafficRequest) Reset() {
 	*x = TrafficRequest{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[8]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1396,7 +747,7 @@ func (x *TrafficRequest) String() string {
 func (*TrafficRequest) ProtoMessage() {}
 
 func (x *TrafficRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[8]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1409,7 +760,7 @@ func (x *TrafficRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TrafficRequest.ProtoReflect.Descriptor instead.
 func (*TrafficRequest) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{8}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *TrafficRequest) GetIntervalMilliseconds() uint32 {
@@ -1420,25 +771,23 @@ func (x *TrafficRequest) GetIntervalMilliseconds() uint32 {
 }
 
 type TrafficStatus struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// False when the runtime is stopped or its traffic manager is unavailable.
-	Available              bool  `protobuf:"varint,1,opt,name=available,proto3" json:"available,omitempty"`
-	UploadBytesPerSecond   int64 `protobuf:"varint,2,opt,name=upload_bytes_per_second,json=uploadBytesPerSecond,proto3" json:"upload_bytes_per_second,omitempty"`
-	DownloadBytesPerSecond int64 `protobuf:"varint,3,opt,name=download_bytes_per_second,json=downloadBytesPerSecond,proto3" json:"download_bytes_per_second,omitempty"`
-	// Totals belong to the current sing-box runtime and reset when it restarts.
-	UploadTotalBytes     int64  `protobuf:"varint,4,opt,name=upload_total_bytes,json=uploadTotalBytes,proto3" json:"upload_total_bytes,omitempty"`
-	DownloadTotalBytes   int64  `protobuf:"varint,5,opt,name=download_total_bytes,json=downloadTotalBytes,proto3" json:"download_total_bytes,omitempty"`
-	InboundConnections   int32  `protobuf:"varint,6,opt,name=inbound_connections,json=inboundConnections,proto3" json:"inbound_connections,omitempty"`
-	OutboundConnections  int32  `protobuf:"varint,7,opt,name=outbound_connections,json=outboundConnections,proto3" json:"outbound_connections,omitempty"`
-	SampledAtUnixMs      int64  `protobuf:"varint,8,opt,name=sampled_at_unix_ms,json=sampledAtUnixMs,proto3" json:"sampled_at_unix_ms,omitempty"`
-	IntervalMilliseconds uint32 `protobuf:"varint,9,opt,name=interval_milliseconds,json=intervalMilliseconds,proto3" json:"interval_milliseconds,omitempty"`
-	unknownFields        protoimpl.UnknownFields
-	sizeCache            protoimpl.SizeCache
+	state                  protoimpl.MessageState `protogen:"open.v1"`
+	Available              bool                   `protobuf:"varint,1,opt,name=available,proto3" json:"available,omitempty"`
+	UploadBytesPerSecond   int64                  `protobuf:"varint,2,opt,name=upload_bytes_per_second,json=uploadBytesPerSecond,proto3" json:"upload_bytes_per_second,omitempty"`
+	DownloadBytesPerSecond int64                  `protobuf:"varint,3,opt,name=download_bytes_per_second,json=downloadBytesPerSecond,proto3" json:"download_bytes_per_second,omitempty"`
+	UploadTotalBytes       int64                  `protobuf:"varint,4,opt,name=upload_total_bytes,json=uploadTotalBytes,proto3" json:"upload_total_bytes,omitempty"`
+	DownloadTotalBytes     int64                  `protobuf:"varint,5,opt,name=download_total_bytes,json=downloadTotalBytes,proto3" json:"download_total_bytes,omitempty"`
+	InboundConnections     int32                  `protobuf:"varint,6,opt,name=inbound_connections,json=inboundConnections,proto3" json:"inbound_connections,omitempty"`
+	OutboundConnections    int32                  `protobuf:"varint,7,opt,name=outbound_connections,json=outboundConnections,proto3" json:"outbound_connections,omitempty"`
+	SampledAtUnixMs        int64                  `protobuf:"varint,8,opt,name=sampled_at_unix_ms,json=sampledAtUnixMs,proto3" json:"sampled_at_unix_ms,omitempty"`
+	IntervalMilliseconds   uint32                 `protobuf:"varint,9,opt,name=interval_milliseconds,json=intervalMilliseconds,proto3" json:"interval_milliseconds,omitempty"`
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
 }
 
 func (x *TrafficStatus) Reset() {
 	*x = TrafficStatus{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[9]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1450,7 +799,7 @@ func (x *TrafficStatus) String() string {
 func (*TrafficStatus) ProtoMessage() {}
 
 func (x *TrafficStatus) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[9]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1463,7 +812,7 @@ func (x *TrafficStatus) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TrafficStatus.ProtoReflect.Descriptor instead.
 func (*TrafficStatus) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{9}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *TrafficStatus) GetAvailable() bool {
@@ -1538,7 +887,7 @@ type SubscriptionId struct {
 
 func (x *SubscriptionId) Reset() {
 	*x = SubscriptionId{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[10]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1550,7 +899,7 @@ func (x *SubscriptionId) String() string {
 func (*SubscriptionId) ProtoMessage() {}
 
 func (x *SubscriptionId) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[10]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1563,7 +912,7 @@ func (x *SubscriptionId) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SubscriptionId.ProtoReflect.Descriptor instead.
 func (*SubscriptionId) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{10}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *SubscriptionId) GetId() string {
@@ -1589,7 +938,7 @@ type AddSubscriptionRequest struct {
 
 func (x *AddSubscriptionRequest) Reset() {
 	*x = AddSubscriptionRequest{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[11]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1601,7 +950,7 @@ func (x *AddSubscriptionRequest) String() string {
 func (*AddSubscriptionRequest) ProtoMessage() {}
 
 func (x *AddSubscriptionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[11]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1614,7 +963,7 @@ func (x *AddSubscriptionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AddSubscriptionRequest.ProtoReflect.Descriptor instead.
 func (*AddSubscriptionRequest) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{11}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *AddSubscriptionRequest) GetId() string {
@@ -1683,7 +1032,7 @@ type RenameSubscriptionRequest struct {
 
 func (x *RenameSubscriptionRequest) Reset() {
 	*x = RenameSubscriptionRequest{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[12]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1695,7 +1044,7 @@ func (x *RenameSubscriptionRequest) String() string {
 func (*RenameSubscriptionRequest) ProtoMessage() {}
 
 func (x *RenameSubscriptionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[12]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1708,7 +1057,7 @@ func (x *RenameSubscriptionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RenameSubscriptionRequest.ProtoReflect.Descriptor instead.
 func (*RenameSubscriptionRequest) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{12}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *RenameSubscriptionRequest) GetId() string {
@@ -1735,7 +1084,7 @@ type SetSubscriptionEnabledRequest struct {
 
 func (x *SetSubscriptionEnabledRequest) Reset() {
 	*x = SetSubscriptionEnabledRequest{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[13]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1747,7 +1096,7 @@ func (x *SetSubscriptionEnabledRequest) String() string {
 func (*SetSubscriptionEnabledRequest) ProtoMessage() {}
 
 func (x *SetSubscriptionEnabledRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[13]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1760,7 +1109,7 @@ func (x *SetSubscriptionEnabledRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetSubscriptionEnabledRequest.ProtoReflect.Descriptor instead.
 func (*SetSubscriptionEnabledRequest) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{13}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *SetSubscriptionEnabledRequest) GetId() string {
@@ -1788,7 +1137,7 @@ type ConfigureSubscriptionUpdatesRequest struct {
 
 func (x *ConfigureSubscriptionUpdatesRequest) Reset() {
 	*x = ConfigureSubscriptionUpdatesRequest{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[14]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1800,7 +1149,7 @@ func (x *ConfigureSubscriptionUpdatesRequest) String() string {
 func (*ConfigureSubscriptionUpdatesRequest) ProtoMessage() {}
 
 func (x *ConfigureSubscriptionUpdatesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[14]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1813,7 +1162,7 @@ func (x *ConfigureSubscriptionUpdatesRequest) ProtoReflect() protoreflect.Messag
 
 // Deprecated: Use ConfigureSubscriptionUpdatesRequest.ProtoReflect.Descriptor instead.
 func (*ConfigureSubscriptionUpdatesRequest) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{14}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *ConfigureSubscriptionUpdatesRequest) GetId() string {
@@ -1846,7 +1195,7 @@ type ResolvedEndpointsRequest struct {
 
 func (x *ResolvedEndpointsRequest) Reset() {
 	*x = ResolvedEndpointsRequest{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[15]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1858,7 +1207,7 @@ func (x *ResolvedEndpointsRequest) String() string {
 func (*ResolvedEndpointsRequest) ProtoMessage() {}
 
 func (x *ResolvedEndpointsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[15]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1871,7 +1220,7 @@ func (x *ResolvedEndpointsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ResolvedEndpointsRequest.ProtoReflect.Descriptor instead.
 func (*ResolvedEndpointsRequest) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{15}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *ResolvedEndpointsRequest) GetEnabledOnly() bool {
@@ -1890,7 +1239,7 @@ type SubscriptionList struct {
 
 func (x *SubscriptionList) Reset() {
 	*x = SubscriptionList{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[16]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1902,7 +1251,7 @@ func (x *SubscriptionList) String() string {
 func (*SubscriptionList) ProtoMessage() {}
 
 func (x *SubscriptionList) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[16]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1915,7 +1264,7 @@ func (x *SubscriptionList) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SubscriptionList.ProtoReflect.Descriptor instead.
 func (*SubscriptionList) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{16}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *SubscriptionList) GetSubscriptions() []*SubscriptionView {
@@ -1943,19 +1292,18 @@ type SubscriptionView struct {
 	UploadBytes           int64                   `protobuf:"varint,14,opt,name=upload_bytes,json=uploadBytes,proto3" json:"upload_bytes,omitempty"`
 	DownloadBytes         int64                   `protobuf:"varint,15,opt,name=download_bytes,json=downloadBytes,proto3" json:"download_bytes,omitempty"`
 	TotalBytes            int64                   `protobuf:"varint,16,opt,name=total_bytes,json=totalBytes,proto3" json:"total_bytes,omitempty"`
-	// 订阅协议响应头元数据，服务器未提供时为零值。
-	ExpiresAtUnixMs    int64  `protobuf:"varint,17,opt,name=expires_at_unix_ms,json=expiresAtUnixMs,proto3" json:"expires_at_unix_ms,omitempty"`
-	Title              string `protobuf:"bytes,18,opt,name=title,proto3" json:"title,omitempty"`
-	WebPageUrl         string `protobuf:"bytes,19,opt,name=web_page_url,json=webPageUrl,proto3" json:"web_page_url,omitempty"`
-	SupportUrl         string `protobuf:"bytes,20,opt,name=support_url,json=supportUrl,proto3" json:"support_url,omitempty"`
-	MovedPermanentlyTo string `protobuf:"bytes,21,opt,name=moved_permanently_to,json=movedPermanentlyTo,proto3" json:"moved_permanently_to,omitempty"`
-	unknownFields      protoimpl.UnknownFields
-	sizeCache          protoimpl.SizeCache
+	ExpiresAtUnixMs       int64                   `protobuf:"varint,17,opt,name=expires_at_unix_ms,json=expiresAtUnixMs,proto3" json:"expires_at_unix_ms,omitempty"`
+	Title                 string                  `protobuf:"bytes,18,opt,name=title,proto3" json:"title,omitempty"`
+	WebPageUrl            string                  `protobuf:"bytes,19,opt,name=web_page_url,json=webPageUrl,proto3" json:"web_page_url,omitempty"`
+	SupportUrl            string                  `protobuf:"bytes,20,opt,name=support_url,json=supportUrl,proto3" json:"support_url,omitempty"`
+	MovedPermanentlyTo    string                  `protobuf:"bytes,21,opt,name=moved_permanently_to,json=movedPermanentlyTo,proto3" json:"moved_permanently_to,omitempty"`
+	unknownFields         protoimpl.UnknownFields
+	sizeCache             protoimpl.SizeCache
 }
 
 func (x *SubscriptionView) Reset() {
 	*x = SubscriptionView{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[17]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1967,7 +1315,7 @@ func (x *SubscriptionView) String() string {
 func (*SubscriptionView) ProtoMessage() {}
 
 func (x *SubscriptionView) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[17]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1980,7 +1328,7 @@ func (x *SubscriptionView) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SubscriptionView.ProtoReflect.Descriptor instead.
 func (*SubscriptionView) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{17}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *SubscriptionView) GetId() string {
@@ -2139,7 +1487,7 @@ type ProfileView struct {
 
 func (x *ProfileView) Reset() {
 	*x = ProfileView{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[18]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2151,7 +1499,7 @@ func (x *ProfileView) String() string {
 func (*ProfileView) ProtoMessage() {}
 
 func (x *ProfileView) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[18]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2164,7 +1512,7 @@ func (x *ProfileView) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProfileView.ProtoReflect.Descriptor instead.
 func (*ProfileView) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{18}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *ProfileView) GetNodes() []*ProfileNode {
@@ -2191,7 +1539,7 @@ type ProfileNode struct {
 
 func (x *ProfileNode) Reset() {
 	*x = ProfileNode{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[19]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2203,7 +1551,7 @@ func (x *ProfileNode) String() string {
 func (*ProfileNode) ProtoMessage() {}
 
 func (x *ProfileNode) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[19]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2216,7 +1564,7 @@ func (x *ProfileNode) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProfileNode.ProtoReflect.Descriptor instead.
 func (*ProfileNode) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{19}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *ProfileNode) GetSubscriptionId() string {
@@ -2288,16 +1636,15 @@ type SubscriptionUpdateResult struct {
 	Changed              bool                   `protobuf:"varint,2,opt,name=changed,proto3" json:"changed,omitempty"`
 	NotModified          bool                   `protobuf:"varint,3,opt,name=not_modified,json=notModified,proto3" json:"not_modified,omitempty"`
 	DurationMilliseconds int64                  `protobuf:"varint,4,opt,name=duration_milliseconds,json=durationMilliseconds,proto3" json:"duration_milliseconds,omitempty"`
-	// One-shot diagnostics for an explicit update. These bytes are not persisted.
-	OriginalConfig  []byte `protobuf:"bytes,5,opt,name=original_config,json=originalConfig,proto3" json:"original_config,omitempty"`
-	GeneratedConfig []byte `protobuf:"bytes,6,opt,name=generated_config,json=generatedConfig,proto3" json:"generated_config,omitempty"`
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	OriginalConfig       []byte                 `protobuf:"bytes,5,opt,name=original_config,json=originalConfig,proto3" json:"original_config,omitempty"`
+	GeneratedConfig      []byte                 `protobuf:"bytes,6,opt,name=generated_config,json=generatedConfig,proto3" json:"generated_config,omitempty"`
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
 }
 
 func (x *SubscriptionUpdateResult) Reset() {
 	*x = SubscriptionUpdateResult{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[20]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2309,7 +1656,7 @@ func (x *SubscriptionUpdateResult) String() string {
 func (*SubscriptionUpdateResult) ProtoMessage() {}
 
 func (x *SubscriptionUpdateResult) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[20]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2322,7 +1669,7 @@ func (x *SubscriptionUpdateResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SubscriptionUpdateResult.ProtoReflect.Descriptor instead.
 func (*SubscriptionUpdateResult) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{20}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *SubscriptionUpdateResult) GetSubscription() *SubscriptionView {
@@ -2380,7 +1727,7 @@ type RuntimeSettings struct {
 
 func (x *RuntimeSettings) Reset() {
 	*x = RuntimeSettings{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[21]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2392,7 +1739,7 @@ func (x *RuntimeSettings) String() string {
 func (*RuntimeSettings) ProtoMessage() {}
 
 func (x *RuntimeSettings) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[21]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2405,7 +1752,7 @@ func (x *RuntimeSettings) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RuntimeSettings.ProtoReflect.Descriptor instead.
 func (*RuntimeSettings) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{21}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *RuntimeSettings) GetListenAddress() string {
@@ -2457,7 +1804,7 @@ type RuntimeConfig struct {
 
 func (x *RuntimeConfig) Reset() {
 	*x = RuntimeConfig{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[22]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2469,7 +1816,7 @@ func (x *RuntimeConfig) String() string {
 func (*RuntimeConfig) ProtoMessage() {}
 
 func (x *RuntimeConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[22]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2482,7 +1829,7 @@ func (x *RuntimeConfig) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RuntimeConfig.ProtoReflect.Descriptor instead.
 func (*RuntimeConfig) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{22}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *RuntimeConfig) GetSettings() *RuntimeSettings {
@@ -2528,20 +1875,16 @@ func (x *RuntimeConfig) GetNodePoolRevision() string {
 }
 
 type UpdateRuntimeConfigRequest struct {
-	state    protoimpl.MessageState `protogen:"open.v1"`
-	Settings *RuntimeSettings       `protobuf:"bytes,1,opt,name=settings,proto3" json:"settings,omitempty"`
-	// When present, replaces the complete selector/route/binding model.
-	// When absent, preserves it (legacy settings-only updates).
-	Model *RuntimeModel `protobuf:"bytes,2,opt,name=model,proto3" json:"model,omitempty"`
-	// Empty disables optimistic concurrency checking.
-	ExpectedRevision string `protobuf:"bytes,3,opt,name=expected_revision,json=expectedRevision,proto3" json:"expected_revision,omitempty"`
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	Settings         *RuntimeSettings       `protobuf:"bytes,1,opt,name=settings,proto3" json:"settings,omitempty"`
+	ExpectedRevision string                 `protobuf:"bytes,3,opt,name=expected_revision,json=expectedRevision,proto3" json:"expected_revision,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
 
 func (x *UpdateRuntimeConfigRequest) Reset() {
 	*x = UpdateRuntimeConfigRequest{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[23]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2553,7 +1896,7 @@ func (x *UpdateRuntimeConfigRequest) String() string {
 func (*UpdateRuntimeConfigRequest) ProtoMessage() {}
 
 func (x *UpdateRuntimeConfigRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[23]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2566,19 +1909,12 @@ func (x *UpdateRuntimeConfigRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateRuntimeConfigRequest.ProtoReflect.Descriptor instead.
 func (*UpdateRuntimeConfigRequest) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{23}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *UpdateRuntimeConfigRequest) GetSettings() *RuntimeSettings {
 	if x != nil {
 		return x.Settings
-	}
-	return nil
-}
-
-func (x *UpdateRuntimeConfigRequest) GetModel() *RuntimeModel {
-	if x != nil {
-		return x.Model
 	}
 	return nil
 }
@@ -2601,7 +1937,7 @@ type SelectorConfig struct {
 
 func (x *SelectorConfig) Reset() {
 	*x = SelectorConfig{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[24]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2613,7 +1949,7 @@ func (x *SelectorConfig) String() string {
 func (*SelectorConfig) ProtoMessage() {}
 
 func (x *SelectorConfig) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[24]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2626,7 +1962,7 @@ func (x *SelectorConfig) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SelectorConfig.ProtoReflect.Descriptor instead.
 func (*SelectorConfig) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{24}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *SelectorConfig) GetTag() string {
@@ -2651,19 +1987,19 @@ func (x *SelectorConfig) GetSelectedNodeId() string {
 }
 
 type ServiceRoute struct {
-	state     protoimpl.MessageState `protogen:"open.v1"`
-	ServiceId string                 `protobuf:"bytes,1,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
-	// DNS suffixes, including the apex. More-specific domains take precedence.
-	Domains       []string `protobuf:"bytes,2,rep,name=domains,proto3" json:"domains,omitempty"`
-	SelectorTag   string   `protobuf:"bytes,3,opt,name=selector_tag,json=selectorTag,proto3" json:"selector_tag,omitempty"`
-	Enabled       bool     `protobuf:"varint,4,opt,name=enabled,proto3" json:"enabled,omitempty"`
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ServiceId     string                 `protobuf:"bytes,1,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
+	Domains       []string               `protobuf:"bytes,2,rep,name=domains,proto3" json:"domains,omitempty"`
+	SelectorTag   string                 `protobuf:"bytes,3,opt,name=selector_tag,json=selectorTag,proto3" json:"selector_tag,omitempty"`
+	Enabled       bool                   `protobuf:"varint,4,opt,name=enabled,proto3" json:"enabled,omitempty"`
+	DisplayName   string                 `protobuf:"bytes,5,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ServiceRoute) Reset() {
 	*x = ServiceRoute{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[25]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2675,7 +2011,7 @@ func (x *ServiceRoute) String() string {
 func (*ServiceRoute) ProtoMessage() {}
 
 func (x *ServiceRoute) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[25]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2688,7 +2024,7 @@ func (x *ServiceRoute) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ServiceRoute.ProtoReflect.Descriptor instead.
 func (*ServiceRoute) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{25}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *ServiceRoute) GetServiceId() string {
@@ -2719,6 +2055,13 @@ func (x *ServiceRoute) GetEnabled() bool {
 	return false
 }
 
+func (x *ServiceRoute) GetDisplayName() string {
+	if x != nil {
+		return x.DisplayName
+	}
+	return ""
+}
+
 type ServiceBinding struct {
 	state                   protoimpl.MessageState `protogen:"open.v1"`
 	ServiceId               string                 `protobuf:"bytes,1,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
@@ -2736,7 +2079,7 @@ type ServiceBinding struct {
 
 func (x *ServiceBinding) Reset() {
 	*x = ServiceBinding{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[26]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2748,7 +2091,7 @@ func (x *ServiceBinding) String() string {
 func (*ServiceBinding) ProtoMessage() {}
 
 func (x *ServiceBinding) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[26]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2761,7 +2104,7 @@ func (x *ServiceBinding) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ServiceBinding.ProtoReflect.Descriptor instead.
 func (*ServiceBinding) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{26}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *ServiceBinding) GetServiceId() string {
@@ -2838,7 +2181,7 @@ type RuntimeModel struct {
 
 func (x *RuntimeModel) Reset() {
 	*x = RuntimeModel{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[27]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2850,7 +2193,7 @@ func (x *RuntimeModel) String() string {
 func (*RuntimeModel) ProtoMessage() {}
 
 func (x *RuntimeModel) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[27]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2863,7 +2206,7 @@ func (x *RuntimeModel) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RuntimeModel.ProtoReflect.Descriptor instead.
 func (*RuntimeModel) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{27}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *RuntimeModel) GetSelectors() []*SelectorConfig {
@@ -2897,7 +2240,7 @@ type NodePool struct {
 
 func (x *NodePool) Reset() {
 	*x = NodePool{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[28]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2909,7 +2252,7 @@ func (x *NodePool) String() string {
 func (*NodePool) ProtoMessage() {}
 
 func (x *NodePool) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[28]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2922,7 +2265,7 @@ func (x *NodePool) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use NodePool.ProtoReflect.Descriptor instead.
 func (*NodePool) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{28}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *NodePool) GetRevision() string {
@@ -2939,30 +2282,29 @@ func (x *NodePool) GetNodes() []*ProfileNode {
 	return nil
 }
 
-type SelectorState struct {
+// Layer 1: Node Selection
+type SelectNodeRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Desired       *SelectorConfig        `protobuf:"bytes,1,opt,name=desired,proto3" json:"desired,omitempty"`
-	ActualNodeId  string                 `protobuf:"bytes,2,opt,name=actual_node_id,json=actualNodeId,proto3" json:"actual_node_id,omitempty"`
-	Effective     bool                   `protobuf:"varint,3,opt,name=effective,proto3" json:"effective,omitempty"`
+	NodeId        string                 `protobuf:"bytes,1,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *SelectorState) Reset() {
-	*x = SelectorState{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[29]
+func (x *SelectNodeRequest) Reset() {
+	*x = SelectNodeRequest{}
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *SelectorState) String() string {
+func (x *SelectNodeRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*SelectorState) ProtoMessage() {}
+func (*SelectNodeRequest) ProtoMessage() {}
 
-func (x *SelectorState) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[29]
+func (x *SelectNodeRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2973,563 +2315,213 @@ func (x *SelectorState) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use SelectorState.ProtoReflect.Descriptor instead.
-func (*SelectorState) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{29}
+// Deprecated: Use SelectNodeRequest.ProtoReflect.Descriptor instead.
+func (*SelectNodeRequest) Descriptor() ([]byte, []int) {
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{26}
 }
 
-func (x *SelectorState) GetDesired() *SelectorConfig {
+func (x *SelectNodeRequest) GetNodeId() string {
 	if x != nil {
-		return x.Desired
+		return x.NodeId
 	}
-	return nil
+	return ""
 }
 
-func (x *SelectorState) GetActualNodeId() string {
+type SelectNodeResponse struct {
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	NodeId             string                 `protobuf:"bytes,1,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
+	NodeName           string                 `protobuf:"bytes,2,opt,name=node_name,json=nodeName,proto3" json:"node_name,omitempty"`
+	AppliedImmediately bool                   `protobuf:"varint,3,opt,name=applied_immediately,json=appliedImmediately,proto3" json:"applied_immediately,omitempty"`
+	ErrorMessage       string                 `protobuf:"bytes,4,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *SelectNodeResponse) Reset() {
+	*x = SelectNodeResponse{}
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[27]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SelectNodeResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SelectNodeResponse) ProtoMessage() {}
+
+func (x *SelectNodeResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[27]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SelectNodeResponse.ProtoReflect.Descriptor instead.
+func (*SelectNodeResponse) Descriptor() ([]byte, []int) {
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{27}
+}
+
+func (x *SelectNodeResponse) GetNodeId() string {
+	if x != nil {
+		return x.NodeId
+	}
+	return ""
+}
+
+func (x *SelectNodeResponse) GetNodeName() string {
+	if x != nil {
+		return x.NodeName
+	}
+	return ""
+}
+
+func (x *SelectNodeResponse) GetAppliedImmediately() bool {
+	if x != nil {
+		return x.AppliedImmediately
+	}
+	return false
+}
+
+func (x *SelectNodeResponse) GetErrorMessage() string {
+	if x != nil {
+		return x.ErrorMessage
+	}
+	return ""
+}
+
+type ProxyStatus struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	ServiceState      ServiceStateType       `protobuf:"varint,1,opt,name=service_state,json=serviceState,proto3,enum=targetlib.ServiceStateType" json:"service_state,omitempty"`
+	SelectedNodeId    string                 `protobuf:"bytes,2,opt,name=selected_node_id,json=selectedNodeId,proto3" json:"selected_node_id,omitempty"`
+	SelectedNodeName  string                 `protobuf:"bytes,3,opt,name=selected_node_name,json=selectedNodeName,proto3" json:"selected_node_name,omitempty"`
+	ActualNodeId      string                 `protobuf:"bytes,4,opt,name=actual_node_id,json=actualNodeId,proto3" json:"actual_node_id,omitempty"`
+	Effective         bool                   `protobuf:"varint,5,opt,name=effective,proto3" json:"effective,omitempty"`
+	SelectedAtUnixMs  int64                  `protobuf:"varint,6,opt,name=selected_at_unix_ms,json=selectedAtUnixMs,proto3" json:"selected_at_unix_ms,omitempty"`
+	NodeAvailable     bool                   `protobuf:"varint,7,opt,name=node_available,json=nodeAvailable,proto3" json:"node_available,omitempty"`
+	UnavailableReason string                 `protobuf:"bytes,8,opt,name=unavailable_reason,json=unavailableReason,proto3" json:"unavailable_reason,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *ProxyStatus) Reset() {
+	*x = ProxyStatus{}
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[28]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ProxyStatus) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ProxyStatus) ProtoMessage() {}
+
+func (x *ProxyStatus) ProtoReflect() protoreflect.Message {
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[28]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ProxyStatus.ProtoReflect.Descriptor instead.
+func (*ProxyStatus) Descriptor() ([]byte, []int) {
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{28}
+}
+
+func (x *ProxyStatus) GetServiceState() ServiceStateType {
+	if x != nil {
+		return x.ServiceState
+	}
+	return ServiceStateType_SERVICE_STATE_UNSPECIFIED
+}
+
+func (x *ProxyStatus) GetSelectedNodeId() string {
+	if x != nil {
+		return x.SelectedNodeId
+	}
+	return ""
+}
+
+func (x *ProxyStatus) GetSelectedNodeName() string {
+	if x != nil {
+		return x.SelectedNodeName
+	}
+	return ""
+}
+
+func (x *ProxyStatus) GetActualNodeId() string {
 	if x != nil {
 		return x.ActualNodeId
 	}
 	return ""
 }
 
-func (x *SelectorState) GetEffective() bool {
+func (x *ProxyStatus) GetEffective() bool {
 	if x != nil {
 		return x.Effective
 	}
 	return false
 }
 
-type ServiceRouteState struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Desired       *ServiceRoute          `protobuf:"bytes,1,opt,name=desired,proto3" json:"desired,omitempty"`
-	Effective     bool                   `protobuf:"varint,2,opt,name=effective,proto3" json:"effective,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ServiceRouteState) Reset() {
-	*x = ServiceRouteState{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[30]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ServiceRouteState) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ServiceRouteState) ProtoMessage() {}
-
-func (x *ServiceRouteState) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[30]
+func (x *ProxyStatus) GetSelectedAtUnixMs() int64 {
 	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
+		return x.SelectedAtUnixMs
 	}
-	return mi.MessageOf(x)
+	return 0
 }
 
-// Deprecated: Use ServiceRouteState.ProtoReflect.Descriptor instead.
-func (*ServiceRouteState) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{30}
-}
-
-func (x *ServiceRouteState) GetDesired() *ServiceRoute {
-	if x != nil {
-		return x.Desired
-	}
-	return nil
-}
-
-func (x *ServiceRouteState) GetEffective() bool {
-	if x != nil {
-		return x.Effective
-	}
-	return false
-}
-
-type ServiceBindingState struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	Desired          *ServiceBinding        `protobuf:"bytes,1,opt,name=desired,proto3" json:"desired,omitempty"`
-	Effective        bool                   `protobuf:"varint,2,opt,name=effective,proto3" json:"effective,omitempty"`
-	NodeAvailable    bool                   `protobuf:"varint,3,opt,name=node_available,json=nodeAvailable,proto3" json:"node_available,omitempty"`
-	NeedsEvaluation  bool                   `protobuf:"varint,4,opt,name=needs_evaluation,json=needsEvaluation,proto3" json:"needs_evaluation,omitempty"`
-	EvaluationReason string                 `protobuf:"bytes,5,opt,name=evaluation_reason,json=evaluationReason,proto3" json:"evaluation_reason,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
-}
-
-func (x *ServiceBindingState) Reset() {
-	*x = ServiceBindingState{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[31]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ServiceBindingState) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ServiceBindingState) ProtoMessage() {}
-
-func (x *ServiceBindingState) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[31]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ServiceBindingState.ProtoReflect.Descriptor instead.
-func (*ServiceBindingState) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{31}
-}
-
-func (x *ServiceBindingState) GetDesired() *ServiceBinding {
-	if x != nil {
-		return x.Desired
-	}
-	return nil
-}
-
-func (x *ServiceBindingState) GetEffective() bool {
-	if x != nil {
-		return x.Effective
-	}
-	return false
-}
-
-func (x *ServiceBindingState) GetNodeAvailable() bool {
+func (x *ProxyStatus) GetNodeAvailable() bool {
 	if x != nil {
 		return x.NodeAvailable
 	}
 	return false
 }
 
-func (x *ServiceBindingState) GetNeedsEvaluation() bool {
+func (x *ProxyStatus) GetUnavailableReason() string {
 	if x != nil {
-		return x.NeedsEvaluation
-	}
-	return false
-}
-
-func (x *ServiceBindingState) GetEvaluationReason() string {
-	if x != nil {
-		return x.EvaluationReason
+		return x.UnavailableReason
 	}
 	return ""
 }
 
-// Probe definitions contain no credentials. Request headers are transient.
-type ServiceProbe struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	ServiceId        string                 `protobuf:"bytes,1,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
-	Url              string                 `protobuf:"bytes,2,opt,name=url,proto3" json:"url,omitempty"`
-	ExpectedStatus   []uint32               `protobuf:"varint,3,rep,packed,name=expected_status,json=expectedStatus,proto3" json:"expected_status,omitempty"`
-	BodyContains     string                 `protobuf:"bytes,4,opt,name=body_contains,json=bodyContains,proto3" json:"body_contains,omitempty"`
-	AllowedCountries []string               `protobuf:"bytes,5,rep,name=allowed_countries,json=allowedCountries,proto3" json:"allowed_countries,omitempty"`
-	// Optional JSON endpoint returning {"ip":"...","country":"US"}.
-	EgressUrl string `protobuf:"bytes,6,opt,name=egress_url,json=egressUrl,proto3" json:"egress_url,omitempty"`
-	// Optional service response header containing an ISO country code.
-	ServiceCountryHeader string `protobuf:"bytes,7,opt,name=service_country_header,json=serviceCountryHeader,proto3" json:"service_country_header,omitempty"`
-	TimeoutMilliseconds  uint32 `protobuf:"varint,8,opt,name=timeout_milliseconds,json=timeoutMilliseconds,proto3" json:"timeout_milliseconds,omitempty"`
-	ValiditySeconds      uint32 `protobuf:"varint,9,opt,name=validity_seconds,json=validitySeconds,proto3" json:"validity_seconds,omitempty"`
-	Revision             string `protobuf:"bytes,10,opt,name=revision,proto3" json:"revision,omitempty"`
-	// Optional RFC 862 UDP echo endpoint controlled by the host/operator.
-	UdpEchoAddress            string   `protobuf:"bytes,11,opt,name=udp_echo_address,json=udpEchoAddress,proto3" json:"udp_echo_address,omitempty"`
-	PacketCount               uint32   `protobuf:"varint,12,opt,name=packet_count,json=packetCount,proto3" json:"packet_count,omitempty"`
-	PacketTimeoutMilliseconds uint32   `protobuf:"varint,13,opt,name=packet_timeout_milliseconds,json=packetTimeoutMilliseconds,proto3" json:"packet_timeout_milliseconds,omitempty"`
-	MaximumPacketLoss         *float64 `protobuf:"fixed64,14,opt,name=maximum_packet_loss,json=maximumPacketLoss,proto3,oneof" json:"maximum_packet_loss,omitempty"`
-	unknownFields             protoimpl.UnknownFields
-	sizeCache                 protoimpl.SizeCache
-}
-
-func (x *ServiceProbe) Reset() {
-	*x = ServiceProbe{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[32]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ServiceProbe) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ServiceProbe) ProtoMessage() {}
-
-func (x *ServiceProbe) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[32]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ServiceProbe.ProtoReflect.Descriptor instead.
-func (*ServiceProbe) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{32}
-}
-
-func (x *ServiceProbe) GetServiceId() string {
-	if x != nil {
-		return x.ServiceId
-	}
-	return ""
-}
-
-func (x *ServiceProbe) GetUrl() string {
-	if x != nil {
-		return x.Url
-	}
-	return ""
-}
-
-func (x *ServiceProbe) GetExpectedStatus() []uint32 {
-	if x != nil {
-		return x.ExpectedStatus
-	}
-	return nil
-}
-
-func (x *ServiceProbe) GetBodyContains() string {
-	if x != nil {
-		return x.BodyContains
-	}
-	return ""
-}
-
-func (x *ServiceProbe) GetAllowedCountries() []string {
-	if x != nil {
-		return x.AllowedCountries
-	}
-	return nil
-}
-
-func (x *ServiceProbe) GetEgressUrl() string {
-	if x != nil {
-		return x.EgressUrl
-	}
-	return ""
-}
-
-func (x *ServiceProbe) GetServiceCountryHeader() string {
-	if x != nil {
-		return x.ServiceCountryHeader
-	}
-	return ""
-}
-
-func (x *ServiceProbe) GetTimeoutMilliseconds() uint32 {
-	if x != nil {
-		return x.TimeoutMilliseconds
-	}
-	return 0
-}
-
-func (x *ServiceProbe) GetValiditySeconds() uint32 {
-	if x != nil {
-		return x.ValiditySeconds
-	}
-	return 0
-}
-
-func (x *ServiceProbe) GetRevision() string {
-	if x != nil {
-		return x.Revision
-	}
-	return ""
-}
-
-func (x *ServiceProbe) GetUdpEchoAddress() string {
-	if x != nil {
-		return x.UdpEchoAddress
-	}
-	return ""
-}
-
-func (x *ServiceProbe) GetPacketCount() uint32 {
-	if x != nil {
-		return x.PacketCount
-	}
-	return 0
-}
-
-func (x *ServiceProbe) GetPacketTimeoutMilliseconds() uint32 {
-	if x != nil {
-		return x.PacketTimeoutMilliseconds
-	}
-	return 0
-}
-
-func (x *ServiceProbe) GetMaximumPacketLoss() float64 {
-	if x != nil && x.MaximumPacketLoss != nil {
-		return *x.MaximumPacketLoss
-	}
-	return 0
-}
-
-type ProbeResult struct {
-	state               protoimpl.MessageState `protogen:"open.v1"`
-	Id                  string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	ServiceId           string                 `protobuf:"bytes,2,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
-	NodeId              string                 `protobuf:"bytes,3,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
-	NodePoolRevision    string                 `protobuf:"bytes,4,opt,name=node_pool_revision,json=nodePoolRevision,proto3" json:"node_pool_revision,omitempty"`
-	ProbeRevision       string                 `protobuf:"bytes,5,opt,name=probe_revision,json=probeRevision,proto3" json:"probe_revision,omitempty"`
-	Stage               ProbeStage             `protobuf:"varint,6,opt,name=stage,proto3,enum=targetlib.ProbeStage" json:"stage,omitempty"`
-	ErrorMessage        string                 `protobuf:"bytes,7,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
-	TestedAtUnixMs      int64                  `protobuf:"varint,8,opt,name=tested_at_unix_ms,json=testedAtUnixMs,proto3" json:"tested_at_unix_ms,omitempty"`
-	ExpiresAtUnixMs     int64                  `protobuf:"varint,9,opt,name=expires_at_unix_ms,json=expiresAtUnixMs,proto3" json:"expires_at_unix_ms,omitempty"`
-	LatencyMilliseconds uint32                 `protobuf:"varint,10,opt,name=latency_milliseconds,json=latencyMilliseconds,proto3" json:"latency_milliseconds,omitempty"`
-	HttpStatus          uint32                 `protobuf:"varint,11,opt,name=http_status,json=httpStatus,proto3" json:"http_status,omitempty"`
-	DeclaredCountry     string                 `protobuf:"bytes,12,opt,name=declared_country,json=declaredCountry,proto3" json:"declared_country,omitempty"`
-	ObservedCountry     string                 `protobuf:"bytes,13,opt,name=observed_country,json=observedCountry,proto3" json:"observed_country,omitempty"`
-	ServiceCountry      string                 `protobuf:"bytes,14,opt,name=service_country,json=serviceCountry,proto3" json:"service_country,omitempty"`
-	EgressIp            string                 `protobuf:"bytes,15,opt,name=egress_ip,json=egressIp,proto3" json:"egress_ip,omitempty"`
-	Attempts            uint32                 `protobuf:"varint,16,opt,name=attempts,proto3" json:"attempts,omitempty"`
-	Successes           uint32                 `protobuf:"varint,17,opt,name=successes,proto3" json:"successes,omitempty"`
-	// Failed application probes / attempts, not ICMP or UDP packet loss.
-	FailureRatio        float64 `protobuf:"fixed64,18,opt,name=failure_ratio,json=failureRatio,proto3" json:"failure_ratio,omitempty"`
-	JitterMilliseconds  uint32  `protobuf:"varint,19,opt,name=jitter_milliseconds,json=jitterMilliseconds,proto3" json:"jitter_milliseconds,omitempty"`
-	PacketLossAvailable bool    `protobuf:"varint,20,opt,name=packet_loss_available,json=packetLossAvailable,proto3" json:"packet_loss_available,omitempty"`
-	PacketLossRatio     float64 `protobuf:"fixed64,21,opt,name=packet_loss_ratio,json=packetLossRatio,proto3" json:"packet_loss_ratio,omitempty"`
-	PacketsSent         uint32  `protobuf:"varint,22,opt,name=packets_sent,json=packetsSent,proto3" json:"packets_sent,omitempty"`
-	PacketsReceived     uint32  `protobuf:"varint,23,opt,name=packets_received,json=packetsReceived,proto3" json:"packets_received,omitempty"`
-	PacketError         string  `protobuf:"bytes,24,opt,name=packet_error,json=packetError,proto3" json:"packet_error,omitempty"`
-	unknownFields       protoimpl.UnknownFields
-	sizeCache           protoimpl.SizeCache
-}
-
-func (x *ProbeResult) Reset() {
-	*x = ProbeResult{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[33]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ProbeResult) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ProbeResult) ProtoMessage() {}
-
-func (x *ProbeResult) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[33]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ProbeResult.ProtoReflect.Descriptor instead.
-func (*ProbeResult) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{33}
-}
-
-func (x *ProbeResult) GetId() string {
-	if x != nil {
-		return x.Id
-	}
-	return ""
-}
-
-func (x *ProbeResult) GetServiceId() string {
-	if x != nil {
-		return x.ServiceId
-	}
-	return ""
-}
-
-func (x *ProbeResult) GetNodeId() string {
-	if x != nil {
-		return x.NodeId
-	}
-	return ""
-}
-
-func (x *ProbeResult) GetNodePoolRevision() string {
-	if x != nil {
-		return x.NodePoolRevision
-	}
-	return ""
-}
-
-func (x *ProbeResult) GetProbeRevision() string {
-	if x != nil {
-		return x.ProbeRevision
-	}
-	return ""
-}
-
-func (x *ProbeResult) GetStage() ProbeStage {
-	if x != nil {
-		return x.Stage
-	}
-	return ProbeStage_PROBE_STAGE_UNSPECIFIED
-}
-
-func (x *ProbeResult) GetErrorMessage() string {
-	if x != nil {
-		return x.ErrorMessage
-	}
-	return ""
-}
-
-func (x *ProbeResult) GetTestedAtUnixMs() int64 {
-	if x != nil {
-		return x.TestedAtUnixMs
-	}
-	return 0
-}
-
-func (x *ProbeResult) GetExpiresAtUnixMs() int64 {
-	if x != nil {
-		return x.ExpiresAtUnixMs
-	}
-	return 0
-}
-
-func (x *ProbeResult) GetLatencyMilliseconds() uint32 {
-	if x != nil {
-		return x.LatencyMilliseconds
-	}
-	return 0
-}
-
-func (x *ProbeResult) GetHttpStatus() uint32 {
-	if x != nil {
-		return x.HttpStatus
-	}
-	return 0
-}
-
-func (x *ProbeResult) GetDeclaredCountry() string {
-	if x != nil {
-		return x.DeclaredCountry
-	}
-	return ""
-}
-
-func (x *ProbeResult) GetObservedCountry() string {
-	if x != nil {
-		return x.ObservedCountry
-	}
-	return ""
-}
-
-func (x *ProbeResult) GetServiceCountry() string {
-	if x != nil {
-		return x.ServiceCountry
-	}
-	return ""
-}
-
-func (x *ProbeResult) GetEgressIp() string {
-	if x != nil {
-		return x.EgressIp
-	}
-	return ""
-}
-
-func (x *ProbeResult) GetAttempts() uint32 {
-	if x != nil {
-		return x.Attempts
-	}
-	return 0
-}
-
-func (x *ProbeResult) GetSuccesses() uint32 {
-	if x != nil {
-		return x.Successes
-	}
-	return 0
-}
-
-func (x *ProbeResult) GetFailureRatio() float64 {
-	if x != nil {
-		return x.FailureRatio
-	}
-	return 0
-}
-
-func (x *ProbeResult) GetJitterMilliseconds() uint32 {
-	if x != nil {
-		return x.JitterMilliseconds
-	}
-	return 0
-}
-
-func (x *ProbeResult) GetPacketLossAvailable() bool {
-	if x != nil {
-		return x.PacketLossAvailable
-	}
-	return false
-}
-
-func (x *ProbeResult) GetPacketLossRatio() float64 {
-	if x != nil {
-		return x.PacketLossRatio
-	}
-	return 0
-}
-
-func (x *ProbeResult) GetPacketsSent() uint32 {
-	if x != nil {
-		return x.PacketsSent
-	}
-	return 0
-}
-
-func (x *ProbeResult) GetPacketsReceived() uint32 {
-	if x != nil {
-		return x.PacketsReceived
-	}
-	return 0
-}
-
-func (x *ProbeResult) GetPacketError() string {
-	if x != nil {
-		return x.PacketError
-	}
-	return ""
-}
-
-type EvaluateServiceRequest struct {
+// Layer 2: Rule-based Routing
+type UpsertRouteRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ServiceId     string                 `protobuf:"bytes,1,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
+	DisplayName   string                 `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
+	Domains       []string               `protobuf:"bytes,3,rep,name=domains,proto3" json:"domains,omitempty"`
+	NodeId        string                 `protobuf:"bytes,4,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
+	Enabled       bool                   `protobuf:"varint,5,opt,name=enabled,proto3" json:"enabled,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *EvaluateServiceRequest) Reset() {
-	*x = EvaluateServiceRequest{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[34]
+func (x *UpsertRouteRequest) Reset() {
+	*x = UpsertRouteRequest{}
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *EvaluateServiceRequest) String() string {
+func (x *UpsertRouteRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*EvaluateServiceRequest) ProtoMessage() {}
+func (*UpsertRouteRequest) ProtoMessage() {}
 
-func (x *EvaluateServiceRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[34]
+func (x *UpsertRouteRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3540,877 +2532,75 @@ func (x *EvaluateServiceRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use EvaluateServiceRequest.ProtoReflect.Descriptor instead.
-func (*EvaluateServiceRequest) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{34}
+// Deprecated: Use UpsertRouteRequest.ProtoReflect.Descriptor instead.
+func (*UpsertRouteRequest) Descriptor() ([]byte, []int) {
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{29}
 }
 
-func (x *EvaluateServiceRequest) GetServiceId() string {
+func (x *UpsertRouteRequest) GetServiceId() string {
 	if x != nil {
 		return x.ServiceId
 	}
 	return ""
 }
 
-type ServiceSelectionPolicy struct {
-	state              protoimpl.MessageState `protogen:"open.v1"`
-	ServiceId          string                 `protobuf:"bytes,1,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
-	PreferredCountries []string               `protobuf:"bytes,2,rep,name=preferred_countries,json=preferredCountries,proto3" json:"preferred_countries,omitempty"`
-	SubscriptionIds    []string               `protobuf:"bytes,3,rep,name=subscription_ids,json=subscriptionIds,proto3" json:"subscription_ids,omitempty"`
-	ExcludedNodeIds    []string               `protobuf:"bytes,4,rep,name=excluded_node_ids,json=excludedNodeIds,proto3" json:"excluded_node_ids,omitempty"`
-	FavoriteNodeIds    []string               `protobuf:"bytes,5,rep,name=favorite_node_ids,json=favoriteNodeIds,proto3" json:"favorite_node_ids,omitempty"`
-	AllowDirect        bool                   `protobuf:"varint,6,opt,name=allow_direct,json=allowDirect,proto3" json:"allow_direct,omitempty"`
-	MaxCandidates      uint32                 `protobuf:"varint,7,opt,name=max_candidates,json=maxCandidates,proto3" json:"max_candidates,omitempty"`
-	Revision           string                 `protobuf:"bytes,8,opt,name=revision,proto3" json:"revision,omitempty"`
-	ExpectedRevision   string                 `protobuf:"bytes,9,opt,name=expected_revision,json=expectedRevision,proto3" json:"expected_revision,omitempty"`
-	unknownFields      protoimpl.UnknownFields
-	sizeCache          protoimpl.SizeCache
-}
-
-func (x *ServiceSelectionPolicy) Reset() {
-	*x = ServiceSelectionPolicy{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[35]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ServiceSelectionPolicy) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ServiceSelectionPolicy) ProtoMessage() {}
-
-func (x *ServiceSelectionPolicy) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[35]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ServiceSelectionPolicy.ProtoReflect.Descriptor instead.
-func (*ServiceSelectionPolicy) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{35}
-}
-
-func (x *ServiceSelectionPolicy) GetServiceId() string {
-	if x != nil {
-		return x.ServiceId
-	}
-	return ""
-}
-
-func (x *ServiceSelectionPolicy) GetPreferredCountries() []string {
-	if x != nil {
-		return x.PreferredCountries
-	}
-	return nil
-}
-
-func (x *ServiceSelectionPolicy) GetSubscriptionIds() []string {
-	if x != nil {
-		return x.SubscriptionIds
-	}
-	return nil
-}
-
-func (x *ServiceSelectionPolicy) GetExcludedNodeIds() []string {
-	if x != nil {
-		return x.ExcludedNodeIds
-	}
-	return nil
-}
-
-func (x *ServiceSelectionPolicy) GetFavoriteNodeIds() []string {
-	if x != nil {
-		return x.FavoriteNodeIds
-	}
-	return nil
-}
-
-func (x *ServiceSelectionPolicy) GetAllowDirect() bool {
-	if x != nil {
-		return x.AllowDirect
-	}
-	return false
-}
-
-func (x *ServiceSelectionPolicy) GetMaxCandidates() uint32 {
-	if x != nil {
-		return x.MaxCandidates
-	}
-	return 0
-}
-
-func (x *ServiceSelectionPolicy) GetRevision() string {
-	if x != nil {
-		return x.Revision
-	}
-	return ""
-}
-
-func (x *ServiceSelectionPolicy) GetExpectedRevision() string {
-	if x != nil {
-		return x.ExpectedRevision
-	}
-	return ""
-}
-
-type ServiceCandidate struct {
-	state                   protoimpl.MessageState `protogen:"open.v1"`
-	NodeId                  string                 `protobuf:"bytes,1,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
-	Eligible                bool                   `protobuf:"varint,2,opt,name=eligible,proto3" json:"eligible,omitempty"`
-	Score                   float64                `protobuf:"fixed64,3,opt,name=score,proto3" json:"score,omitempty"`
-	Reason                  string                 `protobuf:"bytes,4,opt,name=reason,proto3" json:"reason,omitempty"`
-	Latest                  *ProbeResult           `protobuf:"bytes,5,opt,name=latest,proto3" json:"latest,omitempty"`
-	SuccessRatio            float64                `protobuf:"fixed64,6,opt,name=success_ratio,json=successRatio,proto3" json:"success_ratio,omitempty"`
-	MeanLatencyMilliseconds float64                `protobuf:"fixed64,7,opt,name=mean_latency_milliseconds,json=meanLatencyMilliseconds,proto3" json:"mean_latency_milliseconds,omitempty"`
-	// Recent half mean latency minus older half; positive means slower.
-	LatencyTrendMilliseconds float64 `protobuf:"fixed64,8,opt,name=latency_trend_milliseconds,json=latencyTrendMilliseconds,proto3" json:"latency_trend_milliseconds,omitempty"`
-	unknownFields            protoimpl.UnknownFields
-	sizeCache                protoimpl.SizeCache
-}
-
-func (x *ServiceCandidate) Reset() {
-	*x = ServiceCandidate{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[36]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ServiceCandidate) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ServiceCandidate) ProtoMessage() {}
-
-func (x *ServiceCandidate) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[36]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ServiceCandidate.ProtoReflect.Descriptor instead.
-func (*ServiceCandidate) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{36}
-}
-
-func (x *ServiceCandidate) GetNodeId() string {
-	if x != nil {
-		return x.NodeId
-	}
-	return ""
-}
-
-func (x *ServiceCandidate) GetEligible() bool {
-	if x != nil {
-		return x.Eligible
-	}
-	return false
-}
-
-func (x *ServiceCandidate) GetScore() float64 {
-	if x != nil {
-		return x.Score
-	}
-	return 0
-}
-
-func (x *ServiceCandidate) GetReason() string {
-	if x != nil {
-		return x.Reason
-	}
-	return ""
-}
-
-func (x *ServiceCandidate) GetLatest() *ProbeResult {
-	if x != nil {
-		return x.Latest
-	}
-	return nil
-}
-
-func (x *ServiceCandidate) GetSuccessRatio() float64 {
-	if x != nil {
-		return x.SuccessRatio
-	}
-	return 0
-}
-
-func (x *ServiceCandidate) GetMeanLatencyMilliseconds() float64 {
-	if x != nil {
-		return x.MeanLatencyMilliseconds
-	}
-	return 0
-}
-
-func (x *ServiceCandidate) GetLatencyTrendMilliseconds() float64 {
-	if x != nil {
-		return x.LatencyTrendMilliseconds
-	}
-	return 0
-}
-
-type ServiceEvaluation struct {
-	state             protoimpl.MessageState `protogen:"open.v1"`
-	ServiceId         string                 `protobuf:"bytes,1,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
-	NodePoolRevision  string                 `protobuf:"bytes,2,opt,name=node_pool_revision,json=nodePoolRevision,proto3" json:"node_pool_revision,omitempty"`
-	RuntimeRevision   string                 `protobuf:"bytes,3,opt,name=runtime_revision,json=runtimeRevision,proto3" json:"runtime_revision,omitempty"`
-	Candidates        []*ServiceCandidate    `protobuf:"bytes,4,rep,name=candidates,proto3" json:"candidates,omitempty"`
-	EvaluatedAtUnixMs int64                  `protobuf:"varint,5,opt,name=evaluated_at_unix_ms,json=evaluatedAtUnixMs,proto3" json:"evaluated_at_unix_ms,omitempty"`
-	ProbeRevision     string                 `protobuf:"bytes,6,opt,name=probe_revision,json=probeRevision,proto3" json:"probe_revision,omitempty"`
-	unknownFields     protoimpl.UnknownFields
-	sizeCache         protoimpl.SizeCache
-}
-
-func (x *ServiceEvaluation) Reset() {
-	*x = ServiceEvaluation{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[37]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ServiceEvaluation) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ServiceEvaluation) ProtoMessage() {}
-
-func (x *ServiceEvaluation) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[37]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ServiceEvaluation.ProtoReflect.Descriptor instead.
-func (*ServiceEvaluation) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{37}
-}
-
-func (x *ServiceEvaluation) GetServiceId() string {
-	if x != nil {
-		return x.ServiceId
-	}
-	return ""
-}
-
-func (x *ServiceEvaluation) GetNodePoolRevision() string {
-	if x != nil {
-		return x.NodePoolRevision
-	}
-	return ""
-}
-
-func (x *ServiceEvaluation) GetRuntimeRevision() string {
-	if x != nil {
-		return x.RuntimeRevision
-	}
-	return ""
-}
-
-func (x *ServiceEvaluation) GetCandidates() []*ServiceCandidate {
-	if x != nil {
-		return x.Candidates
-	}
-	return nil
-}
-
-func (x *ServiceEvaluation) GetEvaluatedAtUnixMs() int64 {
-	if x != nil {
-		return x.EvaluatedAtUnixMs
-	}
-	return 0
-}
-
-func (x *ServiceEvaluation) GetProbeRevision() string {
-	if x != nil {
-		return x.ProbeRevision
-	}
-	return ""
-}
-
-type RuntimeOrchestrationState struct {
-	state             protoimpl.MessageState    `protogen:"open.v1"`
-	Probes            []*ServiceProbe           `protobuf:"bytes,1,rep,name=probes,proto3" json:"probes,omitempty"`
-	Results           []*ProbeResult            `protobuf:"bytes,2,rep,name=results,proto3" json:"results,omitempty"`
-	SelectionPolicies []*ServiceSelectionPolicy `protobuf:"bytes,3,rep,name=selection_policies,json=selectionPolicies,proto3" json:"selection_policies,omitempty"`
-	Enabled           bool                      `protobuf:"varint,4,opt,name=enabled,proto3" json:"enabled,omitempty"`
-	Revision          string                    `protobuf:"bytes,5,opt,name=revision,proto3" json:"revision,omitempty"`
-	RecoveryState     RuntimeRecoveryState      `protobuf:"varint,6,opt,name=recovery_state,json=recoveryState,proto3,enum=targetlib.RuntimeRecoveryState" json:"recovery_state,omitempty"`
-	Policies          []*ServicePolicy          `protobuf:"bytes,7,rep,name=policies,proto3" json:"policies,omitempty"`
-	Proposals         []*SwitchProposal         `protobuf:"bytes,8,rep,name=proposals,proto3" json:"proposals,omitempty"`
-	Operations        []*Operation              `protobuf:"bytes,9,rep,name=operations,proto3" json:"operations,omitempty"`
-	NodePreferences   []*NodePreference         `protobuf:"bytes,10,rep,name=node_preferences,json=nodePreferences,proto3" json:"node_preferences,omitempty"`
-	Tasks             []*SchedulerTask          `protobuf:"bytes,11,rep,name=tasks,proto3" json:"tasks,omitempty"`
-	unknownFields     protoimpl.UnknownFields
-	sizeCache         protoimpl.SizeCache
-}
-
-func (x *RuntimeOrchestrationState) Reset() {
-	*x = RuntimeOrchestrationState{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[38]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *RuntimeOrchestrationState) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*RuntimeOrchestrationState) ProtoMessage() {}
-
-func (x *RuntimeOrchestrationState) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[38]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use RuntimeOrchestrationState.ProtoReflect.Descriptor instead.
-func (*RuntimeOrchestrationState) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{38}
-}
-
-func (x *RuntimeOrchestrationState) GetProbes() []*ServiceProbe {
-	if x != nil {
-		return x.Probes
-	}
-	return nil
-}
-
-func (x *RuntimeOrchestrationState) GetResults() []*ProbeResult {
-	if x != nil {
-		return x.Results
-	}
-	return nil
-}
-
-func (x *RuntimeOrchestrationState) GetSelectionPolicies() []*ServiceSelectionPolicy {
-	if x != nil {
-		return x.SelectionPolicies
-	}
-	return nil
-}
-
-func (x *RuntimeOrchestrationState) GetEnabled() bool {
-	if x != nil {
-		return x.Enabled
-	}
-	return false
-}
-
-func (x *RuntimeOrchestrationState) GetRevision() string {
-	if x != nil {
-		return x.Revision
-	}
-	return ""
-}
-
-func (x *RuntimeOrchestrationState) GetRecoveryState() RuntimeRecoveryState {
-	if x != nil {
-		return x.RecoveryState
-	}
-	return RuntimeRecoveryState_RUNTIME_RECOVERY_STATE_UNSPECIFIED
-}
-
-func (x *RuntimeOrchestrationState) GetPolicies() []*ServicePolicy {
-	if x != nil {
-		return x.Policies
-	}
-	return nil
-}
-
-func (x *RuntimeOrchestrationState) GetProposals() []*SwitchProposal {
-	if x != nil {
-		return x.Proposals
-	}
-	return nil
-}
-
-func (x *RuntimeOrchestrationState) GetOperations() []*Operation {
-	if x != nil {
-		return x.Operations
-	}
-	return nil
-}
-
-func (x *RuntimeOrchestrationState) GetNodePreferences() []*NodePreference {
-	if x != nil {
-		return x.NodePreferences
-	}
-	return nil
-}
-
-func (x *RuntimeOrchestrationState) GetTasks() []*SchedulerTask {
-	if x != nil {
-		return x.Tasks
-	}
-	return nil
-}
-
-type SwitchPolicy struct {
-	state                         protoimpl.MessageState `protogen:"open.v1"`
-	Mode                          SwitchMode             `protobuf:"varint,1,opt,name=mode,proto3,enum=targetlib.SwitchMode" json:"mode,omitempty"`
-	AllowedCountries              []string               `protobuf:"bytes,2,rep,name=allowed_countries,json=allowedCountries,proto3" json:"allowed_countries,omitempty"`
-	AllowedSubscriptionIds        []string               `protobuf:"bytes,3,rep,name=allowed_subscription_ids,json=allowedSubscriptionIds,proto3" json:"allowed_subscription_ids,omitempty"`
-	AllowCrossCountry             bool                   `protobuf:"varint,4,opt,name=allow_cross_country,json=allowCrossCountry,proto3" json:"allow_cross_country,omitempty"`
-	AllowCrossSubscription        bool                   `protobuf:"varint,5,opt,name=allow_cross_subscription,json=allowCrossSubscription,proto3" json:"allow_cross_subscription,omitempty"`
-	AllowDirect                   bool                   `protobuf:"varint,6,opt,name=allow_direct,json=allowDirect,proto3" json:"allow_direct,omitempty"`
-	ConsecutiveFailures           uint32                 `protobuf:"varint,7,opt,name=consecutive_failures,json=consecutiveFailures,proto3" json:"consecutive_failures,omitempty"`
-	MinimumScoreDelta             float64                `protobuf:"fixed64,8,opt,name=minimum_score_delta,json=minimumScoreDelta,proto3" json:"minimum_score_delta,omitempty"`
-	MinimumHealthScore            float64                `protobuf:"fixed64,9,opt,name=minimum_health_score,json=minimumHealthScore,proto3" json:"minimum_health_score,omitempty"`
-	MinimumDwellSeconds           uint32                 `protobuf:"varint,10,opt,name=minimum_dwell_seconds,json=minimumDwellSeconds,proto3" json:"minimum_dwell_seconds,omitempty"`
-	CooldownSeconds               uint32                 `protobuf:"varint,11,opt,name=cooldown_seconds,json=cooldownSeconds,proto3" json:"cooldown_seconds,omitempty"`
-	MaxSwitchesPerHour            uint32                 `protobuf:"varint,12,opt,name=max_switches_per_hour,json=maxSwitchesPerHour,proto3" json:"max_switches_per_hour,omitempty"`
-	VerifyAfterSwitch             bool                   `protobuf:"varint,13,opt,name=verify_after_switch,json=verifyAfterSwitch,proto3" json:"verify_after_switch,omitempty"`
-	RollbackOnVerificationFailure bool                   `protobuf:"varint,14,opt,name=rollback_on_verification_failure,json=rollbackOnVerificationFailure,proto3" json:"rollback_on_verification_failure,omitempty"`
-	unknownFields                 protoimpl.UnknownFields
-	sizeCache                     protoimpl.SizeCache
-}
-
-func (x *SwitchPolicy) Reset() {
-	*x = SwitchPolicy{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[39]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *SwitchPolicy) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SwitchPolicy) ProtoMessage() {}
-
-func (x *SwitchPolicy) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[39]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SwitchPolicy.ProtoReflect.Descriptor instead.
-func (*SwitchPolicy) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{39}
-}
-
-func (x *SwitchPolicy) GetMode() SwitchMode {
-	if x != nil {
-		return x.Mode
-	}
-	return SwitchMode_SWITCH_MODE_UNSPECIFIED
-}
-
-func (x *SwitchPolicy) GetAllowedCountries() []string {
-	if x != nil {
-		return x.AllowedCountries
-	}
-	return nil
-}
-
-func (x *SwitchPolicy) GetAllowedSubscriptionIds() []string {
-	if x != nil {
-		return x.AllowedSubscriptionIds
-	}
-	return nil
-}
-
-func (x *SwitchPolicy) GetAllowCrossCountry() bool {
-	if x != nil {
-		return x.AllowCrossCountry
-	}
-	return false
-}
-
-func (x *SwitchPolicy) GetAllowCrossSubscription() bool {
-	if x != nil {
-		return x.AllowCrossSubscription
-	}
-	return false
-}
-
-func (x *SwitchPolicy) GetAllowDirect() bool {
-	if x != nil {
-		return x.AllowDirect
-	}
-	return false
-}
-
-func (x *SwitchPolicy) GetConsecutiveFailures() uint32 {
-	if x != nil {
-		return x.ConsecutiveFailures
-	}
-	return 0
-}
-
-func (x *SwitchPolicy) GetMinimumScoreDelta() float64 {
-	if x != nil {
-		return x.MinimumScoreDelta
-	}
-	return 0
-}
-
-func (x *SwitchPolicy) GetMinimumHealthScore() float64 {
-	if x != nil {
-		return x.MinimumHealthScore
-	}
-	return 0
-}
-
-func (x *SwitchPolicy) GetMinimumDwellSeconds() uint32 {
-	if x != nil {
-		return x.MinimumDwellSeconds
-	}
-	return 0
-}
-
-func (x *SwitchPolicy) GetCooldownSeconds() uint32 {
-	if x != nil {
-		return x.CooldownSeconds
-	}
-	return 0
-}
-
-func (x *SwitchPolicy) GetMaxSwitchesPerHour() uint32 {
-	if x != nil {
-		return x.MaxSwitchesPerHour
-	}
-	return 0
-}
-
-func (x *SwitchPolicy) GetVerifyAfterSwitch() bool {
-	if x != nil {
-		return x.VerifyAfterSwitch
-	}
-	return false
-}
-
-func (x *SwitchPolicy) GetRollbackOnVerificationFailure() bool {
-	if x != nil {
-		return x.RollbackOnVerificationFailure
-	}
-	return false
-}
-
-type ServicePolicy struct {
-	state                     protoimpl.MessageState  `protogen:"open.v1"`
-	ServiceId                 string                  `protobuf:"bytes,1,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
-	DisplayName               string                  `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
-	Domains                   []string                `protobuf:"bytes,3,rep,name=domains,proto3" json:"domains,omitempty"`
-	Probes                    []*ServiceProbe         `protobuf:"bytes,4,rep,name=probes,proto3" json:"probes,omitempty"`
-	Selection                 *ServiceSelectionPolicy `protobuf:"bytes,5,opt,name=selection,proto3" json:"selection,omitempty"`
-	SwitchPolicy              *SwitchPolicy           `protobuf:"bytes,6,opt,name=switch_policy,json=switchPolicy,proto3" json:"switch_policy,omitempty"`
-	Revision                  string                  `protobuf:"bytes,7,opt,name=revision,proto3" json:"revision,omitempty"`
-	SchemaVersion             uint32                  `protobuf:"varint,8,opt,name=schema_version,json=schemaVersion,proto3" json:"schema_version,omitempty"`
-	QualityValiditySeconds    uint32                  `protobuf:"varint,9,opt,name=quality_validity_seconds,json=qualityValiditySeconds,proto3" json:"quality_validity_seconds,omitempty"`
-	BindingValiditySeconds    uint32                  `protobuf:"varint,10,opt,name=binding_validity_seconds,json=bindingValiditySeconds,proto3" json:"binding_validity_seconds,omitempty"`
-	EvaluationIntervalSeconds uint32                  `protobuf:"varint,11,opt,name=evaluation_interval_seconds,json=evaluationIntervalSeconds,proto3" json:"evaluation_interval_seconds,omitempty"`
-	unknownFields             protoimpl.UnknownFields
-	sizeCache                 protoimpl.SizeCache
-}
-
-func (x *ServicePolicy) Reset() {
-	*x = ServicePolicy{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[40]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ServicePolicy) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ServicePolicy) ProtoMessage() {}
-
-func (x *ServicePolicy) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[40]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ServicePolicy.ProtoReflect.Descriptor instead.
-func (*ServicePolicy) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{40}
-}
-
-func (x *ServicePolicy) GetServiceId() string {
-	if x != nil {
-		return x.ServiceId
-	}
-	return ""
-}
-
-func (x *ServicePolicy) GetDisplayName() string {
+func (x *UpsertRouteRequest) GetDisplayName() string {
 	if x != nil {
 		return x.DisplayName
 	}
 	return ""
 }
 
-func (x *ServicePolicy) GetDomains() []string {
+func (x *UpsertRouteRequest) GetDomains() []string {
 	if x != nil {
 		return x.Domains
 	}
 	return nil
 }
 
-func (x *ServicePolicy) GetProbes() []*ServiceProbe {
-	if x != nil {
-		return x.Probes
-	}
-	return nil
-}
-
-func (x *ServicePolicy) GetSelection() *ServiceSelectionPolicy {
-	if x != nil {
-		return x.Selection
-	}
-	return nil
-}
-
-func (x *ServicePolicy) GetSwitchPolicy() *SwitchPolicy {
-	if x != nil {
-		return x.SwitchPolicy
-	}
-	return nil
-}
-
-func (x *ServicePolicy) GetRevision() string {
-	if x != nil {
-		return x.Revision
-	}
-	return ""
-}
-
-func (x *ServicePolicy) GetSchemaVersion() uint32 {
-	if x != nil {
-		return x.SchemaVersion
-	}
-	return 0
-}
-
-func (x *ServicePolicy) GetQualityValiditySeconds() uint32 {
-	if x != nil {
-		return x.QualityValiditySeconds
-	}
-	return 0
-}
-
-func (x *ServicePolicy) GetBindingValiditySeconds() uint32 {
-	if x != nil {
-		return x.BindingValiditySeconds
-	}
-	return 0
-}
-
-func (x *ServicePolicy) GetEvaluationIntervalSeconds() uint32 {
-	if x != nil {
-		return x.EvaluationIntervalSeconds
-	}
-	return 0
-}
-
-type ServicePolicyList struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Policies      []*ServicePolicy       `protobuf:"bytes,1,rep,name=policies,proto3" json:"policies,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ServicePolicyList) Reset() {
-	*x = ServicePolicyList{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[41]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ServicePolicyList) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ServicePolicyList) ProtoMessage() {}
-
-func (x *ServicePolicyList) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[41]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ServicePolicyList.ProtoReflect.Descriptor instead.
-func (*ServicePolicyList) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{41}
-}
-
-func (x *ServicePolicyList) GetPolicies() []*ServicePolicy {
-	if x != nil {
-		return x.Policies
-	}
-	return nil
-}
-
-type NodePreference struct {
-	state                protoimpl.MessageState `protogen:"open.v1"`
-	NodeId               string                 `protobuf:"bytes,1,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
-	Enabled              bool                   `protobuf:"varint,2,opt,name=enabled,proto3" json:"enabled,omitempty"`
-	Excluded             bool                   `protobuf:"varint,3,opt,name=excluded,proto3" json:"excluded,omitempty"`
-	Favorite             bool                   `protobuf:"varint,4,opt,name=favorite,proto3" json:"favorite,omitempty"`
-	Labels               []string               `protobuf:"bytes,5,rep,name=labels,proto3" json:"labels,omitempty"`
-	SubscriptionPriority int32                  `protobuf:"varint,6,opt,name=subscription_priority,json=subscriptionPriority,proto3" json:"subscription_priority,omitempty"`
-	Revision             string                 `protobuf:"bytes,7,opt,name=revision,proto3" json:"revision,omitempty"`
-	unknownFields        protoimpl.UnknownFields
-	sizeCache            protoimpl.SizeCache
-}
-
-func (x *NodePreference) Reset() {
-	*x = NodePreference{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[42]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *NodePreference) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*NodePreference) ProtoMessage() {}
-
-func (x *NodePreference) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[42]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use NodePreference.ProtoReflect.Descriptor instead.
-func (*NodePreference) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{42}
-}
-
-func (x *NodePreference) GetNodeId() string {
+func (x *UpsertRouteRequest) GetNodeId() string {
 	if x != nil {
 		return x.NodeId
 	}
 	return ""
 }
 
-func (x *NodePreference) GetEnabled() bool {
+func (x *UpsertRouteRequest) GetEnabled() bool {
 	if x != nil {
 		return x.Enabled
 	}
 	return false
 }
 
-func (x *NodePreference) GetExcluded() bool {
-	if x != nil {
-		return x.Excluded
-	}
-	return false
+type RouteInfo struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	ServiceId       string                 `protobuf:"bytes,1,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
+	DisplayName     string                 `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
+	Domains         []string               `protobuf:"bytes,3,rep,name=domains,proto3" json:"domains,omitempty"`
+	SelectorTag     string                 `protobuf:"bytes,4,opt,name=selector_tag,json=selectorTag,proto3" json:"selector_tag,omitempty"`
+	CurrentNodeId   string                 `protobuf:"bytes,5,opt,name=current_node_id,json=currentNodeId,proto3" json:"current_node_id,omitempty"`
+	CurrentNodeName string                 `protobuf:"bytes,6,opt,name=current_node_name,json=currentNodeName,proto3" json:"current_node_name,omitempty"`
+	Enabled         bool                   `protobuf:"varint,7,opt,name=enabled,proto3" json:"enabled,omitempty"`
+	Effective       bool                   `protobuf:"varint,8,opt,name=effective,proto3" json:"effective,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
-func (x *NodePreference) GetFavorite() bool {
-	if x != nil {
-		return x.Favorite
-	}
-	return false
-}
-
-func (x *NodePreference) GetLabels() []string {
-	if x != nil {
-		return x.Labels
-	}
-	return nil
-}
-
-func (x *NodePreference) GetSubscriptionPriority() int32 {
-	if x != nil {
-		return x.SubscriptionPriority
-	}
-	return 0
-}
-
-func (x *NodePreference) GetRevision() string {
-	if x != nil {
-		return x.Revision
-	}
-	return ""
-}
-
-type SwitchProposal struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	Id               string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	ServiceId        string                 `protobuf:"bytes,2,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
-	CurrentNodeId    string                 `protobuf:"bytes,3,opt,name=current_node_id,json=currentNodeId,proto3" json:"current_node_id,omitempty"`
-	SuggestedNodeId  string                 `protobuf:"bytes,4,opt,name=suggested_node_id,json=suggestedNodeId,proto3" json:"suggested_node_id,omitempty"`
-	Candidates       []*ServiceCandidate    `protobuf:"bytes,5,rep,name=candidates,proto3" json:"candidates,omitempty"`
-	Reason           string                 `protobuf:"bytes,6,opt,name=reason,proto3" json:"reason,omitempty"`
-	PolicyRevision   string                 `protobuf:"bytes,7,opt,name=policy_revision,json=policyRevision,proto3" json:"policy_revision,omitempty"`
-	NodePoolRevision string                 `protobuf:"bytes,8,opt,name=node_pool_revision,json=nodePoolRevision,proto3" json:"node_pool_revision,omitempty"`
-	BindingRevision  string                 `protobuf:"bytes,9,opt,name=binding_revision,json=bindingRevision,proto3" json:"binding_revision,omitempty"`
-	CreatedAtUnixMs  int64                  `protobuf:"varint,10,opt,name=created_at_unix_ms,json=createdAtUnixMs,proto3" json:"created_at_unix_ms,omitempty"`
-	ExpiresAtUnixMs  int64                  `protobuf:"varint,11,opt,name=expires_at_unix_ms,json=expiresAtUnixMs,proto3" json:"expires_at_unix_ms,omitempty"`
-	AutoAuthorized   bool                   `protobuf:"varint,12,opt,name=auto_authorized,json=autoAuthorized,proto3" json:"auto_authorized,omitempty"`
-	Approved         bool                   `protobuf:"varint,13,opt,name=approved,proto3" json:"approved,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
-}
-
-func (x *SwitchProposal) Reset() {
-	*x = SwitchProposal{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[43]
+func (x *RouteInfo) Reset() {
+	*x = RouteInfo{}
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *SwitchProposal) String() string {
+func (x *RouteInfo) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*SwitchProposal) ProtoMessage() {}
+func (*RouteInfo) ProtoMessage() {}
 
-func (x *SwitchProposal) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[43]
+func (x *RouteInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4421,941 +2611,89 @@ func (x *SwitchProposal) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use SwitchProposal.ProtoReflect.Descriptor instead.
-func (*SwitchProposal) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{43}
+// Deprecated: Use RouteInfo.ProtoReflect.Descriptor instead.
+func (*RouteInfo) Descriptor() ([]byte, []int) {
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{30}
 }
 
-func (x *SwitchProposal) GetId() string {
-	if x != nil {
-		return x.Id
-	}
-	return ""
-}
-
-func (x *SwitchProposal) GetServiceId() string {
+func (x *RouteInfo) GetServiceId() string {
 	if x != nil {
 		return x.ServiceId
 	}
 	return ""
 }
 
-func (x *SwitchProposal) GetCurrentNodeId() string {
+func (x *RouteInfo) GetDisplayName() string {
+	if x != nil {
+		return x.DisplayName
+	}
+	return ""
+}
+
+func (x *RouteInfo) GetDomains() []string {
+	if x != nil {
+		return x.Domains
+	}
+	return nil
+}
+
+func (x *RouteInfo) GetSelectorTag() string {
+	if x != nil {
+		return x.SelectorTag
+	}
+	return ""
+}
+
+func (x *RouteInfo) GetCurrentNodeId() string {
 	if x != nil {
 		return x.CurrentNodeId
 	}
 	return ""
 }
 
-func (x *SwitchProposal) GetSuggestedNodeId() string {
+func (x *RouteInfo) GetCurrentNodeName() string {
 	if x != nil {
-		return x.SuggestedNodeId
+		return x.CurrentNodeName
 	}
 	return ""
 }
 
-func (x *SwitchProposal) GetCandidates() []*ServiceCandidate {
-	if x != nil {
-		return x.Candidates
-	}
-	return nil
-}
-
-func (x *SwitchProposal) GetReason() string {
-	if x != nil {
-		return x.Reason
-	}
-	return ""
-}
-
-func (x *SwitchProposal) GetPolicyRevision() string {
-	if x != nil {
-		return x.PolicyRevision
-	}
-	return ""
-}
-
-func (x *SwitchProposal) GetNodePoolRevision() string {
-	if x != nil {
-		return x.NodePoolRevision
-	}
-	return ""
-}
-
-func (x *SwitchProposal) GetBindingRevision() string {
-	if x != nil {
-		return x.BindingRevision
-	}
-	return ""
-}
-
-func (x *SwitchProposal) GetCreatedAtUnixMs() int64 {
-	if x != nil {
-		return x.CreatedAtUnixMs
-	}
-	return 0
-}
-
-func (x *SwitchProposal) GetExpiresAtUnixMs() int64 {
-	if x != nil {
-		return x.ExpiresAtUnixMs
-	}
-	return 0
-}
-
-func (x *SwitchProposal) GetAutoAuthorized() bool {
-	if x != nil {
-		return x.AutoAuthorized
-	}
-	return false
-}
-
-func (x *SwitchProposal) GetApproved() bool {
-	if x != nil {
-		return x.Approved
-	}
-	return false
-}
-
-type Operation struct {
-	state             protoimpl.MessageState `protogen:"open.v1"`
-	Id                string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Kind              string                 `protobuf:"bytes,2,opt,name=kind,proto3" json:"kind,omitempty"`
-	ResourceId        string                 `protobuf:"bytes,3,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
-	IdempotencyKey    string                 `protobuf:"bytes,4,opt,name=idempotency_key,json=idempotencyKey,proto3" json:"idempotency_key,omitempty"`
-	Status            OperationStatus        `protobuf:"varint,5,opt,name=status,proto3,enum=targetlib.OperationStatus" json:"status,omitempty"`
-	Phase             string                 `protobuf:"bytes,6,opt,name=phase,proto3" json:"phase,omitempty"`
-	ProgressCurrent   uint32                 `protobuf:"varint,7,opt,name=progress_current,json=progressCurrent,proto3" json:"progress_current,omitempty"`
-	ProgressTotal     uint32                 `protobuf:"varint,8,opt,name=progress_total,json=progressTotal,proto3" json:"progress_total,omitempty"`
-	CreatedAtUnixMs   int64                  `protobuf:"varint,9,opt,name=created_at_unix_ms,json=createdAtUnixMs,proto3" json:"created_at_unix_ms,omitempty"`
-	StartedAtUnixMs   int64                  `protobuf:"varint,10,opt,name=started_at_unix_ms,json=startedAtUnixMs,proto3" json:"started_at_unix_ms,omitempty"`
-	UpdatedAtUnixMs   int64                  `protobuf:"varint,11,opt,name=updated_at_unix_ms,json=updatedAtUnixMs,proto3" json:"updated_at_unix_ms,omitempty"`
-	CompletedAtUnixMs int64                  `protobuf:"varint,12,opt,name=completed_at_unix_ms,json=completedAtUnixMs,proto3" json:"completed_at_unix_ms,omitempty"`
-	PolicyRevision    string                 `protobuf:"bytes,13,opt,name=policy_revision,json=policyRevision,proto3" json:"policy_revision,omitempty"`
-	NodePoolRevision  string                 `protobuf:"bytes,14,opt,name=node_pool_revision,json=nodePoolRevision,proto3" json:"node_pool_revision,omitempty"`
-	BindingRevision   string                 `protobuf:"bytes,15,opt,name=binding_revision,json=bindingRevision,proto3" json:"binding_revision,omitempty"`
-	RuntimeRevision   string                 `protobuf:"bytes,16,opt,name=runtime_revision,json=runtimeRevision,proto3" json:"runtime_revision,omitempty"`
-	ProposalId        string                 `protobuf:"bytes,17,opt,name=proposal_id,json=proposalId,proto3" json:"proposal_id,omitempty"`
-	ResultSummary     string                 `protobuf:"bytes,18,opt,name=result_summary,json=resultSummary,proto3" json:"result_summary,omitempty"`
-	ErrorCode         string                 `protobuf:"bytes,19,opt,name=error_code,json=errorCode,proto3" json:"error_code,omitempty"`
-	ErrorMessage      string                 `protobuf:"bytes,20,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
-	// Server-owned hash used to reject idempotency-key reuse with another payload.
-	RequestSignature string `protobuf:"bytes,21,opt,name=request_signature,json=requestSignature,proto3" json:"request_signature,omitempty"`
-	DesiredNodeId    string `protobuf:"bytes,22,opt,name=desired_node_id,json=desiredNodeId,proto3" json:"desired_node_id,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
-}
-
-func (x *Operation) Reset() {
-	*x = Operation{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[44]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *Operation) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*Operation) ProtoMessage() {}
-
-func (x *Operation) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[44]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use Operation.ProtoReflect.Descriptor instead.
-func (*Operation) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{44}
-}
-
-func (x *Operation) GetId() string {
-	if x != nil {
-		return x.Id
-	}
-	return ""
-}
-
-func (x *Operation) GetKind() string {
-	if x != nil {
-		return x.Kind
-	}
-	return ""
-}
-
-func (x *Operation) GetResourceId() string {
-	if x != nil {
-		return x.ResourceId
-	}
-	return ""
-}
-
-func (x *Operation) GetIdempotencyKey() string {
-	if x != nil {
-		return x.IdempotencyKey
-	}
-	return ""
-}
-
-func (x *Operation) GetStatus() OperationStatus {
-	if x != nil {
-		return x.Status
-	}
-	return OperationStatus_OPERATION_STATUS_UNSPECIFIED
-}
-
-func (x *Operation) GetPhase() string {
-	if x != nil {
-		return x.Phase
-	}
-	return ""
-}
-
-func (x *Operation) GetProgressCurrent() uint32 {
-	if x != nil {
-		return x.ProgressCurrent
-	}
-	return 0
-}
-
-func (x *Operation) GetProgressTotal() uint32 {
-	if x != nil {
-		return x.ProgressTotal
-	}
-	return 0
-}
-
-func (x *Operation) GetCreatedAtUnixMs() int64 {
-	if x != nil {
-		return x.CreatedAtUnixMs
-	}
-	return 0
-}
-
-func (x *Operation) GetStartedAtUnixMs() int64 {
-	if x != nil {
-		return x.StartedAtUnixMs
-	}
-	return 0
-}
-
-func (x *Operation) GetUpdatedAtUnixMs() int64 {
-	if x != nil {
-		return x.UpdatedAtUnixMs
-	}
-	return 0
-}
-
-func (x *Operation) GetCompletedAtUnixMs() int64 {
-	if x != nil {
-		return x.CompletedAtUnixMs
-	}
-	return 0
-}
-
-func (x *Operation) GetPolicyRevision() string {
-	if x != nil {
-		return x.PolicyRevision
-	}
-	return ""
-}
-
-func (x *Operation) GetNodePoolRevision() string {
-	if x != nil {
-		return x.NodePoolRevision
-	}
-	return ""
-}
-
-func (x *Operation) GetBindingRevision() string {
-	if x != nil {
-		return x.BindingRevision
-	}
-	return ""
-}
-
-func (x *Operation) GetRuntimeRevision() string {
-	if x != nil {
-		return x.RuntimeRevision
-	}
-	return ""
-}
-
-func (x *Operation) GetProposalId() string {
-	if x != nil {
-		return x.ProposalId
-	}
-	return ""
-}
-
-func (x *Operation) GetResultSummary() string {
-	if x != nil {
-		return x.ResultSummary
-	}
-	return ""
-}
-
-func (x *Operation) GetErrorCode() string {
-	if x != nil {
-		return x.ErrorCode
-	}
-	return ""
-}
-
-func (x *Operation) GetErrorMessage() string {
-	if x != nil {
-		return x.ErrorMessage
-	}
-	return ""
-}
-
-func (x *Operation) GetRequestSignature() string {
-	if x != nil {
-		return x.RequestSignature
-	}
-	return ""
-}
-
-func (x *Operation) GetDesiredNodeId() string {
-	if x != nil {
-		return x.DesiredNodeId
-	}
-	return ""
-}
-
-type SchedulerTask struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	Id               string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	ServiceId        string                 `protobuf:"bytes,2,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
-	Kind             string                 `protobuf:"bytes,3,opt,name=kind,proto3" json:"kind,omitempty"`
-	Reason           string                 `protobuf:"bytes,4,opt,name=reason,proto3" json:"reason,omitempty"`
-	PolicyRevision   string                 `protobuf:"bytes,5,opt,name=policy_revision,json=policyRevision,proto3" json:"policy_revision,omitempty"`
-	NodePoolRevision string                 `protobuf:"bytes,6,opt,name=node_pool_revision,json=nodePoolRevision,proto3" json:"node_pool_revision,omitempty"`
-	NextRunAtUnixMs  int64                  `protobuf:"varint,7,opt,name=next_run_at_unix_ms,json=nextRunAtUnixMs,proto3" json:"next_run_at_unix_ms,omitempty"`
-	Attempt          uint32                 `protobuf:"varint,8,opt,name=attempt,proto3" json:"attempt,omitempty"`
-	BackoffSeconds   uint32                 `protobuf:"varint,9,opt,name=backoff_seconds,json=backoffSeconds,proto3" json:"backoff_seconds,omitempty"`
-	DeadlineUnixMs   int64                  `protobuf:"varint,10,opt,name=deadline_unix_ms,json=deadlineUnixMs,proto3" json:"deadline_unix_ms,omitempty"`
-	OperationId      string                 `protobuf:"bytes,11,opt,name=operation_id,json=operationId,proto3" json:"operation_id,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
-}
-
-func (x *SchedulerTask) Reset() {
-	*x = SchedulerTask{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[45]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *SchedulerTask) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SchedulerTask) ProtoMessage() {}
-
-func (x *SchedulerTask) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[45]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SchedulerTask.ProtoReflect.Descriptor instead.
-func (*SchedulerTask) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{45}
-}
-
-func (x *SchedulerTask) GetId() string {
-	if x != nil {
-		return x.Id
-	}
-	return ""
-}
-
-func (x *SchedulerTask) GetServiceId() string {
-	if x != nil {
-		return x.ServiceId
-	}
-	return ""
-}
-
-func (x *SchedulerTask) GetKind() string {
-	if x != nil {
-		return x.Kind
-	}
-	return ""
-}
-
-func (x *SchedulerTask) GetReason() string {
-	if x != nil {
-		return x.Reason
-	}
-	return ""
-}
-
-func (x *SchedulerTask) GetPolicyRevision() string {
-	if x != nil {
-		return x.PolicyRevision
-	}
-	return ""
-}
-
-func (x *SchedulerTask) GetNodePoolRevision() string {
-	if x != nil {
-		return x.NodePoolRevision
-	}
-	return ""
-}
-
-func (x *SchedulerTask) GetNextRunAtUnixMs() int64 {
-	if x != nil {
-		return x.NextRunAtUnixMs
-	}
-	return 0
-}
-
-func (x *SchedulerTask) GetAttempt() uint32 {
-	if x != nil {
-		return x.Attempt
-	}
-	return 0
-}
-
-func (x *SchedulerTask) GetBackoffSeconds() uint32 {
-	if x != nil {
-		return x.BackoffSeconds
-	}
-	return 0
-}
-
-func (x *SchedulerTask) GetDeadlineUnixMs() int64 {
-	if x != nil {
-		return x.DeadlineUnixMs
-	}
-	return 0
-}
-
-func (x *SchedulerTask) GetOperationId() string {
-	if x != nil {
-		return x.OperationId
-	}
-	return ""
-}
-
-type OperationList struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Operations    []*Operation           `protobuf:"bytes,1,rep,name=operations,proto3" json:"operations,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *OperationList) Reset() {
-	*x = OperationList{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[46]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *OperationList) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*OperationList) ProtoMessage() {}
-
-func (x *OperationList) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[46]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use OperationList.ProtoReflect.Descriptor instead.
-func (*OperationList) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{46}
-}
-
-func (x *OperationList) GetOperations() []*Operation {
-	if x != nil {
-		return x.Operations
-	}
-	return nil
-}
-
-type SetPolicyAutomationEnabledRequest struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	Enabled          bool                   `protobuf:"varint,1,opt,name=enabled,proto3" json:"enabled,omitempty"`
-	ExpectedRevision string                 `protobuf:"bytes,2,opt,name=expected_revision,json=expectedRevision,proto3" json:"expected_revision,omitempty"`
-	IdempotencyKey   string                 `protobuf:"bytes,3,opt,name=idempotency_key,json=idempotencyKey,proto3" json:"idempotency_key,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
-}
-
-func (x *SetPolicyAutomationEnabledRequest) Reset() {
-	*x = SetPolicyAutomationEnabledRequest{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[47]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *SetPolicyAutomationEnabledRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SetPolicyAutomationEnabledRequest) ProtoMessage() {}
-
-func (x *SetPolicyAutomationEnabledRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[47]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SetPolicyAutomationEnabledRequest.ProtoReflect.Descriptor instead.
-func (*SetPolicyAutomationEnabledRequest) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{47}
-}
-
-func (x *SetPolicyAutomationEnabledRequest) GetEnabled() bool {
+func (x *RouteInfo) GetEnabled() bool {
 	if x != nil {
 		return x.Enabled
 	}
 	return false
 }
 
-func (x *SetPolicyAutomationEnabledRequest) GetExpectedRevision() string {
+func (x *RouteInfo) GetEffective() bool {
 	if x != nil {
-		return x.ExpectedRevision
-	}
-	return ""
-}
-
-func (x *SetPolicyAutomationEnabledRequest) GetIdempotencyKey() string {
-	if x != nil {
-		return x.IdempotencyKey
-	}
-	return ""
-}
-
-type UpsertServicePolicyRequest struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	Policy           *ServicePolicy         `protobuf:"bytes,1,opt,name=policy,proto3" json:"policy,omitempty"`
-	ExpectedRevision string                 `protobuf:"bytes,2,opt,name=expected_revision,json=expectedRevision,proto3" json:"expected_revision,omitempty"`
-	IdempotencyKey   string                 `protobuf:"bytes,3,opt,name=idempotency_key,json=idempotencyKey,proto3" json:"idempotency_key,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
-}
-
-func (x *UpsertServicePolicyRequest) Reset() {
-	*x = UpsertServicePolicyRequest{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[48]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *UpsertServicePolicyRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*UpsertServicePolicyRequest) ProtoMessage() {}
-
-func (x *UpsertServicePolicyRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[48]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use UpsertServicePolicyRequest.ProtoReflect.Descriptor instead.
-func (*UpsertServicePolicyRequest) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{48}
-}
-
-func (x *UpsertServicePolicyRequest) GetPolicy() *ServicePolicy {
-	if x != nil {
-		return x.Policy
-	}
-	return nil
-}
-
-func (x *UpsertServicePolicyRequest) GetExpectedRevision() string {
-	if x != nil {
-		return x.ExpectedRevision
-	}
-	return ""
-}
-
-func (x *UpsertServicePolicyRequest) GetIdempotencyKey() string {
-	if x != nil {
-		return x.IdempotencyKey
-	}
-	return ""
-}
-
-type DeleteServicePolicyRequest struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	ServiceId        string                 `protobuf:"bytes,1,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
-	ExpectedRevision string                 `protobuf:"bytes,2,opt,name=expected_revision,json=expectedRevision,proto3" json:"expected_revision,omitempty"`
-	IdempotencyKey   string                 `protobuf:"bytes,3,opt,name=idempotency_key,json=idempotencyKey,proto3" json:"idempotency_key,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
-}
-
-func (x *DeleteServicePolicyRequest) Reset() {
-	*x = DeleteServicePolicyRequest{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[49]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *DeleteServicePolicyRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*DeleteServicePolicyRequest) ProtoMessage() {}
-
-func (x *DeleteServicePolicyRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[49]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use DeleteServicePolicyRequest.ProtoReflect.Descriptor instead.
-func (*DeleteServicePolicyRequest) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{49}
-}
-
-func (x *DeleteServicePolicyRequest) GetServiceId() string {
-	if x != nil {
-		return x.ServiceId
-	}
-	return ""
-}
-
-func (x *DeleteServicePolicyRequest) GetExpectedRevision() string {
-	if x != nil {
-		return x.ExpectedRevision
-	}
-	return ""
-}
-
-func (x *DeleteServicePolicyRequest) GetIdempotencyKey() string {
-	if x != nil {
-		return x.IdempotencyKey
-	}
-	return ""
-}
-
-type SetNodePreferenceRequest struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	Preference       *NodePreference        `protobuf:"bytes,1,opt,name=preference,proto3" json:"preference,omitempty"`
-	ExpectedRevision string                 `protobuf:"bytes,2,opt,name=expected_revision,json=expectedRevision,proto3" json:"expected_revision,omitempty"`
-	IdempotencyKey   string                 `protobuf:"bytes,3,opt,name=idempotency_key,json=idempotencyKey,proto3" json:"idempotency_key,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
-}
-
-func (x *SetNodePreferenceRequest) Reset() {
-	*x = SetNodePreferenceRequest{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[50]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *SetNodePreferenceRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SetNodePreferenceRequest) ProtoMessage() {}
-
-func (x *SetNodePreferenceRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[50]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SetNodePreferenceRequest.ProtoReflect.Descriptor instead.
-func (*SetNodePreferenceRequest) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{50}
-}
-
-func (x *SetNodePreferenceRequest) GetPreference() *NodePreference {
-	if x != nil {
-		return x.Preference
-	}
-	return nil
-}
-
-func (x *SetNodePreferenceRequest) GetExpectedRevision() string {
-	if x != nil {
-		return x.ExpectedRevision
-	}
-	return ""
-}
-
-func (x *SetNodePreferenceRequest) GetIdempotencyKey() string {
-	if x != nil {
-		return x.IdempotencyKey
-	}
-	return ""
-}
-
-type RequestServiceEvaluationRequest struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	ServiceId        string                 `protobuf:"bytes,1,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
-	ExpectedRevision string                 `protobuf:"bytes,2,opt,name=expected_revision,json=expectedRevision,proto3" json:"expected_revision,omitempty"`
-	IdempotencyKey   string                 `protobuf:"bytes,3,opt,name=idempotency_key,json=idempotencyKey,proto3" json:"idempotency_key,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
-}
-
-func (x *RequestServiceEvaluationRequest) Reset() {
-	*x = RequestServiceEvaluationRequest{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[51]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *RequestServiceEvaluationRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*RequestServiceEvaluationRequest) ProtoMessage() {}
-
-func (x *RequestServiceEvaluationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[51]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use RequestServiceEvaluationRequest.ProtoReflect.Descriptor instead.
-func (*RequestServiceEvaluationRequest) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{51}
-}
-
-func (x *RequestServiceEvaluationRequest) GetServiceId() string {
-	if x != nil {
-		return x.ServiceId
-	}
-	return ""
-}
-
-func (x *RequestServiceEvaluationRequest) GetExpectedRevision() string {
-	if x != nil {
-		return x.ExpectedRevision
-	}
-	return ""
-}
-
-func (x *RequestServiceEvaluationRequest) GetIdempotencyKey() string {
-	if x != nil {
-		return x.IdempotencyKey
-	}
-	return ""
-}
-
-type ProposalCommandRequest struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	ProposalId       string                 `protobuf:"bytes,1,opt,name=proposal_id,json=proposalId,proto3" json:"proposal_id,omitempty"`
-	ExpectedRevision string                 `protobuf:"bytes,2,opt,name=expected_revision,json=expectedRevision,proto3" json:"expected_revision,omitempty"`
-	IdempotencyKey   string                 `protobuf:"bytes,3,opt,name=idempotency_key,json=idempotencyKey,proto3" json:"idempotency_key,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
-}
-
-func (x *ProposalCommandRequest) Reset() {
-	*x = ProposalCommandRequest{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[52]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ProposalCommandRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ProposalCommandRequest) ProtoMessage() {}
-
-func (x *ProposalCommandRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[52]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ProposalCommandRequest.ProtoReflect.Descriptor instead.
-func (*ProposalCommandRequest) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{52}
-}
-
-func (x *ProposalCommandRequest) GetProposalId() string {
-	if x != nil {
-		return x.ProposalId
-	}
-	return ""
-}
-
-func (x *ProposalCommandRequest) GetExpectedRevision() string {
-	if x != nil {
-		return x.ExpectedRevision
-	}
-	return ""
-}
-
-func (x *ProposalCommandRequest) GetIdempotencyKey() string {
-	if x != nil {
-		return x.IdempotencyKey
-	}
-	return ""
-}
-
-type ForceServiceBindingRequest struct {
-	state                    protoimpl.MessageState `protogen:"open.v1"`
-	ServiceId                string                 `protobuf:"bytes,1,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
-	NodeId                   string                 `protobuf:"bytes,2,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
-	ExpectedRevision         string                 `protobuf:"bytes,3,opt,name=expected_revision,json=expectedRevision,proto3" json:"expected_revision,omitempty"`
-	IdempotencyKey           string                 `protobuf:"bytes,4,opt,name=idempotency_key,json=idempotencyKey,proto3" json:"idempotency_key,omitempty"`
-	CloseExistingConnections bool                   `protobuf:"varint,5,opt,name=close_existing_connections,json=closeExistingConnections,proto3" json:"close_existing_connections,omitempty"`
-	unknownFields            protoimpl.UnknownFields
-	sizeCache                protoimpl.SizeCache
-}
-
-func (x *ForceServiceBindingRequest) Reset() {
-	*x = ForceServiceBindingRequest{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[53]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ForceServiceBindingRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ForceServiceBindingRequest) ProtoMessage() {}
-
-func (x *ForceServiceBindingRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[53]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ForceServiceBindingRequest.ProtoReflect.Descriptor instead.
-func (*ForceServiceBindingRequest) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{53}
-}
-
-func (x *ForceServiceBindingRequest) GetServiceId() string {
-	if x != nil {
-		return x.ServiceId
-	}
-	return ""
-}
-
-func (x *ForceServiceBindingRequest) GetNodeId() string {
-	if x != nil {
-		return x.NodeId
-	}
-	return ""
-}
-
-func (x *ForceServiceBindingRequest) GetExpectedRevision() string {
-	if x != nil {
-		return x.ExpectedRevision
-	}
-	return ""
-}
-
-func (x *ForceServiceBindingRequest) GetIdempotencyKey() string {
-	if x != nil {
-		return x.IdempotencyKey
-	}
-	return ""
-}
-
-func (x *ForceServiceBindingRequest) GetCloseExistingConnections() bool {
-	if x != nil {
-		return x.CloseExistingConnections
+		return x.Effective
 	}
 	return false
 }
 
-type GetOperationRequest struct {
+type DeleteRouteRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	OperationId   string                 `protobuf:"bytes,1,opt,name=operation_id,json=operationId,proto3" json:"operation_id,omitempty"`
+	ServiceId     string                 `protobuf:"bytes,1,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GetOperationRequest) Reset() {
-	*x = GetOperationRequest{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[54]
+func (x *DeleteRouteRequest) Reset() {
+	*x = DeleteRouteRequest{}
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetOperationRequest) String() string {
+func (x *DeleteRouteRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetOperationRequest) ProtoMessage() {}
+func (*DeleteRouteRequest) ProtoMessage() {}
 
-func (x *GetOperationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[54]
+func (x *DeleteRouteRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5366,374 +2704,41 @@ func (x *GetOperationRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetOperationRequest.ProtoReflect.Descriptor instead.
-func (*GetOperationRequest) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{54}
+// Deprecated: Use DeleteRouteRequest.ProtoReflect.Descriptor instead.
+func (*DeleteRouteRequest) Descriptor() ([]byte, []int) {
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{31}
 }
 
-func (x *GetOperationRequest) GetOperationId() string {
-	if x != nil {
-		return x.OperationId
-	}
-	return ""
-}
-
-type ListOperationsRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	ResourceId    string                 `protobuf:"bytes,1,opt,name=resource_id,json=resourceId,proto3" json:"resource_id,omitempty"`
-	Limit         uint32                 `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ListOperationsRequest) Reset() {
-	*x = ListOperationsRequest{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[55]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ListOperationsRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ListOperationsRequest) ProtoMessage() {}
-
-func (x *ListOperationsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[55]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ListOperationsRequest.ProtoReflect.Descriptor instead.
-func (*ListOperationsRequest) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{55}
-}
-
-func (x *ListOperationsRequest) GetResourceId() string {
-	if x != nil {
-		return x.ResourceId
-	}
-	return ""
-}
-
-func (x *ListOperationsRequest) GetLimit() uint32 {
-	if x != nil {
-		return x.Limit
-	}
-	return 0
-}
-
-type RuntimeState struct {
-	state                   protoimpl.MessageState `protogen:"open.v1"`
-	Phase                   ConfigApplyPhase       `protobuf:"varint,1,opt,name=phase,proto3,enum=targetlib.ConfigApplyPhase" json:"phase,omitempty"`
-	AttemptedRevision       string                 `protobuf:"bytes,2,opt,name=attempted_revision,json=attemptedRevision,proto3" json:"attempted_revision,omitempty"`
-	DesiredRevision         string                 `protobuf:"bytes,3,opt,name=desired_revision,json=desiredRevision,proto3" json:"desired_revision,omitempty"`
-	AppliedRevision         string                 `protobuf:"bytes,4,opt,name=applied_revision,json=appliedRevision,proto3" json:"applied_revision,omitempty"`
-	ErrorMessage            string                 `protobuf:"bytes,5,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
-	Running                 bool                   `protobuf:"varint,6,opt,name=running,proto3" json:"running,omitempty"`
-	Selectors               []*SelectorState       `protobuf:"bytes,7,rep,name=selectors,proto3" json:"selectors,omitempty"`
-	ServiceRoutes           []*ServiceRouteState   `protobuf:"bytes,8,rep,name=service_routes,json=serviceRoutes,proto3" json:"service_routes,omitempty"`
-	ServiceBindings         []*ServiceBindingState `protobuf:"bytes,9,rep,name=service_bindings,json=serviceBindings,proto3" json:"service_bindings,omitempty"`
-	NodePoolRevision        string                 `protobuf:"bytes,10,opt,name=node_pool_revision,json=nodePoolRevision,proto3" json:"node_pool_revision,omitempty"`
-	PolicyAutomationEnabled bool                   `protobuf:"varint,11,opt,name=policy_automation_enabled,json=policyAutomationEnabled,proto3" json:"policy_automation_enabled,omitempty"`
-	PolicyRevision          string                 `protobuf:"bytes,12,opt,name=policy_revision,json=policyRevision,proto3" json:"policy_revision,omitempty"`
-	RecoveryState           RuntimeRecoveryState   `protobuf:"varint,13,opt,name=recovery_state,json=recoveryState,proto3,enum=targetlib.RuntimeRecoveryState" json:"recovery_state,omitempty"`
-	Policies                []*ServicePolicy       `protobuf:"bytes,14,rep,name=policies,proto3" json:"policies,omitempty"`
-	Proposals               []*SwitchProposal      `protobuf:"bytes,15,rep,name=proposals,proto3" json:"proposals,omitempty"`
-	Operations              []*Operation           `protobuf:"bytes,16,rep,name=operations,proto3" json:"operations,omitempty"`
-	NodePreferences         []*NodePreference      `protobuf:"bytes,17,rep,name=node_preferences,json=nodePreferences,proto3" json:"node_preferences,omitempty"`
-	Tasks                   []*SchedulerTask       `protobuf:"bytes,18,rep,name=tasks,proto3" json:"tasks,omitempty"`
-	QualityHistory          []*ProbeResult         `protobuf:"bytes,19,rep,name=quality_history,json=qualityHistory,proto3" json:"quality_history,omitempty"`
-	unknownFields           protoimpl.UnknownFields
-	sizeCache               protoimpl.SizeCache
-}
-
-func (x *RuntimeState) Reset() {
-	*x = RuntimeState{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[56]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *RuntimeState) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*RuntimeState) ProtoMessage() {}
-
-func (x *RuntimeState) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[56]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use RuntimeState.ProtoReflect.Descriptor instead.
-func (*RuntimeState) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{56}
-}
-
-func (x *RuntimeState) GetPhase() ConfigApplyPhase {
-	if x != nil {
-		return x.Phase
-	}
-	return ConfigApplyPhase_CONFIG_APPLY_PHASE_UNSPECIFIED
-}
-
-func (x *RuntimeState) GetAttemptedRevision() string {
-	if x != nil {
-		return x.AttemptedRevision
-	}
-	return ""
-}
-
-func (x *RuntimeState) GetDesiredRevision() string {
-	if x != nil {
-		return x.DesiredRevision
-	}
-	return ""
-}
-
-func (x *RuntimeState) GetAppliedRevision() string {
-	if x != nil {
-		return x.AppliedRevision
-	}
-	return ""
-}
-
-func (x *RuntimeState) GetErrorMessage() string {
-	if x != nil {
-		return x.ErrorMessage
-	}
-	return ""
-}
-
-func (x *RuntimeState) GetRunning() bool {
-	if x != nil {
-		return x.Running
-	}
-	return false
-}
-
-func (x *RuntimeState) GetSelectors() []*SelectorState {
-	if x != nil {
-		return x.Selectors
-	}
-	return nil
-}
-
-func (x *RuntimeState) GetServiceRoutes() []*ServiceRouteState {
-	if x != nil {
-		return x.ServiceRoutes
-	}
-	return nil
-}
-
-func (x *RuntimeState) GetServiceBindings() []*ServiceBindingState {
-	if x != nil {
-		return x.ServiceBindings
-	}
-	return nil
-}
-
-func (x *RuntimeState) GetNodePoolRevision() string {
-	if x != nil {
-		return x.NodePoolRevision
-	}
-	return ""
-}
-
-func (x *RuntimeState) GetPolicyAutomationEnabled() bool {
-	if x != nil {
-		return x.PolicyAutomationEnabled
-	}
-	return false
-}
-
-func (x *RuntimeState) GetPolicyRevision() string {
-	if x != nil {
-		return x.PolicyRevision
-	}
-	return ""
-}
-
-func (x *RuntimeState) GetRecoveryState() RuntimeRecoveryState {
-	if x != nil {
-		return x.RecoveryState
-	}
-	return RuntimeRecoveryState_RUNTIME_RECOVERY_STATE_UNSPECIFIED
-}
-
-func (x *RuntimeState) GetPolicies() []*ServicePolicy {
-	if x != nil {
-		return x.Policies
-	}
-	return nil
-}
-
-func (x *RuntimeState) GetProposals() []*SwitchProposal {
-	if x != nil {
-		return x.Proposals
-	}
-	return nil
-}
-
-func (x *RuntimeState) GetOperations() []*Operation {
-	if x != nil {
-		return x.Operations
-	}
-	return nil
-}
-
-func (x *RuntimeState) GetNodePreferences() []*NodePreference {
-	if x != nil {
-		return x.NodePreferences
-	}
-	return nil
-}
-
-func (x *RuntimeState) GetTasks() []*SchedulerTask {
-	if x != nil {
-		return x.Tasks
-	}
-	return nil
-}
-
-func (x *RuntimeState) GetQualityHistory() []*ProbeResult {
-	if x != nil {
-		return x.QualityHistory
-	}
-	return nil
-}
-
-type RuntimeEvent struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	Sequence         uint64                 `protobuf:"varint,1,opt,name=sequence,proto3" json:"sequence,omitempty"`
-	Type             RuntimeEventType       `protobuf:"varint,2,opt,name=type,proto3,enum=targetlib.RuntimeEventType" json:"type,omitempty"`
-	OccurredAtUnixMs int64                  `protobuf:"varint,3,opt,name=occurred_at_unix_ms,json=occurredAtUnixMs,proto3" json:"occurred_at_unix_ms,omitempty"`
-	State            *RuntimeState          `protobuf:"bytes,4,opt,name=state,proto3" json:"state,omitempty"`
-	Probe            *ProbeResult           `protobuf:"bytes,5,opt,name=probe,proto3" json:"probe,omitempty"`
-	ServiceId        string                 `protobuf:"bytes,6,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
-	NodeId           string                 `protobuf:"bytes,7,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
-}
-
-func (x *RuntimeEvent) Reset() {
-	*x = RuntimeEvent{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[57]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *RuntimeEvent) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*RuntimeEvent) ProtoMessage() {}
-
-func (x *RuntimeEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[57]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use RuntimeEvent.ProtoReflect.Descriptor instead.
-func (*RuntimeEvent) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{57}
-}
-
-func (x *RuntimeEvent) GetSequence() uint64 {
-	if x != nil {
-		return x.Sequence
-	}
-	return 0
-}
-
-func (x *RuntimeEvent) GetType() RuntimeEventType {
-	if x != nil {
-		return x.Type
-	}
-	return RuntimeEventType_RUNTIME_EVENT_TYPE_UNSPECIFIED
-}
-
-func (x *RuntimeEvent) GetOccurredAtUnixMs() int64 {
-	if x != nil {
-		return x.OccurredAtUnixMs
-	}
-	return 0
-}
-
-func (x *RuntimeEvent) GetState() *RuntimeState {
-	if x != nil {
-		return x.State
-	}
-	return nil
-}
-
-func (x *RuntimeEvent) GetProbe() *ProbeResult {
-	if x != nil {
-		return x.Probe
-	}
-	return nil
-}
-
-func (x *RuntimeEvent) GetServiceId() string {
+func (x *DeleteRouteRequest) GetServiceId() string {
 	if x != nil {
 		return x.ServiceId
 	}
 	return ""
 }
 
-func (x *RuntimeEvent) GetNodeId() string {
-	if x != nil {
-		return x.NodeId
-	}
-	return ""
+type RouteList struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Routes        []*RouteInfo           `protobuf:"bytes,1,rep,name=routes,proto3" json:"routes,omitempty"`
+	DefaultRoute  *RouteInfo             `protobuf:"bytes,2,opt,name=default_route,json=defaultRoute,proto3" json:"default_route,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
-type TestOutboundRequest struct {
-	state       protoimpl.MessageState `protogen:"open.v1"`
-	OutboundTag string                 `protobuf:"bytes,1,opt,name=outbound_tag,json=outboundTag,proto3" json:"outbound_tag,omitempty"`
-	// Zero uses the server default. Values above 60 seconds are rejected.
-	TimeoutMilliseconds uint32 `protobuf:"varint,2,opt,name=timeout_milliseconds,json=timeoutMilliseconds,proto3" json:"timeout_milliseconds,omitempty"`
-	unknownFields       protoimpl.UnknownFields
-	sizeCache           protoimpl.SizeCache
-}
-
-func (x *TestOutboundRequest) Reset() {
-	*x = TestOutboundRequest{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[58]
+func (x *RouteList) Reset() {
+	*x = RouteList{}
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *TestOutboundRequest) String() string {
+func (x *RouteList) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*TestOutboundRequest) ProtoMessage() {}
+func (*RouteList) ProtoMessage() {}
 
-func (x *TestOutboundRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[58]
+func (x *RouteList) ProtoReflect() protoreflect.Message {
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5744,114 +2749,48 @@ func (x *TestOutboundRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use TestOutboundRequest.ProtoReflect.Descriptor instead.
-func (*TestOutboundRequest) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{58}
+// Deprecated: Use RouteList.ProtoReflect.Descriptor instead.
+func (*RouteList) Descriptor() ([]byte, []int) {
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{32}
 }
 
-func (x *TestOutboundRequest) GetOutboundTag() string {
+func (x *RouteList) GetRoutes() []*RouteInfo {
 	if x != nil {
-		return x.OutboundTag
-	}
-	return ""
-}
-
-func (x *TestOutboundRequest) GetTimeoutMilliseconds() uint32 {
-	if x != nil {
-		return x.TimeoutMilliseconds
-	}
-	return 0
-}
-
-type TestOutboundsRequest struct {
-	state        protoimpl.MessageState `protogen:"open.v1"`
-	OutboundTags []string               `protobuf:"bytes,1,rep,name=outbound_tags,json=outboundTags,proto3" json:"outbound_tags,omitempty"`
-	// Zero uses the server default. Values above 60 seconds are rejected.
-	TimeoutMilliseconds uint32 `protobuf:"varint,2,opt,name=timeout_milliseconds,json=timeoutMilliseconds,proto3" json:"timeout_milliseconds,omitempty"`
-	// Number of URLTest groups tested concurrently. Zero uses the server
-	// default; the server caps this at four.
-	MaxConcurrency uint32 `protobuf:"varint,3,opt,name=max_concurrency,json=maxConcurrency,proto3" json:"max_concurrency,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
-}
-
-func (x *TestOutboundsRequest) Reset() {
-	*x = TestOutboundsRequest{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[59]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *TestOutboundsRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*TestOutboundsRequest) ProtoMessage() {}
-
-func (x *TestOutboundsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[59]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use TestOutboundsRequest.ProtoReflect.Descriptor instead.
-func (*TestOutboundsRequest) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{59}
-}
-
-func (x *TestOutboundsRequest) GetOutboundTags() []string {
-	if x != nil {
-		return x.OutboundTags
+		return x.Routes
 	}
 	return nil
 }
 
-func (x *TestOutboundsRequest) GetTimeoutMilliseconds() uint32 {
+func (x *RouteList) GetDefaultRoute() *RouteInfo {
 	if x != nil {
-		return x.TimeoutMilliseconds
+		return x.DefaultRoute
 	}
-	return 0
+	return nil
 }
 
-func (x *TestOutboundsRequest) GetMaxConcurrency() uint32 {
-	if x != nil {
-		return x.MaxConcurrency
-	}
-	return 0
+type SelectRouteNodeRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ServiceId     string                 `protobuf:"bytes,1,opt,name=service_id,json=serviceId,proto3" json:"service_id,omitempty"`
+	NodeId        string                 `protobuf:"bytes,2,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
-type LatencyTestResult struct {
-	state             protoimpl.MessageState `protogen:"open.v1"`
-	OutboundTag       string                 `protobuf:"bytes,1,opt,name=outbound_tag,json=outboundTag,proto3" json:"outbound_tag,omitempty"`
-	Status            LatencyTestStatus      `protobuf:"varint,2,opt,name=status,proto3,enum=targetlib.LatencyTestStatus" json:"status,omitempty"`
-	DelayMilliseconds uint32                 `protobuf:"varint,3,opt,name=delay_milliseconds,json=delayMilliseconds,proto3" json:"delay_milliseconds,omitempty"`
-	TestedAtUnixMs    int64                  `protobuf:"varint,4,opt,name=tested_at_unix_ms,json=testedAtUnixMs,proto3" json:"tested_at_unix_ms,omitempty"`
-	ErrorMessage      string                 `protobuf:"bytes,5,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
-	unknownFields     protoimpl.UnknownFields
-	sizeCache         protoimpl.SizeCache
-}
-
-func (x *LatencyTestResult) Reset() {
-	*x = LatencyTestResult{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[60]
+func (x *SelectRouteNodeRequest) Reset() {
+	*x = SelectRouteNodeRequest{}
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *LatencyTestResult) String() string {
+func (x *SelectRouteNodeRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*LatencyTestResult) ProtoMessage() {}
+func (*SelectRouteNodeRequest) ProtoMessage() {}
 
-func (x *LatencyTestResult) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[60]
+func (x *SelectRouteNodeRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5862,42 +2801,21 @@ func (x *LatencyTestResult) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use LatencyTestResult.ProtoReflect.Descriptor instead.
-func (*LatencyTestResult) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{60}
+// Deprecated: Use SelectRouteNodeRequest.ProtoReflect.Descriptor instead.
+func (*SelectRouteNodeRequest) Descriptor() ([]byte, []int) {
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{33}
 }
 
-func (x *LatencyTestResult) GetOutboundTag() string {
+func (x *SelectRouteNodeRequest) GetServiceId() string {
 	if x != nil {
-		return x.OutboundTag
+		return x.ServiceId
 	}
 	return ""
 }
 
-func (x *LatencyTestResult) GetStatus() LatencyTestStatus {
+func (x *SelectRouteNodeRequest) GetNodeId() string {
 	if x != nil {
-		return x.Status
-	}
-	return LatencyTestStatus_LATENCY_TEST_STATUS_UNSPECIFIED
-}
-
-func (x *LatencyTestResult) GetDelayMilliseconds() uint32 {
-	if x != nil {
-		return x.DelayMilliseconds
-	}
-	return 0
-}
-
-func (x *LatencyTestResult) GetTestedAtUnixMs() int64 {
-	if x != nil {
-		return x.TestedAtUnixMs
-	}
-	return 0
-}
-
-func (x *LatencyTestResult) GetErrorMessage() string {
-	if x != nil {
-		return x.ErrorMessage
+		return x.NodeId
 	}
 	return ""
 }
@@ -5911,7 +2829,7 @@ type ResolvedEndpoints struct {
 
 func (x *ResolvedEndpoints) Reset() {
 	*x = ResolvedEndpoints{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[61]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5923,7 +2841,7 @@ func (x *ResolvedEndpoints) String() string {
 func (*ResolvedEndpoints) ProtoMessage() {}
 
 func (x *ResolvedEndpoints) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[61]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5936,7 +2854,7 @@ func (x *ResolvedEndpoints) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ResolvedEndpoints.ProtoReflect.Descriptor instead.
 func (*ResolvedEndpoints) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{61}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *ResolvedEndpoints) GetAddresses() []string {
@@ -5961,7 +2879,7 @@ type IpInfoResponse struct {
 
 func (x *IpInfoResponse) Reset() {
 	*x = IpInfoResponse{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[62]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5973,7 +2891,7 @@ func (x *IpInfoResponse) String() string {
 func (*IpInfoResponse) ProtoMessage() {}
 
 func (x *IpInfoResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[62]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5986,7 +2904,7 @@ func (x *IpInfoResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IpInfoResponse.ProtoReflect.Descriptor instead.
 func (*IpInfoResponse) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{62}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *IpInfoResponse) GetIp() string {
@@ -6049,7 +2967,7 @@ type SubscriptionEvent struct {
 
 func (x *SubscriptionEvent) Reset() {
 	*x = SubscriptionEvent{}
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[63]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -6061,7 +2979,7 @@ func (x *SubscriptionEvent) String() string {
 func (*SubscriptionEvent) ProtoMessage() {}
 
 func (x *SubscriptionEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_api_TargetLib_targetlib_proto_msgTypes[63]
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -6074,7 +2992,7 @@ func (x *SubscriptionEvent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SubscriptionEvent.ProtoReflect.Descriptor instead.
 func (*SubscriptionEvent) Descriptor() ([]byte, []int) {
-	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{63}
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{36}
 }
 
 func (x *SubscriptionEvent) GetType() SubscriptionEventType {
@@ -6109,28 +3027,9 @@ const file_api_TargetLib_targetlib_proto_rawDesc = "" +
 	"\amessage\x18\x02 \x01(\tR\amessage\"S\n" +
 	"\bLogBatch\x121\n" +
 	"\bmessages\x18\x01 \x03(\v2\x15.targetlib.LogMessageR\bmessages\x12\x14\n" +
-	"\x05reset\x18\x02 \x01(\bR\x05reset\"W\n" +
-	"\x15SelectOutboundRequest\x12\x1b\n" +
-	"\tgroup_tag\x18\x01 \x01(\tR\bgroupTag\x12!\n" +
-	"\foutbound_tag\x18\x02 \x01(\tR\voutboundTag\"(\n" +
+	"\x05reset\x18\x02 \x01(\bR\x05reset\"(\n" +
 	"\x16CloseConnectionRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\"\xb2\x01\n" +
-	"\x0fVersionResponse\x12+\n" +
-	"\x11targetlib_version\x18\x01 \x01(\tR\x10targetlibVersion\x12(\n" +
-	"\x10sing_box_version\x18\x02 \x01(\tR\x0esingBoxVersion\x12\x1d\n" +
-	"\n" +
-	"go_version\x18\x03 \x01(\tR\tgoVersion\x12)\n" +
-	"\x10protocol_version\x18\x04 \x01(\rR\x0fprotocolVersion\"\x83\x03\n" +
-	"\x14CapabilitiesResponse\x12\x1a\n" +
-	"\bplatform\x18\x01 \x01(\tR\bplatform\x12!\n" +
-	"\fplatform_vpn\x18\x03 \x01(\bR\vplatformVpn\x127\n" +
-	"\x17subscription_management\x18\x05 \x01(\bR\x16subscriptionManagement\x12*\n" +
-	"\x11real_time_traffic\x18\x06 \x01(\bR\x0frealTimeTraffic\x12+\n" +
-	"\x11policy_automation\x18\a \x01(\bR\x10policyAutomation\x12%\n" +
-	"\x0eservice_probes\x18\b \x01(\bR\rserviceProbes\x12%\n" +
-	"\x0eruntime_events\x18\t \x01(\bR\rruntimeEvents\x122\n" +
-	"\x15policy_automation_api\x18\n" +
-	" \x01(\bR\x13policyAutomationApiJ\x04\b\x02\x10\x03J\x04\b\x04\x10\x05R\fsystem_proxy\"B\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"B\n" +
 	"\x11OperationResponse\x12-\n" +
 	"\x05state\x18\x01 \x01(\v2\x17.targetlib.ServiceStateR\x05state\"\x93\x01\n" +
 	"\fServiceState\x121\n" +
@@ -6150,7 +3049,7 @@ const file_api_TargetLib_targetlib_proto_rawDesc = "" +
 	"\x12sampled_at_unix_ms\x18\b \x01(\x03R\x0fsampledAtUnixMs\x123\n" +
 	"\x15interval_milliseconds\x18\t \x01(\rR\x14intervalMilliseconds\" \n" +
 	"\x0eSubscriptionId\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\"\x9c\x03\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"\x8c\x03\n" +
 	"\x16AddSubscriptionRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x10\n" +
@@ -6167,7 +3066,7 @@ const file_api_TargetLib_targetlib_proto_rawDesc = "" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\n" +
 	"\n" +
 	"\b_enabledB\x0e\n" +
-	"\f_auto_updateJ\x04\b\b\x10\tR\bactivate\"?\n" +
+	"\f_auto_update\"?\n" +
 	"\x19RenameSubscriptionRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\"I\n" +
@@ -6179,9 +3078,9 @@ const file_api_TargetLib_targetlib_proto_rawDesc = "" +
 	"\aenabled\x18\x02 \x01(\bR\aenabled\x126\n" +
 	"\x17update_interval_seconds\x18\x03 \x01(\x03R\x15updateIntervalSeconds\"=\n" +
 	"\x18ResolvedEndpointsRequest\x12!\n" +
-	"\fenabled_only\x18\x01 \x01(\bR\venabledOnly\"f\n" +
+	"\fenabled_only\x18\x01 \x01(\bR\venabledOnly\"U\n" +
 	"\x10SubscriptionList\x12A\n" +
-	"\rsubscriptions\x18\x01 \x03(\v2\x1b.targetlib.SubscriptionViewR\rsubscriptionsJ\x04\b\x02\x10\x03R\tactive_id\"\xac\x06\n" +
+	"\rsubscriptions\x18\x01 \x03(\v2\x1b.targetlib.SubscriptionViewR\rsubscriptions\"\xac\x06\n" +
 	"\x10SubscriptionView\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x16\n" +
@@ -6209,9 +3108,9 @@ const file_api_TargetLib_targetlib_proto_rawDesc = "" +
 	"webPageUrl\x12\x1f\n" +
 	"\vsupport_url\x18\x14 \x01(\tR\n" +
 	"supportUrl\x120\n" +
-	"\x14moved_permanently_to\x18\x15 \x01(\tR\x12movedPermanentlyTo\"\x83\x01\n" +
+	"\x14moved_permanently_to\x18\x15 \x01(\tR\x12movedPermanentlyTo\";\n" +
 	"\vProfileView\x12,\n" +
-	"\x05nodes\x18\x01 \x03(\v2\x16.targetlib.ProfileNodeR\x05nodesJ\x04\b\x02\x10\aR\x06groupsR\x10custom_outboundsR\x0fcustom_inboundsR\x10route_rule_countR\x03dns\"\xa9\x02\n" +
+	"\x05nodes\x18\x01 \x03(\v2\x16.targetlib.ProfileNodeR\x05nodes\"\x97\x02\n" +
 	"\vProfileNode\x12'\n" +
 	"\x0fsubscription_id\x18\n" +
 	" \x01(\tR\x0esubscriptionId\x12\x10\n" +
@@ -6222,8 +3121,7 @@ const file_api_TargetLib_targetlib_proto_rawDesc = "" +
 	"\x04port\x18\x05 \x01(\x05R\x04port\x121\n" +
 	"\x05phase\x18\a \x01(\x0e2\x1b.targetlib.ProfileNodePhaseR\x05phase\x12#\n" +
 	"\rerror_message\x18\b \x01(\tR\ferrorMessage\x12!\n" +
-	"\fcountry_code\x18\t \x01(\tR\vcountryCodeJ\x04\b\x06\x10\aR\n" +
-	"group_tags\"\xa1\x02\n" +
+	"\fcountry_code\x18\t \x01(\tR\vcountryCode\"\xa1\x02\n" +
 	"\x18SubscriptionUpdateResult\x12?\n" +
 	"\fsubscription\x18\x01 \x01(\v2\x1b.targetlib.SubscriptionViewR\fsubscription\x12\x18\n" +
 	"\achanged\x18\x02 \x01(\bR\achanged\x12!\n" +
@@ -6246,21 +3144,21 @@ const file_api_TargetLib_targetlib_proto_rawDesc = "" +
 	"\x0eservice_routes\x18\x03 \x03(\v2\x17.targetlib.ServiceRouteR\rserviceRoutes\x12D\n" +
 	"\x10service_bindings\x18\x04 \x03(\v2\x19.targetlib.ServiceBindingR\x0fserviceBindings\x12\x1a\n" +
 	"\brevision\x18\x05 \x01(\tR\brevision\x12,\n" +
-	"\x12node_pool_revision\x18\x06 \x01(\tR\x10nodePoolRevision\"\xb0\x01\n" +
+	"\x12node_pool_revision\x18\x06 \x01(\tR\x10nodePoolRevision\"\x81\x01\n" +
 	"\x1aUpdateRuntimeConfigRequest\x126\n" +
-	"\bsettings\x18\x01 \x01(\v2\x1a.targetlib.RuntimeSettingsR\bsettings\x12-\n" +
-	"\x05model\x18\x02 \x01(\v2\x17.targetlib.RuntimeModelR\x05model\x12+\n" +
+	"\bsettings\x18\x01 \x01(\v2\x1a.targetlib.RuntimeSettingsR\bsettings\x12+\n" +
 	"\x11expected_revision\x18\x03 \x01(\tR\x10expectedRevision\"g\n" +
 	"\x0eSelectorConfig\x12\x10\n" +
 	"\x03tag\x18\x01 \x01(\tR\x03tag\x12\x19\n" +
 	"\bnode_ids\x18\x02 \x03(\tR\anodeIds\x12(\n" +
-	"\x10selected_node_id\x18\x03 \x01(\tR\x0eselectedNodeId\"\x84\x01\n" +
+	"\x10selected_node_id\x18\x03 \x01(\tR\x0eselectedNodeId\"\xa7\x01\n" +
 	"\fServiceRoute\x12\x1d\n" +
 	"\n" +
 	"service_id\x18\x01 \x01(\tR\tserviceId\x12\x18\n" +
 	"\adomains\x18\x02 \x03(\tR\adomains\x12!\n" +
 	"\fselector_tag\x18\x03 \x01(\tR\vselectorTag\x12\x18\n" +
-	"\aenabled\x18\x04 \x01(\bR\aenabled\"\xf1\x02\n" +
+	"\aenabled\x18\x04 \x01(\bR\aenabled\x12!\n" +
+	"\fdisplay_name\x18\x05 \x01(\tR\vdisplayName\"\xf1\x02\n" +
 	"\x0eServiceBinding\x12\x1d\n" +
 	"\n" +
 	"service_id\x18\x01 \x01(\tR\tserviceId\x12!\n" +
@@ -6278,305 +3176,50 @@ const file_api_TargetLib_targetlib_proto_rawDesc = "" +
 	"\x10service_bindings\x18\x03 \x03(\v2\x19.targetlib.ServiceBindingR\x0fserviceBindings\"T\n" +
 	"\bNodePool\x12\x1a\n" +
 	"\brevision\x18\x01 \x01(\tR\brevision\x12,\n" +
-	"\x05nodes\x18\x02 \x03(\v2\x16.targetlib.ProfileNodeR\x05nodes\"\x88\x01\n" +
-	"\rSelectorState\x123\n" +
-	"\adesired\x18\x01 \x01(\v2\x19.targetlib.SelectorConfigR\adesired\x12$\n" +
-	"\x0eactual_node_id\x18\x02 \x01(\tR\factualNodeId\x12\x1c\n" +
-	"\teffective\x18\x03 \x01(\bR\teffective\"d\n" +
-	"\x11ServiceRouteState\x121\n" +
-	"\adesired\x18\x01 \x01(\v2\x17.targetlib.ServiceRouteR\adesired\x12\x1c\n" +
-	"\teffective\x18\x02 \x01(\bR\teffective\"\xe7\x01\n" +
-	"\x13ServiceBindingState\x123\n" +
-	"\adesired\x18\x01 \x01(\v2\x19.targetlib.ServiceBindingR\adesired\x12\x1c\n" +
-	"\teffective\x18\x02 \x01(\bR\teffective\x12%\n" +
-	"\x0enode_available\x18\x03 \x01(\bR\rnodeAvailable\x12)\n" +
-	"\x10needs_evaluation\x18\x04 \x01(\bR\x0fneedsEvaluation\x12+\n" +
-	"\x11evaluation_reason\x18\x05 \x01(\tR\x10evaluationReason\"\xe3\x04\n" +
-	"\fServiceProbe\x12\x1d\n" +
-	"\n" +
-	"service_id\x18\x01 \x01(\tR\tserviceId\x12\x10\n" +
-	"\x03url\x18\x02 \x01(\tR\x03url\x12'\n" +
-	"\x0fexpected_status\x18\x03 \x03(\rR\x0eexpectedStatus\x12#\n" +
-	"\rbody_contains\x18\x04 \x01(\tR\fbodyContains\x12+\n" +
-	"\x11allowed_countries\x18\x05 \x03(\tR\x10allowedCountries\x12\x1d\n" +
-	"\n" +
-	"egress_url\x18\x06 \x01(\tR\tegressUrl\x124\n" +
-	"\x16service_country_header\x18\a \x01(\tR\x14serviceCountryHeader\x121\n" +
-	"\x14timeout_milliseconds\x18\b \x01(\rR\x13timeoutMilliseconds\x12)\n" +
-	"\x10validity_seconds\x18\t \x01(\rR\x0fvaliditySeconds\x12\x1a\n" +
-	"\brevision\x18\n" +
-	" \x01(\tR\brevision\x12(\n" +
-	"\x10udp_echo_address\x18\v \x01(\tR\x0eudpEchoAddress\x12!\n" +
-	"\fpacket_count\x18\f \x01(\rR\vpacketCount\x12>\n" +
-	"\x1bpacket_timeout_milliseconds\x18\r \x01(\rR\x19packetTimeoutMilliseconds\x123\n" +
-	"\x13maximum_packet_loss\x18\x0e \x01(\x01H\x00R\x11maximumPacketLoss\x88\x01\x01B\x16\n" +
-	"\x14_maximum_packet_loss\"\xa5\a\n" +
-	"\vProbeResult\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1d\n" +
-	"\n" +
-	"service_id\x18\x02 \x01(\tR\tserviceId\x12\x17\n" +
-	"\anode_id\x18\x03 \x01(\tR\x06nodeId\x12,\n" +
-	"\x12node_pool_revision\x18\x04 \x01(\tR\x10nodePoolRevision\x12%\n" +
-	"\x0eprobe_revision\x18\x05 \x01(\tR\rprobeRevision\x12+\n" +
-	"\x05stage\x18\x06 \x01(\x0e2\x15.targetlib.ProbeStageR\x05stage\x12#\n" +
-	"\rerror_message\x18\a \x01(\tR\ferrorMessage\x12)\n" +
-	"\x11tested_at_unix_ms\x18\b \x01(\x03R\x0etestedAtUnixMs\x12+\n" +
-	"\x12expires_at_unix_ms\x18\t \x01(\x03R\x0fexpiresAtUnixMs\x121\n" +
-	"\x14latency_milliseconds\x18\n" +
-	" \x01(\rR\x13latencyMilliseconds\x12\x1f\n" +
-	"\vhttp_status\x18\v \x01(\rR\n" +
-	"httpStatus\x12)\n" +
-	"\x10declared_country\x18\f \x01(\tR\x0fdeclaredCountry\x12)\n" +
-	"\x10observed_country\x18\r \x01(\tR\x0fobservedCountry\x12'\n" +
-	"\x0fservice_country\x18\x0e \x01(\tR\x0eserviceCountry\x12\x1b\n" +
-	"\tegress_ip\x18\x0f \x01(\tR\begressIp\x12\x1a\n" +
-	"\battempts\x18\x10 \x01(\rR\battempts\x12\x1c\n" +
-	"\tsuccesses\x18\x11 \x01(\rR\tsuccesses\x12#\n" +
-	"\rfailure_ratio\x18\x12 \x01(\x01R\ffailureRatio\x12/\n" +
-	"\x13jitter_milliseconds\x18\x13 \x01(\rR\x12jitterMilliseconds\x122\n" +
-	"\x15packet_loss_available\x18\x14 \x01(\bR\x13packetLossAvailable\x12*\n" +
-	"\x11packet_loss_ratio\x18\x15 \x01(\x01R\x0fpacketLossRatio\x12!\n" +
-	"\fpackets_sent\x18\x16 \x01(\rR\vpacketsSent\x12)\n" +
-	"\x10packets_received\x18\x17 \x01(\rR\x0fpacketsReceived\x12!\n" +
-	"\fpacket_error\x18\x18 \x01(\tR\vpacketError\"7\n" +
-	"\x16EvaluateServiceRequest\x12\x1d\n" +
-	"\n" +
-	"service_id\x18\x01 \x01(\tR\tserviceId\"\xfe\x02\n" +
-	"\x16ServiceSelectionPolicy\x12\x1d\n" +
-	"\n" +
-	"service_id\x18\x01 \x01(\tR\tserviceId\x12/\n" +
-	"\x13preferred_countries\x18\x02 \x03(\tR\x12preferredCountries\x12)\n" +
-	"\x10subscription_ids\x18\x03 \x03(\tR\x0fsubscriptionIds\x12*\n" +
-	"\x11excluded_node_ids\x18\x04 \x03(\tR\x0fexcludedNodeIds\x12*\n" +
-	"\x11favorite_node_ids\x18\x05 \x03(\tR\x0ffavoriteNodeIds\x12!\n" +
-	"\fallow_direct\x18\x06 \x01(\bR\vallowDirect\x12%\n" +
-	"\x0emax_candidates\x18\a \x01(\rR\rmaxCandidates\x12\x1a\n" +
-	"\brevision\x18\b \x01(\tR\brevision\x12+\n" +
-	"\x11expected_revision\x18\t \x01(\tR\x10expectedRevision\"\xc4\x02\n" +
-	"\x10ServiceCandidate\x12\x17\n" +
-	"\anode_id\x18\x01 \x01(\tR\x06nodeId\x12\x1a\n" +
-	"\beligible\x18\x02 \x01(\bR\beligible\x12\x14\n" +
-	"\x05score\x18\x03 \x01(\x01R\x05score\x12\x16\n" +
-	"\x06reason\x18\x04 \x01(\tR\x06reason\x12.\n" +
-	"\x06latest\x18\x05 \x01(\v2\x16.targetlib.ProbeResultR\x06latest\x12#\n" +
-	"\rsuccess_ratio\x18\x06 \x01(\x01R\fsuccessRatio\x12:\n" +
-	"\x19mean_latency_milliseconds\x18\a \x01(\x01R\x17meanLatencyMilliseconds\x12<\n" +
-	"\x1alatency_trend_milliseconds\x18\b \x01(\x01R\x18latencyTrendMilliseconds\"\xa0\x02\n" +
-	"\x11ServiceEvaluation\x12\x1d\n" +
-	"\n" +
-	"service_id\x18\x01 \x01(\tR\tserviceId\x12,\n" +
-	"\x12node_pool_revision\x18\x02 \x01(\tR\x10nodePoolRevision\x12)\n" +
-	"\x10runtime_revision\x18\x03 \x01(\tR\x0fruntimeRevision\x12;\n" +
-	"\n" +
-	"candidates\x18\x04 \x03(\v2\x1b.targetlib.ServiceCandidateR\n" +
-	"candidates\x12/\n" +
-	"\x14evaluated_at_unix_ms\x18\x05 \x01(\x03R\x11evaluatedAtUnixMs\x12%\n" +
-	"\x0eprobe_revision\x18\x06 \x01(\tR\rprobeRevision\"\xe9\x04\n" +
-	"\x19RuntimeOrchestrationState\x12/\n" +
-	"\x06probes\x18\x01 \x03(\v2\x17.targetlib.ServiceProbeR\x06probes\x120\n" +
-	"\aresults\x18\x02 \x03(\v2\x16.targetlib.ProbeResultR\aresults\x12P\n" +
-	"\x12selection_policies\x18\x03 \x03(\v2!.targetlib.ServiceSelectionPolicyR\x11selectionPolicies\x12\x18\n" +
-	"\aenabled\x18\x04 \x01(\bR\aenabled\x12\x1a\n" +
-	"\brevision\x18\x05 \x01(\tR\brevision\x12F\n" +
-	"\x0erecovery_state\x18\x06 \x01(\x0e2\x1f.targetlib.RuntimeRecoveryStateR\rrecoveryState\x124\n" +
-	"\bpolicies\x18\a \x03(\v2\x18.targetlib.ServicePolicyR\bpolicies\x127\n" +
-	"\tproposals\x18\b \x03(\v2\x19.targetlib.SwitchProposalR\tproposals\x124\n" +
-	"\n" +
-	"operations\x18\t \x03(\v2\x14.targetlib.OperationR\n" +
-	"operations\x12D\n" +
-	"\x10node_preferences\x18\n" +
-	" \x03(\v2\x19.targetlib.NodePreferenceR\x0fnodePreferences\x12.\n" +
-	"\x05tasks\x18\v \x03(\v2\x18.targetlib.SchedulerTaskR\x05tasks\"\xcd\x05\n" +
-	"\fSwitchPolicy\x12)\n" +
-	"\x04mode\x18\x01 \x01(\x0e2\x15.targetlib.SwitchModeR\x04mode\x12+\n" +
-	"\x11allowed_countries\x18\x02 \x03(\tR\x10allowedCountries\x128\n" +
-	"\x18allowed_subscription_ids\x18\x03 \x03(\tR\x16allowedSubscriptionIds\x12.\n" +
-	"\x13allow_cross_country\x18\x04 \x01(\bR\x11allowCrossCountry\x128\n" +
-	"\x18allow_cross_subscription\x18\x05 \x01(\bR\x16allowCrossSubscription\x12!\n" +
-	"\fallow_direct\x18\x06 \x01(\bR\vallowDirect\x121\n" +
-	"\x14consecutive_failures\x18\a \x01(\rR\x13consecutiveFailures\x12.\n" +
-	"\x13minimum_score_delta\x18\b \x01(\x01R\x11minimumScoreDelta\x120\n" +
-	"\x14minimum_health_score\x18\t \x01(\x01R\x12minimumHealthScore\x122\n" +
-	"\x15minimum_dwell_seconds\x18\n" +
-	" \x01(\rR\x13minimumDwellSeconds\x12)\n" +
-	"\x10cooldown_seconds\x18\v \x01(\rR\x0fcooldownSeconds\x121\n" +
-	"\x15max_switches_per_hour\x18\f \x01(\rR\x12maxSwitchesPerHour\x12.\n" +
-	"\x13verify_after_switch\x18\r \x01(\bR\x11verifyAfterSwitch\x12G\n" +
-	" rollback_on_verification_failure\x18\x0e \x01(\bR\x1drollbackOnVerificationFailure\"\x92\x04\n" +
-	"\rServicePolicy\x12\x1d\n" +
+	"\x05nodes\x18\x02 \x03(\v2\x16.targetlib.ProfileNodeR\x05nodes\",\n" +
+	"\x11SelectNodeRequest\x12\x17\n" +
+	"\anode_id\x18\x01 \x01(\tR\x06nodeId\"\xa0\x01\n" +
+	"\x12SelectNodeResponse\x12\x17\n" +
+	"\anode_id\x18\x01 \x01(\tR\x06nodeId\x12\x1b\n" +
+	"\tnode_name\x18\x02 \x01(\tR\bnodeName\x12/\n" +
+	"\x13applied_immediately\x18\x03 \x01(\bR\x12appliedImmediately\x12#\n" +
+	"\rerror_message\x18\x04 \x01(\tR\ferrorMessage\"\xf0\x02\n" +
+	"\vProxyStatus\x12@\n" +
+	"\rservice_state\x18\x01 \x01(\x0e2\x1b.targetlib.ServiceStateTypeR\fserviceState\x12(\n" +
+	"\x10selected_node_id\x18\x02 \x01(\tR\x0eselectedNodeId\x12,\n" +
+	"\x12selected_node_name\x18\x03 \x01(\tR\x10selectedNodeName\x12$\n" +
+	"\x0eactual_node_id\x18\x04 \x01(\tR\factualNodeId\x12\x1c\n" +
+	"\teffective\x18\x05 \x01(\bR\teffective\x12-\n" +
+	"\x13selected_at_unix_ms\x18\x06 \x01(\x03R\x10selectedAtUnixMs\x12%\n" +
+	"\x0enode_available\x18\a \x01(\bR\rnodeAvailable\x12-\n" +
+	"\x12unavailable_reason\x18\b \x01(\tR\x11unavailableReason\"\xa3\x01\n" +
+	"\x12UpsertRouteRequest\x12\x1d\n" +
 	"\n" +
 	"service_id\x18\x01 \x01(\tR\tserviceId\x12!\n" +
 	"\fdisplay_name\x18\x02 \x01(\tR\vdisplayName\x12\x18\n" +
-	"\adomains\x18\x03 \x03(\tR\adomains\x12/\n" +
-	"\x06probes\x18\x04 \x03(\v2\x17.targetlib.ServiceProbeR\x06probes\x12?\n" +
-	"\tselection\x18\x05 \x01(\v2!.targetlib.ServiceSelectionPolicyR\tselection\x12<\n" +
-	"\rswitch_policy\x18\x06 \x01(\v2\x17.targetlib.SwitchPolicyR\fswitchPolicy\x12\x1a\n" +
-	"\brevision\x18\a \x01(\tR\brevision\x12%\n" +
-	"\x0eschema_version\x18\b \x01(\rR\rschemaVersion\x128\n" +
-	"\x18quality_validity_seconds\x18\t \x01(\rR\x16qualityValiditySeconds\x128\n" +
-	"\x18binding_validity_seconds\x18\n" +
-	" \x01(\rR\x16bindingValiditySeconds\x12>\n" +
-	"\x1bevaluation_interval_seconds\x18\v \x01(\rR\x19evaluationIntervalSeconds\"I\n" +
-	"\x11ServicePolicyList\x124\n" +
-	"\bpolicies\x18\x01 \x03(\v2\x18.targetlib.ServicePolicyR\bpolicies\"\xe4\x01\n" +
-	"\x0eNodePreference\x12\x17\n" +
-	"\anode_id\x18\x01 \x01(\tR\x06nodeId\x12\x18\n" +
-	"\aenabled\x18\x02 \x01(\bR\aenabled\x12\x1a\n" +
-	"\bexcluded\x18\x03 \x01(\bR\bexcluded\x12\x1a\n" +
-	"\bfavorite\x18\x04 \x01(\bR\bfavorite\x12\x16\n" +
-	"\x06labels\x18\x05 \x03(\tR\x06labels\x123\n" +
-	"\x15subscription_priority\x18\x06 \x01(\x05R\x14subscriptionPriority\x12\x1a\n" +
-	"\brevision\x18\a \x01(\tR\brevision\"\x89\x04\n" +
-	"\x0eSwitchProposal\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1d\n" +
+	"\adomains\x18\x03 \x03(\tR\adomains\x12\x17\n" +
+	"\anode_id\x18\x04 \x01(\tR\x06nodeId\x12\x18\n" +
+	"\aenabled\x18\x05 \x01(\bR\aenabled\"\x96\x02\n" +
+	"\tRouteInfo\x12\x1d\n" +
 	"\n" +
-	"service_id\x18\x02 \x01(\tR\tserviceId\x12&\n" +
-	"\x0fcurrent_node_id\x18\x03 \x01(\tR\rcurrentNodeId\x12*\n" +
-	"\x11suggested_node_id\x18\x04 \x01(\tR\x0fsuggestedNodeId\x12;\n" +
+	"service_id\x18\x01 \x01(\tR\tserviceId\x12!\n" +
+	"\fdisplay_name\x18\x02 \x01(\tR\vdisplayName\x12\x18\n" +
+	"\adomains\x18\x03 \x03(\tR\adomains\x12!\n" +
+	"\fselector_tag\x18\x04 \x01(\tR\vselectorTag\x12&\n" +
+	"\x0fcurrent_node_id\x18\x05 \x01(\tR\rcurrentNodeId\x12*\n" +
+	"\x11current_node_name\x18\x06 \x01(\tR\x0fcurrentNodeName\x12\x18\n" +
+	"\aenabled\x18\a \x01(\bR\aenabled\x12\x1c\n" +
+	"\teffective\x18\b \x01(\bR\teffective\"3\n" +
+	"\x12DeleteRouteRequest\x12\x1d\n" +
 	"\n" +
-	"candidates\x18\x05 \x03(\v2\x1b.targetlib.ServiceCandidateR\n" +
-	"candidates\x12\x16\n" +
-	"\x06reason\x18\x06 \x01(\tR\x06reason\x12'\n" +
-	"\x0fpolicy_revision\x18\a \x01(\tR\x0epolicyRevision\x12,\n" +
-	"\x12node_pool_revision\x18\b \x01(\tR\x10nodePoolRevision\x12)\n" +
-	"\x10binding_revision\x18\t \x01(\tR\x0fbindingRevision\x12+\n" +
-	"\x12created_at_unix_ms\x18\n" +
-	" \x01(\x03R\x0fcreatedAtUnixMs\x12+\n" +
-	"\x12expires_at_unix_ms\x18\v \x01(\x03R\x0fexpiresAtUnixMs\x12'\n" +
-	"\x0fauto_authorized\x18\f \x01(\bR\x0eautoAuthorized\x12\x1a\n" +
-	"\bapproved\x18\r \x01(\bR\bapproved\"\xdb\x06\n" +
-	"\tOperation\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
-	"\x04kind\x18\x02 \x01(\tR\x04kind\x12\x1f\n" +
-	"\vresource_id\x18\x03 \x01(\tR\n" +
-	"resourceId\x12'\n" +
-	"\x0fidempotency_key\x18\x04 \x01(\tR\x0eidempotencyKey\x122\n" +
-	"\x06status\x18\x05 \x01(\x0e2\x1a.targetlib.OperationStatusR\x06status\x12\x14\n" +
-	"\x05phase\x18\x06 \x01(\tR\x05phase\x12)\n" +
-	"\x10progress_current\x18\a \x01(\rR\x0fprogressCurrent\x12%\n" +
-	"\x0eprogress_total\x18\b \x01(\rR\rprogressTotal\x12+\n" +
-	"\x12created_at_unix_ms\x18\t \x01(\x03R\x0fcreatedAtUnixMs\x12+\n" +
-	"\x12started_at_unix_ms\x18\n" +
-	" \x01(\x03R\x0fstartedAtUnixMs\x12+\n" +
-	"\x12updated_at_unix_ms\x18\v \x01(\x03R\x0fupdatedAtUnixMs\x12/\n" +
-	"\x14completed_at_unix_ms\x18\f \x01(\x03R\x11completedAtUnixMs\x12'\n" +
-	"\x0fpolicy_revision\x18\r \x01(\tR\x0epolicyRevision\x12,\n" +
-	"\x12node_pool_revision\x18\x0e \x01(\tR\x10nodePoolRevision\x12)\n" +
-	"\x10binding_revision\x18\x0f \x01(\tR\x0fbindingRevision\x12)\n" +
-	"\x10runtime_revision\x18\x10 \x01(\tR\x0fruntimeRevision\x12\x1f\n" +
-	"\vproposal_id\x18\x11 \x01(\tR\n" +
-	"proposalId\x12%\n" +
-	"\x0eresult_summary\x18\x12 \x01(\tR\rresultSummary\x12\x1d\n" +
-	"\n" +
-	"error_code\x18\x13 \x01(\tR\terrorCode\x12#\n" +
-	"\rerror_message\x18\x14 \x01(\tR\ferrorMessage\x12+\n" +
-	"\x11request_signature\x18\x15 \x01(\tR\x10requestSignature\x12&\n" +
-	"\x0fdesired_node_id\x18\x16 \x01(\tR\rdesiredNodeId\"\xff\x02\n" +
-	"\rSchedulerTask\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1d\n" +
-	"\n" +
-	"service_id\x18\x02 \x01(\tR\tserviceId\x12\x12\n" +
-	"\x04kind\x18\x03 \x01(\tR\x04kind\x12\x16\n" +
-	"\x06reason\x18\x04 \x01(\tR\x06reason\x12'\n" +
-	"\x0fpolicy_revision\x18\x05 \x01(\tR\x0epolicyRevision\x12,\n" +
-	"\x12node_pool_revision\x18\x06 \x01(\tR\x10nodePoolRevision\x12,\n" +
-	"\x13next_run_at_unix_ms\x18\a \x01(\x03R\x0fnextRunAtUnixMs\x12\x18\n" +
-	"\aattempt\x18\b \x01(\rR\aattempt\x12'\n" +
-	"\x0fbackoff_seconds\x18\t \x01(\rR\x0ebackoffSeconds\x12(\n" +
-	"\x10deadline_unix_ms\x18\n" +
-	" \x01(\x03R\x0edeadlineUnixMs\x12!\n" +
-	"\foperation_id\x18\v \x01(\tR\voperationId\"E\n" +
-	"\rOperationList\x124\n" +
-	"\n" +
-	"operations\x18\x01 \x03(\v2\x14.targetlib.OperationR\n" +
-	"operations\"\x93\x01\n" +
-	"!SetPolicyAutomationEnabledRequest\x12\x18\n" +
-	"\aenabled\x18\x01 \x01(\bR\aenabled\x12+\n" +
-	"\x11expected_revision\x18\x02 \x01(\tR\x10expectedRevision\x12'\n" +
-	"\x0fidempotency_key\x18\x03 \x01(\tR\x0eidempotencyKey\"\xa4\x01\n" +
-	"\x1aUpsertServicePolicyRequest\x120\n" +
-	"\x06policy\x18\x01 \x01(\v2\x18.targetlib.ServicePolicyR\x06policy\x12+\n" +
-	"\x11expected_revision\x18\x02 \x01(\tR\x10expectedRevision\x12'\n" +
-	"\x0fidempotency_key\x18\x03 \x01(\tR\x0eidempotencyKey\"\x91\x01\n" +
-	"\x1aDeleteServicePolicyRequest\x12\x1d\n" +
-	"\n" +
-	"service_id\x18\x01 \x01(\tR\tserviceId\x12+\n" +
-	"\x11expected_revision\x18\x02 \x01(\tR\x10expectedRevision\x12'\n" +
-	"\x0fidempotency_key\x18\x03 \x01(\tR\x0eidempotencyKey\"\xab\x01\n" +
-	"\x18SetNodePreferenceRequest\x129\n" +
-	"\n" +
-	"preference\x18\x01 \x01(\v2\x19.targetlib.NodePreferenceR\n" +
-	"preference\x12+\n" +
-	"\x11expected_revision\x18\x02 \x01(\tR\x10expectedRevision\x12'\n" +
-	"\x0fidempotency_key\x18\x03 \x01(\tR\x0eidempotencyKey\"\x96\x01\n" +
-	"\x1fRequestServiceEvaluationRequest\x12\x1d\n" +
-	"\n" +
-	"service_id\x18\x01 \x01(\tR\tserviceId\x12+\n" +
-	"\x11expected_revision\x18\x02 \x01(\tR\x10expectedRevision\x12'\n" +
-	"\x0fidempotency_key\x18\x03 \x01(\tR\x0eidempotencyKey\"\x8f\x01\n" +
-	"\x16ProposalCommandRequest\x12\x1f\n" +
-	"\vproposal_id\x18\x01 \x01(\tR\n" +
-	"proposalId\x12+\n" +
-	"\x11expected_revision\x18\x02 \x01(\tR\x10expectedRevision\x12'\n" +
-	"\x0fidempotency_key\x18\x03 \x01(\tR\x0eidempotencyKey\"\xe8\x01\n" +
-	"\x1aForceServiceBindingRequest\x12\x1d\n" +
+	"service_id\x18\x01 \x01(\tR\tserviceId\"t\n" +
+	"\tRouteList\x12,\n" +
+	"\x06routes\x18\x01 \x03(\v2\x14.targetlib.RouteInfoR\x06routes\x129\n" +
+	"\rdefault_route\x18\x02 \x01(\v2\x14.targetlib.RouteInfoR\fdefaultRoute\"P\n" +
+	"\x16SelectRouteNodeRequest\x12\x1d\n" +
 	"\n" +
 	"service_id\x18\x01 \x01(\tR\tserviceId\x12\x17\n" +
-	"\anode_id\x18\x02 \x01(\tR\x06nodeId\x12+\n" +
-	"\x11expected_revision\x18\x03 \x01(\tR\x10expectedRevision\x12'\n" +
-	"\x0fidempotency_key\x18\x04 \x01(\tR\x0eidempotencyKey\x12<\n" +
-	"\x1aclose_existing_connections\x18\x05 \x01(\bR\x18closeExistingConnections\"8\n" +
-	"\x13GetOperationRequest\x12!\n" +
-	"\foperation_id\x18\x01 \x01(\tR\voperationId\"N\n" +
-	"\x15ListOperationsRequest\x12\x1f\n" +
-	"\vresource_id\x18\x01 \x01(\tR\n" +
-	"resourceId\x12\x14\n" +
-	"\x05limit\x18\x02 \x01(\rR\x05limit\"\x84\b\n" +
-	"\fRuntimeState\x121\n" +
-	"\x05phase\x18\x01 \x01(\x0e2\x1b.targetlib.ConfigApplyPhaseR\x05phase\x12-\n" +
-	"\x12attempted_revision\x18\x02 \x01(\tR\x11attemptedRevision\x12)\n" +
-	"\x10desired_revision\x18\x03 \x01(\tR\x0fdesiredRevision\x12)\n" +
-	"\x10applied_revision\x18\x04 \x01(\tR\x0fappliedRevision\x12#\n" +
-	"\rerror_message\x18\x05 \x01(\tR\ferrorMessage\x12\x18\n" +
-	"\arunning\x18\x06 \x01(\bR\arunning\x126\n" +
-	"\tselectors\x18\a \x03(\v2\x18.targetlib.SelectorStateR\tselectors\x12C\n" +
-	"\x0eservice_routes\x18\b \x03(\v2\x1c.targetlib.ServiceRouteStateR\rserviceRoutes\x12I\n" +
-	"\x10service_bindings\x18\t \x03(\v2\x1e.targetlib.ServiceBindingStateR\x0fserviceBindings\x12,\n" +
-	"\x12node_pool_revision\x18\n" +
-	" \x01(\tR\x10nodePoolRevision\x12:\n" +
-	"\x19policy_automation_enabled\x18\v \x01(\bR\x17policyAutomationEnabled\x12'\n" +
-	"\x0fpolicy_revision\x18\f \x01(\tR\x0epolicyRevision\x12F\n" +
-	"\x0erecovery_state\x18\r \x01(\x0e2\x1f.targetlib.RuntimeRecoveryStateR\rrecoveryState\x124\n" +
-	"\bpolicies\x18\x0e \x03(\v2\x18.targetlib.ServicePolicyR\bpolicies\x127\n" +
-	"\tproposals\x18\x0f \x03(\v2\x19.targetlib.SwitchProposalR\tproposals\x124\n" +
-	"\n" +
-	"operations\x18\x10 \x03(\v2\x14.targetlib.OperationR\n" +
-	"operations\x12D\n" +
-	"\x10node_preferences\x18\x11 \x03(\v2\x19.targetlib.NodePreferenceR\x0fnodePreferences\x12.\n" +
-	"\x05tasks\x18\x12 \x03(\v2\x18.targetlib.SchedulerTaskR\x05tasks\x12?\n" +
-	"\x0fquality_history\x18\x13 \x03(\v2\x16.targetlib.ProbeResultR\x0equalityHistory\"\x9f\x02\n" +
-	"\fRuntimeEvent\x12\x1a\n" +
-	"\bsequence\x18\x01 \x01(\x04R\bsequence\x12/\n" +
-	"\x04type\x18\x02 \x01(\x0e2\x1b.targetlib.RuntimeEventTypeR\x04type\x12-\n" +
-	"\x13occurred_at_unix_ms\x18\x03 \x01(\x03R\x10occurredAtUnixMs\x12-\n" +
-	"\x05state\x18\x04 \x01(\v2\x17.targetlib.RuntimeStateR\x05state\x12,\n" +
-	"\x05probe\x18\x05 \x01(\v2\x16.targetlib.ProbeResultR\x05probe\x12\x1d\n" +
-	"\n" +
-	"service_id\x18\x06 \x01(\tR\tserviceId\x12\x17\n" +
-	"\anode_id\x18\a \x01(\tR\x06nodeId\"k\n" +
-	"\x13TestOutboundRequest\x12!\n" +
-	"\foutbound_tag\x18\x01 \x01(\tR\voutboundTag\x121\n" +
-	"\x14timeout_milliseconds\x18\x02 \x01(\rR\x13timeoutMilliseconds\"\x97\x01\n" +
-	"\x14TestOutboundsRequest\x12#\n" +
-	"\routbound_tags\x18\x01 \x03(\tR\foutboundTags\x121\n" +
-	"\x14timeout_milliseconds\x18\x02 \x01(\rR\x13timeoutMilliseconds\x12'\n" +
-	"\x0fmax_concurrency\x18\x03 \x01(\rR\x0emaxConcurrency\"\xeb\x01\n" +
-	"\x11LatencyTestResult\x12!\n" +
-	"\foutbound_tag\x18\x01 \x01(\tR\voutboundTag\x124\n" +
-	"\x06status\x18\x02 \x01(\x0e2\x1c.targetlib.LatencyTestStatusR\x06status\x12-\n" +
-	"\x12delay_milliseconds\x18\x03 \x01(\rR\x11delayMilliseconds\x12)\n" +
-	"\x11tested_at_unix_ms\x18\x04 \x01(\x03R\x0etestedAtUnixMs\x12#\n" +
-	"\rerror_message\x18\x05 \x01(\tR\ferrorMessage\"1\n" +
+	"\anode_id\x18\x02 \x01(\tR\x06nodeId\"1\n" +
 	"\x11ResolvedEndpoints\x12\x1c\n" +
 	"\taddresses\x18\x01 \x03(\tR\taddresses\"\xae\x01\n" +
 	"\x0eIpInfoResponse\x12\x0e\n" +
@@ -6615,66 +3258,7 @@ const file_api_TargetLib_targetlib_proto_rawDesc = "" +
 	"\x16ROUTE_MODE_UNSPECIFIED\x10\x00\x12\x15\n" +
 	"\x11ROUTE_MODE_DIRECT\x10\x01\x12\x13\n" +
 	"\x0fROUTE_MODE_RULE\x10\x02\x12\x12\n" +
-	"\x0eROUTE_MODE_ALL\x10\x03*\xd8\x01\n" +
-	"\x10ConfigApplyPhase\x12\"\n" +
-	"\x1eCONFIG_APPLY_PHASE_UNSPECIFIED\x10\x00\x12!\n" +
-	"\x1dCONFIG_APPLY_PHASE_VALIDATING\x10\x01\x12\x1f\n" +
-	"\x1bCONFIG_APPLY_PHASE_BUILDING\x10\x02\x12\x1f\n" +
-	"\x1bCONFIG_APPLY_PHASE_APPLYING\x10\x03\x12\x1c\n" +
-	"\x18CONFIG_APPLY_PHASE_READY\x10\x04\x12\x1d\n" +
-	"\x19CONFIG_APPLY_PHASE_FAILED\x10\x05*\xa3\x02\n" +
-	"\n" +
-	"ProbeStage\x12\x1b\n" +
-	"\x17PROBE_STAGE_UNSPECIFIED\x10\x00\x12\x15\n" +
-	"\x11PROBE_STAGE_READY\x10\x01\x12\x13\n" +
-	"\x0fPROBE_STAGE_DNS\x10\x02\x12\x13\n" +
-	"\x0fPROBE_STAGE_TCP\x10\x03\x12\x13\n" +
-	"\x0fPROBE_STAGE_TLS\x10\x04\x12\x14\n" +
-	"\x10PROBE_STAGE_HTTP\x10\x05\x12\x14\n" +
-	"\x10PROBE_STAGE_AUTH\x10\x06\x12\x17\n" +
-	"\x13PROBE_STAGE_TIMEOUT\x10\a\x12\x16\n" +
-	"\x12PROBE_STAGE_REGION\x10\b\x12\x17\n" +
-	"\x13PROBE_STAGE_CONTENT\x10\t\x12\x14\n" +
-	"\x10PROBE_STAGE_NODE\x10\n" +
-	"\x12\x16\n" +
-	"\x12PROBE_STAGE_EGRESS\x10\v*\xac\x01\n" +
-	"\x14RuntimeRecoveryState\x12&\n" +
-	"\"RUNTIME_RECOVERY_STATE_UNSPECIFIED\x10\x00\x12%\n" +
-	"!RUNTIME_RECOVERY_STATE_RECOVERING\x10\x01\x12 \n" +
-	"\x1cRUNTIME_RECOVERY_STATE_READY\x10\x02\x12#\n" +
-	"\x1fRUNTIME_RECOVERY_STATE_DEGRADED\x10\x03*\x93\x01\n" +
-	"\n" +
-	"SwitchMode\x12\x1b\n" +
-	"\x17SWITCH_MODE_UNSPECIFIED\x10\x00\x12\x16\n" +
-	"\x12SWITCH_MODE_MANUAL\x10\x01\x12 \n" +
-	"\x1cSWITCH_MODE_AUTO_CONSTRAINED\x10\x02\x12\x16\n" +
-	"\x12SWITCH_MODE_LOCKED\x10\x03\x12\x16\n" +
-	"\x12SWITCH_MODE_DIRECT\x10\x04*\x94\x02\n" +
-	"\x0fOperationStatus\x12 \n" +
-	"\x1cOPERATION_STATUS_UNSPECIFIED\x10\x00\x12\x1b\n" +
-	"\x17OPERATION_STATUS_QUEUED\x10\x01\x12\x1c\n" +
-	"\x18OPERATION_STATUS_RUNNING\x10\x02\x12%\n" +
-	"!OPERATION_STATUS_WAITING_APPROVAL\x10\x03\x12\x1e\n" +
-	"\x1aOPERATION_STATUS_SUCCEEDED\x10\x04\x12\x1b\n" +
-	"\x17OPERATION_STATUS_FAILED\x10\x05\x12\x1e\n" +
-	"\x1aOPERATION_STATUS_CANCELLED\x10\x06\x12 \n" +
-	"\x1cOPERATION_STATUS_ROLLED_BACK\x10\a*\xcf\x02\n" +
-	"\x10RuntimeEventType\x12\"\n" +
-	"\x1eRUNTIME_EVENT_TYPE_UNSPECIFIED\x10\x00\x12\x1f\n" +
-	"\x1bRUNTIME_EVENT_TYPE_SNAPSHOT\x10\x01\x12\x1d\n" +
-	"\x19RUNTIME_EVENT_TYPE_CONFIG\x10\x02\x12 \n" +
-	"\x1cRUNTIME_EVENT_TYPE_NODE_POOL\x10\x03\x12\x1e\n" +
-	"\x1aRUNTIME_EVENT_TYPE_BINDING\x10\x04\x12$\n" +
-	" RUNTIME_EVENT_TYPE_PROBE_STARTED\x10\x05\x12&\n" +
-	"\"RUNTIME_EVENT_TYPE_PROBE_COMPLETED\x10\x06\x12'\n" +
-	"#RUNTIME_EVENT_TYPE_PROBE_DEFINITION\x10\a\x12\x1e\n" +
-	"\x1aRUNTIME_EVENT_TYPE_STOPPED\x10\b*\xbd\x01\n" +
-	"\x11LatencyTestStatus\x12#\n" +
-	"\x1fLATENCY_TEST_STATUS_UNSPECIFIED\x10\x00\x12\x1f\n" +
-	"\x1bLATENCY_TEST_STATUS_SUCCESS\x10\x01\x12\x1e\n" +
-	"\x1aLATENCY_TEST_STATUS_FAILED\x10\x02\x12\x1f\n" +
-	"\x1bLATENCY_TEST_STATUS_TIMEOUT\x10\x03\x12!\n" +
-	"\x1dLATENCY_TEST_STATUS_NOT_FOUND\x10\x04*\xb8\x01\n" +
+	"\x0eROUTE_MODE_ALL\x10\x03*\xb8\x01\n" +
 	"\x12SubscriptionStatus\x12#\n" +
 	"\x1fSUBSCRIPTION_STATUS_UNSPECIFIED\x10\x00\x12\x1c\n" +
 	"\x18SUBSCRIPTION_STATUS_IDLE\x10\x01\x12 \n" +
@@ -6701,19 +3285,15 @@ const file_api_TargetLib_targetlib_proto_rawDesc = "" +
 	"\x1dSUBSCRIPTION_EVENT_TYPE_ADDED\x10\x01\x12#\n" +
 	"\x1fSUBSCRIPTION_EVENT_TYPE_UPDATED\x10\x02\x12#\n" +
 	"\x1fSUBSCRIPTION_EVENT_TYPE_REMOVED\x10\x03\x12!\n" +
-	"\x1dSUBSCRIPTION_EVENT_TYPE_STAGE\x10\x042\x80\x19\n" +
-	"\tTargetLib\x12@\n" +
-	"\n" +
-	"GetVersion\x12\x16.google.protobuf.Empty\x1a\x1a.targetlib.VersionResponse\x12J\n" +
-	"\x0fGetCapabilities\x12\x16.google.protobuf.Empty\x1a\x1f.targetlib.CapabilitiesResponse\x12=\n" +
+	"\x1dSUBSCRIPTION_EVENT_TYPE_STAGE\x10\x042\x8d\x11\n" +
+	"\tTargetLib\x12=\n" +
 	"\x05Start\x12\x16.google.protobuf.Empty\x1a\x1c.targetlib.OperationResponse\x12?\n" +
 	"\aRestart\x12\x16.google.protobuf.Empty\x1a\x1c.targetlib.OperationResponse\x12<\n" +
 	"\x04Stop\x12\x16.google.protobuf.Empty\x1a\x1c.targetlib.OperationResponse\x12;\n" +
 	"\bGetState\x12\x16.google.protobuf.Empty\x1a\x17.targetlib.ServiceState\x12C\n" +
 	"\x0eSubscribeState\x12\x16.google.protobuf.Empty\x1a\x17.targetlib.ServiceState0\x01\x12>\n" +
 	"\rSubscribeLogs\x12\x16.google.protobuf.Empty\x1a\x13.targetlib.LogBatch0\x01\x12I\n" +
-	"\x10SubscribeTraffic\x12\x19.targetlib.TrafficRequest\x1a\x18.targetlib.TrafficStatus0\x01\x12J\n" +
-	"\x0eSelectOutbound\x12 .targetlib.SelectOutboundRequest\x1a\x16.google.protobuf.Empty\x12L\n" +
+	"\x10SubscribeTraffic\x12\x19.targetlib.TrafficRequest\x1a\x18.targetlib.TrafficStatus0\x01\x12L\n" +
 	"\x0fCloseConnection\x12!.targetlib.CloseConnectionRequest\x1a\x16.google.protobuf.Empty\x12E\n" +
 	"\x13CloseAllConnections\x12\x16.google.protobuf.Empty\x1a\x16.google.protobuf.Empty\x12H\n" +
 	"\x11ListSubscriptions\x12\x16.google.protobuf.Empty\x1a\x1b.targetlib.SubscriptionList\x12I\n" +
@@ -6723,28 +3303,21 @@ const file_api_TargetLib_targetlib_proto_rawDesc = "" +
 	"\x12RenameSubscription\x12$.targetlib.RenameSubscriptionRequest\x1a\x1b.targetlib.SubscriptionView\x12_\n" +
 	"\x16SetSubscriptionEnabled\x12(.targetlib.SetSubscriptionEnabledRequest\x1a\x1b.targetlib.SubscriptionView\x12k\n" +
 	"\x1cConfigureSubscriptionUpdates\x12..targetlib.ConfigureSubscriptionUpdatesRequest\x1a\x1b.targetlib.SubscriptionView\x12T\n" +
-	"\x12UpdateSubscription\x12\x19.targetlib.SubscriptionId\x1a#.targetlib.SubscriptionUpdateResult\x12D\n" +
-	"\x10GetRuntimeConfig\x12\x16.google.protobuf.Empty\x1a\x18.targetlib.RuntimeConfig\x12V\n" +
-	"\x13UpdateRuntimeConfig\x12%.targetlib.UpdateRuntimeConfigRequest\x1a\x18.targetlib.RuntimeConfig\x12L\n" +
-	"\fTestOutbound\x12\x1e.targetlib.TestOutboundRequest\x1a\x1c.targetlib.LatencyTestResult\x12P\n" +
-	"\rTestOutbounds\x12\x1f.targetlib.TestOutboundsRequest\x1a\x1c.targetlib.LatencyTestResult0\x01\x12Y\n" +
+	"\x12UpdateSubscription\x12\x19.targetlib.SubscriptionId\x1a#.targetlib.SubscriptionUpdateResult\x12Y\n" +
 	"\x14GetResolvedEndpoints\x12#.targetlib.ResolvedEndpointsRequest\x1a\x1c.targetlib.ResolvedEndpoints\x12U\n" +
-	"\x1bSubscribeSubscriptionEvents\x12\x16.google.protobuf.Empty\x1a\x1c.targetlib.SubscriptionEvent0\x01\x12>\n" +
-	"\tGetIpInfo\x12\x16.google.protobuf.Empty\x1a\x19.targetlib.IpInfoResponse\x12:\n" +
-	"\vGetNodePool\x12\x16.google.protobuf.Empty\x1a\x13.targetlib.NodePool\x12B\n" +
-	"\x0fGetRuntimeState\x12\x16.google.protobuf.Empty\x1a\x17.targetlib.RuntimeState\x12K\n" +
-	"\x16SubscribeRuntimeEvents\x12\x16.google.protobuf.Empty\x1a\x17.targetlib.RuntimeEvent0\x01\x12`\n" +
-	"\x1aSetPolicyAutomationEnabled\x12,.targetlib.SetPolicyAutomationEnabledRequest\x1a\x14.targetlib.Operation\x12K\n" +
-	"\x13ListServicePolicies\x12\x16.google.protobuf.Empty\x1a\x1c.targetlib.ServicePolicyList\x12R\n" +
-	"\x13UpsertServicePolicy\x12%.targetlib.UpsertServicePolicyRequest\x1a\x14.targetlib.Operation\x12R\n" +
-	"\x13DeleteServicePolicy\x12%.targetlib.DeleteServicePolicyRequest\x1a\x14.targetlib.Operation\x12N\n" +
-	"\x11SetNodePreference\x12#.targetlib.SetNodePreferenceRequest\x1a\x14.targetlib.Operation\x12\\\n" +
-	"\x18RequestServiceEvaluation\x12*.targetlib.RequestServiceEvaluationRequest\x1a\x14.targetlib.Operation\x12P\n" +
-	"\x15ApproveSwitchProposal\x12!.targetlib.ProposalCommandRequest\x1a\x14.targetlib.Operation\x12O\n" +
-	"\x14RejectSwitchProposal\x12!.targetlib.ProposalCommandRequest\x1a\x14.targetlib.Operation\x12R\n" +
-	"\x13ForceServiceBinding\x12%.targetlib.ForceServiceBindingRequest\x1a\x14.targetlib.Operation\x12D\n" +
-	"\fGetOperation\x12\x1e.targetlib.GetOperationRequest\x1a\x14.targetlib.Operation\x12L\n" +
-	"\x0eListOperations\x12 .targetlib.ListOperationsRequest\x1a\x18.targetlib.OperationListB:Z8github.com/loafman1120/TargetLib/api/TargetLib;targetlibb\x06proto3"
+	"\x1bSubscribeSubscriptionEvents\x12\x16.google.protobuf.Empty\x1a\x1c.targetlib.SubscriptionEvent0\x01\x12:\n" +
+	"\vGetNodePool\x12\x16.google.protobuf.Empty\x1a\x13.targetlib.NodePool\x12I\n" +
+	"\n" +
+	"SelectNode\x12\x1c.targetlib.SelectNodeRequest\x1a\x1d.targetlib.SelectNodeResponse\x12@\n" +
+	"\x0eGetProxyStatus\x12\x16.google.protobuf.Empty\x1a\x16.targetlib.ProxyStatus\x12D\n" +
+	"\x10GetRuntimeConfig\x12\x16.google.protobuf.Empty\x1a\x18.targetlib.RuntimeConfig\x12V\n" +
+	"\x13UpdateRuntimeConfig\x12%.targetlib.UpdateRuntimeConfigRequest\x1a\x18.targetlib.RuntimeConfig\x12>\n" +
+	"\tGetIpInfo\x12\x16.google.protobuf.Empty\x1a\x19.targetlib.IpInfoResponse\x12B\n" +
+	"\vUpsertRoute\x12\x1d.targetlib.UpsertRouteRequest\x1a\x14.targetlib.RouteInfo\x12D\n" +
+	"\vDeleteRoute\x12\x1d.targetlib.DeleteRouteRequest\x1a\x16.google.protobuf.Empty\x12:\n" +
+	"\n" +
+	"ListRoutes\x12\x16.google.protobuf.Empty\x1a\x14.targetlib.RouteList\x12S\n" +
+	"\x0fSelectRouteNode\x12!.targetlib.SelectRouteNodeRequest\x1a\x1d.targetlib.SelectNodeResponseB:Z8github.com/loafman1120/TargetLib/api/TargetLib;targetlibb\x06proto3"
 
 var (
 	file_api_TargetLib_targetlib_proto_rawDescOnce sync.Once
@@ -6758,245 +3331,149 @@ func file_api_TargetLib_targetlib_proto_rawDescGZIP() []byte {
 	return file_api_TargetLib_targetlib_proto_rawDescData
 }
 
-var file_api_TargetLib_targetlib_proto_enumTypes = make([]protoimpl.EnumInfo, 15)
-var file_api_TargetLib_targetlib_proto_msgTypes = make([]protoimpl.MessageInfo, 65)
+var file_api_TargetLib_targetlib_proto_enumTypes = make([]protoimpl.EnumInfo, 8)
+var file_api_TargetLib_targetlib_proto_msgTypes = make([]protoimpl.MessageInfo, 38)
 var file_api_TargetLib_targetlib_proto_goTypes = []any{
 	(LogLevel)(0),                               // 0: targetlib.LogLevel
 	(ServiceStateType)(0),                       // 1: targetlib.ServiceStateType
 	(ProxyMode)(0),                              // 2: targetlib.ProxyMode
 	(RouteMode)(0),                              // 3: targetlib.RouteMode
-	(ConfigApplyPhase)(0),                       // 4: targetlib.ConfigApplyPhase
-	(ProbeStage)(0),                             // 5: targetlib.ProbeStage
-	(RuntimeRecoveryState)(0),                   // 6: targetlib.RuntimeRecoveryState
-	(SwitchMode)(0),                             // 7: targetlib.SwitchMode
-	(OperationStatus)(0),                        // 8: targetlib.OperationStatus
-	(RuntimeEventType)(0),                       // 9: targetlib.RuntimeEventType
-	(LatencyTestStatus)(0),                      // 10: targetlib.LatencyTestStatus
-	(SubscriptionStatus)(0),                     // 11: targetlib.SubscriptionStatus
-	(SubscriptionUpdateStage)(0),                // 12: targetlib.SubscriptionUpdateStage
-	(ProfileNodePhase)(0),                       // 13: targetlib.ProfileNodePhase
-	(SubscriptionEventType)(0),                  // 14: targetlib.SubscriptionEventType
-	(*LogMessage)(nil),                          // 15: targetlib.LogMessage
-	(*LogBatch)(nil),                            // 16: targetlib.LogBatch
-	(*SelectOutboundRequest)(nil),               // 17: targetlib.SelectOutboundRequest
-	(*CloseConnectionRequest)(nil),              // 18: targetlib.CloseConnectionRequest
-	(*VersionResponse)(nil),                     // 19: targetlib.VersionResponse
-	(*CapabilitiesResponse)(nil),                // 20: targetlib.CapabilitiesResponse
-	(*OperationResponse)(nil),                   // 21: targetlib.OperationResponse
-	(*ServiceState)(nil),                        // 22: targetlib.ServiceState
-	(*TrafficRequest)(nil),                      // 23: targetlib.TrafficRequest
-	(*TrafficStatus)(nil),                       // 24: targetlib.TrafficStatus
-	(*SubscriptionId)(nil),                      // 25: targetlib.SubscriptionId
-	(*AddSubscriptionRequest)(nil),              // 26: targetlib.AddSubscriptionRequest
-	(*RenameSubscriptionRequest)(nil),           // 27: targetlib.RenameSubscriptionRequest
-	(*SetSubscriptionEnabledRequest)(nil),       // 28: targetlib.SetSubscriptionEnabledRequest
-	(*ConfigureSubscriptionUpdatesRequest)(nil), // 29: targetlib.ConfigureSubscriptionUpdatesRequest
-	(*ResolvedEndpointsRequest)(nil),            // 30: targetlib.ResolvedEndpointsRequest
-	(*SubscriptionList)(nil),                    // 31: targetlib.SubscriptionList
-	(*SubscriptionView)(nil),                    // 32: targetlib.SubscriptionView
-	(*ProfileView)(nil),                         // 33: targetlib.ProfileView
-	(*ProfileNode)(nil),                         // 34: targetlib.ProfileNode
-	(*SubscriptionUpdateResult)(nil),            // 35: targetlib.SubscriptionUpdateResult
-	(*RuntimeSettings)(nil),                     // 36: targetlib.RuntimeSettings
-	(*RuntimeConfig)(nil),                       // 37: targetlib.RuntimeConfig
-	(*UpdateRuntimeConfigRequest)(nil),          // 38: targetlib.UpdateRuntimeConfigRequest
-	(*SelectorConfig)(nil),                      // 39: targetlib.SelectorConfig
-	(*ServiceRoute)(nil),                        // 40: targetlib.ServiceRoute
-	(*ServiceBinding)(nil),                      // 41: targetlib.ServiceBinding
-	(*RuntimeModel)(nil),                        // 42: targetlib.RuntimeModel
-	(*NodePool)(nil),                            // 43: targetlib.NodePool
-	(*SelectorState)(nil),                       // 44: targetlib.SelectorState
-	(*ServiceRouteState)(nil),                   // 45: targetlib.ServiceRouteState
-	(*ServiceBindingState)(nil),                 // 46: targetlib.ServiceBindingState
-	(*ServiceProbe)(nil),                        // 47: targetlib.ServiceProbe
-	(*ProbeResult)(nil),                         // 48: targetlib.ProbeResult
-	(*EvaluateServiceRequest)(nil),              // 49: targetlib.EvaluateServiceRequest
-	(*ServiceSelectionPolicy)(nil),              // 50: targetlib.ServiceSelectionPolicy
-	(*ServiceCandidate)(nil),                    // 51: targetlib.ServiceCandidate
-	(*ServiceEvaluation)(nil),                   // 52: targetlib.ServiceEvaluation
-	(*RuntimeOrchestrationState)(nil),           // 53: targetlib.RuntimeOrchestrationState
-	(*SwitchPolicy)(nil),                        // 54: targetlib.SwitchPolicy
-	(*ServicePolicy)(nil),                       // 55: targetlib.ServicePolicy
-	(*ServicePolicyList)(nil),                   // 56: targetlib.ServicePolicyList
-	(*NodePreference)(nil),                      // 57: targetlib.NodePreference
-	(*SwitchProposal)(nil),                      // 58: targetlib.SwitchProposal
-	(*Operation)(nil),                           // 59: targetlib.Operation
-	(*SchedulerTask)(nil),                       // 60: targetlib.SchedulerTask
-	(*OperationList)(nil),                       // 61: targetlib.OperationList
-	(*SetPolicyAutomationEnabledRequest)(nil),   // 62: targetlib.SetPolicyAutomationEnabledRequest
-	(*UpsertServicePolicyRequest)(nil),          // 63: targetlib.UpsertServicePolicyRequest
-	(*DeleteServicePolicyRequest)(nil),          // 64: targetlib.DeleteServicePolicyRequest
-	(*SetNodePreferenceRequest)(nil),            // 65: targetlib.SetNodePreferenceRequest
-	(*RequestServiceEvaluationRequest)(nil),     // 66: targetlib.RequestServiceEvaluationRequest
-	(*ProposalCommandRequest)(nil),              // 67: targetlib.ProposalCommandRequest
-	(*ForceServiceBindingRequest)(nil),          // 68: targetlib.ForceServiceBindingRequest
-	(*GetOperationRequest)(nil),                 // 69: targetlib.GetOperationRequest
-	(*ListOperationsRequest)(nil),               // 70: targetlib.ListOperationsRequest
-	(*RuntimeState)(nil),                        // 71: targetlib.RuntimeState
-	(*RuntimeEvent)(nil),                        // 72: targetlib.RuntimeEvent
-	(*TestOutboundRequest)(nil),                 // 73: targetlib.TestOutboundRequest
-	(*TestOutboundsRequest)(nil),                // 74: targetlib.TestOutboundsRequest
-	(*LatencyTestResult)(nil),                   // 75: targetlib.LatencyTestResult
-	(*ResolvedEndpoints)(nil),                   // 76: targetlib.ResolvedEndpoints
-	(*IpInfoResponse)(nil),                      // 77: targetlib.IpInfoResponse
-	(*SubscriptionEvent)(nil),                   // 78: targetlib.SubscriptionEvent
-	nil,                                         // 79: targetlib.AddSubscriptionRequest.HeadersEntry
-	(*emptypb.Empty)(nil),                       // 80: google.protobuf.Empty
+	(SubscriptionStatus)(0),                     // 4: targetlib.SubscriptionStatus
+	(SubscriptionUpdateStage)(0),                // 5: targetlib.SubscriptionUpdateStage
+	(ProfileNodePhase)(0),                       // 6: targetlib.ProfileNodePhase
+	(SubscriptionEventType)(0),                  // 7: targetlib.SubscriptionEventType
+	(*LogMessage)(nil),                          // 8: targetlib.LogMessage
+	(*LogBatch)(nil),                            // 9: targetlib.LogBatch
+	(*CloseConnectionRequest)(nil),              // 10: targetlib.CloseConnectionRequest
+	(*OperationResponse)(nil),                   // 11: targetlib.OperationResponse
+	(*ServiceState)(nil),                        // 12: targetlib.ServiceState
+	(*TrafficRequest)(nil),                      // 13: targetlib.TrafficRequest
+	(*TrafficStatus)(nil),                       // 14: targetlib.TrafficStatus
+	(*SubscriptionId)(nil),                      // 15: targetlib.SubscriptionId
+	(*AddSubscriptionRequest)(nil),              // 16: targetlib.AddSubscriptionRequest
+	(*RenameSubscriptionRequest)(nil),           // 17: targetlib.RenameSubscriptionRequest
+	(*SetSubscriptionEnabledRequest)(nil),       // 18: targetlib.SetSubscriptionEnabledRequest
+	(*ConfigureSubscriptionUpdatesRequest)(nil), // 19: targetlib.ConfigureSubscriptionUpdatesRequest
+	(*ResolvedEndpointsRequest)(nil),            // 20: targetlib.ResolvedEndpointsRequest
+	(*SubscriptionList)(nil),                    // 21: targetlib.SubscriptionList
+	(*SubscriptionView)(nil),                    // 22: targetlib.SubscriptionView
+	(*ProfileView)(nil),                         // 23: targetlib.ProfileView
+	(*ProfileNode)(nil),                         // 24: targetlib.ProfileNode
+	(*SubscriptionUpdateResult)(nil),            // 25: targetlib.SubscriptionUpdateResult
+	(*RuntimeSettings)(nil),                     // 26: targetlib.RuntimeSettings
+	(*RuntimeConfig)(nil),                       // 27: targetlib.RuntimeConfig
+	(*UpdateRuntimeConfigRequest)(nil),          // 28: targetlib.UpdateRuntimeConfigRequest
+	(*SelectorConfig)(nil),                      // 29: targetlib.SelectorConfig
+	(*ServiceRoute)(nil),                        // 30: targetlib.ServiceRoute
+	(*ServiceBinding)(nil),                      // 31: targetlib.ServiceBinding
+	(*RuntimeModel)(nil),                        // 32: targetlib.RuntimeModel
+	(*NodePool)(nil),                            // 33: targetlib.NodePool
+	(*SelectNodeRequest)(nil),                   // 34: targetlib.SelectNodeRequest
+	(*SelectNodeResponse)(nil),                  // 35: targetlib.SelectNodeResponse
+	(*ProxyStatus)(nil),                         // 36: targetlib.ProxyStatus
+	(*UpsertRouteRequest)(nil),                  // 37: targetlib.UpsertRouteRequest
+	(*RouteInfo)(nil),                           // 38: targetlib.RouteInfo
+	(*DeleteRouteRequest)(nil),                  // 39: targetlib.DeleteRouteRequest
+	(*RouteList)(nil),                           // 40: targetlib.RouteList
+	(*SelectRouteNodeRequest)(nil),              // 41: targetlib.SelectRouteNodeRequest
+	(*ResolvedEndpoints)(nil),                   // 42: targetlib.ResolvedEndpoints
+	(*IpInfoResponse)(nil),                      // 43: targetlib.IpInfoResponse
+	(*SubscriptionEvent)(nil),                   // 44: targetlib.SubscriptionEvent
+	nil,                                         // 45: targetlib.AddSubscriptionRequest.HeadersEntry
+	(*emptypb.Empty)(nil),                       // 46: google.protobuf.Empty
 }
 var file_api_TargetLib_targetlib_proto_depIdxs = []int32{
-	0,   // 0: targetlib.LogMessage.level:type_name -> targetlib.LogLevel
-	15,  // 1: targetlib.LogBatch.messages:type_name -> targetlib.LogMessage
-	22,  // 2: targetlib.OperationResponse.state:type_name -> targetlib.ServiceState
-	1,   // 3: targetlib.ServiceState.state:type_name -> targetlib.ServiceStateType
-	79,  // 4: targetlib.AddSubscriptionRequest.headers:type_name -> targetlib.AddSubscriptionRequest.HeadersEntry
-	32,  // 5: targetlib.SubscriptionList.subscriptions:type_name -> targetlib.SubscriptionView
-	11,  // 6: targetlib.SubscriptionView.status:type_name -> targetlib.SubscriptionStatus
-	12,  // 7: targetlib.SubscriptionView.stage:type_name -> targetlib.SubscriptionUpdateStage
-	33,  // 8: targetlib.SubscriptionView.profile:type_name -> targetlib.ProfileView
-	34,  // 9: targetlib.ProfileView.nodes:type_name -> targetlib.ProfileNode
-	13,  // 10: targetlib.ProfileNode.phase:type_name -> targetlib.ProfileNodePhase
-	32,  // 11: targetlib.SubscriptionUpdateResult.subscription:type_name -> targetlib.SubscriptionView
-	2,   // 12: targetlib.RuntimeSettings.proxy_mode:type_name -> targetlib.ProxyMode
-	3,   // 13: targetlib.RuntimeSettings.route_mode:type_name -> targetlib.RouteMode
-	36,  // 14: targetlib.RuntimeConfig.settings:type_name -> targetlib.RuntimeSettings
-	39,  // 15: targetlib.RuntimeConfig.selectors:type_name -> targetlib.SelectorConfig
-	40,  // 16: targetlib.RuntimeConfig.service_routes:type_name -> targetlib.ServiceRoute
-	41,  // 17: targetlib.RuntimeConfig.service_bindings:type_name -> targetlib.ServiceBinding
-	36,  // 18: targetlib.UpdateRuntimeConfigRequest.settings:type_name -> targetlib.RuntimeSettings
-	42,  // 19: targetlib.UpdateRuntimeConfigRequest.model:type_name -> targetlib.RuntimeModel
-	39,  // 20: targetlib.RuntimeModel.selectors:type_name -> targetlib.SelectorConfig
-	40,  // 21: targetlib.RuntimeModel.service_routes:type_name -> targetlib.ServiceRoute
-	41,  // 22: targetlib.RuntimeModel.service_bindings:type_name -> targetlib.ServiceBinding
-	34,  // 23: targetlib.NodePool.nodes:type_name -> targetlib.ProfileNode
-	39,  // 24: targetlib.SelectorState.desired:type_name -> targetlib.SelectorConfig
-	40,  // 25: targetlib.ServiceRouteState.desired:type_name -> targetlib.ServiceRoute
-	41,  // 26: targetlib.ServiceBindingState.desired:type_name -> targetlib.ServiceBinding
-	5,   // 27: targetlib.ProbeResult.stage:type_name -> targetlib.ProbeStage
-	48,  // 28: targetlib.ServiceCandidate.latest:type_name -> targetlib.ProbeResult
-	51,  // 29: targetlib.ServiceEvaluation.candidates:type_name -> targetlib.ServiceCandidate
-	47,  // 30: targetlib.RuntimeOrchestrationState.probes:type_name -> targetlib.ServiceProbe
-	48,  // 31: targetlib.RuntimeOrchestrationState.results:type_name -> targetlib.ProbeResult
-	50,  // 32: targetlib.RuntimeOrchestrationState.selection_policies:type_name -> targetlib.ServiceSelectionPolicy
-	6,   // 33: targetlib.RuntimeOrchestrationState.recovery_state:type_name -> targetlib.RuntimeRecoveryState
-	55,  // 34: targetlib.RuntimeOrchestrationState.policies:type_name -> targetlib.ServicePolicy
-	58,  // 35: targetlib.RuntimeOrchestrationState.proposals:type_name -> targetlib.SwitchProposal
-	59,  // 36: targetlib.RuntimeOrchestrationState.operations:type_name -> targetlib.Operation
-	57,  // 37: targetlib.RuntimeOrchestrationState.node_preferences:type_name -> targetlib.NodePreference
-	60,  // 38: targetlib.RuntimeOrchestrationState.tasks:type_name -> targetlib.SchedulerTask
-	7,   // 39: targetlib.SwitchPolicy.mode:type_name -> targetlib.SwitchMode
-	47,  // 40: targetlib.ServicePolicy.probes:type_name -> targetlib.ServiceProbe
-	50,  // 41: targetlib.ServicePolicy.selection:type_name -> targetlib.ServiceSelectionPolicy
-	54,  // 42: targetlib.ServicePolicy.switch_policy:type_name -> targetlib.SwitchPolicy
-	55,  // 43: targetlib.ServicePolicyList.policies:type_name -> targetlib.ServicePolicy
-	51,  // 44: targetlib.SwitchProposal.candidates:type_name -> targetlib.ServiceCandidate
-	8,   // 45: targetlib.Operation.status:type_name -> targetlib.OperationStatus
-	59,  // 46: targetlib.OperationList.operations:type_name -> targetlib.Operation
-	55,  // 47: targetlib.UpsertServicePolicyRequest.policy:type_name -> targetlib.ServicePolicy
-	57,  // 48: targetlib.SetNodePreferenceRequest.preference:type_name -> targetlib.NodePreference
-	4,   // 49: targetlib.RuntimeState.phase:type_name -> targetlib.ConfigApplyPhase
-	44,  // 50: targetlib.RuntimeState.selectors:type_name -> targetlib.SelectorState
-	45,  // 51: targetlib.RuntimeState.service_routes:type_name -> targetlib.ServiceRouteState
-	46,  // 52: targetlib.RuntimeState.service_bindings:type_name -> targetlib.ServiceBindingState
-	6,   // 53: targetlib.RuntimeState.recovery_state:type_name -> targetlib.RuntimeRecoveryState
-	55,  // 54: targetlib.RuntimeState.policies:type_name -> targetlib.ServicePolicy
-	58,  // 55: targetlib.RuntimeState.proposals:type_name -> targetlib.SwitchProposal
-	59,  // 56: targetlib.RuntimeState.operations:type_name -> targetlib.Operation
-	57,  // 57: targetlib.RuntimeState.node_preferences:type_name -> targetlib.NodePreference
-	60,  // 58: targetlib.RuntimeState.tasks:type_name -> targetlib.SchedulerTask
-	48,  // 59: targetlib.RuntimeState.quality_history:type_name -> targetlib.ProbeResult
-	9,   // 60: targetlib.RuntimeEvent.type:type_name -> targetlib.RuntimeEventType
-	71,  // 61: targetlib.RuntimeEvent.state:type_name -> targetlib.RuntimeState
-	48,  // 62: targetlib.RuntimeEvent.probe:type_name -> targetlib.ProbeResult
-	10,  // 63: targetlib.LatencyTestResult.status:type_name -> targetlib.LatencyTestStatus
-	14,  // 64: targetlib.SubscriptionEvent.type:type_name -> targetlib.SubscriptionEventType
-	32,  // 65: targetlib.SubscriptionEvent.subscription:type_name -> targetlib.SubscriptionView
-	80,  // 66: targetlib.TargetLib.GetVersion:input_type -> google.protobuf.Empty
-	80,  // 67: targetlib.TargetLib.GetCapabilities:input_type -> google.protobuf.Empty
-	80,  // 68: targetlib.TargetLib.Start:input_type -> google.protobuf.Empty
-	80,  // 69: targetlib.TargetLib.Restart:input_type -> google.protobuf.Empty
-	80,  // 70: targetlib.TargetLib.Stop:input_type -> google.protobuf.Empty
-	80,  // 71: targetlib.TargetLib.GetState:input_type -> google.protobuf.Empty
-	80,  // 72: targetlib.TargetLib.SubscribeState:input_type -> google.protobuf.Empty
-	80,  // 73: targetlib.TargetLib.SubscribeLogs:input_type -> google.protobuf.Empty
-	23,  // 74: targetlib.TargetLib.SubscribeTraffic:input_type -> targetlib.TrafficRequest
-	17,  // 75: targetlib.TargetLib.SelectOutbound:input_type -> targetlib.SelectOutboundRequest
-	18,  // 76: targetlib.TargetLib.CloseConnection:input_type -> targetlib.CloseConnectionRequest
-	80,  // 77: targetlib.TargetLib.CloseAllConnections:input_type -> google.protobuf.Empty
-	80,  // 78: targetlib.TargetLib.ListSubscriptions:input_type -> google.protobuf.Empty
-	25,  // 79: targetlib.TargetLib.GetSubscription:input_type -> targetlib.SubscriptionId
-	26,  // 80: targetlib.TargetLib.AddSubscription:input_type -> targetlib.AddSubscriptionRequest
-	25,  // 81: targetlib.TargetLib.RemoveSubscription:input_type -> targetlib.SubscriptionId
-	27,  // 82: targetlib.TargetLib.RenameSubscription:input_type -> targetlib.RenameSubscriptionRequest
-	28,  // 83: targetlib.TargetLib.SetSubscriptionEnabled:input_type -> targetlib.SetSubscriptionEnabledRequest
-	29,  // 84: targetlib.TargetLib.ConfigureSubscriptionUpdates:input_type -> targetlib.ConfigureSubscriptionUpdatesRequest
-	25,  // 85: targetlib.TargetLib.UpdateSubscription:input_type -> targetlib.SubscriptionId
-	80,  // 86: targetlib.TargetLib.GetRuntimeConfig:input_type -> google.protobuf.Empty
-	38,  // 87: targetlib.TargetLib.UpdateRuntimeConfig:input_type -> targetlib.UpdateRuntimeConfigRequest
-	73,  // 88: targetlib.TargetLib.TestOutbound:input_type -> targetlib.TestOutboundRequest
-	74,  // 89: targetlib.TargetLib.TestOutbounds:input_type -> targetlib.TestOutboundsRequest
-	30,  // 90: targetlib.TargetLib.GetResolvedEndpoints:input_type -> targetlib.ResolvedEndpointsRequest
-	80,  // 91: targetlib.TargetLib.SubscribeSubscriptionEvents:input_type -> google.protobuf.Empty
-	80,  // 92: targetlib.TargetLib.GetIpInfo:input_type -> google.protobuf.Empty
-	80,  // 93: targetlib.TargetLib.GetNodePool:input_type -> google.protobuf.Empty
-	80,  // 94: targetlib.TargetLib.GetRuntimeState:input_type -> google.protobuf.Empty
-	80,  // 95: targetlib.TargetLib.SubscribeRuntimeEvents:input_type -> google.protobuf.Empty
-	62,  // 96: targetlib.TargetLib.SetPolicyAutomationEnabled:input_type -> targetlib.SetPolicyAutomationEnabledRequest
-	80,  // 97: targetlib.TargetLib.ListServicePolicies:input_type -> google.protobuf.Empty
-	63,  // 98: targetlib.TargetLib.UpsertServicePolicy:input_type -> targetlib.UpsertServicePolicyRequest
-	64,  // 99: targetlib.TargetLib.DeleteServicePolicy:input_type -> targetlib.DeleteServicePolicyRequest
-	65,  // 100: targetlib.TargetLib.SetNodePreference:input_type -> targetlib.SetNodePreferenceRequest
-	66,  // 101: targetlib.TargetLib.RequestServiceEvaluation:input_type -> targetlib.RequestServiceEvaluationRequest
-	67,  // 102: targetlib.TargetLib.ApproveSwitchProposal:input_type -> targetlib.ProposalCommandRequest
-	67,  // 103: targetlib.TargetLib.RejectSwitchProposal:input_type -> targetlib.ProposalCommandRequest
-	68,  // 104: targetlib.TargetLib.ForceServiceBinding:input_type -> targetlib.ForceServiceBindingRequest
-	69,  // 105: targetlib.TargetLib.GetOperation:input_type -> targetlib.GetOperationRequest
-	70,  // 106: targetlib.TargetLib.ListOperations:input_type -> targetlib.ListOperationsRequest
-	19,  // 107: targetlib.TargetLib.GetVersion:output_type -> targetlib.VersionResponse
-	20,  // 108: targetlib.TargetLib.GetCapabilities:output_type -> targetlib.CapabilitiesResponse
-	21,  // 109: targetlib.TargetLib.Start:output_type -> targetlib.OperationResponse
-	21,  // 110: targetlib.TargetLib.Restart:output_type -> targetlib.OperationResponse
-	21,  // 111: targetlib.TargetLib.Stop:output_type -> targetlib.OperationResponse
-	22,  // 112: targetlib.TargetLib.GetState:output_type -> targetlib.ServiceState
-	22,  // 113: targetlib.TargetLib.SubscribeState:output_type -> targetlib.ServiceState
-	16,  // 114: targetlib.TargetLib.SubscribeLogs:output_type -> targetlib.LogBatch
-	24,  // 115: targetlib.TargetLib.SubscribeTraffic:output_type -> targetlib.TrafficStatus
-	80,  // 116: targetlib.TargetLib.SelectOutbound:output_type -> google.protobuf.Empty
-	80,  // 117: targetlib.TargetLib.CloseConnection:output_type -> google.protobuf.Empty
-	80,  // 118: targetlib.TargetLib.CloseAllConnections:output_type -> google.protobuf.Empty
-	31,  // 119: targetlib.TargetLib.ListSubscriptions:output_type -> targetlib.SubscriptionList
-	32,  // 120: targetlib.TargetLib.GetSubscription:output_type -> targetlib.SubscriptionView
-	32,  // 121: targetlib.TargetLib.AddSubscription:output_type -> targetlib.SubscriptionView
-	80,  // 122: targetlib.TargetLib.RemoveSubscription:output_type -> google.protobuf.Empty
-	32,  // 123: targetlib.TargetLib.RenameSubscription:output_type -> targetlib.SubscriptionView
-	32,  // 124: targetlib.TargetLib.SetSubscriptionEnabled:output_type -> targetlib.SubscriptionView
-	32,  // 125: targetlib.TargetLib.ConfigureSubscriptionUpdates:output_type -> targetlib.SubscriptionView
-	35,  // 126: targetlib.TargetLib.UpdateSubscription:output_type -> targetlib.SubscriptionUpdateResult
-	37,  // 127: targetlib.TargetLib.GetRuntimeConfig:output_type -> targetlib.RuntimeConfig
-	37,  // 128: targetlib.TargetLib.UpdateRuntimeConfig:output_type -> targetlib.RuntimeConfig
-	75,  // 129: targetlib.TargetLib.TestOutbound:output_type -> targetlib.LatencyTestResult
-	75,  // 130: targetlib.TargetLib.TestOutbounds:output_type -> targetlib.LatencyTestResult
-	76,  // 131: targetlib.TargetLib.GetResolvedEndpoints:output_type -> targetlib.ResolvedEndpoints
-	78,  // 132: targetlib.TargetLib.SubscribeSubscriptionEvents:output_type -> targetlib.SubscriptionEvent
-	77,  // 133: targetlib.TargetLib.GetIpInfo:output_type -> targetlib.IpInfoResponse
-	43,  // 134: targetlib.TargetLib.GetNodePool:output_type -> targetlib.NodePool
-	71,  // 135: targetlib.TargetLib.GetRuntimeState:output_type -> targetlib.RuntimeState
-	72,  // 136: targetlib.TargetLib.SubscribeRuntimeEvents:output_type -> targetlib.RuntimeEvent
-	59,  // 137: targetlib.TargetLib.SetPolicyAutomationEnabled:output_type -> targetlib.Operation
-	56,  // 138: targetlib.TargetLib.ListServicePolicies:output_type -> targetlib.ServicePolicyList
-	59,  // 139: targetlib.TargetLib.UpsertServicePolicy:output_type -> targetlib.Operation
-	59,  // 140: targetlib.TargetLib.DeleteServicePolicy:output_type -> targetlib.Operation
-	59,  // 141: targetlib.TargetLib.SetNodePreference:output_type -> targetlib.Operation
-	59,  // 142: targetlib.TargetLib.RequestServiceEvaluation:output_type -> targetlib.Operation
-	59,  // 143: targetlib.TargetLib.ApproveSwitchProposal:output_type -> targetlib.Operation
-	59,  // 144: targetlib.TargetLib.RejectSwitchProposal:output_type -> targetlib.Operation
-	59,  // 145: targetlib.TargetLib.ForceServiceBinding:output_type -> targetlib.Operation
-	59,  // 146: targetlib.TargetLib.GetOperation:output_type -> targetlib.Operation
-	61,  // 147: targetlib.TargetLib.ListOperations:output_type -> targetlib.OperationList
-	107, // [107:148] is the sub-list for method output_type
-	66,  // [66:107] is the sub-list for method input_type
-	66,  // [66:66] is the sub-list for extension type_name
-	66,  // [66:66] is the sub-list for extension extendee
-	0,   // [0:66] is the sub-list for field type_name
+	0,  // 0: targetlib.LogMessage.level:type_name -> targetlib.LogLevel
+	8,  // 1: targetlib.LogBatch.messages:type_name -> targetlib.LogMessage
+	12, // 2: targetlib.OperationResponse.state:type_name -> targetlib.ServiceState
+	1,  // 3: targetlib.ServiceState.state:type_name -> targetlib.ServiceStateType
+	45, // 4: targetlib.AddSubscriptionRequest.headers:type_name -> targetlib.AddSubscriptionRequest.HeadersEntry
+	22, // 5: targetlib.SubscriptionList.subscriptions:type_name -> targetlib.SubscriptionView
+	4,  // 6: targetlib.SubscriptionView.status:type_name -> targetlib.SubscriptionStatus
+	5,  // 7: targetlib.SubscriptionView.stage:type_name -> targetlib.SubscriptionUpdateStage
+	23, // 8: targetlib.SubscriptionView.profile:type_name -> targetlib.ProfileView
+	24, // 9: targetlib.ProfileView.nodes:type_name -> targetlib.ProfileNode
+	6,  // 10: targetlib.ProfileNode.phase:type_name -> targetlib.ProfileNodePhase
+	22, // 11: targetlib.SubscriptionUpdateResult.subscription:type_name -> targetlib.SubscriptionView
+	2,  // 12: targetlib.RuntimeSettings.proxy_mode:type_name -> targetlib.ProxyMode
+	3,  // 13: targetlib.RuntimeSettings.route_mode:type_name -> targetlib.RouteMode
+	26, // 14: targetlib.RuntimeConfig.settings:type_name -> targetlib.RuntimeSettings
+	29, // 15: targetlib.RuntimeConfig.selectors:type_name -> targetlib.SelectorConfig
+	30, // 16: targetlib.RuntimeConfig.service_routes:type_name -> targetlib.ServiceRoute
+	31, // 17: targetlib.RuntimeConfig.service_bindings:type_name -> targetlib.ServiceBinding
+	26, // 18: targetlib.UpdateRuntimeConfigRequest.settings:type_name -> targetlib.RuntimeSettings
+	29, // 19: targetlib.RuntimeModel.selectors:type_name -> targetlib.SelectorConfig
+	30, // 20: targetlib.RuntimeModel.service_routes:type_name -> targetlib.ServiceRoute
+	31, // 21: targetlib.RuntimeModel.service_bindings:type_name -> targetlib.ServiceBinding
+	24, // 22: targetlib.NodePool.nodes:type_name -> targetlib.ProfileNode
+	1,  // 23: targetlib.ProxyStatus.service_state:type_name -> targetlib.ServiceStateType
+	38, // 24: targetlib.RouteList.routes:type_name -> targetlib.RouteInfo
+	38, // 25: targetlib.RouteList.default_route:type_name -> targetlib.RouteInfo
+	7,  // 26: targetlib.SubscriptionEvent.type:type_name -> targetlib.SubscriptionEventType
+	22, // 27: targetlib.SubscriptionEvent.subscription:type_name -> targetlib.SubscriptionView
+	46, // 28: targetlib.TargetLib.Start:input_type -> google.protobuf.Empty
+	46, // 29: targetlib.TargetLib.Restart:input_type -> google.protobuf.Empty
+	46, // 30: targetlib.TargetLib.Stop:input_type -> google.protobuf.Empty
+	46, // 31: targetlib.TargetLib.GetState:input_type -> google.protobuf.Empty
+	46, // 32: targetlib.TargetLib.SubscribeState:input_type -> google.protobuf.Empty
+	46, // 33: targetlib.TargetLib.SubscribeLogs:input_type -> google.protobuf.Empty
+	13, // 34: targetlib.TargetLib.SubscribeTraffic:input_type -> targetlib.TrafficRequest
+	10, // 35: targetlib.TargetLib.CloseConnection:input_type -> targetlib.CloseConnectionRequest
+	46, // 36: targetlib.TargetLib.CloseAllConnections:input_type -> google.protobuf.Empty
+	46, // 37: targetlib.TargetLib.ListSubscriptions:input_type -> google.protobuf.Empty
+	15, // 38: targetlib.TargetLib.GetSubscription:input_type -> targetlib.SubscriptionId
+	16, // 39: targetlib.TargetLib.AddSubscription:input_type -> targetlib.AddSubscriptionRequest
+	15, // 40: targetlib.TargetLib.RemoveSubscription:input_type -> targetlib.SubscriptionId
+	17, // 41: targetlib.TargetLib.RenameSubscription:input_type -> targetlib.RenameSubscriptionRequest
+	18, // 42: targetlib.TargetLib.SetSubscriptionEnabled:input_type -> targetlib.SetSubscriptionEnabledRequest
+	19, // 43: targetlib.TargetLib.ConfigureSubscriptionUpdates:input_type -> targetlib.ConfigureSubscriptionUpdatesRequest
+	15, // 44: targetlib.TargetLib.UpdateSubscription:input_type -> targetlib.SubscriptionId
+	20, // 45: targetlib.TargetLib.GetResolvedEndpoints:input_type -> targetlib.ResolvedEndpointsRequest
+	46, // 46: targetlib.TargetLib.SubscribeSubscriptionEvents:input_type -> google.protobuf.Empty
+	46, // 47: targetlib.TargetLib.GetNodePool:input_type -> google.protobuf.Empty
+	34, // 48: targetlib.TargetLib.SelectNode:input_type -> targetlib.SelectNodeRequest
+	46, // 49: targetlib.TargetLib.GetProxyStatus:input_type -> google.protobuf.Empty
+	46, // 50: targetlib.TargetLib.GetRuntimeConfig:input_type -> google.protobuf.Empty
+	28, // 51: targetlib.TargetLib.UpdateRuntimeConfig:input_type -> targetlib.UpdateRuntimeConfigRequest
+	46, // 52: targetlib.TargetLib.GetIpInfo:input_type -> google.protobuf.Empty
+	37, // 53: targetlib.TargetLib.UpsertRoute:input_type -> targetlib.UpsertRouteRequest
+	39, // 54: targetlib.TargetLib.DeleteRoute:input_type -> targetlib.DeleteRouteRequest
+	46, // 55: targetlib.TargetLib.ListRoutes:input_type -> google.protobuf.Empty
+	41, // 56: targetlib.TargetLib.SelectRouteNode:input_type -> targetlib.SelectRouteNodeRequest
+	11, // 57: targetlib.TargetLib.Start:output_type -> targetlib.OperationResponse
+	11, // 58: targetlib.TargetLib.Restart:output_type -> targetlib.OperationResponse
+	11, // 59: targetlib.TargetLib.Stop:output_type -> targetlib.OperationResponse
+	12, // 60: targetlib.TargetLib.GetState:output_type -> targetlib.ServiceState
+	12, // 61: targetlib.TargetLib.SubscribeState:output_type -> targetlib.ServiceState
+	9,  // 62: targetlib.TargetLib.SubscribeLogs:output_type -> targetlib.LogBatch
+	14, // 63: targetlib.TargetLib.SubscribeTraffic:output_type -> targetlib.TrafficStatus
+	46, // 64: targetlib.TargetLib.CloseConnection:output_type -> google.protobuf.Empty
+	46, // 65: targetlib.TargetLib.CloseAllConnections:output_type -> google.protobuf.Empty
+	21, // 66: targetlib.TargetLib.ListSubscriptions:output_type -> targetlib.SubscriptionList
+	22, // 67: targetlib.TargetLib.GetSubscription:output_type -> targetlib.SubscriptionView
+	22, // 68: targetlib.TargetLib.AddSubscription:output_type -> targetlib.SubscriptionView
+	46, // 69: targetlib.TargetLib.RemoveSubscription:output_type -> google.protobuf.Empty
+	22, // 70: targetlib.TargetLib.RenameSubscription:output_type -> targetlib.SubscriptionView
+	22, // 71: targetlib.TargetLib.SetSubscriptionEnabled:output_type -> targetlib.SubscriptionView
+	22, // 72: targetlib.TargetLib.ConfigureSubscriptionUpdates:output_type -> targetlib.SubscriptionView
+	25, // 73: targetlib.TargetLib.UpdateSubscription:output_type -> targetlib.SubscriptionUpdateResult
+	42, // 74: targetlib.TargetLib.GetResolvedEndpoints:output_type -> targetlib.ResolvedEndpoints
+	44, // 75: targetlib.TargetLib.SubscribeSubscriptionEvents:output_type -> targetlib.SubscriptionEvent
+	33, // 76: targetlib.TargetLib.GetNodePool:output_type -> targetlib.NodePool
+	35, // 77: targetlib.TargetLib.SelectNode:output_type -> targetlib.SelectNodeResponse
+	36, // 78: targetlib.TargetLib.GetProxyStatus:output_type -> targetlib.ProxyStatus
+	27, // 79: targetlib.TargetLib.GetRuntimeConfig:output_type -> targetlib.RuntimeConfig
+	27, // 80: targetlib.TargetLib.UpdateRuntimeConfig:output_type -> targetlib.RuntimeConfig
+	43, // 81: targetlib.TargetLib.GetIpInfo:output_type -> targetlib.IpInfoResponse
+	38, // 82: targetlib.TargetLib.UpsertRoute:output_type -> targetlib.RouteInfo
+	46, // 83: targetlib.TargetLib.DeleteRoute:output_type -> google.protobuf.Empty
+	40, // 84: targetlib.TargetLib.ListRoutes:output_type -> targetlib.RouteList
+	35, // 85: targetlib.TargetLib.SelectRouteNode:output_type -> targetlib.SelectNodeResponse
+	57, // [57:86] is the sub-list for method output_type
+	28, // [28:57] is the sub-list for method input_type
+	28, // [28:28] is the sub-list for extension type_name
+	28, // [28:28] is the sub-list for extension extendee
+	0,  // [0:28] is the sub-list for field type_name
 }
 
 func init() { file_api_TargetLib_targetlib_proto_init() }
@@ -7004,15 +3481,14 @@ func file_api_TargetLib_targetlib_proto_init() {
 	if File_api_TargetLib_targetlib_proto != nil {
 		return
 	}
-	file_api_TargetLib_targetlib_proto_msgTypes[11].OneofWrappers = []any{}
-	file_api_TargetLib_targetlib_proto_msgTypes[32].OneofWrappers = []any{}
+	file_api_TargetLib_targetlib_proto_msgTypes[8].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_TargetLib_targetlib_proto_rawDesc), len(file_api_TargetLib_targetlib_proto_rawDesc)),
-			NumEnums:      15,
-			NumMessages:   65,
+			NumEnums:      8,
+			NumMessages:   38,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

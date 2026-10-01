@@ -50,8 +50,9 @@ func canonicalRuntimeSettings(value *targetlibapi.RuntimeSettings) *targetlibapi
 
 func (m *Manager) GetRuntimeConfig(context.Context, *emptypb.Empty) (*targetlibapi.RuntimeConfig, error) {
 	m.configMu.RLock()
-	defer m.configMu.RUnlock()
-	return cloneRuntimeConfig(m.runtimeConfig), nil
+	config := m.runtimeConfig
+	m.configMu.RUnlock()
+	return cloneRuntimeConfig(config), nil
 }
 
 func (m *Manager) UpdateRuntimeConfig(ctx context.Context, request *targetlibapi.UpdateRuntimeConfigRequest) (*targetlibapi.RuntimeConfig, error) {
@@ -66,10 +67,6 @@ func (m *Manager) UpdateRuntimeConfig(ctx context.Context, request *targetlibapi
 		return nil, err
 	}
 	next.Settings = canonicalRuntimeSettings(request.Settings)
-	if request.Model != nil {
-		model := proto.Clone(request.Model).(*targetlibapi.RuntimeModel)
-		next.Selectors, next.ServiceRoutes, next.ServiceBindings = model.Selectors, model.ServiceRoutes, model.ServiceBindings
-	}
 	return m.applyDesired(ctx, next)
 }
 
