@@ -94,13 +94,7 @@ func targetlib_set_tun_fd(fd C.int32_t) C.int32_t {
 
 //export targetlib_notify_network_changed
 func targetlib_notify_network_changed() C.int32_t {
-	serviceMu.Lock()
-	server := activeServer
-	serviceMu.Unlock()
-	if server == nil {
-		return -1
-	}
-	server.NotifyNetworkChanged()
+	// Network changes do not alter the shared runtime model, so no manager-side action is required.
 	return 0
 }
 

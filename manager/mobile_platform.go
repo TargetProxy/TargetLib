@@ -3,6 +3,7 @@
 package manager
 
 import (
+	"context"
 	"errors"
 	"net/netip"
 	"sync/atomic"
@@ -53,7 +54,7 @@ func (mobilePlatform) UnderNetworkExtension() bool                            { 
 func (mobilePlatform) NetworkExtensionIncludeAllNetworks() bool               { return false }
 func (mobilePlatform) ClearDNSCache()                                         {}
 func (mobilePlatform) RequestPermissionForWIFIState() error                   { return nil }
-func (mobilePlatform) ReadWIFIState() adapter.WIFIState                       { return adapter.WIFIState{} }
+func (mobilePlatform) ReadWIFIState(context.Context) adapter.WIFIState { return adapter.WIFIState{} }
 func (mobilePlatform) SystemCertificates() []string                           { return nil }
 func (mobilePlatform) UsePlatformConnectionOwnerFinder() bool                 { return false }
 func (mobilePlatform) FindConnectionOwner(*adapter.FindConnectionOwnerRequest) (*adapter.ConnectionOwner, error) {
@@ -64,6 +65,34 @@ func (mobilePlatform) UsePlatformNotification() bool                { return fal
 func (mobilePlatform) SendNotification(*adapter.Notification) error { return nil }
 func (mobilePlatform) MyInterfaceAddress() []netip.Addr             { return nil }
 
+// sing-box 的桌面级平台能力在 Android/iOS 上不可用，这些实现只为满足 adapter.PlatformInterface。
+func (mobilePlatform) ProcessPlatformOptions(option.TunPlatformOptions) error { return nil }
+func (mobilePlatform) CancelNotification(string, int32) error                 { return nil }
+
+func (mobilePlatform) UsePlatformNeighborResolver() bool { return false }
+func (mobilePlatform) StartNeighborMonitor(adapter.NeighborUpdateListener) error {
+	return errors.New("Android neighbor resolution is unavailable")
+}
+func (mobilePlatform) CloseNeighborMonitor(adapter.NeighborUpdateListener) error { return nil }
+
+func (mobilePlatform) UsePlatformShell() bool    { return false }
+func (mobilePlatform) CheckPlatformShell() error { return errors.New("platform shell is unavailable") }
+func (mobilePlatform) OpenShellSession(*adapter.PlatformUser, string, []string, string, int32, int32) (adapter.ShellSession, error) {
+	return nil, errors.New("platform shell is unavailable")
+}
+func (mobilePlatform) LookupUser(string) (*adapter.PlatformUser, error) {
+	return nil, errors.New("platform user lookup is unavailable")
+}
+func (mobilePlatform) LookupSFTPServer() (string, error) { return "", errors.New("platform SFTP is unavailable") }
+func (mobilePlatform) ReadSystemSSHHostKey() ([]byte, error) {
+	return nil, errors.New("system SSH host key is unavailable")
+}
+func (mobilePlatform) TailscaleHostname() string { return "" }
+
+func (mobilePlatform) UsePlatformBridge() bool { return false }
+func (mobilePlatform) CreateBridge(adapter.BridgeOptions) (adapter.BridgeSession, error) {
+	return nil, errors.New("platform bridge is unavailable")
+}
 var _ adapter.PlatformInterface = mobilePlatform{}
 
 // Android 的活动网络由 VpnService 管理。GOOS=android 下 sing-tun 没有原生网络监视器，

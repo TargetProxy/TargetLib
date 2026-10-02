@@ -26,13 +26,13 @@ $ErrorActionPreference = 'Stop'
 $repositoryRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $configuration = Import-PowerShellDataFile (Join-Path $PSScriptRoot 'build-config.psd1')
 $goCommand = Get-Command go -ErrorAction Stop
-$cppSource = Join-Path $repositoryRoot 'flutter\android\src\main\cpp\targetlib_jni.cpp'
+$cppSource = Join-Path $repositoryRoot 'flutter/android/src/main/cpp/targetlib_jni.cpp'
 
 $ndkCandidates = @()
 if ($NDKRoot) { $ndkCandidates += $NDKRoot }
 if ($env:ANDROID_NDK_ROOT) { $ndkCandidates += $env:ANDROID_NDK_ROOT }
 if ($env:ANDROID_HOME) { $ndkCandidates += (Join-Path $env:ANDROID_HOME 'ndk') }
-if ($env:LOCALAPPDATA) { $ndkCandidates += (Join-Path $env:LOCALAPPDATA 'Android\Sdk\ndk') }
+if ($env:LOCALAPPDATA) { $ndkCandidates += (Join-Path $env:LOCALAPPDATA 'Android/Sdk/ndk') }
 
 $ndk = $null
 foreach ($candidate in $ndkCandidates) {
@@ -57,17 +57,17 @@ elseif ($hostGOOS -eq 'darwin' -and $hostGOARCH -eq 'arm64') { $hostDirectory = 
 elseif ($hostGOOS -eq 'darwin') { $hostDirectory = 'darwin-x86_64' }
 else { $hostDirectory = 'linux-x86_64' }
 
-$prebuilt = Join-Path $ndk "toolchains\llvm\prebuilt\$hostDirectory"
+$prebuilt = Join-Path $ndk "toolchains/llvm/prebuilt/$hostDirectory"
 $executableSuffix = if ($hostGOOS -eq 'windows') { '.exe' } else { '' }
-$clang = Join-Path $prebuilt "bin\clang$executableSuffix"
-$clangxx = Join-Path $prebuilt "bin\clang++$executableSuffix"
-$jniInclude = Join-Path $prebuilt 'sysroot\usr\include'
+$clang = Join-Path $prebuilt "bin/clang$executableSuffix"
+$clangxx = Join-Path $prebuilt "bin/clang++$executableSuffix"
+$jniInclude = Join-Path $prebuilt 'sysroot/usr/include'
 foreach ($requiredPath in @($clang, $clangxx, (Join-Path $jniInclude 'jni.h'))) {
     if (-not (Test-Path -LiteralPath $requiredPath)) { throw "Android toolchain file not found: $requiredPath" }
 }
 
 if (-not $OutputDir) {
-    $OutputDir = Join-Path $repositoryRoot 'flutter\android\src\main\jniLibs'
+    $OutputDir = Join-Path $repositoryRoot 'flutter/android/src/main/jniLibs'
 } elseif (-not [System.IO.Path]::IsPathRooted($OutputDir)) {
     $OutputDir = Join-Path $repositoryRoot $OutputDir
 }
@@ -124,8 +124,8 @@ try {
     foreach ($abi in $ABIs) {
         $targetDirectory = Join-Path $OutputDir $abi
         New-Item -ItemType Directory -Force -Path $targetDirectory | Out-Null
-        Copy-Item -LiteralPath (Join-Path $stagingRoot "$abi\libtargetlib.so") -Destination $targetDirectory -Force
-        Copy-Item -LiteralPath (Join-Path $stagingRoot "$abi\libtargetlib_jni.so") -Destination $targetDirectory -Force
+        Copy-Item -LiteralPath (Join-Path $stagingRoot "$abi/libtargetlib.so") -Destination $targetDirectory -Force
+        Copy-Item -LiteralPath (Join-Path $stagingRoot "$abi/libtargetlib_jni.so") -Destination $targetDirectory -Force
         Write-Host "Built $targetDirectory" -ForegroundColor Green
     }
 } finally {
