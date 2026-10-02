@@ -12,9 +12,10 @@ type NodePool struct {
 }
 
 type Selector struct {
-	Tag      string
-	NodeIDs  []string
-	Selected string
+	Tag              string
+	NodeIDs          []string
+	Selected         string
+	SelectedAtUnixMs int64
 }
 
 type ServiceRoute struct {
@@ -25,18 +26,10 @@ type ServiceRoute struct {
 	Enabled     bool
 }
 
-type ServiceBinding struct {
-	ServiceID string
-	Selector  string
-	Outbound  string
-	Revision  string
-}
-
 type RuntimeModel struct {
-	NodePool        NodePool
-	Selectors       []Selector
-	ServiceRoutes   []ServiceRoute
-	ServiceBindings []ServiceBinding
+	NodePool      NodePool
+	Selectors     []Selector
+	ServiceRoutes []ServiceRoute
 }
 
 func RuntimeModelFromProfile(source targetprofile.Profile) RuntimeModel {

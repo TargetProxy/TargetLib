@@ -27,10 +27,7 @@ func (m *Manager) UpsertRoute(ctx context.Context, req *api.UpsertRouteRequest) 
 	if node == nil || !node.IsAvailable() {
 		return nil, status.Error(codes.NotFound, "node not found or unavailable")
 	}
-	next, err := m.desiredForUpdate("")
-	if err != nil {
-		return nil, err
-	}
+	next := m.desiredForUpdate()
 	route := findRoute(next.ServiceRoutes, req.GetServiceId())
 	selectorTag := "route-" + req.GetServiceId()
 	if route != nil {
@@ -44,6 +41,7 @@ func (m *Manager) UpsertRoute(ctx context.Context, req *api.UpsertRouteRequest) 
 	selector.NodeIds = readyNodeIDs(pool.Nodes)
 	selector.NodeIds = append(selector.NodeIds, "direct")
 	selector.SelectedNodeId = req.GetNodeId()
+	selector.SelectedAtUnixMs = currentTimeMillis()
 	if route == nil {
 		next.ServiceRoutes = append(next.ServiceRoutes, &api.ServiceRoute{ServiceId: req.GetServiceId(), SelectorTag: selectorTag})
 		route = next.ServiceRoutes[len(next.ServiceRoutes)-1]
@@ -51,8 +49,7 @@ func (m *Manager) UpsertRoute(ctx context.Context, req *api.UpsertRouteRequest) 
 	route.Domains = append([]string(nil), req.GetDomains()...)
 	route.Enabled = req.GetEnabled()
 	route.DisplayName = req.GetDisplayName()
-	next.Revision = ""
-	next, err = m.applyDesired(ctx, next)
+	next, err := m.applyDesired(ctx, next)
 	if err != nil {
 		return nil, err
 	}
@@ -65,10 +62,7 @@ func (m *Manager) DeleteRoute(ctx context.Context, req *api.DeleteRouteRequest) 
 	}
 	m.opMu.Lock()
 	defer m.opMu.Unlock()
-	next, err := m.desiredForUpdate("")
-	if err != nil {
-		return nil, err
-	}
+	next := m.desiredForUpdate()
 	index := -1
 	selectorTag := ""
 	for i, route := range next.ServiceRoutes {
@@ -85,11 +79,6 @@ func (m *Manager) DeleteRoute(ctx context.Context, req *api.DeleteRouteRequest) 
 		if selector.GetTag() == selectorTag {
 			next.Selectors = append(next.Selectors[:i], next.Selectors[i+1:]...)
 			break
-		}
-	}
-	for i := len(next.ServiceBindings) - 1; i >= 0; i-- {
-		if next.ServiceBindings[i].GetServiceId() == req.GetServiceId() {
-			next.ServiceBindings = append(next.ServiceBindings[:i], next.ServiceBindings[i+1:]...)
 		}
 	}
 	if _, err := m.applyDesired(ctx, next); err != nil {
@@ -134,7 +123,7 @@ func (m *Manager) SelectRouteNode(ctx context.Context, req *api.SelectRouteNodeR
 	if node == nil || !node.IsAvailable() {
 		return nil, status.Error(codes.NotFound, "node not found or unavailable")
 	}
-	next, _ := m.desiredForUpdate("")
+	next := m.desiredForUpdate()
 	route := findRoute(next.ServiceRoutes, req.GetServiceId())
 	if route == nil {
 		return nil, status.Error(codes.NotFound, "route not found")
@@ -145,8 +134,8 @@ func (m *Manager) SelectRouteNode(ctx context.Context, req *api.SelectRouteNodeR
 	}
 	previous := selector.GetSelectedNodeId()
 	selector.SelectedNodeId = req.GetNodeId()
-	next.Revision = ""
-	_, content, err := m.prepareRuntimeContent(next, pool.Nodes)
+	selector.SelectedAtUnixMs = currentTimeMillis()
+	content, err := m.prepareRuntimeContent(next, pool.Nodes)
 	if err != nil {
 		return nil, err
 	}
@@ -155,7 +144,7 @@ func (m *Manager) SelectRouteNode(ctx context.Context, req *api.SelectRouteNodeR
 		return nil, err
 	}
 	running := current.Status == daemon.ServiceStatus_STARTED
-	if err := m.commitLiveSelector(ctx, next, pool.Nodes, content, selector.Tag, req.GetNodeId(), previous, running); err != nil {
+	if err := m.commitLiveSelector(ctx, next, content, selector.Tag, req.GetNodeId(), previous, running); err != nil {
 		return nil, err
 	}
 	return &api.SelectNodeResponse{NodeId: req.GetNodeId(), NodeName: node.Name, AppliedImmediately: running}, nil

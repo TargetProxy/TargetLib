@@ -6,7 +6,6 @@ import (
 	"io"
 
 	"github.com/sagernet/sing-box/daemon"
-	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
@@ -34,14 +33,6 @@ func (d *daemonAdapter) Status() (*daemon.ServiceStatus, error) {
 
 func (d *daemonAdapter) SelectOutbound(ctx context.Context, group, outbound string) (*emptypb.Empty, error) {
 	return d.service.SelectOutbound(ctx, &daemon.SelectOutboundRequest{GroupTag: group, OutboundTag: outbound})
-}
-
-func (d *daemonAdapter) SubscribeGroups(request *emptypb.Empty, stream grpc.ServerStreamingServer[daemon.Groups]) error {
-	return d.service.SubscribeGroups(request, stream)
-}
-
-func (d *daemonAdapter) URLTest(ctx context.Context, request *daemon.URLTestRequest) (*emptypb.Empty, error) {
-	return d.service.URLTest(ctx, request)
 }
 
 var errStatusReceived = errors.New("status received")

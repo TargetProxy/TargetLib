@@ -11,15 +11,8 @@ final class TargetLibConfig {
   Future<RuntimeConfig> get() => _resolve().then((connection) =>
       connection.getRuntimeConfig());
 
-  Future<RuntimeConfig> update(
-    RuntimeSettings settings, {
-    String expectedRevision = '',
-  }) => _resolve().then(
-        (connection) => connection.updateRuntimeConfig(
-          settings,
-          expectedRevision: expectedRevision,
-        ),
-      );
+  Future<RuntimeConfig> update(RuntimeSettings settings) =>
+      _resolve().then((connection) => connection.updateRuntimeConfig(settings));
 }
 
 final class TargetLibProxy {

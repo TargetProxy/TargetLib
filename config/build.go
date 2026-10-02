@@ -102,6 +102,15 @@ func Build(settings Settings, source any) ([]byte, error) {
 	default:
 		return nil, fmt.Errorf("%w: unsupported runtime model", ErrInvalidSource)
 	}
+	model, err := NormalizeRuntimeModel(model)
+	if err != nil {
+		return nil, err
+	}
+	return BuildNormalized(settings, model)
+}
+
+// BuildNormalized emits a model that has already passed NormalizeRuntimeModel.
+func BuildNormalized(settings Settings, model RuntimeModel) ([]byte, error) {
 	plan, err := planRuntimeModel(settings, model)
 	if err != nil {
 		return nil, err
@@ -110,11 +119,6 @@ func Build(settings Settings, source any) ([]byte, error) {
 }
 
 func planRuntimeModel(settings Settings, model RuntimeModel) (Blueprint, error) {
-	var err error
-	model, err = NormalizeRuntimeModel(model)
-	if err != nil {
-		return Blueprint{}, err
-	}
 	if err := settings.Validate(); err != nil {
 		return Blueprint{}, err
 	}

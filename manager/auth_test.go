@@ -11,7 +11,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func TestIntentAuthenticationUsesPersistentControlToken(t *testing.T) {
+func TestAuthenticationUsesPersistentControlToken(t *testing.T) {
 	base := t.TempDir()
 	first, err := loadControlToken(base, "")
 	if err != nil {
@@ -29,19 +29,27 @@ func TestIntentAuthenticationUsesPersistentControlToken(t *testing.T) {
 	}
 
 	m := &Manager{controlToken: first}
-	method := "/targetlib.TargetLib/ForceServiceBinding"
-	if code := status.Code(m.authenticate(context.Background(), method)); code != codes.Unauthenticated {
-		t.Fatalf("missing token code=%v", code)
+	for _, name := range []string{"UpdateRuntimeConfig", "UpsertRoute", "DeleteRoute", "SelectRouteNode"} {
+		t.Run(name, func(t *testing.T) {
+			method := "/targetlib.TargetLib/" + name
+			if code := status.Code(m.authenticate(context.Background(), method)); code != codes.Unauthenticated {
+				t.Fatalf("missing token code=%v", code)
+			}
+			bad := metadata.NewIncomingContext(context.Background(), metadata.Pairs("authorization", "Bearer wrong"))
+			if code := status.Code(m.authenticate(bad, method)); code != codes.Unauthenticated {
+				t.Fatalf("bad token code=%v", code)
+			}
+			good := metadata.NewIncomingContext(context.Background(), metadata.Pairs("authorization", "Bearer "+first))
+			if err := m.authenticate(good, method); err != nil {
+				t.Fatal(err)
+			}
+		})
 	}
-	bad := metadata.NewIncomingContext(context.Background(), metadata.Pairs("authorization", "Bearer wrong"))
-	if code := status.Code(m.authenticate(bad, method)); code != codes.Unauthenticated {
-		t.Fatalf("bad token code=%v", code)
-	}
-	good := metadata.NewIncomingContext(context.Background(), metadata.Pairs("authorization", "Bearer "+first))
-	if err := m.authenticate(good, method); err != nil {
-		t.Fatal(err)
-	}
-	if err := m.authenticate(context.Background(), "/targetlib.TargetLib/GetState"); err != nil {
-		t.Fatal(err)
+	for _, name := range []string{"GetState", "SelectNode", "ListRoutes"} {
+		t.Run(name+" does not require token", func(t *testing.T) {
+			if err := m.authenticate(context.Background(), "/targetlib.TargetLib/"+name); err != nil {
+				t.Fatal(err)
+			}
+		})
 	}
 }

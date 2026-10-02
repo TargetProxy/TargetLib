@@ -1869,16 +1869,12 @@ class RuntimeConfig extends $pb.GeneratedMessage {
     RuntimeSettings? settings,
     $core.Iterable<SelectorConfig>? selectors,
     $core.Iterable<ServiceRoute>? serviceRoutes,
-    $core.Iterable<ServiceBinding>? serviceBindings,
-    $core.String? revision,
     $core.String? nodePoolRevision,
   }) {
     final result = RuntimeConfig._();
     if (settings != null) result.settings = settings;
     if (selectors != null) result.selectors.addAll(selectors);
     if (serviceRoutes != null) result.serviceRoutes.addAll(serviceRoutes);
-    if (serviceBindings != null) result.serviceBindings.addAll(serviceBindings);
-    if (revision != null) result.revision = revision;
     if (nodePoolRevision != null) result.nodePoolRevision = nodePoolRevision;
     return result;
   }
@@ -1902,9 +1898,6 @@ class RuntimeConfig extends $pb.GeneratedMessage {
         subBuilder: SelectorConfig.$_createMessage)
     ..pPM<ServiceRoute>(3, _omitFieldNames ? '' : 'serviceRoutes',
         subBuilder: ServiceRoute.$_createMessage)
-    ..pPM<ServiceBinding>(4, _omitFieldNames ? '' : 'serviceBindings',
-        subBuilder: ServiceBinding.$_createMessage)
-    ..aOS(5, _omitFieldNames ? '' : 'revision')
     ..aOS(6, _omitFieldNames ? '' : 'nodePoolRevision')
     ..hasRequiredFields = false;
 
@@ -1947,24 +1940,12 @@ class RuntimeConfig extends $pb.GeneratedMessage {
   @$pb.TagNumber(3)
   $pb.PbList<ServiceRoute> get serviceRoutes => $_getList(2);
 
-  @$pb.TagNumber(4)
-  $pb.PbList<ServiceBinding> get serviceBindings => $_getList(3);
-
-  @$pb.TagNumber(5)
-  $core.String get revision => $_getSZ(4);
-  @$pb.TagNumber(5)
-  set revision($core.String value) => $_setString(4, value);
-  @$pb.TagNumber(5)
-  $core.bool hasRevision() => $_has(4);
-  @$pb.TagNumber(5)
-  void clearRevision() => $_clearField(5);
-
   @$pb.TagNumber(6)
-  $core.String get nodePoolRevision => $_getSZ(5);
+  $core.String get nodePoolRevision => $_getSZ(3);
   @$pb.TagNumber(6)
-  set nodePoolRevision($core.String value) => $_setString(5, value);
+  set nodePoolRevision($core.String value) => $_setString(3, value);
   @$pb.TagNumber(6)
-  $core.bool hasNodePoolRevision() => $_has(5);
+  $core.bool hasNodePoolRevision() => $_has(3);
   @$pb.TagNumber(6)
   void clearNodePoolRevision() => $_clearField(6);
 }
@@ -1972,11 +1953,9 @@ class RuntimeConfig extends $pb.GeneratedMessage {
 class UpdateRuntimeConfigRequest extends $pb.GeneratedMessage {
   factory UpdateRuntimeConfigRequest({
     RuntimeSettings? settings,
-    $core.String? expectedRevision,
   }) {
     final result = UpdateRuntimeConfigRequest._();
     if (settings != null) result.settings = settings;
-    if (expectedRevision != null) result.expectedRevision = expectedRevision;
     return result;
   }
 
@@ -1995,7 +1974,6 @@ class UpdateRuntimeConfigRequest extends $pb.GeneratedMessage {
       createEmptyInstance: UpdateRuntimeConfigRequest.$_createMessage)
     ..aOM<RuntimeSettings>(1, _omitFieldNames ? '' : 'settings',
         subBuilder: RuntimeSettings.$_createMessage)
-    ..aOS(3, _omitFieldNames ? '' : 'expectedRevision')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -2035,15 +2013,6 @@ class UpdateRuntimeConfigRequest extends $pb.GeneratedMessage {
   void clearSettings() => $_clearField(1);
   @$pb.TagNumber(1)
   RuntimeSettings ensureSettings() => $_ensure(0);
-
-  @$pb.TagNumber(3)
-  $core.String get expectedRevision => $_getSZ(1);
-  @$pb.TagNumber(3)
-  set expectedRevision($core.String value) => $_setString(1, value);
-  @$pb.TagNumber(3)
-  $core.bool hasExpectedRevision() => $_has(1);
-  @$pb.TagNumber(3)
-  void clearExpectedRevision() => $_clearField(3);
 }
 
 class SelectorConfig extends $pb.GeneratedMessage {
@@ -2051,11 +2020,13 @@ class SelectorConfig extends $pb.GeneratedMessage {
     $core.String? tag,
     $core.Iterable<$core.String>? nodeIds,
     $core.String? selectedNodeId,
+    $fixnum.Int64? selectedAtUnixMs,
   }) {
     final result = SelectorConfig._();
     if (tag != null) result.tag = tag;
     if (nodeIds != null) result.nodeIds.addAll(nodeIds);
     if (selectedNodeId != null) result.selectedNodeId = selectedNodeId;
+    if (selectedAtUnixMs != null) result.selectedAtUnixMs = selectedAtUnixMs;
     return result;
   }
 
@@ -2075,6 +2046,7 @@ class SelectorConfig extends $pb.GeneratedMessage {
     ..aOS(1, _omitFieldNames ? '' : 'tag')
     ..pPS(2, _omitFieldNames ? '' : 'nodeIds')
     ..aOS(3, _omitFieldNames ? '' : 'selectedNodeId')
+    ..aInt64(4, _omitFieldNames ? '' : 'selectedAtUnixMs')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -2119,6 +2091,15 @@ class SelectorConfig extends $pb.GeneratedMessage {
   $core.bool hasSelectedNodeId() => $_has(2);
   @$pb.TagNumber(3)
   void clearSelectedNodeId() => $_clearField(3);
+
+  @$pb.TagNumber(4)
+  $fixnum.Int64 get selectedAtUnixMs => $_getI64(3);
+  @$pb.TagNumber(4)
+  set selectedAtUnixMs($fixnum.Int64 value) => $_setInt64(3, value);
+  @$pb.TagNumber(4)
+  $core.bool hasSelectedAtUnixMs() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearSelectedAtUnixMs() => $_clearField(4);
 }
 
 class ServiceRoute extends $pb.GeneratedMessage {
@@ -2127,12 +2108,14 @@ class ServiceRoute extends $pb.GeneratedMessage {
     $core.Iterable<$core.String>? domains,
     $core.String? selectorTag,
     $core.bool? enabled,
+    $core.String? displayName,
   }) {
     final result = ServiceRoute._();
     if (serviceId != null) result.serviceId = serviceId;
     if (domains != null) result.domains.addAll(domains);
     if (selectorTag != null) result.selectorTag = selectorTag;
     if (enabled != null) result.enabled = enabled;
+    if (displayName != null) result.displayName = displayName;
     return result;
   }
 
@@ -2153,6 +2136,7 @@ class ServiceRoute extends $pb.GeneratedMessage {
     ..pPS(2, _omitFieldNames ? '' : 'domains')
     ..aOS(3, _omitFieldNames ? '' : 'selectorTag')
     ..aOB(4, _omitFieldNames ? '' : 'enabled')
+    ..aOS(5, _omitFieldNames ? '' : 'displayName')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -2206,172 +2190,25 @@ class ServiceRoute extends $pb.GeneratedMessage {
   $core.bool hasEnabled() => $_has(3);
   @$pb.TagNumber(4)
   void clearEnabled() => $_clearField(4);
-}
-
-class ServiceBinding extends $pb.GeneratedMessage {
-  factory ServiceBinding({
-    $core.String? serviceId,
-    $core.String? selectorTag,
-    $core.String? nodeId,
-    $core.String? revision,
-    $fixnum.Int64? expiresAtUnixMs,
-    $fixnum.Int64? selectedAtUnixMs,
-    $core.double? selectedScore,
-    $core.String? selectionReason,
-    $core.String? selectionPolicyRevision,
-  }) {
-    final result = ServiceBinding._();
-    if (serviceId != null) result.serviceId = serviceId;
-    if (selectorTag != null) result.selectorTag = selectorTag;
-    if (nodeId != null) result.nodeId = nodeId;
-    if (revision != null) result.revision = revision;
-    if (expiresAtUnixMs != null) result.expiresAtUnixMs = expiresAtUnixMs;
-    if (selectedAtUnixMs != null) result.selectedAtUnixMs = selectedAtUnixMs;
-    if (selectedScore != null) result.selectedScore = selectedScore;
-    if (selectionReason != null) result.selectionReason = selectionReason;
-    if (selectionPolicyRevision != null)
-      result.selectionPolicyRevision = selectionPolicyRevision;
-    return result;
-  }
-
-  ServiceBinding._();
-
-  factory ServiceBinding.fromBuffer($core.List<$core.int> data,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      ServiceBinding()..mergeFromBuffer(data, registry);
-  factory ServiceBinding.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      ServiceBinding()..mergeFromJson(json, registry);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'ServiceBinding',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'targetlib'),
-      createEmptyInstance: ServiceBinding.$_createMessage)
-    ..aOS(1, _omitFieldNames ? '' : 'serviceId')
-    ..aOS(2, _omitFieldNames ? '' : 'selectorTag')
-    ..aOS(3, _omitFieldNames ? '' : 'nodeId')
-    ..aOS(4, _omitFieldNames ? '' : 'revision')
-    ..aInt64(5, _omitFieldNames ? '' : 'expiresAtUnixMs')
-    ..aInt64(6, _omitFieldNames ? '' : 'selectedAtUnixMs')
-    ..aD(7, _omitFieldNames ? '' : 'selectedScore')
-    ..aOS(8, _omitFieldNames ? '' : 'selectionReason')
-    ..aOS(9, _omitFieldNames ? '' : 'selectionPolicyRevision')
-    ..hasRequiredFields = false;
-
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  ServiceBinding clone() => deepCopy();
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  ServiceBinding copyWith(void Function(ServiceBinding) updates) =>
-      super.copyWith((message) => updates(message as ServiceBinding))
-          as ServiceBinding;
-
-  @$core.override
-  $pb.BuilderInfo get info_ => _i;
-
-  @$core.pragma('dart2js:noInline')
-  @$core.Deprecated('Use ServiceBinding() / ServiceBinding.new instead')
-  static ServiceBinding create() => ServiceBinding._();
-  static $pb.GeneratedMessage $_createMessage() => ServiceBinding._();
-  @$core.override
-  ServiceBinding createEmptyInstance() => ServiceBinding._();
-  @$core.pragma('dart2js:noInline')
-  static ServiceBinding getDefault() =>
-      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ServiceBinding>(
-          ServiceBinding.$_createMessage);
-  static ServiceBinding? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  $core.String get serviceId => $_getSZ(0);
-  @$pb.TagNumber(1)
-  set serviceId($core.String value) => $_setString(0, value);
-  @$pb.TagNumber(1)
-  $core.bool hasServiceId() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearServiceId() => $_clearField(1);
-
-  @$pb.TagNumber(2)
-  $core.String get selectorTag => $_getSZ(1);
-  @$pb.TagNumber(2)
-  set selectorTag($core.String value) => $_setString(1, value);
-  @$pb.TagNumber(2)
-  $core.bool hasSelectorTag() => $_has(1);
-  @$pb.TagNumber(2)
-  void clearSelectorTag() => $_clearField(2);
-
-  @$pb.TagNumber(3)
-  $core.String get nodeId => $_getSZ(2);
-  @$pb.TagNumber(3)
-  set nodeId($core.String value) => $_setString(2, value);
-  @$pb.TagNumber(3)
-  $core.bool hasNodeId() => $_has(2);
-  @$pb.TagNumber(3)
-  void clearNodeId() => $_clearField(3);
-
-  @$pb.TagNumber(4)
-  $core.String get revision => $_getSZ(3);
-  @$pb.TagNumber(4)
-  set revision($core.String value) => $_setString(3, value);
-  @$pb.TagNumber(4)
-  $core.bool hasRevision() => $_has(3);
-  @$pb.TagNumber(4)
-  void clearRevision() => $_clearField(4);
 
   @$pb.TagNumber(5)
-  $fixnum.Int64 get expiresAtUnixMs => $_getI64(4);
+  $core.String get displayName => $_getSZ(4);
   @$pb.TagNumber(5)
-  set expiresAtUnixMs($fixnum.Int64 value) => $_setInt64(4, value);
+  set displayName($core.String value) => $_setString(4, value);
   @$pb.TagNumber(5)
-  $core.bool hasExpiresAtUnixMs() => $_has(4);
+  $core.bool hasDisplayName() => $_has(4);
   @$pb.TagNumber(5)
-  void clearExpiresAtUnixMs() => $_clearField(5);
-
-  @$pb.TagNumber(6)
-  $fixnum.Int64 get selectedAtUnixMs => $_getI64(5);
-  @$pb.TagNumber(6)
-  set selectedAtUnixMs($fixnum.Int64 value) => $_setInt64(5, value);
-  @$pb.TagNumber(6)
-  $core.bool hasSelectedAtUnixMs() => $_has(5);
-  @$pb.TagNumber(6)
-  void clearSelectedAtUnixMs() => $_clearField(6);
-
-  @$pb.TagNumber(7)
-  $core.double get selectedScore => $_getN(6);
-  @$pb.TagNumber(7)
-  set selectedScore($core.double value) => $_setDouble(6, value);
-  @$pb.TagNumber(7)
-  $core.bool hasSelectedScore() => $_has(6);
-  @$pb.TagNumber(7)
-  void clearSelectedScore() => $_clearField(7);
-
-  @$pb.TagNumber(8)
-  $core.String get selectionReason => $_getSZ(7);
-  @$pb.TagNumber(8)
-  set selectionReason($core.String value) => $_setString(7, value);
-  @$pb.TagNumber(8)
-  $core.bool hasSelectionReason() => $_has(7);
-  @$pb.TagNumber(8)
-  void clearSelectionReason() => $_clearField(8);
-
-  @$pb.TagNumber(9)
-  $core.String get selectionPolicyRevision => $_getSZ(8);
-  @$pb.TagNumber(9)
-  set selectionPolicyRevision($core.String value) => $_setString(8, value);
-  @$pb.TagNumber(9)
-  $core.bool hasSelectionPolicyRevision() => $_has(8);
-  @$pb.TagNumber(9)
-  void clearSelectionPolicyRevision() => $_clearField(9);
+  void clearDisplayName() => $_clearField(5);
 }
 
 class RuntimeModel extends $pb.GeneratedMessage {
   factory RuntimeModel({
     $core.Iterable<SelectorConfig>? selectors,
     $core.Iterable<ServiceRoute>? serviceRoutes,
-    $core.Iterable<ServiceBinding>? serviceBindings,
   }) {
     final result = RuntimeModel._();
     if (selectors != null) result.selectors.addAll(selectors);
     if (serviceRoutes != null) result.serviceRoutes.addAll(serviceRoutes);
-    if (serviceBindings != null) result.serviceBindings.addAll(serviceBindings);
     return result;
   }
 
@@ -2392,8 +2229,6 @@ class RuntimeModel extends $pb.GeneratedMessage {
         subBuilder: SelectorConfig.$_createMessage)
     ..pPM<ServiceRoute>(2, _omitFieldNames ? '' : 'serviceRoutes',
         subBuilder: ServiceRoute.$_createMessage)
-    ..pPM<ServiceBinding>(3, _omitFieldNames ? '' : 'serviceBindings',
-        subBuilder: ServiceBinding.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -2423,9 +2258,6 @@ class RuntimeModel extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(2)
   $pb.PbList<ServiceRoute> get serviceRoutes => $_getList(1);
-
-  @$pb.TagNumber(3)
-  $pb.PbList<ServiceBinding> get serviceBindings => $_getList(2);
 }
 
 class NodePool extends $pb.GeneratedMessage {

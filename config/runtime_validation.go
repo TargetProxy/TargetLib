@@ -95,32 +95,6 @@ func NormalizeRuntimeModel(model RuntimeModel) (RuntimeModel, error) {
 		routes[route.ServiceID] = route
 		model.ServiceRoutes[index] = route
 	}
-	bound := make(map[string]bool)
-	for _, binding := range model.ServiceBindings {
-		if binding.ServiceID == DefaultServiceID {
-			if binding.Selector != "proxy" {
-				return fail("default service binds the proxy selector")
-			}
-			selector, ok := selectors["proxy"]
-			if !ok {
-				return fail("default service requires the proxy selector")
-			}
-			if binding.Outbound != selector.Selected {
-				return fail("binding and selector selection disagree")
-			}
-			bound[binding.ServiceID] = true
-			continue
-		}
-		route, ok := routes[binding.ServiceID]
-		if !ok || route.Selector != binding.Selector || bound[binding.ServiceID] {
-			return fail("invalid or duplicate service binding")
-		}
-		selector := selectors[binding.Selector]
-		if binding.Outbound != selector.Selected {
-			return fail("binding and selector selection disagree")
-		}
-		bound[binding.ServiceID] = true
-	}
 	model.Selectors = nil
 	for _, selector := range selectors {
 		model.Selectors = append(model.Selectors, selector)

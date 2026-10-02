@@ -145,14 +145,9 @@ final class TargetLibConnection {
   Future<RuntimeConfig> getRuntimeConfig() =>
       client.getRuntimeConfig(Empty(), options: options);
 
-  Future<RuntimeConfig> updateRuntimeConfig(
-    RuntimeSettings settings, {
-    String expectedRevision = '',
-  }) => client.updateRuntimeConfig(
-        UpdateRuntimeConfigRequest(
-          settings: settings,
-          expectedRevision: expectedRevision,
-        ),
+  Future<RuntimeConfig> updateRuntimeConfig(RuntimeSettings settings) =>
+      client.updateRuntimeConfig(
+        UpdateRuntimeConfigRequest(settings: settings),
         options: options,
       );
 

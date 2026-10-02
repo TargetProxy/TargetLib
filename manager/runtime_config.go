@@ -62,10 +62,7 @@ func (m *Manager) UpdateRuntimeConfig(ctx context.Context, request *targetlibapi
 	m.opMu.Lock()
 	defer m.opMu.Unlock()
 
-	next, err := m.desiredForUpdate(request.ExpectedRevision)
-	if err != nil {
-		return nil, err
-	}
+	next := m.desiredForUpdate()
 	next.Settings = canonicalRuntimeSettings(request.Settings)
 	return m.applyDesired(ctx, next)
 }

@@ -12,7 +12,7 @@ import (
 )
 
 func buildRuntimeConfigForModel(settings config.Settings, model config.RuntimeModel) ([]byte, error) {
-	content, err := config.Build(settings, model)
+	content, err := config.BuildNormalized(settings, model)
 	if err != nil {
 		if errors.Is(err, config.ErrInvalidSettings) || errors.Is(err, config.ErrInvalidSource) {
 			return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -20,6 +20,14 @@ func buildRuntimeConfigForModel(settings config.Settings, model config.RuntimeMo
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	return content, nil
+}
+
+func normalizeRuntimeModel(model config.RuntimeModel) (config.RuntimeModel, error) {
+	normalized, err := config.NormalizeRuntimeModel(model)
+	if err != nil {
+		return config.RuntimeModel{}, status.Error(codes.InvalidArgument, err.Error())
+	}
+	return normalized, nil
 }
 
 func buildSettings(source *targetlibapi.RuntimeSettings, cacheFilePath string) (config.Settings, error) {

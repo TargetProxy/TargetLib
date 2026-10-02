@@ -97,8 +97,6 @@ func (s *Server) SocketEndpoint() string {
 	return s.socketListener.Addr().String()
 }
 
-func (s *Server) NotifyNetworkChanged() { s.manager.NotifyNetworkChanged() }
-
 func (s *Server) Close() {
 	s.close.Do(func() {
 		s.stopListeners()

@@ -9,7 +9,7 @@ import (
 
 func TestServiceSelectorAllowsDirect(t *testing.T) {
 	n := profile.Node{ID: "node", Phase: profile.NodeReady, Outbound: &option.Outbound{Type: "shadowsocks"}}
-	m, err := NormalizeRuntimeModel(RuntimeModel{NodePool: NodePool{Nodes: []profile.Node{n}}, Selectors: []Selector{{Tag: "svc", NodeIDs: []string{"node", "direct"}, Selected: "direct"}}, ServiceRoutes: []ServiceRoute{{ServiceID: "svc", Selector: "svc", Domains: []string{"example.com"}}}, ServiceBindings: []ServiceBinding{{ServiceID: "svc", Selector: "svc", Outbound: "direct"}}})
+	m, err := NormalizeRuntimeModel(RuntimeModel{NodePool: NodePool{Nodes: []profile.Node{n}}, Selectors: []Selector{{Tag: "svc", NodeIDs: []string{"node", "direct"}, Selected: "direct"}}, ServiceRoutes: []ServiceRoute{{ServiceID: "svc", Selector: "svc", Domains: []string{"example.com"}}}})
 	if err != nil {
 		t.Fatal(err)
 	}

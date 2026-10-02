@@ -2,10 +2,7 @@ package manager
 
 import (
 	"context"
-	"slices"
-	"strings"
 
-	"github.com/google/uuid"
 	api "github.com/loafman1120/TargetLib/api/TargetLib"
 	"github.com/loafman1120/TargetLib/config"
 	targetprofile "github.com/loafman1120/TargetLib/profile"
@@ -15,68 +12,106 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
+func findNodeByID(nodes []targetprofile.Node, nodeID string) *targetprofile.Node {
+	for i := range nodes {
+		if nodes[i].ID == nodeID {
+			return &nodes[i]
+		}
+	}
+	return nil
+}
+
+func findSelector(selectors []*api.SelectorConfig, tag string) *api.SelectorConfig {
+	for _, sel := range selectors {
+		if sel.Tag == tag {
+			return sel
+		}
+	}
+	return nil
+}
+
+func findRoute(routes []*api.ServiceRoute, id string) *api.ServiceRoute {
+	for _, route := range routes {
+		if route.GetServiceId() == id {
+			return route
+		}
+	}
+	return nil
+}
+
+func readyNodeIDs(nodes []targetprofile.Node) []string {
+	ids := make([]string, 0, len(nodes))
+	for _, node := range nodes {
+		if node.IsAvailable() {
+			ids = append(ids, node.ID)
+		}
+	}
+	return ids
+}
+
 func runtimeModel(value *api.RuntimeConfig, nodes []targetprofile.Node) config.RuntimeModel {
 	model := config.RuntimeModel{NodePool: config.NodePool{Nodes: nodes}}
 	for _, selector := range value.Selectors {
-		model.Selectors = append(model.Selectors, config.Selector{Tag: selector.GetTag(), NodeIDs: selector.GetNodeIds(), Selected: selector.GetSelectedNodeId()})
+		model.Selectors = append(model.Selectors, config.Selector{Tag: selector.GetTag(), NodeIDs: selector.GetNodeIds(), Selected: selector.GetSelectedNodeId(), SelectedAtUnixMs: selector.GetSelectedAtUnixMs()})
 	}
 	for _, route := range value.ServiceRoutes {
 		model.ServiceRoutes = append(model.ServiceRoutes, config.ServiceRoute{ServiceID: route.GetServiceId(), DisplayName: route.GetDisplayName(), Domains: route.GetDomains(), Selector: route.GetSelectorTag(), Enabled: route.GetEnabled()})
 	}
-	for _, binding := range value.ServiceBindings {
-		model.ServiceBindings = append(model.ServiceBindings, config.ServiceBinding{ServiceID: binding.GetServiceId(), Selector: binding.GetSelectorTag(), Outbound: binding.GetNodeId(), Revision: binding.GetRevision()})
-	}
 	return model
 }
 
-func (m *Manager) desiredForUpdate(expected string) (*api.RuntimeConfig, error) {
+func (m *Manager) desiredForUpdate() *api.RuntimeConfig {
 	m.configMu.RLock()
 	defer m.configMu.RUnlock()
-	if expected != "" && expected != m.runtimeConfig.Revision {
-		return nil, status.Error(codes.Aborted, "runtime revision changed")
-	}
-	return cloneRuntimeConfig(m.runtimeConfig), nil
+	return cloneRuntimeConfig(m.runtimeConfig)
 }
 
-// prepareRuntimeContent runs the shared normalize -> settings -> sing-box
-// content pipeline used by full reloads and live selector commits.
-func (m *Manager) prepareRuntimeContent(next *api.RuntimeConfig, nodes []targetprofile.Node) (config.Settings, []byte, error) {
-	if err := normalizeDesired(next, nodes); err != nil {
-		return config.Settings{}, nil, err
-	}
+// prepareRuntimeContent runs the shared settings -> normalize -> sing-box
+// pipeline used by full reloads and live selector commits.
+func (m *Manager) prepareRuntimeContent(next *api.RuntimeConfig, nodes []targetprofile.Node) ([]byte, error) {
 	settings, err := buildSettings(next.Settings, m.cacheFilePath)
 	if err != nil {
-		return config.Settings{}, nil, err
+		return nil, err
 	}
-	content, err := buildRuntimeConfigForModel(settings, runtimeModel(next, nodes))
-	if err != nil {
-		return config.Settings{}, nil, err
-	}
-	return settings, content, nil
+	return m.buildRuntimeContent(next, nodes, settings)
 }
 
-func (m *Manager) swapRuntime(next *api.RuntimeConfig, nodes []targetprofile.Node, content []byte, activate bool) {
+func (m *Manager) buildRuntimeContent(next *api.RuntimeConfig, nodes []targetprofile.Node, settings config.Settings) ([]byte, error) {
+	model, err := normalizeDesired(next, nodes)
+	if err != nil {
+		return nil, err
+	}
+	content, err := buildRuntimeConfigForModel(settings, model)
+	if err != nil {
+		return nil, err
+	}
+	return content, nil
+}
+
+func (m *Manager) swapRuntime(next *api.RuntimeConfig, content []byte, activate bool) {
 	m.configMu.Lock()
 	m.runtimeConfig = cloneRuntimeConfig(next)
-	m.runtimeNodes = append([]targetprofile.Node(nil), nodes...)
 	if activate {
 		m.config = string(content)
-		m.appliedConfig = cloneRuntimeConfig(next)
 	}
 	m.configMu.Unlock()
 }
 
 // Caller holds opMu. Pool reads never wait on runtime operations.
 func (m *Manager) applyDesired(ctx context.Context, next *api.RuntimeConfig) (*api.RuntimeConfig, error) {
-	next.Revision = uuid.NewString()
-	if _, err := buildSettings(next.Settings, m.cacheFilePath); err != nil {
+	settings, err := buildSettings(next.Settings, m.cacheFilePath)
+	if err != nil {
 		return nil, err
 	}
 	pool := m.subscriptions.NodePool()
 	next.NodePoolRevision = pool.Revision
+	content, err := m.buildRuntimeContent(next, pool.Nodes, settings)
+	if err != nil {
+		return nil, err
+	}
 	current, err := m.waitForStableStatus(ctx)
 	if err == nil {
-		err = m.applySnapshot(ctx, next, pool.Nodes, current.Status == daemon.ServiceStatus_STARTED, current.Status == daemon.ServiceStatus_STARTED)
+		err = m.applySnapshot(ctx, next, content, current.Status == daemon.ServiceStatus_STARTED, current.Status == daemon.ServiceStatus_STARTED)
 	}
 	if err != nil {
 		return nil, err
@@ -85,24 +120,18 @@ func (m *Manager) applyDesired(ctx context.Context, next *api.RuntimeConfig) (*a
 }
 
 func (m *Manager) activateSavedRuntime(ctx context.Context, wasRunning bool) error {
-	next, _ := m.desiredForUpdate("")
-	m.configMu.RLock()
-	nodes := append([]targetprofile.Node(nil), m.runtimeNodes...)
-	m.configMu.RUnlock()
-	if next.Revision == "" {
-		pool := m.subscriptions.NodePool()
-		nodes, next.NodePoolRevision = pool.Nodes, pool.Revision
-		next.Revision = uuid.NewString()
+	next := m.desiredForUpdate()
+	pool := m.subscriptions.NodePool()
+	nodes := pool.Nodes
+	next.NodePoolRevision = pool.Revision
+	content, err := m.prepareRuntimeContent(next, nodes)
+	if err != nil {
+		return err
 	}
-	return m.applySnapshot(ctx, next, nodes, true, wasRunning)
+	return m.applySnapshot(ctx, next, content, true, wasRunning)
 }
 
-func normalizeDesired(next *api.RuntimeConfig, nodes []targetprofile.Node) error {
-	for _, binding := range next.ServiceBindings {
-		if binding.GetExpiresAtUnixMs() < 0 {
-			return status.Error(codes.InvalidArgument, "binding expiry must not be negative")
-		}
-	}
+func normalizeDesired(next *api.RuntimeConfig, nodes []targetprofile.Node) (config.RuntimeModel, error) {
 	hasProxy := false
 	for _, selector := range next.Selectors {
 		if selector.GetTag() == "proxy" {
@@ -119,34 +148,56 @@ func normalizeDesired(next *api.RuntimeConfig, nodes []targetprofile.Node) error
 		}
 		next.Selectors = append(next.Selectors, &api.SelectorConfig{Tag: "proxy", SelectedNodeId: selected})
 	}
-	model, err := config.NormalizeRuntimeModel(runtimeModel(next, nodes))
+	reconcileRuntimeSelections(next, nodes)
+	model, err := normalizeRuntimeModel(runtimeModel(next, nodes))
 	if err != nil {
-		return status.Error(codes.InvalidArgument, err.Error())
+		return config.RuntimeModel{}, err
 	}
 	next.Selectors = nil
 	for _, selector := range model.Selectors {
-		next.Selectors = append(next.Selectors, &api.SelectorConfig{Tag: selector.Tag, NodeIds: selector.NodeIDs, SelectedNodeId: selector.Selected})
+		next.Selectors = append(next.Selectors, &api.SelectorConfig{Tag: selector.Tag, NodeIds: selector.NodeIDs, SelectedNodeId: selector.Selected, SelectedAtUnixMs: selector.SelectedAtUnixMs})
 	}
 	next.ServiceRoutes = nil
 	for _, route := range model.ServiceRoutes {
 		next.ServiceRoutes = append(next.ServiceRoutes, &api.ServiceRoute{ServiceId: route.ServiceID, DisplayName: route.DisplayName, Domains: route.Domains, SelectorTag: route.Selector, Enabled: route.Enabled})
 	}
-	for _, binding := range next.ServiceBindings {
-		binding.Revision = next.Revision
+	return model, nil
+}
+
+func reconcileRuntimeSelections(next *api.RuntimeConfig, nodes []targetprofile.Node) {
+	available := make(map[string]bool, len(nodes))
+	for _, node := range nodes {
+		if node.IsAvailable() {
+			available[node.ID] = true
+		}
 	}
-	slices.SortFunc(next.ServiceBindings, func(a, b *api.ServiceBinding) int {
-		return strings.Compare(a.ServiceId, b.ServiceId)
-	})
-	return nil
+	for _, selector := range next.Selectors {
+		if selector == nil {
+			continue
+		}
+		if selector.GetSelectedNodeId() != "direct" && !available[selector.GetSelectedNodeId()] {
+			selector.SelectedNodeId = "direct"
+		}
+		if selector.GetTag() == "proxy" {
+			continue
+		}
+		filtered := make([]string, 0, len(selector.GetNodeIds())+1)
+		for _, nodeID := range selector.GetNodeIds() {
+			if nodeID == "direct" || available[nodeID] {
+				filtered = append(filtered, nodeID)
+			}
+		}
+		if len(filtered) == 0 {
+			filtered = []string{"direct"}
+		}
+		selector.NodeIds = filtered
+	}
 }
 
 // sing-box closes the old instance before attempting the new one. Both load
 // and persistence failures therefore explicitly reload the last good config.
-func (m *Manager) applySnapshot(ctx context.Context, next *api.RuntimeConfig, nodes []targetprofile.Node, activate, wasRunning bool) error {
-	_, content, err := m.prepareRuntimeContent(next, nodes)
-	if err != nil {
-		return err
-	}
+func (m *Manager) applySnapshot(ctx context.Context, next *api.RuntimeConfig, content []byte, activate, wasRunning bool) error {
+	var err error
 	if err = m.checkConfig(ctx, string(content)); err != nil {
 		return status.Error(codes.InvalidArgument, err.Error())
 	}
@@ -159,9 +210,6 @@ func (m *Manager) applySnapshot(ctx context.Context, next *api.RuntimeConfig, no
 	rollback := func(cause error) error {
 		if wasRunning {
 			if restoreErr := m.applyConfig(previousContent); restoreErr != nil {
-				m.configMu.Lock()
-				m.appliedConfig = nil
-				m.configMu.Unlock()
 				return status.Errorf(codes.DataLoss, "apply failed: %v; rollback failed: %v", cause, restoreErr)
 			}
 		} else if activate && m.started != nil {
@@ -177,14 +225,14 @@ func (m *Manager) applySnapshot(ctx context.Context, next *api.RuntimeConfig, no
 		}
 	}
 	// Once activation begins, complete the atomic commit even if the RPC ends.
-	err = m.runtimeStore.SaveSnapshot(context.WithoutCancel(ctx), next, nodes)
+	err = m.runtimeStore.SaveSnapshot(context.WithoutCancel(ctx), next)
 	if err != nil {
 		if activate {
 			return rollback(err)
 		}
 		return status.Error(codes.Internal, err.Error())
 	}
-	m.swapRuntime(next, nodes, content, activate)
+	m.swapRuntime(next, content, activate)
 	return nil
 }
 
@@ -204,7 +252,7 @@ func (m *Manager) GetNodePool(_ context.Context, _ *emptypb.Empty) (*api.NodePoo
 // commitLiveSelector applies a sing-box selector change without a full
 // reload, persists the model, and reverts the live selector on persistence
 // failure.
-func (m *Manager) commitLiveSelector(ctx context.Context, next *api.RuntimeConfig, nodes []targetprofile.Node, content []byte, selectorTag, nodeID, previousSelected string, running bool) error {
+func (m *Manager) commitLiveSelector(ctx context.Context, next *api.RuntimeConfig, content []byte, selectorTag, nodeID, previousSelected string, running bool) error {
 	if running {
 		if m.daemon == nil {
 			return status.Error(codes.FailedPrecondition, "runtime selector is unavailable")
@@ -213,13 +261,13 @@ func (m *Manager) commitLiveSelector(ctx context.Context, next *api.RuntimeConfi
 			return err
 		}
 	}
-	err := m.runtimeStore.SaveSnapshot(context.WithoutCancel(ctx), next, nodes)
+	err := m.runtimeStore.SaveSnapshot(context.WithoutCancel(ctx), next)
 	if err != nil {
 		if running && previousSelected != "" {
 			_, _ = m.daemon.SelectOutbound(context.WithoutCancel(ctx), selectorTag, previousSelected)
 		}
 		return err
 	}
-	m.swapRuntime(next, nodes, content, running)
+	m.swapRuntime(next, content, running)
 	return nil
 }

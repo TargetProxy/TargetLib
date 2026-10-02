@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/loafman1120/TargetLib/config"
-	targetprofile "github.com/loafman1120/TargetLib/profile"
 	box "github.com/sagernet/sing-box"
 	"github.com/sagernet/sing-box/adapter"
 	"github.com/sagernet/sing-box/daemon"
@@ -27,6 +26,18 @@ import (
 	subscriptioncore "github.com/loafman1120/TargetLib/subscriptions"
 )
 
+type Options struct {
+	BasePath          string
+	WorkingPath       string
+	TempPath          string
+	Locale            string
+	LogMaxLines       int
+	Debug             bool
+	OOMKiller         bool
+	ControlToken      string
+	SubscriptionStore subscriptioncore.Store
+}
+
 // Manager 持有 TargetLib gRPC API 使用的唯一 StartedService 实例。
 type Manager struct {
 	*subscriptioncore.Handler
@@ -42,8 +53,6 @@ type Manager struct {
 	configMu      sync.RWMutex
 	config        string
 	runtimeConfig *targetlibapi.RuntimeConfig
-	runtimeNodes  []targetprofile.Node
-	appliedConfig *targetlibapi.RuntimeConfig
 	checkConfig   func(context.Context, string) error
 	readStatus    func() (*daemon.ServiceStatus, error)
 	runtimeStore  runtimeConfigStore
@@ -145,13 +154,6 @@ func New(ctx context.Context, options Options) (*Manager, error) {
 	m.checkConfig = m.started.CheckConfig
 	m.daemon = newDaemonAdapter(m.started)
 	m.readStatus = m.daemon.Status
-	m.runtimeNodes, err = runtimeStore.LoadNodes(ctx)
-	if err != nil {
-		m.started.Close()
-		cancelSubscriptions()
-		subscriptionManager.Close()
-		return nil, err
-	}
 	go func() {
 		defer close(m.subscriptionDone)
 		_ = subscriptionManager.Run(subscriptionContext)
@@ -245,9 +247,6 @@ func (m *Manager) StopService() error {
 	if err := m.started.CloseService(); err != nil {
 		return status.Error(codes.Internal, err.Error())
 	}
-	m.configMu.Lock()
-	m.appliedConfig = nil
-	m.configMu.Unlock()
 	return nil
 }
 
@@ -274,11 +273,11 @@ func (m *Manager) State() (*targetlibapi.ServiceState, error) {
 }
 
 func (m *Manager) SubscribeState(_ *emptypb.Empty, stream grpc.ServerStreamingServer[targetlibapi.ServiceState]) error {
-	return m.started.SubscribeServiceStatus(&emptypb.Empty{}, newStatusRelay(stream))
+	return m.started.SubscribeServiceStatus(&emptypb.Empty{}, &statusRelay{stream})
 }
 
 func (m *Manager) SubscribeLogs(_ *emptypb.Empty, stream grpc.ServerStreamingServer[targetlibapi.LogBatch]) error {
-	return m.started.SubscribeLog(&emptypb.Empty{}, newLogRelay(stream))
+	return m.started.SubscribeLog(&emptypb.Empty{}, &logRelay{stream})
 }
 
 func (m *Manager) SubscribeTraffic(request *targetlibapi.TrafficRequest, stream grpc.ServerStreamingServer[targetlibapi.TrafficStatus]) error {
@@ -288,7 +287,7 @@ func (m *Manager) SubscribeTraffic(request *targetlibapi.TrafficRequest, stream 
 	}
 	return m.started.SubscribeStatus(
 		&daemon.SubscribeStatusRequest{Interval: int64(interval)},
-		newTrafficRelay(stream, interval),
+		&trafficRelay{ServerStreamingServer: stream, interval: interval},
 	)
 }
 
@@ -310,7 +309,11 @@ func (m *Manager) UpdateSubscription(ctx context.Context, request *targetlibapi.
 	if err != nil {
 		return nil, err
 	}
-	content, err := buildRuntimeConfigForModel(settings, config.RuntimeModel{NodePool: config.NodePool{Nodes: subscription.Profile.Nodes}})
+	model, err := normalizeRuntimeModel(config.RuntimeModel{NodePool: config.NodePool{Nodes: subscription.Profile.Nodes}})
+	if err != nil {
+		return nil, err
+	}
+	content, err := buildRuntimeConfigForModel(settings, model)
 	if err != nil {
 		return nil, err
 	}
@@ -350,26 +353,17 @@ func (m *Manager) ServiceReload() error {
 	return m.startOrReload(config)
 }
 
-// platformHandler 仅用于满足 sing-box 的内部 daemon 契约。
-// 系统代理仍由用户会话中的 UI 进程负责。
-type platformHandler struct {
-	manager *Manager
-}
+type platformHandler struct{ manager *Manager }
 
-func (h platformHandler) ServiceStop() error { return h.manager.ServiceStop() }
-
+func (h platformHandler) ServiceStop() error   { return h.manager.ServiceStop() }
 func (h platformHandler) ServiceReload() error { return h.manager.ServiceReload() }
-
 func (platformHandler) SystemProxyStatus() (*daemon.SystemProxyStatus, error) {
 	return &daemon.SystemProxyStatus{Available: false, Enabled: false}, nil
 }
-
 func (platformHandler) SetSystemProxyEnabled(bool) error {
 	return status.Error(codes.Unimplemented, "system proxy is managed by the desktop client")
 }
-
 func (platformHandler) WriteDebugMessage(string) {}
-
 func (platformHandler) ConnectSSHAgent() (int32, error) {
 	return -1, status.Error(codes.Unimplemented, "SSH agent is managed by the host")
 }
@@ -391,10 +385,6 @@ func (m *Manager) Close() {
 		}
 	})
 }
-
-// NotifyNetworkChanged is retained for platform hosts; network changes do not
-// alter the shared runtime model and therefore require no manager-side action.
-func (m *Manager) NotifyNetworkChanged() {}
 
 func (m *Manager) operationResponse() (*targetlibapi.OperationResponse, error) {
 	current, err := m.currentStatus()
@@ -446,26 +436,12 @@ func managerState(source *daemon.ServiceStatus) *targetlibapi.ServiceState {
 type statusRelay struct {
 	grpc.ServerStreamingServer[targetlibapi.ServiceState]
 }
-
 type logRelay struct {
 	grpc.ServerStreamingServer[targetlibapi.LogBatch]
 }
-
 type trafficRelay struct {
 	grpc.ServerStreamingServer[targetlibapi.TrafficStatus]
 	interval time.Duration
-}
-
-func newStatusRelay(server grpc.ServerStreamingServer[targetlibapi.ServiceState]) *statusRelay {
-	return &statusRelay{server}
-}
-
-func newLogRelay(server grpc.ServerStreamingServer[targetlibapi.LogBatch]) *logRelay {
-	return &logRelay{server}
-}
-
-func newTrafficRelay(server grpc.ServerStreamingServer[targetlibapi.TrafficStatus], interval time.Duration) *trafficRelay {
-	return &trafficRelay{ServerStreamingServer: server, interval: interval}
 }
 
 func (r *logRelay) Send(value *daemon.Log) error {

@@ -217,20 +217,22 @@ message RuntimeConfig {
   RuntimeSettings settings = 1;
   repeated SelectorConfig selectors = 2;
   repeated ServiceRoute service_routes = 3;
-  repeated ServiceBinding service_bindings = 4;
-  string revision = 5;
   string node_pool_revision = 6;
+  reserved 4, 5;
+  reserved "service_bindings", "revision";
 }
 
 message UpdateRuntimeConfigRequest {
   RuntimeSettings settings = 1;
-  string expected_revision = 3;
+  reserved 3;
+  reserved "expected_revision";
 }
 
 message SelectorConfig {
   string tag = 1;
   repeated string node_ids = 2;
   string selected_node_id = 3;
+  int64 selected_at_unix_ms = 4;
 }
 
 message ServiceRoute {
@@ -241,22 +243,11 @@ message ServiceRoute {
   string display_name = 5;
 }
 
-message ServiceBinding {
-  string service_id = 1;
-  string selector_tag = 2;
-  string node_id = 3;
-  string revision = 4;
-  int64 expires_at_unix_ms = 5;
-  int64 selected_at_unix_ms = 6;
-  double selected_score = 7;
-  string selection_reason = 8;
-  string selection_policy_revision = 9;
-}
-
 message RuntimeModel {
   repeated SelectorConfig selectors = 1;
   repeated ServiceRoute service_routes = 2;
-  repeated ServiceBinding service_bindings = 3;
+  reserved 3;
+  reserved "service_bindings";
 }
 
 message NodePool {

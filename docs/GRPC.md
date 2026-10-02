@@ -214,16 +214,6 @@ await client.selectNode({ nodeId: 'hk-node-01' });
 
 `GetRuntimeConfig`, `UpdateRuntimeConfig`, `GetIpInfo`, `CloseConnection`, `CloseAllConnections`
 
-### 兼容接口（deprecated）
-
-| 旧 RPC | 替代方案 |
-| --- | --- |
-| `ForceServiceBinding` | `SelectNode` / `SelectRouteNode` |
-| `GetRuntimeState` | `GetProxyStatus` + `ListRoutes` |
-| Smart Connect 复杂 RPC | Layer 3 简化接口 |
-
----
-
 ## 传输与安全
 
 ### 端点
@@ -236,7 +226,6 @@ await client.selectNode({ nodeId: 'hk-node-01' });
 **需要 `Authorization: Bearer <token>` 的 RPC：**
 - Layer 2: `UpsertRoute`, `DeleteRoute`, `SelectRouteNode`
 - 配置: `UpdateRuntimeConfig`
-- 兼容: `ForceServiceBinding` 等遗留 RPC
 
 Token 存储在 `<basePath>/control.token`，Flutter SDK 自动读取。
 
