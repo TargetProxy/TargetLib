@@ -15,6 +15,7 @@ service TargetLib {
   rpc SubscribeState(google.protobuf.Empty) returns (stream ServiceState);
   rpc SubscribeLogs(google.protobuf.Empty) returns (stream LogBatch);
   rpc SubscribeTraffic(TrafficRequest) returns (stream TrafficStatus);
+  rpc SubscribeConnections(SubscribeConnectionsRequest) returns (stream ConnectionEvents);
   rpc CloseConnection(CloseConnectionRequest) returns (google.protobuf.Empty);
   rpc CloseAllConnections(google.protobuf.Empty) returns (google.protobuf.Empty);
 
@@ -365,4 +366,42 @@ enum SubscriptionEventType {
   SUBSCRIPTION_EVENT_TYPE_UPDATED = 2;
   SUBSCRIPTION_EVENT_TYPE_REMOVED = 3;
   SUBSCRIPTION_EVENT_TYPE_STAGE = 4;
+}
+
+message SubscribeConnectionsRequest {
+  uint32 interval_milliseconds = 1;
+}
+
+enum ConnectionEventType {
+  CONNECTION_EVENT_TYPE_UNSPECIFIED = 0;
+  CONNECTION_EVENT_TYPE_NEW = 1;
+  CONNECTION_EVENT_TYPE_UPDATE = 2;
+  CONNECTION_EVENT_TYPE_CLOSED = 3;
+}
+
+message Connection {
+  string id = 1;
+  string destination = 2;
+  string domain = 3;
+  string network = 4;
+  string protocol = 5;
+  string outbound = 6;
+  int64 created_at_unix_ms = 7;
+  int64 closed_at_unix_ms = 8;
+  int64 uplink_total = 9;
+  int64 downlink_total = 10;
+}
+
+message ConnectionEvent {
+  ConnectionEventType type = 1;
+  string id = 2;
+  Connection connection = 3;
+  int64 uplink_delta = 4;
+  int64 downlink_delta = 5;
+  int64 closed_at_unix_ms = 6;
+}
+
+message ConnectionEvents {
+  repeated ConnectionEvent events = 1;
+  bool reset = 2;
 }

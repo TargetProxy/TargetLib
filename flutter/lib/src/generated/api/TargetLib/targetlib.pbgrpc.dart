@@ -89,6 +89,15 @@ class TargetLibClient extends $grpc.Client {
         options: options);
   }
 
+  $grpc.ResponseStream<$1.ConnectionEvents> subscribeConnections(
+    $1.SubscribeConnectionsRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createStreamingCall(
+        _$subscribeConnections, $async.Stream.fromIterable([request]),
+        options: options);
+  }
+
   $grpc.ResponseFuture<$0.Empty> closeConnection(
     $1.CloseConnectionRequest request, {
     $grpc.CallOptions? options,
@@ -279,6 +288,11 @@ class TargetLibClient extends $grpc.Client {
           '/targetlib.TargetLib/SubscribeTraffic',
           ($1.TrafficRequest value) => value.writeToBuffer(),
           $1.TrafficStatus.fromBuffer);
+  static final _$subscribeConnections =
+      $grpc.ClientMethod<$1.SubscribeConnectionsRequest, $1.ConnectionEvents>(
+          '/targetlib.TargetLib/SubscribeConnections',
+          ($1.SubscribeConnectionsRequest value) => value.writeToBuffer(),
+          $1.ConnectionEvents.fromBuffer);
   static final _$closeConnection =
       $grpc.ClientMethod<$1.CloseConnectionRequest, $0.Empty>(
           '/targetlib.TargetLib/CloseConnection',
@@ -440,6 +454,15 @@ abstract class TargetLibServiceBase extends $grpc.Service {
         true,
         ($core.List<$core.int> value) => $1.TrafficRequest.fromBuffer(value),
         ($1.TrafficStatus value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$1.SubscribeConnectionsRequest,
+            $1.ConnectionEvents>(
+        'SubscribeConnections',
+        subscribeConnections_Pre,
+        false,
+        true,
+        ($core.List<$core.int> value) =>
+            $1.SubscribeConnectionsRequest.fromBuffer(value),
+        ($1.ConnectionEvents value) => value.writeToBuffer()));
     $addMethod($grpc.ServiceMethod<$1.CloseConnectionRequest, $0.Empty>(
         'CloseConnection',
         closeConnection_Pre,
@@ -670,6 +693,15 @@ abstract class TargetLibServiceBase extends $grpc.Service {
 
   $async.Stream<$1.TrafficStatus> subscribeTraffic(
       $grpc.ServiceCall call, $1.TrafficRequest request);
+
+  $async.Stream<$1.ConnectionEvents> subscribeConnections_Pre(
+      $grpc.ServiceCall $call,
+      $async.Future<$1.SubscribeConnectionsRequest> $request) async* {
+    yield* subscribeConnections($call, await $request);
+  }
+
+  $async.Stream<$1.ConnectionEvents> subscribeConnections(
+      $grpc.ServiceCall call, $1.SubscribeConnectionsRequest request);
 
   $async.Future<$0.Empty> closeConnection_Pre($grpc.ServiceCall $call,
       $async.Future<$1.CloseConnectionRequest> $request) async {

@@ -291,6 +291,21 @@ func (m *Manager) SubscribeTraffic(request *targetlibapi.TrafficRequest, stream 
 	)
 }
 
+func (m *Manager) SubscribeConnections(request *targetlibapi.SubscribeConnectionsRequest, stream grpc.ServerStreamingServer[targetlibapi.ConnectionEvents]) error {
+	interval, err := connectionInterval(request.GetIntervalMilliseconds())
+	if err != nil {
+		return err
+	}
+	err = m.started.SubscribeConnections(
+		&daemon.SubscribeConnectionsRequest{Interval: int64(interval)},
+		&connectionRelay{ServerStreamingServer: stream},
+	)
+	if errors.Is(err, os.ErrInvalid) {
+		return status.Error(codes.FailedPrecondition, "service is not running")
+	}
+	return err
+}
+
 // UpdateSubscription adds a one-shot generated configuration to the update
 // response so clients can compare it with the fetched provider document.
 func (m *Manager) UpdateSubscription(ctx context.Context, request *targetlibapi.SubscriptionId) (*targetlibapi.SubscriptionUpdateResult, error) {
@@ -443,6 +458,9 @@ type trafficRelay struct {
 	grpc.ServerStreamingServer[targetlibapi.TrafficStatus]
 	interval time.Duration
 }
+type connectionRelay struct {
+	grpc.ServerStreamingServer[targetlibapi.ConnectionEvents]
+}
 
 func (r *logRelay) Send(value *daemon.Log) error {
 	batch := &targetlibapi.LogBatch{Reset_: value.GetReset_()}
@@ -470,6 +488,56 @@ func (r *trafficRelay) Send(value *daemon.Status) error {
 	return r.ServerStreamingServer.Send(trafficStatus(value, r.interval, time.Now()))
 }
 
+func (r *connectionRelay) Send(value *daemon.ConnectionEvents) error {
+	batch := &targetlibapi.ConnectionEvents{Reset_: value.GetReset_()}
+	for _, event := range value.GetEvents() {
+		if event == nil {
+			continue
+		}
+		converted := &targetlibapi.ConnectionEvent{
+			Type:           connectionEventType(event.GetType()),
+			Id:             event.GetId(),
+			UplinkDelta:    event.GetUplinkDelta(),
+			DownlinkDelta:  event.GetDownlinkDelta(),
+			ClosedAtUnixMs: event.GetClosedAt(),
+			Connection:     connectionInfo(event.GetConnection()),
+		}
+		batch.Events = append(batch.Events, converted)
+	}
+	return r.ServerStreamingServer.Send(batch)
+}
+
+func connectionEventType(source daemon.ConnectionEventType) targetlibapi.ConnectionEventType {
+	switch source {
+	case daemon.ConnectionEventType_CONNECTION_EVENT_NEW:
+		return targetlibapi.ConnectionEventType_CONNECTION_EVENT_TYPE_NEW
+	case daemon.ConnectionEventType_CONNECTION_EVENT_UPDATE:
+		return targetlibapi.ConnectionEventType_CONNECTION_EVENT_TYPE_UPDATE
+	case daemon.ConnectionEventType_CONNECTION_EVENT_CLOSED:
+		return targetlibapi.ConnectionEventType_CONNECTION_EVENT_TYPE_CLOSED
+	default:
+		return targetlibapi.ConnectionEventType_CONNECTION_EVENT_TYPE_UNSPECIFIED
+	}
+}
+
+func connectionInfo(source *daemon.Connection) *targetlibapi.Connection {
+	if source == nil {
+		return nil
+	}
+	return &targetlibapi.Connection{
+		Id:              source.GetId(),
+		Destination:     source.GetDestination(),
+		Domain:          source.GetDomain(),
+		Network:         source.GetNetwork(),
+		Protocol:        source.GetProtocol(),
+		Outbound:        source.GetOutbound(),
+		CreatedAtUnixMs: source.GetCreatedAt(),
+		ClosedAtUnixMs:  source.GetClosedAt(),
+		UplinkTotal:     source.GetUplinkTotal(),
+		DownlinkTotal:   source.GetDownlinkTotal(),
+	}
+}
+
 const (
 	defaultTrafficInterval = time.Second
 	minimumTrafficInterval = 250 * time.Millisecond
@@ -485,6 +553,13 @@ func trafficInterval(milliseconds uint32) (time.Duration, error) {
 		return 0, status.Errorf(codes.InvalidArgument, "interval_milliseconds must be between %d and %d", minimumTrafficInterval.Milliseconds(), maximumTrafficInterval.Milliseconds())
 	}
 	return interval, nil
+}
+
+func connectionInterval(milliseconds uint32) (time.Duration, error) {
+	if milliseconds == 0 {
+		return time.Second, nil
+	}
+	return time.Duration(milliseconds) * time.Millisecond, nil
 }
 
 func trafficStatus(source *daemon.Status, interval time.Duration, sampledAt time.Time) *targetlibapi.TrafficStatus {

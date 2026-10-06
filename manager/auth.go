@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"crypto/subtle"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"os"
 	"path"
@@ -125,5 +126,11 @@ func (m *Manager) logGRPCError(method string, err error) {
 		return
 	}
 	st := status.Convert(err)
+	// Closing a client stream cancels its context. This is an expected
+	// lifecycle event and should not be surfaced as a runtime error.
+	if st.Code() == codes.Canceled || errors.Is(err, context.Canceled) ||
+		(st.Code() == codes.Unknown && st.Message() == context.Canceled.Error()) {
+		return
+	}
 	m.started.WriteMessage(boxlog.LevelError, fmt.Sprintf("gRPC ERROR %s: %s: %s", method, st.Code(), st.Message()))
 }

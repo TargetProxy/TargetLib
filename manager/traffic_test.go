@@ -6,6 +6,7 @@ import (
 
 	targetlibapi "github.com/loafman1120/TargetLib/api/TargetLib"
 	"github.com/sagernet/sing-box/daemon"
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
@@ -35,6 +36,54 @@ func TestTrafficInterval(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestConnectionInterval(t *testing.T) {
+	for _, test := range []struct {
+		milliseconds uint32
+		want         time.Duration
+		wantCode     codes.Code
+	}{
+		{want: time.Second},
+		{milliseconds: 100, want: 100 * time.Millisecond},
+		{milliseconds: 250, want: 250 * time.Millisecond},
+	} {
+		got, err := connectionInterval(test.milliseconds)
+		if status.Code(err) != test.wantCode || got != test.want {
+			t.Fatalf("connection interval (%d) = %v, %v; want %v, %v", test.milliseconds, got, status.Code(err), test.want, test.wantCode)
+		}
+	}
+}
+
+func TestConnectionRelayConvertsDaemonEvent(t *testing.T) {
+	source := &daemon.ConnectionEvents{
+		Reset_: true,
+		Events: []*daemon.ConnectionEvent{{
+			Type:          daemon.ConnectionEventType_CONNECTION_EVENT_NEW,
+			Id:            "conn-1",
+			Connection:    &daemon.Connection{Id: "conn-1", Destination: "example.com:443", Domain: "example.com", Network: "tcp", Protocol: "tls", Outbound: "proxy", CreatedAt: 123, UplinkTotal: 7, DownlinkTotal: 11},
+			UplinkDelta:   2,
+			DownlinkDelta: 3,
+		}},
+	}
+	relay := &connectionRelay{ServerStreamingServer: &captureConnectionStream{}}
+	if err := relay.Send(source); err != nil {
+		t.Fatal(err)
+	}
+	got := relay.ServerStreamingServer.(*captureConnectionStream).value
+	if !got.GetReset_() || len(got.GetEvents()) != 1 || got.GetEvents()[0].GetConnection().GetDestination() != "example.com:443" {
+		t.Fatalf("unexpected converted event: %v", got)
+	}
+}
+
+type captureConnectionStream struct {
+	grpc.ServerStreamingServer[targetlibapi.ConnectionEvents]
+	value *targetlibapi.ConnectionEvents
+}
+
+func (s *captureConnectionStream) Send(value *targetlibapi.ConnectionEvents) error {
+	s.value = value
+	return nil
 }
 
 func TestTrafficStatusNormalizesSampleToBytesPerSecond(t *testing.T) {

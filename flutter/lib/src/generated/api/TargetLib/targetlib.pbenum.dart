@@ -272,5 +272,34 @@ class SubscriptionEventType extends $pb.ProtobufEnum {
   const SubscriptionEventType._(super.value, super.name);
 }
 
+class ConnectionEventType extends $pb.ProtobufEnum {
+  static const ConnectionEventType CONNECTION_EVENT_TYPE_UNSPECIFIED =
+      ConnectionEventType._(
+          0, _omitEnumNames ? '' : 'CONNECTION_EVENT_TYPE_UNSPECIFIED');
+  static const ConnectionEventType CONNECTION_EVENT_TYPE_NEW =
+      ConnectionEventType._(
+          1, _omitEnumNames ? '' : 'CONNECTION_EVENT_TYPE_NEW');
+  static const ConnectionEventType CONNECTION_EVENT_TYPE_UPDATE =
+      ConnectionEventType._(
+          2, _omitEnumNames ? '' : 'CONNECTION_EVENT_TYPE_UPDATE');
+  static const ConnectionEventType CONNECTION_EVENT_TYPE_CLOSED =
+      ConnectionEventType._(
+          3, _omitEnumNames ? '' : 'CONNECTION_EVENT_TYPE_CLOSED');
+
+  static const $core.List<ConnectionEventType> values = <ConnectionEventType>[
+    CONNECTION_EVENT_TYPE_UNSPECIFIED,
+    CONNECTION_EVENT_TYPE_NEW,
+    CONNECTION_EVENT_TYPE_UPDATE,
+    CONNECTION_EVENT_TYPE_CLOSED,
+  ];
+
+  static final $core.List<ConnectionEventType?> _byValue =
+      $pb.ProtobufEnum.$_initByValueList(values, 3);
+  static ConnectionEventType? valueOf($core.int value) =>
+      value < 0 || value >= _byValue.length ? null : _byValue[value];
+
+  const ConnectionEventType._(super.value, super.name);
+}
+
 const $core.bool _omitEnumNames =
     $core.bool.fromEnvironment('protobuf.omit_enum_names');

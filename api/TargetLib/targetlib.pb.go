@@ -474,6 +474,58 @@ func (SubscriptionEventType) EnumDescriptor() ([]byte, []int) {
 	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{7}
 }
 
+type ConnectionEventType int32
+
+const (
+	ConnectionEventType_CONNECTION_EVENT_TYPE_UNSPECIFIED ConnectionEventType = 0
+	ConnectionEventType_CONNECTION_EVENT_TYPE_NEW         ConnectionEventType = 1
+	ConnectionEventType_CONNECTION_EVENT_TYPE_UPDATE      ConnectionEventType = 2
+	ConnectionEventType_CONNECTION_EVENT_TYPE_CLOSED      ConnectionEventType = 3
+)
+
+// Enum value maps for ConnectionEventType.
+var (
+	ConnectionEventType_name = map[int32]string{
+		0: "CONNECTION_EVENT_TYPE_UNSPECIFIED",
+		1: "CONNECTION_EVENT_TYPE_NEW",
+		2: "CONNECTION_EVENT_TYPE_UPDATE",
+		3: "CONNECTION_EVENT_TYPE_CLOSED",
+	}
+	ConnectionEventType_value = map[string]int32{
+		"CONNECTION_EVENT_TYPE_UNSPECIFIED": 0,
+		"CONNECTION_EVENT_TYPE_NEW":         1,
+		"CONNECTION_EVENT_TYPE_UPDATE":      2,
+		"CONNECTION_EVENT_TYPE_CLOSED":      3,
+	}
+)
+
+func (x ConnectionEventType) Enum() *ConnectionEventType {
+	p := new(ConnectionEventType)
+	*p = x
+	return p
+}
+
+func (x ConnectionEventType) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (ConnectionEventType) Descriptor() protoreflect.EnumDescriptor {
+	return file_api_TargetLib_targetlib_proto_enumTypes[8].Descriptor()
+}
+
+func (ConnectionEventType) Type() protoreflect.EnumType {
+	return &file_api_TargetLib_targetlib_proto_enumTypes[8]
+}
+
+func (x ConnectionEventType) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use ConnectionEventType.Descriptor instead.
+func (ConnectionEventType) EnumDescriptor() ([]byte, []int) {
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{8}
+}
+
 type LogMessage struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Level         LogLevel               `protobuf:"varint,1,opt,name=level,proto3,enum=targetlib.LogLevel" json:"level,omitempty"`
@@ -2884,6 +2936,302 @@ func (x *SubscriptionEvent) GetOccurredAtUnixMs() int64 {
 	return 0
 }
 
+type SubscribeConnectionsRequest struct {
+	state                protoimpl.MessageState `protogen:"open.v1"`
+	IntervalMilliseconds uint32                 `protobuf:"varint,1,opt,name=interval_milliseconds,json=intervalMilliseconds,proto3" json:"interval_milliseconds,omitempty"`
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
+}
+
+func (x *SubscribeConnectionsRequest) Reset() {
+	*x = SubscribeConnectionsRequest{}
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[36]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SubscribeConnectionsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SubscribeConnectionsRequest) ProtoMessage() {}
+
+func (x *SubscribeConnectionsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[36]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SubscribeConnectionsRequest.ProtoReflect.Descriptor instead.
+func (*SubscribeConnectionsRequest) Descriptor() ([]byte, []int) {
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{36}
+}
+
+func (x *SubscribeConnectionsRequest) GetIntervalMilliseconds() uint32 {
+	if x != nil {
+		return x.IntervalMilliseconds
+	}
+	return 0
+}
+
+type Connection struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Id              string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Destination     string                 `protobuf:"bytes,2,opt,name=destination,proto3" json:"destination,omitempty"`
+	Domain          string                 `protobuf:"bytes,3,opt,name=domain,proto3" json:"domain,omitempty"`
+	Network         string                 `protobuf:"bytes,4,opt,name=network,proto3" json:"network,omitempty"`
+	Protocol        string                 `protobuf:"bytes,5,opt,name=protocol,proto3" json:"protocol,omitempty"`
+	Outbound        string                 `protobuf:"bytes,6,opt,name=outbound,proto3" json:"outbound,omitempty"`
+	CreatedAtUnixMs int64                  `protobuf:"varint,7,opt,name=created_at_unix_ms,json=createdAtUnixMs,proto3" json:"created_at_unix_ms,omitempty"`
+	ClosedAtUnixMs  int64                  `protobuf:"varint,8,opt,name=closed_at_unix_ms,json=closedAtUnixMs,proto3" json:"closed_at_unix_ms,omitempty"`
+	UplinkTotal     int64                  `protobuf:"varint,9,opt,name=uplink_total,json=uplinkTotal,proto3" json:"uplink_total,omitempty"`
+	DownlinkTotal   int64                  `protobuf:"varint,10,opt,name=downlink_total,json=downlinkTotal,proto3" json:"downlink_total,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *Connection) Reset() {
+	*x = Connection{}
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[37]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Connection) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Connection) ProtoMessage() {}
+
+func (x *Connection) ProtoReflect() protoreflect.Message {
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[37]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Connection.ProtoReflect.Descriptor instead.
+func (*Connection) Descriptor() ([]byte, []int) {
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{37}
+}
+
+func (x *Connection) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *Connection) GetDestination() string {
+	if x != nil {
+		return x.Destination
+	}
+	return ""
+}
+
+func (x *Connection) GetDomain() string {
+	if x != nil {
+		return x.Domain
+	}
+	return ""
+}
+
+func (x *Connection) GetNetwork() string {
+	if x != nil {
+		return x.Network
+	}
+	return ""
+}
+
+func (x *Connection) GetProtocol() string {
+	if x != nil {
+		return x.Protocol
+	}
+	return ""
+}
+
+func (x *Connection) GetOutbound() string {
+	if x != nil {
+		return x.Outbound
+	}
+	return ""
+}
+
+func (x *Connection) GetCreatedAtUnixMs() int64 {
+	if x != nil {
+		return x.CreatedAtUnixMs
+	}
+	return 0
+}
+
+func (x *Connection) GetClosedAtUnixMs() int64 {
+	if x != nil {
+		return x.ClosedAtUnixMs
+	}
+	return 0
+}
+
+func (x *Connection) GetUplinkTotal() int64 {
+	if x != nil {
+		return x.UplinkTotal
+	}
+	return 0
+}
+
+func (x *Connection) GetDownlinkTotal() int64 {
+	if x != nil {
+		return x.DownlinkTotal
+	}
+	return 0
+}
+
+type ConnectionEvent struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Type           ConnectionEventType    `protobuf:"varint,1,opt,name=type,proto3,enum=targetlib.ConnectionEventType" json:"type,omitempty"`
+	Id             string                 `protobuf:"bytes,2,opt,name=id,proto3" json:"id,omitempty"`
+	Connection     *Connection            `protobuf:"bytes,3,opt,name=connection,proto3" json:"connection,omitempty"`
+	UplinkDelta    int64                  `protobuf:"varint,4,opt,name=uplink_delta,json=uplinkDelta,proto3" json:"uplink_delta,omitempty"`
+	DownlinkDelta  int64                  `protobuf:"varint,5,opt,name=downlink_delta,json=downlinkDelta,proto3" json:"downlink_delta,omitempty"`
+	ClosedAtUnixMs int64                  `protobuf:"varint,6,opt,name=closed_at_unix_ms,json=closedAtUnixMs,proto3" json:"closed_at_unix_ms,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *ConnectionEvent) Reset() {
+	*x = ConnectionEvent{}
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[38]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ConnectionEvent) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ConnectionEvent) ProtoMessage() {}
+
+func (x *ConnectionEvent) ProtoReflect() protoreflect.Message {
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[38]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ConnectionEvent.ProtoReflect.Descriptor instead.
+func (*ConnectionEvent) Descriptor() ([]byte, []int) {
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{38}
+}
+
+func (x *ConnectionEvent) GetType() ConnectionEventType {
+	if x != nil {
+		return x.Type
+	}
+	return ConnectionEventType_CONNECTION_EVENT_TYPE_UNSPECIFIED
+}
+
+func (x *ConnectionEvent) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *ConnectionEvent) GetConnection() *Connection {
+	if x != nil {
+		return x.Connection
+	}
+	return nil
+}
+
+func (x *ConnectionEvent) GetUplinkDelta() int64 {
+	if x != nil {
+		return x.UplinkDelta
+	}
+	return 0
+}
+
+func (x *ConnectionEvent) GetDownlinkDelta() int64 {
+	if x != nil {
+		return x.DownlinkDelta
+	}
+	return 0
+}
+
+func (x *ConnectionEvent) GetClosedAtUnixMs() int64 {
+	if x != nil {
+		return x.ClosedAtUnixMs
+	}
+	return 0
+}
+
+type ConnectionEvents struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Events        []*ConnectionEvent     `protobuf:"bytes,1,rep,name=events,proto3" json:"events,omitempty"`
+	Reset_        bool                   `protobuf:"varint,2,opt,name=reset,proto3" json:"reset,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ConnectionEvents) Reset() {
+	*x = ConnectionEvents{}
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[39]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ConnectionEvents) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ConnectionEvents) ProtoMessage() {}
+
+func (x *ConnectionEvents) ProtoReflect() protoreflect.Message {
+	mi := &file_api_TargetLib_targetlib_proto_msgTypes[39]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ConnectionEvents.ProtoReflect.Descriptor instead.
+func (*ConnectionEvents) Descriptor() ([]byte, []int) {
+	return file_api_TargetLib_targetlib_proto_rawDescGZIP(), []int{39}
+}
+
+func (x *ConnectionEvents) GetEvents() []*ConnectionEvent {
+	if x != nil {
+		return x.Events
+	}
+	return nil
+}
+
+func (x *ConnectionEvents) GetReset_() bool {
+	if x != nil {
+		return x.Reset_
+	}
+	return false
+}
+
 var File_api_TargetLib_targetlib_proto protoreflect.FileDescriptor
 
 const file_api_TargetLib_targetlib_proto_rawDesc = "" +
@@ -3087,7 +3435,34 @@ const file_api_TargetLib_targetlib_proto_rawDesc = "" +
 	"\x11SubscriptionEvent\x124\n" +
 	"\x04type\x18\x01 \x01(\x0e2 .targetlib.SubscriptionEventTypeR\x04type\x12?\n" +
 	"\fsubscription\x18\x02 \x01(\v2\x1b.targetlib.SubscriptionViewR\fsubscription\x12-\n" +
-	"\x13occurred_at_unix_ms\x18\x03 \x01(\x03R\x10occurredAtUnixMs*\xb6\x01\n" +
+	"\x13occurred_at_unix_ms\x18\x03 \x01(\x03R\x10occurredAtUnixMs\"R\n" +
+	"\x1bSubscribeConnectionsRequest\x123\n" +
+	"\x15interval_milliseconds\x18\x01 \x01(\rR\x14intervalMilliseconds\"\xca\x02\n" +
+	"\n" +
+	"Connection\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12 \n" +
+	"\vdestination\x18\x02 \x01(\tR\vdestination\x12\x16\n" +
+	"\x06domain\x18\x03 \x01(\tR\x06domain\x12\x18\n" +
+	"\anetwork\x18\x04 \x01(\tR\anetwork\x12\x1a\n" +
+	"\bprotocol\x18\x05 \x01(\tR\bprotocol\x12\x1a\n" +
+	"\boutbound\x18\x06 \x01(\tR\boutbound\x12+\n" +
+	"\x12created_at_unix_ms\x18\a \x01(\x03R\x0fcreatedAtUnixMs\x12)\n" +
+	"\x11closed_at_unix_ms\x18\b \x01(\x03R\x0eclosedAtUnixMs\x12!\n" +
+	"\fuplink_total\x18\t \x01(\x03R\vuplinkTotal\x12%\n" +
+	"\x0edownlink_total\x18\n" +
+	" \x01(\x03R\rdownlinkTotal\"\x81\x02\n" +
+	"\x0fConnectionEvent\x122\n" +
+	"\x04type\x18\x01 \x01(\x0e2\x1e.targetlib.ConnectionEventTypeR\x04type\x12\x0e\n" +
+	"\x02id\x18\x02 \x01(\tR\x02id\x125\n" +
+	"\n" +
+	"connection\x18\x03 \x01(\v2\x15.targetlib.ConnectionR\n" +
+	"connection\x12!\n" +
+	"\fuplink_delta\x18\x04 \x01(\x03R\vuplinkDelta\x12%\n" +
+	"\x0edownlink_delta\x18\x05 \x01(\x03R\rdownlinkDelta\x12)\n" +
+	"\x11closed_at_unix_ms\x18\x06 \x01(\x03R\x0eclosedAtUnixMs\"\\\n" +
+	"\x10ConnectionEvents\x122\n" +
+	"\x06events\x18\x01 \x03(\v2\x1a.targetlib.ConnectionEventR\x06events\x12\x14\n" +
+	"\x05reset\x18\x02 \x01(\bR\x05reset*\xb6\x01\n" +
 	"\bLogLevel\x12\x19\n" +
 	"\x15LOG_LEVEL_UNSPECIFIED\x10\x00\x12\x13\n" +
 	"\x0fLOG_LEVEL_PANIC\x10\x01\x12\x13\n" +
@@ -3139,7 +3514,12 @@ const file_api_TargetLib_targetlib_proto_rawDesc = "" +
 	"\x1dSUBSCRIPTION_EVENT_TYPE_ADDED\x10\x01\x12#\n" +
 	"\x1fSUBSCRIPTION_EVENT_TYPE_UPDATED\x10\x02\x12#\n" +
 	"\x1fSUBSCRIPTION_EVENT_TYPE_REMOVED\x10\x03\x12!\n" +
-	"\x1dSUBSCRIPTION_EVENT_TYPE_STAGE\x10\x042\x8d\x11\n" +
+	"\x1dSUBSCRIPTION_EVENT_TYPE_STAGE\x10\x04*\x9f\x01\n" +
+	"\x13ConnectionEventType\x12%\n" +
+	"!CONNECTION_EVENT_TYPE_UNSPECIFIED\x10\x00\x12\x1d\n" +
+	"\x19CONNECTION_EVENT_TYPE_NEW\x10\x01\x12 \n" +
+	"\x1cCONNECTION_EVENT_TYPE_UPDATE\x10\x02\x12 \n" +
+	"\x1cCONNECTION_EVENT_TYPE_CLOSED\x10\x032\xec\x11\n" +
 	"\tTargetLib\x12=\n" +
 	"\x05Start\x12\x16.google.protobuf.Empty\x1a\x1c.targetlib.OperationResponse\x12?\n" +
 	"\aRestart\x12\x16.google.protobuf.Empty\x1a\x1c.targetlib.OperationResponse\x12<\n" +
@@ -3147,7 +3527,8 @@ const file_api_TargetLib_targetlib_proto_rawDesc = "" +
 	"\bGetState\x12\x16.google.protobuf.Empty\x1a\x17.targetlib.ServiceState\x12C\n" +
 	"\x0eSubscribeState\x12\x16.google.protobuf.Empty\x1a\x17.targetlib.ServiceState0\x01\x12>\n" +
 	"\rSubscribeLogs\x12\x16.google.protobuf.Empty\x1a\x13.targetlib.LogBatch0\x01\x12I\n" +
-	"\x10SubscribeTraffic\x12\x19.targetlib.TrafficRequest\x1a\x18.targetlib.TrafficStatus0\x01\x12L\n" +
+	"\x10SubscribeTraffic\x12\x19.targetlib.TrafficRequest\x1a\x18.targetlib.TrafficStatus0\x01\x12]\n" +
+	"\x14SubscribeConnections\x12&.targetlib.SubscribeConnectionsRequest\x1a\x1b.targetlib.ConnectionEvents0\x01\x12L\n" +
 	"\x0fCloseConnection\x12!.targetlib.CloseConnectionRequest\x1a\x16.google.protobuf.Empty\x12E\n" +
 	"\x13CloseAllConnections\x12\x16.google.protobuf.Empty\x1a\x16.google.protobuf.Empty\x12H\n" +
 	"\x11ListSubscriptions\x12\x16.google.protobuf.Empty\x1a\x1b.targetlib.SubscriptionList\x12I\n" +
@@ -3185,8 +3566,8 @@ func file_api_TargetLib_targetlib_proto_rawDescGZIP() []byte {
 	return file_api_TargetLib_targetlib_proto_rawDescData
 }
 
-var file_api_TargetLib_targetlib_proto_enumTypes = make([]protoimpl.EnumInfo, 8)
-var file_api_TargetLib_targetlib_proto_msgTypes = make([]protoimpl.MessageInfo, 37)
+var file_api_TargetLib_targetlib_proto_enumTypes = make([]protoimpl.EnumInfo, 9)
+var file_api_TargetLib_targetlib_proto_msgTypes = make([]protoimpl.MessageInfo, 41)
 var file_api_TargetLib_targetlib_proto_goTypes = []any{
 	(LogLevel)(0),                               // 0: targetlib.LogLevel
 	(ServiceStateType)(0),                       // 1: targetlib.ServiceStateType
@@ -3196,135 +3577,145 @@ var file_api_TargetLib_targetlib_proto_goTypes = []any{
 	(SubscriptionUpdateStage)(0),                // 5: targetlib.SubscriptionUpdateStage
 	(ProfileNodePhase)(0),                       // 6: targetlib.ProfileNodePhase
 	(SubscriptionEventType)(0),                  // 7: targetlib.SubscriptionEventType
-	(*LogMessage)(nil),                          // 8: targetlib.LogMessage
-	(*LogBatch)(nil),                            // 9: targetlib.LogBatch
-	(*CloseConnectionRequest)(nil),              // 10: targetlib.CloseConnectionRequest
-	(*OperationResponse)(nil),                   // 11: targetlib.OperationResponse
-	(*ServiceState)(nil),                        // 12: targetlib.ServiceState
-	(*TrafficRequest)(nil),                      // 13: targetlib.TrafficRequest
-	(*TrafficStatus)(nil),                       // 14: targetlib.TrafficStatus
-	(*SubscriptionId)(nil),                      // 15: targetlib.SubscriptionId
-	(*AddSubscriptionRequest)(nil),              // 16: targetlib.AddSubscriptionRequest
-	(*RenameSubscriptionRequest)(nil),           // 17: targetlib.RenameSubscriptionRequest
-	(*SetSubscriptionEnabledRequest)(nil),       // 18: targetlib.SetSubscriptionEnabledRequest
-	(*ConfigureSubscriptionUpdatesRequest)(nil), // 19: targetlib.ConfigureSubscriptionUpdatesRequest
-	(*ResolvedEndpointsRequest)(nil),            // 20: targetlib.ResolvedEndpointsRequest
-	(*SubscriptionList)(nil),                    // 21: targetlib.SubscriptionList
-	(*SubscriptionView)(nil),                    // 22: targetlib.SubscriptionView
-	(*ProfileView)(nil),                         // 23: targetlib.ProfileView
-	(*ProfileNode)(nil),                         // 24: targetlib.ProfileNode
-	(*SubscriptionUpdateResult)(nil),            // 25: targetlib.SubscriptionUpdateResult
-	(*RuntimeSettings)(nil),                     // 26: targetlib.RuntimeSettings
-	(*RuntimeConfig)(nil),                       // 27: targetlib.RuntimeConfig
-	(*UpdateRuntimeConfigRequest)(nil),          // 28: targetlib.UpdateRuntimeConfigRequest
-	(*SelectorConfig)(nil),                      // 29: targetlib.SelectorConfig
-	(*ServiceRoute)(nil),                        // 30: targetlib.ServiceRoute
-	(*RuntimeModel)(nil),                        // 31: targetlib.RuntimeModel
-	(*NodePool)(nil),                            // 32: targetlib.NodePool
-	(*SelectNodeRequest)(nil),                   // 33: targetlib.SelectNodeRequest
-	(*SelectNodeResponse)(nil),                  // 34: targetlib.SelectNodeResponse
-	(*ProxyStatus)(nil),                         // 35: targetlib.ProxyStatus
-	(*UpsertRouteRequest)(nil),                  // 36: targetlib.UpsertRouteRequest
-	(*RouteInfo)(nil),                           // 37: targetlib.RouteInfo
-	(*DeleteRouteRequest)(nil),                  // 38: targetlib.DeleteRouteRequest
-	(*RouteList)(nil),                           // 39: targetlib.RouteList
-	(*SelectRouteNodeRequest)(nil),              // 40: targetlib.SelectRouteNodeRequest
-	(*ResolvedEndpoints)(nil),                   // 41: targetlib.ResolvedEndpoints
-	(*IpInfoResponse)(nil),                      // 42: targetlib.IpInfoResponse
-	(*SubscriptionEvent)(nil),                   // 43: targetlib.SubscriptionEvent
-	nil,                                         // 44: targetlib.AddSubscriptionRequest.HeadersEntry
-	(*emptypb.Empty)(nil),                       // 45: google.protobuf.Empty
+	(ConnectionEventType)(0),                    // 8: targetlib.ConnectionEventType
+	(*LogMessage)(nil),                          // 9: targetlib.LogMessage
+	(*LogBatch)(nil),                            // 10: targetlib.LogBatch
+	(*CloseConnectionRequest)(nil),              // 11: targetlib.CloseConnectionRequest
+	(*OperationResponse)(nil),                   // 12: targetlib.OperationResponse
+	(*ServiceState)(nil),                        // 13: targetlib.ServiceState
+	(*TrafficRequest)(nil),                      // 14: targetlib.TrafficRequest
+	(*TrafficStatus)(nil),                       // 15: targetlib.TrafficStatus
+	(*SubscriptionId)(nil),                      // 16: targetlib.SubscriptionId
+	(*AddSubscriptionRequest)(nil),              // 17: targetlib.AddSubscriptionRequest
+	(*RenameSubscriptionRequest)(nil),           // 18: targetlib.RenameSubscriptionRequest
+	(*SetSubscriptionEnabledRequest)(nil),       // 19: targetlib.SetSubscriptionEnabledRequest
+	(*ConfigureSubscriptionUpdatesRequest)(nil), // 20: targetlib.ConfigureSubscriptionUpdatesRequest
+	(*ResolvedEndpointsRequest)(nil),            // 21: targetlib.ResolvedEndpointsRequest
+	(*SubscriptionList)(nil),                    // 22: targetlib.SubscriptionList
+	(*SubscriptionView)(nil),                    // 23: targetlib.SubscriptionView
+	(*ProfileView)(nil),                         // 24: targetlib.ProfileView
+	(*ProfileNode)(nil),                         // 25: targetlib.ProfileNode
+	(*SubscriptionUpdateResult)(nil),            // 26: targetlib.SubscriptionUpdateResult
+	(*RuntimeSettings)(nil),                     // 27: targetlib.RuntimeSettings
+	(*RuntimeConfig)(nil),                       // 28: targetlib.RuntimeConfig
+	(*UpdateRuntimeConfigRequest)(nil),          // 29: targetlib.UpdateRuntimeConfigRequest
+	(*SelectorConfig)(nil),                      // 30: targetlib.SelectorConfig
+	(*ServiceRoute)(nil),                        // 31: targetlib.ServiceRoute
+	(*RuntimeModel)(nil),                        // 32: targetlib.RuntimeModel
+	(*NodePool)(nil),                            // 33: targetlib.NodePool
+	(*SelectNodeRequest)(nil),                   // 34: targetlib.SelectNodeRequest
+	(*SelectNodeResponse)(nil),                  // 35: targetlib.SelectNodeResponse
+	(*ProxyStatus)(nil),                         // 36: targetlib.ProxyStatus
+	(*UpsertRouteRequest)(nil),                  // 37: targetlib.UpsertRouteRequest
+	(*RouteInfo)(nil),                           // 38: targetlib.RouteInfo
+	(*DeleteRouteRequest)(nil),                  // 39: targetlib.DeleteRouteRequest
+	(*RouteList)(nil),                           // 40: targetlib.RouteList
+	(*SelectRouteNodeRequest)(nil),              // 41: targetlib.SelectRouteNodeRequest
+	(*ResolvedEndpoints)(nil),                   // 42: targetlib.ResolvedEndpoints
+	(*IpInfoResponse)(nil),                      // 43: targetlib.IpInfoResponse
+	(*SubscriptionEvent)(nil),                   // 44: targetlib.SubscriptionEvent
+	(*SubscribeConnectionsRequest)(nil),         // 45: targetlib.SubscribeConnectionsRequest
+	(*Connection)(nil),                          // 46: targetlib.Connection
+	(*ConnectionEvent)(nil),                     // 47: targetlib.ConnectionEvent
+	(*ConnectionEvents)(nil),                    // 48: targetlib.ConnectionEvents
+	nil,                                         // 49: targetlib.AddSubscriptionRequest.HeadersEntry
+	(*emptypb.Empty)(nil),                       // 50: google.protobuf.Empty
 }
 var file_api_TargetLib_targetlib_proto_depIdxs = []int32{
 	0,  // 0: targetlib.LogMessage.level:type_name -> targetlib.LogLevel
-	8,  // 1: targetlib.LogBatch.messages:type_name -> targetlib.LogMessage
-	12, // 2: targetlib.OperationResponse.state:type_name -> targetlib.ServiceState
+	9,  // 1: targetlib.LogBatch.messages:type_name -> targetlib.LogMessage
+	13, // 2: targetlib.OperationResponse.state:type_name -> targetlib.ServiceState
 	1,  // 3: targetlib.ServiceState.state:type_name -> targetlib.ServiceStateType
-	44, // 4: targetlib.AddSubscriptionRequest.headers:type_name -> targetlib.AddSubscriptionRequest.HeadersEntry
-	22, // 5: targetlib.SubscriptionList.subscriptions:type_name -> targetlib.SubscriptionView
+	49, // 4: targetlib.AddSubscriptionRequest.headers:type_name -> targetlib.AddSubscriptionRequest.HeadersEntry
+	23, // 5: targetlib.SubscriptionList.subscriptions:type_name -> targetlib.SubscriptionView
 	4,  // 6: targetlib.SubscriptionView.status:type_name -> targetlib.SubscriptionStatus
 	5,  // 7: targetlib.SubscriptionView.stage:type_name -> targetlib.SubscriptionUpdateStage
-	23, // 8: targetlib.SubscriptionView.profile:type_name -> targetlib.ProfileView
-	24, // 9: targetlib.ProfileView.nodes:type_name -> targetlib.ProfileNode
+	24, // 8: targetlib.SubscriptionView.profile:type_name -> targetlib.ProfileView
+	25, // 9: targetlib.ProfileView.nodes:type_name -> targetlib.ProfileNode
 	6,  // 10: targetlib.ProfileNode.phase:type_name -> targetlib.ProfileNodePhase
-	22, // 11: targetlib.SubscriptionUpdateResult.subscription:type_name -> targetlib.SubscriptionView
+	23, // 11: targetlib.SubscriptionUpdateResult.subscription:type_name -> targetlib.SubscriptionView
 	2,  // 12: targetlib.RuntimeSettings.proxy_mode:type_name -> targetlib.ProxyMode
 	3,  // 13: targetlib.RuntimeSettings.route_mode:type_name -> targetlib.RouteMode
-	26, // 14: targetlib.RuntimeConfig.settings:type_name -> targetlib.RuntimeSettings
-	29, // 15: targetlib.RuntimeConfig.selectors:type_name -> targetlib.SelectorConfig
-	30, // 16: targetlib.RuntimeConfig.service_routes:type_name -> targetlib.ServiceRoute
-	26, // 17: targetlib.UpdateRuntimeConfigRequest.settings:type_name -> targetlib.RuntimeSettings
-	29, // 18: targetlib.RuntimeModel.selectors:type_name -> targetlib.SelectorConfig
-	30, // 19: targetlib.RuntimeModel.service_routes:type_name -> targetlib.ServiceRoute
-	24, // 20: targetlib.NodePool.nodes:type_name -> targetlib.ProfileNode
+	27, // 14: targetlib.RuntimeConfig.settings:type_name -> targetlib.RuntimeSettings
+	30, // 15: targetlib.RuntimeConfig.selectors:type_name -> targetlib.SelectorConfig
+	31, // 16: targetlib.RuntimeConfig.service_routes:type_name -> targetlib.ServiceRoute
+	27, // 17: targetlib.UpdateRuntimeConfigRequest.settings:type_name -> targetlib.RuntimeSettings
+	30, // 18: targetlib.RuntimeModel.selectors:type_name -> targetlib.SelectorConfig
+	31, // 19: targetlib.RuntimeModel.service_routes:type_name -> targetlib.ServiceRoute
+	25, // 20: targetlib.NodePool.nodes:type_name -> targetlib.ProfileNode
 	1,  // 21: targetlib.ProxyStatus.service_state:type_name -> targetlib.ServiceStateType
-	37, // 22: targetlib.RouteList.routes:type_name -> targetlib.RouteInfo
-	37, // 23: targetlib.RouteList.default_route:type_name -> targetlib.RouteInfo
+	38, // 22: targetlib.RouteList.routes:type_name -> targetlib.RouteInfo
+	38, // 23: targetlib.RouteList.default_route:type_name -> targetlib.RouteInfo
 	7,  // 24: targetlib.SubscriptionEvent.type:type_name -> targetlib.SubscriptionEventType
-	22, // 25: targetlib.SubscriptionEvent.subscription:type_name -> targetlib.SubscriptionView
-	45, // 26: targetlib.TargetLib.Start:input_type -> google.protobuf.Empty
-	45, // 27: targetlib.TargetLib.Restart:input_type -> google.protobuf.Empty
-	45, // 28: targetlib.TargetLib.Stop:input_type -> google.protobuf.Empty
-	45, // 29: targetlib.TargetLib.GetState:input_type -> google.protobuf.Empty
-	45, // 30: targetlib.TargetLib.SubscribeState:input_type -> google.protobuf.Empty
-	45, // 31: targetlib.TargetLib.SubscribeLogs:input_type -> google.protobuf.Empty
-	13, // 32: targetlib.TargetLib.SubscribeTraffic:input_type -> targetlib.TrafficRequest
-	10, // 33: targetlib.TargetLib.CloseConnection:input_type -> targetlib.CloseConnectionRequest
-	45, // 34: targetlib.TargetLib.CloseAllConnections:input_type -> google.protobuf.Empty
-	45, // 35: targetlib.TargetLib.ListSubscriptions:input_type -> google.protobuf.Empty
-	15, // 36: targetlib.TargetLib.GetSubscription:input_type -> targetlib.SubscriptionId
-	16, // 37: targetlib.TargetLib.AddSubscription:input_type -> targetlib.AddSubscriptionRequest
-	15, // 38: targetlib.TargetLib.RemoveSubscription:input_type -> targetlib.SubscriptionId
-	17, // 39: targetlib.TargetLib.RenameSubscription:input_type -> targetlib.RenameSubscriptionRequest
-	18, // 40: targetlib.TargetLib.SetSubscriptionEnabled:input_type -> targetlib.SetSubscriptionEnabledRequest
-	19, // 41: targetlib.TargetLib.ConfigureSubscriptionUpdates:input_type -> targetlib.ConfigureSubscriptionUpdatesRequest
-	15, // 42: targetlib.TargetLib.UpdateSubscription:input_type -> targetlib.SubscriptionId
-	20, // 43: targetlib.TargetLib.GetResolvedEndpoints:input_type -> targetlib.ResolvedEndpointsRequest
-	45, // 44: targetlib.TargetLib.SubscribeSubscriptionEvents:input_type -> google.protobuf.Empty
-	45, // 45: targetlib.TargetLib.GetNodePool:input_type -> google.protobuf.Empty
-	33, // 46: targetlib.TargetLib.SelectNode:input_type -> targetlib.SelectNodeRequest
-	45, // 47: targetlib.TargetLib.GetProxyStatus:input_type -> google.protobuf.Empty
-	45, // 48: targetlib.TargetLib.GetRuntimeConfig:input_type -> google.protobuf.Empty
-	28, // 49: targetlib.TargetLib.UpdateRuntimeConfig:input_type -> targetlib.UpdateRuntimeConfigRequest
-	45, // 50: targetlib.TargetLib.GetIpInfo:input_type -> google.protobuf.Empty
-	36, // 51: targetlib.TargetLib.UpsertRoute:input_type -> targetlib.UpsertRouteRequest
-	38, // 52: targetlib.TargetLib.DeleteRoute:input_type -> targetlib.DeleteRouteRequest
-	45, // 53: targetlib.TargetLib.ListRoutes:input_type -> google.protobuf.Empty
-	40, // 54: targetlib.TargetLib.SelectRouteNode:input_type -> targetlib.SelectRouteNodeRequest
-	11, // 55: targetlib.TargetLib.Start:output_type -> targetlib.OperationResponse
-	11, // 56: targetlib.TargetLib.Restart:output_type -> targetlib.OperationResponse
-	11, // 57: targetlib.TargetLib.Stop:output_type -> targetlib.OperationResponse
-	12, // 58: targetlib.TargetLib.GetState:output_type -> targetlib.ServiceState
-	12, // 59: targetlib.TargetLib.SubscribeState:output_type -> targetlib.ServiceState
-	9,  // 60: targetlib.TargetLib.SubscribeLogs:output_type -> targetlib.LogBatch
-	14, // 61: targetlib.TargetLib.SubscribeTraffic:output_type -> targetlib.TrafficStatus
-	45, // 62: targetlib.TargetLib.CloseConnection:output_type -> google.protobuf.Empty
-	45, // 63: targetlib.TargetLib.CloseAllConnections:output_type -> google.protobuf.Empty
-	21, // 64: targetlib.TargetLib.ListSubscriptions:output_type -> targetlib.SubscriptionList
-	22, // 65: targetlib.TargetLib.GetSubscription:output_type -> targetlib.SubscriptionView
-	22, // 66: targetlib.TargetLib.AddSubscription:output_type -> targetlib.SubscriptionView
-	45, // 67: targetlib.TargetLib.RemoveSubscription:output_type -> google.protobuf.Empty
-	22, // 68: targetlib.TargetLib.RenameSubscription:output_type -> targetlib.SubscriptionView
-	22, // 69: targetlib.TargetLib.SetSubscriptionEnabled:output_type -> targetlib.SubscriptionView
-	22, // 70: targetlib.TargetLib.ConfigureSubscriptionUpdates:output_type -> targetlib.SubscriptionView
-	25, // 71: targetlib.TargetLib.UpdateSubscription:output_type -> targetlib.SubscriptionUpdateResult
-	41, // 72: targetlib.TargetLib.GetResolvedEndpoints:output_type -> targetlib.ResolvedEndpoints
-	43, // 73: targetlib.TargetLib.SubscribeSubscriptionEvents:output_type -> targetlib.SubscriptionEvent
-	32, // 74: targetlib.TargetLib.GetNodePool:output_type -> targetlib.NodePool
-	34, // 75: targetlib.TargetLib.SelectNode:output_type -> targetlib.SelectNodeResponse
-	35, // 76: targetlib.TargetLib.GetProxyStatus:output_type -> targetlib.ProxyStatus
-	27, // 77: targetlib.TargetLib.GetRuntimeConfig:output_type -> targetlib.RuntimeConfig
-	27, // 78: targetlib.TargetLib.UpdateRuntimeConfig:output_type -> targetlib.RuntimeConfig
-	42, // 79: targetlib.TargetLib.GetIpInfo:output_type -> targetlib.IpInfoResponse
-	37, // 80: targetlib.TargetLib.UpsertRoute:output_type -> targetlib.RouteInfo
-	45, // 81: targetlib.TargetLib.DeleteRoute:output_type -> google.protobuf.Empty
-	39, // 82: targetlib.TargetLib.ListRoutes:output_type -> targetlib.RouteList
-	34, // 83: targetlib.TargetLib.SelectRouteNode:output_type -> targetlib.SelectNodeResponse
-	55, // [55:84] is the sub-list for method output_type
-	26, // [26:55] is the sub-list for method input_type
-	26, // [26:26] is the sub-list for extension type_name
-	26, // [26:26] is the sub-list for extension extendee
-	0,  // [0:26] is the sub-list for field type_name
+	23, // 25: targetlib.SubscriptionEvent.subscription:type_name -> targetlib.SubscriptionView
+	8,  // 26: targetlib.ConnectionEvent.type:type_name -> targetlib.ConnectionEventType
+	46, // 27: targetlib.ConnectionEvent.connection:type_name -> targetlib.Connection
+	47, // 28: targetlib.ConnectionEvents.events:type_name -> targetlib.ConnectionEvent
+	50, // 29: targetlib.TargetLib.Start:input_type -> google.protobuf.Empty
+	50, // 30: targetlib.TargetLib.Restart:input_type -> google.protobuf.Empty
+	50, // 31: targetlib.TargetLib.Stop:input_type -> google.protobuf.Empty
+	50, // 32: targetlib.TargetLib.GetState:input_type -> google.protobuf.Empty
+	50, // 33: targetlib.TargetLib.SubscribeState:input_type -> google.protobuf.Empty
+	50, // 34: targetlib.TargetLib.SubscribeLogs:input_type -> google.protobuf.Empty
+	14, // 35: targetlib.TargetLib.SubscribeTraffic:input_type -> targetlib.TrafficRequest
+	45, // 36: targetlib.TargetLib.SubscribeConnections:input_type -> targetlib.SubscribeConnectionsRequest
+	11, // 37: targetlib.TargetLib.CloseConnection:input_type -> targetlib.CloseConnectionRequest
+	50, // 38: targetlib.TargetLib.CloseAllConnections:input_type -> google.protobuf.Empty
+	50, // 39: targetlib.TargetLib.ListSubscriptions:input_type -> google.protobuf.Empty
+	16, // 40: targetlib.TargetLib.GetSubscription:input_type -> targetlib.SubscriptionId
+	17, // 41: targetlib.TargetLib.AddSubscription:input_type -> targetlib.AddSubscriptionRequest
+	16, // 42: targetlib.TargetLib.RemoveSubscription:input_type -> targetlib.SubscriptionId
+	18, // 43: targetlib.TargetLib.RenameSubscription:input_type -> targetlib.RenameSubscriptionRequest
+	19, // 44: targetlib.TargetLib.SetSubscriptionEnabled:input_type -> targetlib.SetSubscriptionEnabledRequest
+	20, // 45: targetlib.TargetLib.ConfigureSubscriptionUpdates:input_type -> targetlib.ConfigureSubscriptionUpdatesRequest
+	16, // 46: targetlib.TargetLib.UpdateSubscription:input_type -> targetlib.SubscriptionId
+	21, // 47: targetlib.TargetLib.GetResolvedEndpoints:input_type -> targetlib.ResolvedEndpointsRequest
+	50, // 48: targetlib.TargetLib.SubscribeSubscriptionEvents:input_type -> google.protobuf.Empty
+	50, // 49: targetlib.TargetLib.GetNodePool:input_type -> google.protobuf.Empty
+	34, // 50: targetlib.TargetLib.SelectNode:input_type -> targetlib.SelectNodeRequest
+	50, // 51: targetlib.TargetLib.GetProxyStatus:input_type -> google.protobuf.Empty
+	50, // 52: targetlib.TargetLib.GetRuntimeConfig:input_type -> google.protobuf.Empty
+	29, // 53: targetlib.TargetLib.UpdateRuntimeConfig:input_type -> targetlib.UpdateRuntimeConfigRequest
+	50, // 54: targetlib.TargetLib.GetIpInfo:input_type -> google.protobuf.Empty
+	37, // 55: targetlib.TargetLib.UpsertRoute:input_type -> targetlib.UpsertRouteRequest
+	39, // 56: targetlib.TargetLib.DeleteRoute:input_type -> targetlib.DeleteRouteRequest
+	50, // 57: targetlib.TargetLib.ListRoutes:input_type -> google.protobuf.Empty
+	41, // 58: targetlib.TargetLib.SelectRouteNode:input_type -> targetlib.SelectRouteNodeRequest
+	12, // 59: targetlib.TargetLib.Start:output_type -> targetlib.OperationResponse
+	12, // 60: targetlib.TargetLib.Restart:output_type -> targetlib.OperationResponse
+	12, // 61: targetlib.TargetLib.Stop:output_type -> targetlib.OperationResponse
+	13, // 62: targetlib.TargetLib.GetState:output_type -> targetlib.ServiceState
+	13, // 63: targetlib.TargetLib.SubscribeState:output_type -> targetlib.ServiceState
+	10, // 64: targetlib.TargetLib.SubscribeLogs:output_type -> targetlib.LogBatch
+	15, // 65: targetlib.TargetLib.SubscribeTraffic:output_type -> targetlib.TrafficStatus
+	48, // 66: targetlib.TargetLib.SubscribeConnections:output_type -> targetlib.ConnectionEvents
+	50, // 67: targetlib.TargetLib.CloseConnection:output_type -> google.protobuf.Empty
+	50, // 68: targetlib.TargetLib.CloseAllConnections:output_type -> google.protobuf.Empty
+	22, // 69: targetlib.TargetLib.ListSubscriptions:output_type -> targetlib.SubscriptionList
+	23, // 70: targetlib.TargetLib.GetSubscription:output_type -> targetlib.SubscriptionView
+	23, // 71: targetlib.TargetLib.AddSubscription:output_type -> targetlib.SubscriptionView
+	50, // 72: targetlib.TargetLib.RemoveSubscription:output_type -> google.protobuf.Empty
+	23, // 73: targetlib.TargetLib.RenameSubscription:output_type -> targetlib.SubscriptionView
+	23, // 74: targetlib.TargetLib.SetSubscriptionEnabled:output_type -> targetlib.SubscriptionView
+	23, // 75: targetlib.TargetLib.ConfigureSubscriptionUpdates:output_type -> targetlib.SubscriptionView
+	26, // 76: targetlib.TargetLib.UpdateSubscription:output_type -> targetlib.SubscriptionUpdateResult
+	42, // 77: targetlib.TargetLib.GetResolvedEndpoints:output_type -> targetlib.ResolvedEndpoints
+	44, // 78: targetlib.TargetLib.SubscribeSubscriptionEvents:output_type -> targetlib.SubscriptionEvent
+	33, // 79: targetlib.TargetLib.GetNodePool:output_type -> targetlib.NodePool
+	35, // 80: targetlib.TargetLib.SelectNode:output_type -> targetlib.SelectNodeResponse
+	36, // 81: targetlib.TargetLib.GetProxyStatus:output_type -> targetlib.ProxyStatus
+	28, // 82: targetlib.TargetLib.GetRuntimeConfig:output_type -> targetlib.RuntimeConfig
+	28, // 83: targetlib.TargetLib.UpdateRuntimeConfig:output_type -> targetlib.RuntimeConfig
+	43, // 84: targetlib.TargetLib.GetIpInfo:output_type -> targetlib.IpInfoResponse
+	38, // 85: targetlib.TargetLib.UpsertRoute:output_type -> targetlib.RouteInfo
+	50, // 86: targetlib.TargetLib.DeleteRoute:output_type -> google.protobuf.Empty
+	40, // 87: targetlib.TargetLib.ListRoutes:output_type -> targetlib.RouteList
+	35, // 88: targetlib.TargetLib.SelectRouteNode:output_type -> targetlib.SelectNodeResponse
+	59, // [59:89] is the sub-list for method output_type
+	29, // [29:59] is the sub-list for method input_type
+	29, // [29:29] is the sub-list for extension type_name
+	29, // [29:29] is the sub-list for extension extendee
+	0,  // [0:29] is the sub-list for field type_name
 }
 
 func init() { file_api_TargetLib_targetlib_proto_init() }
@@ -3338,8 +3729,8 @@ func file_api_TargetLib_targetlib_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_TargetLib_targetlib_proto_rawDesc), len(file_api_TargetLib_targetlib_proto_rawDesc)),
-			NumEnums:      8,
-			NumMessages:   37,
+			NumEnums:      9,
+			NumMessages:   41,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

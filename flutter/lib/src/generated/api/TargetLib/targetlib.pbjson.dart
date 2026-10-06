@@ -170,6 +170,23 @@ final $typed_data.Uint8List subscriptionEventTypeDescriptor = $convert.base64Dec
     'VElPTl9FVkVOVF9UWVBFX1VQREFURUQQAhIjCh9TVUJTQ1JJUFRJT05fRVZFTlRfVFlQRV9SRU'
     '1PVkVEEAMSIQodU1VCU0NSSVBUSU9OX0VWRU5UX1RZUEVfU1RBR0UQBA==');
 
+@$core.Deprecated('Use connectionEventTypeDescriptor instead')
+const ConnectionEventType$json = {
+  '1': 'ConnectionEventType',
+  '2': [
+    {'1': 'CONNECTION_EVENT_TYPE_UNSPECIFIED', '2': 0},
+    {'1': 'CONNECTION_EVENT_TYPE_NEW', '2': 1},
+    {'1': 'CONNECTION_EVENT_TYPE_UPDATE', '2': 2},
+    {'1': 'CONNECTION_EVENT_TYPE_CLOSED', '2': 3},
+  ],
+};
+
+/// Descriptor for `ConnectionEventType`. Decode as a `google.protobuf.EnumDescriptorProto`.
+final $typed_data.Uint8List connectionEventTypeDescriptor = $convert.base64Decode(
+    'ChNDb25uZWN0aW9uRXZlbnRUeXBlEiUKIUNPTk5FQ1RJT05fRVZFTlRfVFlQRV9VTlNQRUNJRk'
+    'lFRBAAEh0KGUNPTk5FQ1RJT05fRVZFTlRfVFlQRV9ORVcQARIgChxDT05ORUNUSU9OX0VWRU5U'
+    'X1RZUEVfVVBEQVRFEAISIAocQ09OTkVDVElPTl9FVkVOVF9UWVBFX0NMT1NFRBAD');
+
 @$core.Deprecated('Use logMessageDescriptor instead')
 const LogMessage$json = {
   '1': 'LogMessage',
@@ -1180,3 +1197,111 @@ final $typed_data.Uint8List subscriptionEventDescriptor = $convert.base64Decode(
     'lvbkV2ZW50VHlwZVIEdHlwZRI/CgxzdWJzY3JpcHRpb24YAiABKAsyGy50YXJnZXRsaWIuU3Vi'
     'c2NyaXB0aW9uVmlld1IMc3Vic2NyaXB0aW9uEi0KE29jY3VycmVkX2F0X3VuaXhfbXMYAyABKA'
     'NSEG9jY3VycmVkQXRVbml4TXM=');
+
+@$core.Deprecated('Use subscribeConnectionsRequestDescriptor instead')
+const SubscribeConnectionsRequest$json = {
+  '1': 'SubscribeConnectionsRequest',
+  '2': [
+    {
+      '1': 'interval_milliseconds',
+      '3': 1,
+      '4': 1,
+      '5': 13,
+      '10': 'intervalMilliseconds'
+    },
+  ],
+};
+
+/// Descriptor for `SubscribeConnectionsRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List subscribeConnectionsRequestDescriptor =
+    $convert.base64Decode(
+        'ChtTdWJzY3JpYmVDb25uZWN0aW9uc1JlcXVlc3QSMwoVaW50ZXJ2YWxfbWlsbGlzZWNvbmRzGA'
+        'EgASgNUhRpbnRlcnZhbE1pbGxpc2Vjb25kcw==');
+
+@$core.Deprecated('Use connectionDescriptor instead')
+const Connection$json = {
+  '1': 'Connection',
+  '2': [
+    {'1': 'id', '3': 1, '4': 1, '5': 9, '10': 'id'},
+    {'1': 'destination', '3': 2, '4': 1, '5': 9, '10': 'destination'},
+    {'1': 'domain', '3': 3, '4': 1, '5': 9, '10': 'domain'},
+    {'1': 'network', '3': 4, '4': 1, '5': 9, '10': 'network'},
+    {'1': 'protocol', '3': 5, '4': 1, '5': 9, '10': 'protocol'},
+    {'1': 'outbound', '3': 6, '4': 1, '5': 9, '10': 'outbound'},
+    {
+      '1': 'created_at_unix_ms',
+      '3': 7,
+      '4': 1,
+      '5': 3,
+      '10': 'createdAtUnixMs'
+    },
+    {'1': 'closed_at_unix_ms', '3': 8, '4': 1, '5': 3, '10': 'closedAtUnixMs'},
+    {'1': 'uplink_total', '3': 9, '4': 1, '5': 3, '10': 'uplinkTotal'},
+    {'1': 'downlink_total', '3': 10, '4': 1, '5': 3, '10': 'downlinkTotal'},
+  ],
+};
+
+/// Descriptor for `Connection`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List connectionDescriptor = $convert.base64Decode(
+    'CgpDb25uZWN0aW9uEg4KAmlkGAEgASgJUgJpZBIgCgtkZXN0aW5hdGlvbhgCIAEoCVILZGVzdG'
+    'luYXRpb24SFgoGZG9tYWluGAMgASgJUgZkb21haW4SGAoHbmV0d29yaxgEIAEoCVIHbmV0d29y'
+    'axIaCghwcm90b2NvbBgFIAEoCVIIcHJvdG9jb2wSGgoIb3V0Ym91bmQYBiABKAlSCG91dGJvdW'
+    '5kEisKEmNyZWF0ZWRfYXRfdW5peF9tcxgHIAEoA1IPY3JlYXRlZEF0VW5peE1zEikKEWNsb3Nl'
+    'ZF9hdF91bml4X21zGAggASgDUg5jbG9zZWRBdFVuaXhNcxIhCgx1cGxpbmtfdG90YWwYCSABKA'
+    'NSC3VwbGlua1RvdGFsEiUKDmRvd25saW5rX3RvdGFsGAogASgDUg1kb3dubGlua1RvdGFs');
+
+@$core.Deprecated('Use connectionEventDescriptor instead')
+const ConnectionEvent$json = {
+  '1': 'ConnectionEvent',
+  '2': [
+    {
+      '1': 'type',
+      '3': 1,
+      '4': 1,
+      '5': 14,
+      '6': '.targetlib.ConnectionEventType',
+      '10': 'type'
+    },
+    {'1': 'id', '3': 2, '4': 1, '5': 9, '10': 'id'},
+    {
+      '1': 'connection',
+      '3': 3,
+      '4': 1,
+      '5': 11,
+      '6': '.targetlib.Connection',
+      '10': 'connection'
+    },
+    {'1': 'uplink_delta', '3': 4, '4': 1, '5': 3, '10': 'uplinkDelta'},
+    {'1': 'downlink_delta', '3': 5, '4': 1, '5': 3, '10': 'downlinkDelta'},
+    {'1': 'closed_at_unix_ms', '3': 6, '4': 1, '5': 3, '10': 'closedAtUnixMs'},
+  ],
+};
+
+/// Descriptor for `ConnectionEvent`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List connectionEventDescriptor = $convert.base64Decode(
+    'Cg9Db25uZWN0aW9uRXZlbnQSMgoEdHlwZRgBIAEoDjIeLnRhcmdldGxpYi5Db25uZWN0aW9uRX'
+    'ZlbnRUeXBlUgR0eXBlEg4KAmlkGAIgASgJUgJpZBI1Cgpjb25uZWN0aW9uGAMgASgLMhUudGFy'
+    'Z2V0bGliLkNvbm5lY3Rpb25SCmNvbm5lY3Rpb24SIQoMdXBsaW5rX2RlbHRhGAQgASgDUgt1cG'
+    'xpbmtEZWx0YRIlCg5kb3dubGlua19kZWx0YRgFIAEoA1INZG93bmxpbmtEZWx0YRIpChFjbG9z'
+    'ZWRfYXRfdW5peF9tcxgGIAEoA1IOY2xvc2VkQXRVbml4TXM=');
+
+@$core.Deprecated('Use connectionEventsDescriptor instead')
+const ConnectionEvents$json = {
+  '1': 'ConnectionEvents',
+  '2': [
+    {
+      '1': 'events',
+      '3': 1,
+      '4': 3,
+      '5': 11,
+      '6': '.targetlib.ConnectionEvent',
+      '10': 'events'
+    },
+    {'1': 'reset', '3': 2, '4': 1, '5': 8, '10': 'reset'},
+  ],
+};
+
+/// Descriptor for `ConnectionEvents`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List connectionEventsDescriptor = $convert.base64Decode(
+    'ChBDb25uZWN0aW9uRXZlbnRzEjIKBmV2ZW50cxgBIAMoCzIaLnRhcmdldGxpYi5Db25uZWN0aW'
+    '9uRXZlbnRSBmV2ZW50cxIUCgVyZXNldBgCIAEoCFIFcmVzZXQ=');

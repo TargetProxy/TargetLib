@@ -46,6 +46,12 @@ final class TargetLibProxy {
     yield* (await _resolve()).subscribeTraffic(interval: interval);
   }
 
+  Stream<ConnectionEvents> subscribeConnections({
+    Duration interval = const Duration(seconds: 1),
+  }) async* {
+    yield* (await _resolve()).subscribeConnections(interval: interval);
+  }
+
   Future<NodePool> nodePool() =>
       _resolve().then((connection) => connection.getNodePool());
 

@@ -3307,6 +3307,419 @@ class SubscriptionEvent extends $pb.GeneratedMessage {
   void clearOccurredAtUnixMs() => $_clearField(3);
 }
 
+class SubscribeConnectionsRequest extends $pb.GeneratedMessage {
+  factory SubscribeConnectionsRequest({
+    $core.int? intervalMilliseconds,
+  }) {
+    final result = SubscribeConnectionsRequest._();
+    if (intervalMilliseconds != null)
+      result.intervalMilliseconds = intervalMilliseconds;
+    return result;
+  }
+
+  SubscribeConnectionsRequest._();
+
+  factory SubscribeConnectionsRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      SubscribeConnectionsRequest()..mergeFromBuffer(data, registry);
+  factory SubscribeConnectionsRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      SubscribeConnectionsRequest()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'SubscribeConnectionsRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'targetlib'),
+      createEmptyInstance: SubscribeConnectionsRequest.$_createMessage)
+    ..aI(1, _omitFieldNames ? '' : 'intervalMilliseconds',
+        fieldType: $pb.PbFieldType.OU3)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SubscribeConnectionsRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SubscribeConnectionsRequest copyWith(
+          void Function(SubscribeConnectionsRequest) updates) =>
+      super.copyWith(
+              (message) => updates(message as SubscribeConnectionsRequest))
+          as SubscribeConnectionsRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use SubscribeConnectionsRequest() / SubscribeConnectionsRequest.new instead')
+  static SubscribeConnectionsRequest create() =>
+      SubscribeConnectionsRequest._();
+  static $pb.GeneratedMessage $_createMessage() =>
+      SubscribeConnectionsRequest._();
+  @$core.override
+  SubscribeConnectionsRequest createEmptyInstance() =>
+      SubscribeConnectionsRequest._();
+  @$core.pragma('dart2js:noInline')
+  static SubscribeConnectionsRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<SubscribeConnectionsRequest>(
+          SubscribeConnectionsRequest.$_createMessage);
+  static SubscribeConnectionsRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get intervalMilliseconds => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set intervalMilliseconds($core.int value) => $_setUnsignedInt32(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasIntervalMilliseconds() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearIntervalMilliseconds() => $_clearField(1);
+}
+
+class Connection extends $pb.GeneratedMessage {
+  factory Connection({
+    $core.String? id,
+    $core.String? destination,
+    $core.String? domain,
+    $core.String? network,
+    $core.String? protocol,
+    $core.String? outbound,
+    $fixnum.Int64? createdAtUnixMs,
+    $fixnum.Int64? closedAtUnixMs,
+    $fixnum.Int64? uplinkTotal,
+    $fixnum.Int64? downlinkTotal,
+  }) {
+    final result = Connection._();
+    if (id != null) result.id = id;
+    if (destination != null) result.destination = destination;
+    if (domain != null) result.domain = domain;
+    if (network != null) result.network = network;
+    if (protocol != null) result.protocol = protocol;
+    if (outbound != null) result.outbound = outbound;
+    if (createdAtUnixMs != null) result.createdAtUnixMs = createdAtUnixMs;
+    if (closedAtUnixMs != null) result.closedAtUnixMs = closedAtUnixMs;
+    if (uplinkTotal != null) result.uplinkTotal = uplinkTotal;
+    if (downlinkTotal != null) result.downlinkTotal = downlinkTotal;
+    return result;
+  }
+
+  Connection._();
+
+  factory Connection.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      Connection()..mergeFromBuffer(data, registry);
+  factory Connection.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      Connection()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'Connection',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'targetlib'),
+      createEmptyInstance: Connection.$_createMessage)
+    ..aOS(1, _omitFieldNames ? '' : 'id')
+    ..aOS(2, _omitFieldNames ? '' : 'destination')
+    ..aOS(3, _omitFieldNames ? '' : 'domain')
+    ..aOS(4, _omitFieldNames ? '' : 'network')
+    ..aOS(5, _omitFieldNames ? '' : 'protocol')
+    ..aOS(6, _omitFieldNames ? '' : 'outbound')
+    ..aInt64(7, _omitFieldNames ? '' : 'createdAtUnixMs')
+    ..aInt64(8, _omitFieldNames ? '' : 'closedAtUnixMs')
+    ..aInt64(9, _omitFieldNames ? '' : 'uplinkTotal')
+    ..aInt64(10, _omitFieldNames ? '' : 'downlinkTotal')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  Connection clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  Connection copyWith(void Function(Connection) updates) =>
+      super.copyWith((message) => updates(message as Connection)) as Connection;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use Connection() / Connection.new instead')
+  static Connection create() => Connection._();
+  static $pb.GeneratedMessage $_createMessage() => Connection._();
+  @$core.override
+  Connection createEmptyInstance() => Connection._();
+  @$core.pragma('dart2js:noInline')
+  static Connection getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<Connection>(Connection.$_createMessage);
+  static Connection? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get id => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set id($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearId() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get destination => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set destination($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasDestination() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearDestination() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get domain => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set domain($core.String value) => $_setString(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasDomain() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearDomain() => $_clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.String get network => $_getSZ(3);
+  @$pb.TagNumber(4)
+  set network($core.String value) => $_setString(3, value);
+  @$pb.TagNumber(4)
+  $core.bool hasNetwork() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearNetwork() => $_clearField(4);
+
+  @$pb.TagNumber(5)
+  $core.String get protocol => $_getSZ(4);
+  @$pb.TagNumber(5)
+  set protocol($core.String value) => $_setString(4, value);
+  @$pb.TagNumber(5)
+  $core.bool hasProtocol() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearProtocol() => $_clearField(5);
+
+  @$pb.TagNumber(6)
+  $core.String get outbound => $_getSZ(5);
+  @$pb.TagNumber(6)
+  set outbound($core.String value) => $_setString(5, value);
+  @$pb.TagNumber(6)
+  $core.bool hasOutbound() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearOutbound() => $_clearField(6);
+
+  @$pb.TagNumber(7)
+  $fixnum.Int64 get createdAtUnixMs => $_getI64(6);
+  @$pb.TagNumber(7)
+  set createdAtUnixMs($fixnum.Int64 value) => $_setInt64(6, value);
+  @$pb.TagNumber(7)
+  $core.bool hasCreatedAtUnixMs() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearCreatedAtUnixMs() => $_clearField(7);
+
+  @$pb.TagNumber(8)
+  $fixnum.Int64 get closedAtUnixMs => $_getI64(7);
+  @$pb.TagNumber(8)
+  set closedAtUnixMs($fixnum.Int64 value) => $_setInt64(7, value);
+  @$pb.TagNumber(8)
+  $core.bool hasClosedAtUnixMs() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearClosedAtUnixMs() => $_clearField(8);
+
+  @$pb.TagNumber(9)
+  $fixnum.Int64 get uplinkTotal => $_getI64(8);
+  @$pb.TagNumber(9)
+  set uplinkTotal($fixnum.Int64 value) => $_setInt64(8, value);
+  @$pb.TagNumber(9)
+  $core.bool hasUplinkTotal() => $_has(8);
+  @$pb.TagNumber(9)
+  void clearUplinkTotal() => $_clearField(9);
+
+  @$pb.TagNumber(10)
+  $fixnum.Int64 get downlinkTotal => $_getI64(9);
+  @$pb.TagNumber(10)
+  set downlinkTotal($fixnum.Int64 value) => $_setInt64(9, value);
+  @$pb.TagNumber(10)
+  $core.bool hasDownlinkTotal() => $_has(9);
+  @$pb.TagNumber(10)
+  void clearDownlinkTotal() => $_clearField(10);
+}
+
+class ConnectionEvent extends $pb.GeneratedMessage {
+  factory ConnectionEvent({
+    ConnectionEventType? type,
+    $core.String? id,
+    Connection? connection,
+    $fixnum.Int64? uplinkDelta,
+    $fixnum.Int64? downlinkDelta,
+    $fixnum.Int64? closedAtUnixMs,
+  }) {
+    final result = ConnectionEvent._();
+    if (type != null) result.type = type;
+    if (id != null) result.id = id;
+    if (connection != null) result.connection = connection;
+    if (uplinkDelta != null) result.uplinkDelta = uplinkDelta;
+    if (downlinkDelta != null) result.downlinkDelta = downlinkDelta;
+    if (closedAtUnixMs != null) result.closedAtUnixMs = closedAtUnixMs;
+    return result;
+  }
+
+  ConnectionEvent._();
+
+  factory ConnectionEvent.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ConnectionEvent()..mergeFromBuffer(data, registry);
+  factory ConnectionEvent.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ConnectionEvent()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ConnectionEvent',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'targetlib'),
+      createEmptyInstance: ConnectionEvent.$_createMessage)
+    ..aE<ConnectionEventType>(1, _omitFieldNames ? '' : 'type',
+        enumValues: ConnectionEventType.values)
+    ..aOS(2, _omitFieldNames ? '' : 'id')
+    ..aOM<Connection>(3, _omitFieldNames ? '' : 'connection',
+        subBuilder: Connection.$_createMessage)
+    ..aInt64(4, _omitFieldNames ? '' : 'uplinkDelta')
+    ..aInt64(5, _omitFieldNames ? '' : 'downlinkDelta')
+    ..aInt64(6, _omitFieldNames ? '' : 'closedAtUnixMs')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ConnectionEvent clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ConnectionEvent copyWith(void Function(ConnectionEvent) updates) =>
+      super.copyWith((message) => updates(message as ConnectionEvent))
+          as ConnectionEvent;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use ConnectionEvent() / ConnectionEvent.new instead')
+  static ConnectionEvent create() => ConnectionEvent._();
+  static $pb.GeneratedMessage $_createMessage() => ConnectionEvent._();
+  @$core.override
+  ConnectionEvent createEmptyInstance() => ConnectionEvent._();
+  @$core.pragma('dart2js:noInline')
+  static ConnectionEvent getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ConnectionEvent>(
+          ConnectionEvent.$_createMessage);
+  static ConnectionEvent? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  ConnectionEventType get type => $_getN(0);
+  @$pb.TagNumber(1)
+  set type(ConnectionEventType value) => $_setField(1, value);
+  @$pb.TagNumber(1)
+  $core.bool hasType() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearType() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get id => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set id($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasId() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearId() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  Connection get connection => $_getN(2);
+  @$pb.TagNumber(3)
+  set connection(Connection value) => $_setField(3, value);
+  @$pb.TagNumber(3)
+  $core.bool hasConnection() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearConnection() => $_clearField(3);
+  @$pb.TagNumber(3)
+  Connection ensureConnection() => $_ensure(2);
+
+  @$pb.TagNumber(4)
+  $fixnum.Int64 get uplinkDelta => $_getI64(3);
+  @$pb.TagNumber(4)
+  set uplinkDelta($fixnum.Int64 value) => $_setInt64(3, value);
+  @$pb.TagNumber(4)
+  $core.bool hasUplinkDelta() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearUplinkDelta() => $_clearField(4);
+
+  @$pb.TagNumber(5)
+  $fixnum.Int64 get downlinkDelta => $_getI64(4);
+  @$pb.TagNumber(5)
+  set downlinkDelta($fixnum.Int64 value) => $_setInt64(4, value);
+  @$pb.TagNumber(5)
+  $core.bool hasDownlinkDelta() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearDownlinkDelta() => $_clearField(5);
+
+  @$pb.TagNumber(6)
+  $fixnum.Int64 get closedAtUnixMs => $_getI64(5);
+  @$pb.TagNumber(6)
+  set closedAtUnixMs($fixnum.Int64 value) => $_setInt64(5, value);
+  @$pb.TagNumber(6)
+  $core.bool hasClosedAtUnixMs() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearClosedAtUnixMs() => $_clearField(6);
+}
+
+class ConnectionEvents extends $pb.GeneratedMessage {
+  factory ConnectionEvents({
+    $core.Iterable<ConnectionEvent>? events,
+    $core.bool? reset,
+  }) {
+    final result = ConnectionEvents._();
+    if (events != null) result.events.addAll(events);
+    if (reset != null) result.reset = reset;
+    return result;
+  }
+
+  ConnectionEvents._();
+
+  factory ConnectionEvents.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ConnectionEvents()..mergeFromBuffer(data, registry);
+  factory ConnectionEvents.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      ConnectionEvents()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ConnectionEvents',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'targetlib'),
+      createEmptyInstance: ConnectionEvents.$_createMessage)
+    ..pPM<ConnectionEvent>(1, _omitFieldNames ? '' : 'events',
+        subBuilder: ConnectionEvent.$_createMessage)
+    ..aOB(2, _omitFieldNames ? '' : 'reset')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ConnectionEvents clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ConnectionEvents copyWith(void Function(ConnectionEvents) updates) =>
+      super.copyWith((message) => updates(message as ConnectionEvents))
+          as ConnectionEvents;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use ConnectionEvents() / ConnectionEvents.new instead')
+  static ConnectionEvents create() => ConnectionEvents._();
+  static $pb.GeneratedMessage $_createMessage() => ConnectionEvents._();
+  @$core.override
+  ConnectionEvents createEmptyInstance() => ConnectionEvents._();
+  @$core.pragma('dart2js:noInline')
+  static ConnectionEvents getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ConnectionEvents>(
+          ConnectionEvents.$_createMessage);
+  static ConnectionEvents? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $pb.PbList<ConnectionEvent> get events => $_getList(0);
+
+  @$pb.TagNumber(2)
+  $core.bool get reset => $_getBF(1);
+  @$pb.TagNumber(2)
+  set reset($core.bool value) => $_setBool(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasReset() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearReset() => $_clearField(2);
+}
+
 const $core.bool _omitFieldNames =
     $core.bool.fromEnvironment('protobuf.omit_field_names');
 const $core.bool _omitMessageNames =

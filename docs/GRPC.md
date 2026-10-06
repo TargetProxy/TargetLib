@@ -28,6 +28,7 @@ TargetLib gRPC 为图形化代理客户端提供远程控制接口。
 | `SubscribeState` | 流 | 监听状态变化 |
 | `SubscribeLogs` | 流 | 日志流（仅 ERROR+）|
 | `SubscribeTraffic` | 流 | 流量统计（间隔 250-5000ms）|
+| `SubscribeConnections` | 流 | 连接初始快照及 NEW/UPDATE/CLOSED 事件（默认每秒，可配置间隔）|
 
 ### 订阅管理
 

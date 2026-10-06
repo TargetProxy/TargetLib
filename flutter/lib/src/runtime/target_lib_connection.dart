@@ -142,6 +142,13 @@ final class TargetLibConnection {
     options: options,
   );
 
+  ResponseStream<ConnectionEvents> subscribeConnections({
+    Duration interval = const Duration(seconds: 1),
+  }) => client.subscribeConnections(
+    SubscribeConnectionsRequest(intervalMilliseconds: interval.inMilliseconds),
+    options: options,
+  );
+
   Future<RuntimeConfig> getRuntimeConfig() =>
       client.getRuntimeConfig(Empty(), options: options);
 
