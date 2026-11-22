@@ -11,26 +11,18 @@ import (
 	"github.com/loafman1120/TargetLib/config"
 )
 
-func buildRuntimeConfigForModel(settings config.Settings, model config.RuntimeModel) ([]byte, error) {
-	content, err := config.BuildNormalized(settings, model)
+func buildRuntimeConfigForModel(settings config.Settings, model config.RuntimeModel) (config.BuildResult, error) {
+	result, err := config.Build(settings, model)
 	if err != nil {
 		if errors.Is(err, config.ErrInvalidSettings) || errors.Is(err, config.ErrInvalidSource) {
-			return nil, status.Error(codes.InvalidArgument, err.Error())
+			return config.BuildResult{}, status.Error(codes.InvalidArgument, err.Error())
 		}
-		return nil, status.Error(codes.Internal, err.Error())
+		return config.BuildResult{}, status.Error(codes.Internal, err.Error())
 	}
-	return content, nil
+	return result, nil
 }
 
-func normalizeRuntimeModel(model config.RuntimeModel) (config.RuntimeModel, error) {
-	normalized, err := config.NormalizeRuntimeModel(model)
-	if err != nil {
-		return config.RuntimeModel{}, status.Error(codes.InvalidArgument, err.Error())
-	}
-	return normalized, nil
-}
-
-func buildSettings(source *targetlibapi.RuntimeSettings, cacheFilePath string) (config.Settings, error) {
+func buildSettings(source *targetlibapi.RuntimeSettings) (config.Settings, error) {
 	if source == nil {
 		return config.Settings{}, status.Error(codes.InvalidArgument, "runtime settings are required")
 	}
@@ -38,9 +30,6 @@ func buildSettings(source *targetlibapi.RuntimeSettings, cacheFilePath string) (
 		ListenAddress: source.GetListenAddress(),
 		MixedPort:     int(source.GetMixedPort()),
 		IPv6:          source.GetIpv6(),
-		// Selector state is persisted with the runtime revision. A sing-box
-		// selection cache would override these authoritative defaults on reload.
-		CacheFilePath: "",
 	}
 	switch source.GetRouteMode() {
 	case targetlibapi.RouteMode_ROUTE_MODE_DIRECT:
@@ -63,9 +52,6 @@ func buildSettings(source *targetlibapi.RuntimeSettings, cacheFilePath string) (
 		default:
 			return config.Settings{}, status.Error(codes.InvalidArgument, "proxy mode is required")
 		}
-	}
-	if err := settings.Validate(); err != nil {
-		return config.Settings{}, status.Error(codes.InvalidArgument, err.Error())
 	}
 	return settings, nil
 }

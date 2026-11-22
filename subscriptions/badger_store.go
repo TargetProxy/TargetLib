@@ -3,6 +3,7 @@ package subscriptions
 import (
 	"context"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
@@ -11,10 +12,12 @@ import (
 	badgeroptions "github.com/dgraph-io/badger/v4/options"
 	"github.com/fxamacker/cbor/v2"
 	targetprofile "github.com/loafman1120/TargetLib/profile"
+	"github.com/sagernet/sing-box/option"
+	singjson "github.com/sagernet/sing/common/json"
 )
 
 const (
-	badgerPrefix         = "subscription/"
+	badgerPrefix         = "subscription-profile/"
 	badgerMetadataPrefix = "meta/runtime/"
 )
 
@@ -98,7 +101,10 @@ func (s *BadgerStore) encodeSubscription(item Subscription) ([]byte, error) {
 	if item.ID == "" {
 		return nil, ErrIDRequired
 	}
-	stored := cloneSubscription(item)
+	stored, err := storedSubscriptionFrom(item)
+	if err != nil {
+		return nil, err
+	}
 	encoded, err := s.encode.Marshal(stored)
 	if err != nil {
 		return nil, err
@@ -161,30 +167,125 @@ func metadataKey(key string) []byte {
 }
 
 func (s *BadgerStore) decodeSubscription(value []byte) (Subscription, error) {
-	var item Subscription
-	if err := s.decode.Unmarshal(value, &item); err != nil {
+	var stored storedSubscription
+	if err := s.decode.Unmarshal(value, &stored); err != nil {
 		return Subscription{}, err
 	}
-	if err := restoreNodeOutbounds(&item.Profile); err != nil {
-		return Subscription{}, fmt.Errorf("restore subscription %q: %w", item.ID, err)
+	item, err := stored.subscription()
+	if err != nil {
+		return Subscription{}, fmt.Errorf("restore subscription %q: %w", stored.ID, err)
 	}
 	return item, nil
 }
 
-func restoreNodeOutbounds(profile *targetprofile.Profile) error {
-	if profile == nil {
-		return nil
+type storedSubscription struct {
+	ID                 string
+	Name               string
+	URL                string
+	Enabled            bool
+	AutoUpdate         bool
+	UpdateInterval     time.Duration
+	Headers            map[string]string
+	Status             Status
+	Stage              UpdateStage
+	Profile            storedProfile
+	NodesHash          string
+	ETag               string
+	LastModified       string
+	ErrorCode          string
+	Error              string
+	UpdatedAt          time.Time
+	NextUpdateAt       time.Time
+	UploadBytes        int64
+	DownloadBytes      int64
+	TotalBytes         int64
+	ResolvedEndpoints  []string
+	ExpiresAt          time.Time
+	Title              string
+	WebPageURL         string
+	SupportURL         string
+	MovedPermanentlyTo string
+}
+
+type storedProfile struct {
+	Nodes []storedNode
+}
+
+type storedNode struct {
+	ID             string
+	SubscriptionID string
+	Name           string
+	Type           string
+	CountryCode    string
+	Server         string
+	Port           int
+	Phase          targetprofile.NodePhase
+	Error          string
+	OutboundJSON   json.RawMessage
+}
+
+func storedSubscriptionFrom(item Subscription) (storedSubscription, error) {
+	stored := storedSubscription{
+		ID: item.ID, Name: item.Name, URL: item.URL, Enabled: item.Enabled,
+		AutoUpdate: item.AutoUpdate, UpdateInterval: item.UpdateInterval,
+		Headers: cloneStringMap(item.Headers), Status: item.Status, Stage: item.Stage,
+		NodesHash: item.NodesHash, ETag: item.ETag, LastModified: item.LastModified,
+		ErrorCode: item.ErrorCode, Error: item.Error, UpdatedAt: item.UpdatedAt,
+		NextUpdateAt: item.NextUpdateAt, UploadBytes: item.UploadBytes,
+		DownloadBytes: item.DownloadBytes, TotalBytes: item.TotalBytes,
+		ResolvedEndpoints: append([]string(nil), item.ResolvedEndpoints...),
+		ExpiresAt:         item.ExpiresAt, Title: item.Title, WebPageURL: item.WebPageURL,
+		SupportURL: item.SupportURL, MovedPermanentlyTo: item.MovedPermanentlyTo,
+		Profile: storedProfile{Nodes: make([]storedNode, len(item.Profile.Nodes))},
 	}
-	for index := range profile.Nodes {
-		node := &profile.Nodes[index]
-		if node.Outbound != nil || len(node.OutboundJSON) == 0 {
-			continue
+	for index, node := range item.Profile.Nodes {
+		var outboundJSON []byte
+		if node.Outbound != nil {
+			encoded, err := singjson.MarshalContext(targetprofile.Context(), node.Outbound)
+			if err != nil {
+				return storedSubscription{}, fmt.Errorf("encode node %q: %w", node.ID, err)
+			}
+			outboundJSON = encoded
 		}
-		if err := targetprofile.RestoreNodeOutbound(node); err != nil {
-			return err
+		stored.Profile.Nodes[index] = storedNode{
+			ID: node.ID, SubscriptionID: node.SubscriptionID, Name: node.Name,
+			Type: node.Type, CountryCode: node.CountryCode, Server: node.Server,
+			Port: node.Port, Phase: node.Phase, Error: node.Error, OutboundJSON: outboundJSON,
 		}
 	}
-	return nil
+	return stored, nil
+}
+
+func (stored storedSubscription) subscription() (Subscription, error) {
+	item := Subscription{
+		ID: stored.ID, Name: stored.Name, URL: stored.URL, Enabled: stored.Enabled,
+		AutoUpdate: stored.AutoUpdate, UpdateInterval: stored.UpdateInterval,
+		Headers: stored.Headers, Status: stored.Status, Stage: stored.Stage,
+		NodesHash: stored.NodesHash, ETag: stored.ETag, LastModified: stored.LastModified,
+		ErrorCode: stored.ErrorCode, Error: stored.Error, UpdatedAt: stored.UpdatedAt,
+		NextUpdateAt: stored.NextUpdateAt, UploadBytes: stored.UploadBytes,
+		DownloadBytes: stored.DownloadBytes, TotalBytes: stored.TotalBytes,
+		ResolvedEndpoints: stored.ResolvedEndpoints, ExpiresAt: stored.ExpiresAt,
+		Title: stored.Title, WebPageURL: stored.WebPageURL, SupportURL: stored.SupportURL,
+		MovedPermanentlyTo: stored.MovedPermanentlyTo,
+		Profile:            targetprofile.Profile{Nodes: make([]targetprofile.Node, len(stored.Profile.Nodes))},
+	}
+	for index, node := range stored.Profile.Nodes {
+		runtimeNode := targetprofile.Node{
+			ID: node.ID, SubscriptionID: node.SubscriptionID, Name: node.Name,
+			Type: node.Type, CountryCode: node.CountryCode, Server: node.Server,
+			Port: node.Port, Phase: node.Phase, Error: node.Error,
+		}
+		if len(node.OutboundJSON) > 0 {
+			outbound, err := singjson.UnmarshalExtendedContext[option.Outbound](targetprofile.Context(), node.OutboundJSON)
+			if err != nil {
+				return Subscription{}, fmt.Errorf("decode node %q: %w", node.ID, err)
+			}
+			runtimeNode.Outbound = &outbound
+		}
+		item.Profile.Nodes[index] = runtimeNode
+	}
+	return item, nil
 }
 
 func badgerKey(id string) []byte {

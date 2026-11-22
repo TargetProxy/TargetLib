@@ -725,7 +725,6 @@ const SubscriptionUpdateResult$json = {
       '10': 'durationMilliseconds'
     },
     {'1': 'original_config', '3': 5, '4': 1, '5': 12, '10': 'originalConfig'},
-    {'1': 'generated_config', '3': 6, '4': 1, '5': 12, '10': 'generatedConfig'},
   ],
 };
 
@@ -735,8 +734,7 @@ final $typed_data.Uint8List subscriptionUpdateResultDescriptor = $convert.base64
     'V0bGliLlN1YnNjcmlwdGlvblZpZXdSDHN1YnNjcmlwdGlvbhIYCgdjaGFuZ2VkGAIgASgIUgdj'
     'aGFuZ2VkEiEKDG5vdF9tb2RpZmllZBgDIAEoCFILbm90TW9kaWZpZWQSMwoVZHVyYXRpb25fbW'
     'lsbGlzZWNvbmRzGAQgASgDUhRkdXJhdGlvbk1pbGxpc2Vjb25kcxInCg9vcmlnaW5hbF9jb25m'
-    'aWcYBSABKAxSDm9yaWdpbmFsQ29uZmlnEikKEGdlbmVyYXRlZF9jb25maWcYBiABKAxSD2dlbm'
-    'VyYXRlZENvbmZpZw==');
+    'aWcYBSABKAxSDm9yaWdpbmFsQ29uZmln');
 
 @$core.Deprecated('Use runtimeSettingsDescriptor instead')
 const RuntimeSettings$json = {
@@ -807,11 +805,6 @@ const RuntimeConfig$json = {
       '10': 'nodePoolRevision'
     },
   ],
-  '9': [
-    {'1': 4, '2': 5},
-    {'1': 5, '2': 6},
-  ],
-  '10': ['service_bindings', 'revision'],
 };
 
 /// Descriptor for `RuntimeConfig`. Decode as a `google.protobuf.DescriptorProto`.
@@ -820,8 +813,7 @@ final $typed_data.Uint8List runtimeConfigDescriptor = $convert.base64Decode(
     'R0aW5nc1IIc2V0dGluZ3MSNwoJc2VsZWN0b3JzGAIgAygLMhkudGFyZ2V0bGliLlNlbGVjdG9y'
     'Q29uZmlnUglzZWxlY3RvcnMSPgoOc2VydmljZV9yb3V0ZXMYAyADKAsyFy50YXJnZXRsaWIuU2'
     'VydmljZVJvdXRlUg1zZXJ2aWNlUm91dGVzEiwKEm5vZGVfcG9vbF9yZXZpc2lvbhgGIAEoCVIQ'
-    'bm9kZVBvb2xSZXZpc2lvbkoECAQQBUoECAUQBlIQc2VydmljZV9iaW5kaW5nc1IIcmV2aXNpb2'
-    '4=');
+    'bm9kZVBvb2xSZXZpc2lvbg==');
 
 @$core.Deprecated('Use updateRuntimeConfigRequestDescriptor instead')
 const UpdateRuntimeConfigRequest$json = {
@@ -836,17 +828,13 @@ const UpdateRuntimeConfigRequest$json = {
       '10': 'settings'
     },
   ],
-  '9': [
-    {'1': 3, '2': 4},
-  ],
-  '10': ['expected_revision'],
 };
 
 /// Descriptor for `UpdateRuntimeConfigRequest`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List updateRuntimeConfigRequestDescriptor =
     $convert.base64Decode(
         'ChpVcGRhdGVSdW50aW1lQ29uZmlnUmVxdWVzdBI2CghzZXR0aW5ncxgBIAEoCzIaLnRhcmdldG'
-        'xpYi5SdW50aW1lU2V0dGluZ3NSCHNldHRpbmdzSgQIAxAEUhFleHBlY3RlZF9yZXZpc2lvbg==');
+        'xpYi5SdW50aW1lU2V0dGluZ3NSCHNldHRpbmdz');
 
 @$core.Deprecated('Use selectorConfigDescriptor instead')
 const SelectorConfig$json = {
@@ -889,39 +877,6 @@ final $typed_data.Uint8List serviceRouteDescriptor = $convert.base64Decode(
     'MYAiADKAlSB2RvbWFpbnMSIQoMc2VsZWN0b3JfdGFnGAMgASgJUgtzZWxlY3RvclRhZxIYCgdl'
     'bmFibGVkGAQgASgIUgdlbmFibGVkEiEKDGRpc3BsYXlfbmFtZRgFIAEoCVILZGlzcGxheU5hbW'
     'U=');
-
-@$core.Deprecated('Use runtimeModelDescriptor instead')
-const RuntimeModel$json = {
-  '1': 'RuntimeModel',
-  '2': [
-    {
-      '1': 'selectors',
-      '3': 1,
-      '4': 3,
-      '5': 11,
-      '6': '.targetlib.SelectorConfig',
-      '10': 'selectors'
-    },
-    {
-      '1': 'service_routes',
-      '3': 2,
-      '4': 3,
-      '5': 11,
-      '6': '.targetlib.ServiceRoute',
-      '10': 'serviceRoutes'
-    },
-  ],
-  '9': [
-    {'1': 3, '2': 4},
-  ],
-  '10': ['service_bindings'],
-};
-
-/// Descriptor for `RuntimeModel`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List runtimeModelDescriptor = $convert.base64Decode(
-    'CgxSdW50aW1lTW9kZWwSNwoJc2VsZWN0b3JzGAEgAygLMhkudGFyZ2V0bGliLlNlbGVjdG9yQ2'
-    '9uZmlnUglzZWxlY3RvcnMSPgoOc2VydmljZV9yb3V0ZXMYAiADKAsyFy50YXJnZXRsaWIuU2Vy'
-    'dmljZVJvdXRlUg1zZXJ2aWNlUm91dGVzSgQIAxAEUhBzZXJ2aWNlX2JpbmRpbmdz');
 
 @$core.Deprecated('Use nodePoolDescriptor instead')
 const NodePool$json = {
@@ -969,7 +924,6 @@ const SelectNodeResponse$json = {
       '5': 8,
       '10': 'appliedImmediately'
     },
-    {'1': 'error_message', '3': 4, '4': 1, '5': 9, '10': 'errorMessage'},
   ],
 };
 
@@ -977,7 +931,7 @@ const SelectNodeResponse$json = {
 final $typed_data.Uint8List selectNodeResponseDescriptor = $convert.base64Decode(
     'ChJTZWxlY3ROb2RlUmVzcG9uc2USFwoHbm9kZV9pZBgBIAEoCVIGbm9kZUlkEhsKCW5vZGVfbm'
     'FtZRgCIAEoCVIIbm9kZU5hbWUSLwoTYXBwbGllZF9pbW1lZGlhdGVseRgDIAEoCFISYXBwbGll'
-    'ZEltbWVkaWF0ZWx5EiMKDWVycm9yX21lc3NhZ2UYBCABKAlSDGVycm9yTWVzc2FnZQ==');
+    'ZEltbWVkaWF0ZWx5');
 
 @$core.Deprecated('Use proxyStatusDescriptor instead')
 const ProxyStatus$json = {

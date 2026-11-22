@@ -31,8 +31,9 @@ func (d *daemonAdapter) Status() (*daemon.ServiceStatus, error) {
 	return nil, err
 }
 
-func (d *daemonAdapter) SelectOutbound(ctx context.Context, group, outbound string) (*emptypb.Empty, error) {
-	return d.service.SelectOutbound(ctx, &daemon.SelectOutboundRequest{GroupTag: group, OutboundTag: outbound})
+func (d *daemonAdapter) SelectOutbound(ctx context.Context, group, outbound string) error {
+	_, err := d.service.SelectOutbound(ctx, &daemon.SelectOutboundRequest{GroupTag: group, OutboundTag: outbound})
+	return err
 }
 
 var errStatusReceived = errors.New("status received")

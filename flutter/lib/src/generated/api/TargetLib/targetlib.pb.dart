@@ -1638,7 +1638,6 @@ class SubscriptionUpdateResult extends $pb.GeneratedMessage {
     $core.bool? notModified,
     $fixnum.Int64? durationMilliseconds,
     $core.List<$core.int>? originalConfig,
-    $core.List<$core.int>? generatedConfig,
   }) {
     final result = SubscriptionUpdateResult._();
     if (subscription != null) result.subscription = subscription;
@@ -1647,7 +1646,6 @@ class SubscriptionUpdateResult extends $pb.GeneratedMessage {
     if (durationMilliseconds != null)
       result.durationMilliseconds = durationMilliseconds;
     if (originalConfig != null) result.originalConfig = originalConfig;
-    if (generatedConfig != null) result.generatedConfig = generatedConfig;
     return result;
   }
 
@@ -1671,8 +1669,6 @@ class SubscriptionUpdateResult extends $pb.GeneratedMessage {
     ..aInt64(4, _omitFieldNames ? '' : 'durationMilliseconds')
     ..a<$core.List<$core.int>>(
         5, _omitFieldNames ? '' : 'originalConfig', $pb.PbFieldType.OY)
-    ..a<$core.List<$core.int>>(
-        6, _omitFieldNames ? '' : 'generatedConfig', $pb.PbFieldType.OY)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -1746,15 +1742,6 @@ class SubscriptionUpdateResult extends $pb.GeneratedMessage {
   $core.bool hasOriginalConfig() => $_has(4);
   @$pb.TagNumber(5)
   void clearOriginalConfig() => $_clearField(5);
-
-  @$pb.TagNumber(6)
-  $core.List<$core.int> get generatedConfig => $_getN(5);
-  @$pb.TagNumber(6)
-  set generatedConfig($core.List<$core.int> value) => $_setBytes(5, value);
-  @$pb.TagNumber(6)
-  $core.bool hasGeneratedConfig() => $_has(5);
-  @$pb.TagNumber(6)
-  void clearGeneratedConfig() => $_clearField(6);
 }
 
 class RuntimeSettings extends $pb.GeneratedMessage {
@@ -2201,65 +2188,6 @@ class ServiceRoute extends $pb.GeneratedMessage {
   void clearDisplayName() => $_clearField(5);
 }
 
-class RuntimeModel extends $pb.GeneratedMessage {
-  factory RuntimeModel({
-    $core.Iterable<SelectorConfig>? selectors,
-    $core.Iterable<ServiceRoute>? serviceRoutes,
-  }) {
-    final result = RuntimeModel._();
-    if (selectors != null) result.selectors.addAll(selectors);
-    if (serviceRoutes != null) result.serviceRoutes.addAll(serviceRoutes);
-    return result;
-  }
-
-  RuntimeModel._();
-
-  factory RuntimeModel.fromBuffer($core.List<$core.int> data,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      RuntimeModel()..mergeFromBuffer(data, registry);
-  factory RuntimeModel.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      RuntimeModel()..mergeFromJson(json, registry);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'RuntimeModel',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'targetlib'),
-      createEmptyInstance: RuntimeModel.$_createMessage)
-    ..pPM<SelectorConfig>(1, _omitFieldNames ? '' : 'selectors',
-        subBuilder: SelectorConfig.$_createMessage)
-    ..pPM<ServiceRoute>(2, _omitFieldNames ? '' : 'serviceRoutes',
-        subBuilder: ServiceRoute.$_createMessage)
-    ..hasRequiredFields = false;
-
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  RuntimeModel clone() => deepCopy();
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  RuntimeModel copyWith(void Function(RuntimeModel) updates) =>
-      super.copyWith((message) => updates(message as RuntimeModel))
-          as RuntimeModel;
-
-  @$core.override
-  $pb.BuilderInfo get info_ => _i;
-
-  @$core.pragma('dart2js:noInline')
-  @$core.Deprecated('Use RuntimeModel() / RuntimeModel.new instead')
-  static RuntimeModel create() => RuntimeModel._();
-  static $pb.GeneratedMessage $_createMessage() => RuntimeModel._();
-  @$core.override
-  RuntimeModel createEmptyInstance() => RuntimeModel._();
-  @$core.pragma('dart2js:noInline')
-  static RuntimeModel getDefault() =>
-      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<RuntimeModel>(
-          RuntimeModel.$_createMessage);
-  static RuntimeModel? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  $pb.PbList<SelectorConfig> get selectors => $_getList(0);
-
-  @$pb.TagNumber(2)
-  $pb.PbList<ServiceRoute> get serviceRoutes => $_getList(1);
-}
-
 class NodePool extends $pb.GeneratedMessage {
   factory NodePool({
     $core.String? revision,
@@ -2385,14 +2313,12 @@ class SelectNodeResponse extends $pb.GeneratedMessage {
     $core.String? nodeId,
     $core.String? nodeName,
     $core.bool? appliedImmediately,
-    $core.String? errorMessage,
   }) {
     final result = SelectNodeResponse._();
     if (nodeId != null) result.nodeId = nodeId;
     if (nodeName != null) result.nodeName = nodeName;
     if (appliedImmediately != null)
       result.appliedImmediately = appliedImmediately;
-    if (errorMessage != null) result.errorMessage = errorMessage;
     return result;
   }
 
@@ -2412,7 +2338,6 @@ class SelectNodeResponse extends $pb.GeneratedMessage {
     ..aOS(1, _omitFieldNames ? '' : 'nodeId')
     ..aOS(2, _omitFieldNames ? '' : 'nodeName')
     ..aOB(3, _omitFieldNames ? '' : 'appliedImmediately')
-    ..aOS(4, _omitFieldNames ? '' : 'errorMessage')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -2463,15 +2388,6 @@ class SelectNodeResponse extends $pb.GeneratedMessage {
   $core.bool hasAppliedImmediately() => $_has(2);
   @$pb.TagNumber(3)
   void clearAppliedImmediately() => $_clearField(3);
-
-  @$pb.TagNumber(4)
-  $core.String get errorMessage => $_getSZ(3);
-  @$pb.TagNumber(4)
-  set errorMessage($core.String value) => $_setString(3, value);
-  @$pb.TagNumber(4)
-  $core.bool hasErrorMessage() => $_has(3);
-  @$pb.TagNumber(4)
-  void clearErrorMessage() => $_clearField(4);
 }
 
 class ProxyStatus extends $pb.GeneratedMessage {

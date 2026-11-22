@@ -28,23 +28,21 @@ func (m *Manager) UpsertRoute(ctx context.Context, req *api.UpsertRouteRequest) 
 		return nil, status.Error(codes.NotFound, "node not found or unavailable")
 	}
 	next := m.desiredForUpdate()
-	route := findRoute(next.ServiceRoutes, req.GetServiceId())
+	route := next.route(req.GetServiceId())
 	selectorTag := "route-" + req.GetServiceId()
 	if route != nil {
-		selectorTag = route.SelectorTag
+		selectorTag = route.Selector
 	}
-	selector := findSelector(next.Selectors, selectorTag)
+	selector := next.selector(selectorTag)
 	if selector == nil {
-		selector = &api.SelectorConfig{Tag: selectorTag}
-		next.Selectors = append(next.Selectors, selector)
+		next.selectors = append(next.selectors, config.Selector{Tag: selectorTag})
+		selector = next.selector(selectorTag)
 	}
-	selector.NodeIds = readyNodeIDs(pool.Nodes)
-	selector.NodeIds = append(selector.NodeIds, "direct")
-	selector.SelectedNodeId = req.GetNodeId()
+	selector.Selected = req.GetNodeId()
 	selector.SelectedAtUnixMs = currentTimeMillis()
 	if route == nil {
-		next.ServiceRoutes = append(next.ServiceRoutes, &api.ServiceRoute{ServiceId: req.GetServiceId(), SelectorTag: selectorTag})
-		route = next.ServiceRoutes[len(next.ServiceRoutes)-1]
+		next.serviceRoutes = append(next.serviceRoutes, config.ServiceRoute{ServiceID: req.GetServiceId(), Selector: selectorTag})
+		route = next.route(req.GetServiceId())
 	}
 	route.Domains = append([]string(nil), req.GetDomains()...)
 	route.Enabled = req.GetEnabled()
@@ -53,7 +51,7 @@ func (m *Manager) UpsertRoute(ctx context.Context, req *api.UpsertRouteRequest) 
 	if err != nil {
 		return nil, err
 	}
-	return m.routeInfo(next, route.ServiceId)
+	return m.routeInfo(next, route.ServiceID)
 }
 
 func (m *Manager) DeleteRoute(ctx context.Context, req *api.DeleteRouteRequest) (*emptypb.Empty, error) {
@@ -63,23 +61,8 @@ func (m *Manager) DeleteRoute(ctx context.Context, req *api.DeleteRouteRequest) 
 	m.opMu.Lock()
 	defer m.opMu.Unlock()
 	next := m.desiredForUpdate()
-	index := -1
-	selectorTag := ""
-	for i, route := range next.ServiceRoutes {
-		if route.GetServiceId() == req.GetServiceId() {
-			index, selectorTag = i, route.GetSelectorTag()
-			break
-		}
-	}
-	if index < 0 {
+	if _, ok := next.removeRoute(req.GetServiceId()); !ok {
 		return nil, status.Error(codes.NotFound, "route not found")
-	}
-	next.ServiceRoutes = append(next.ServiceRoutes[:index], next.ServiceRoutes[index+1:]...)
-	for i, selector := range next.Selectors {
-		if selector.GetTag() == selectorTag {
-			next.Selectors = append(next.Selectors[:i], next.Selectors[i+1:]...)
-			break
-		}
 	}
 	if _, err := m.applyDesired(ctx, next); err != nil {
 		return nil, err
@@ -88,24 +71,18 @@ func (m *Manager) DeleteRoute(ctx context.Context, req *api.DeleteRouteRequest) 
 }
 
 func (m *Manager) ListRoutes(_ context.Context, _ *emptypb.Empty) (*api.RouteList, error) {
-	m.configMu.RLock()
-	serviceRoutes := m.runtimeConfig.ServiceRoutes
-	proxySelector := findSelector(m.runtimeConfig.Selectors, "proxy")
-	m.configMu.RUnlock()
-
+	intent := m.desiredForUpdate()
 	result := &api.RouteList{DefaultRoute: &api.RouteInfo{ServiceId: config.DefaultServiceID, SelectorTag: "proxy"}}
-	for _, route := range serviceRoutes {
-		m.configMu.RLock()
-		info, err := m.routeInfo(m.runtimeConfig, route.GetServiceId())
-		m.configMu.RUnlock()
+	for _, route := range intent.serviceRoutes {
+		info, err := m.routeInfo(intent, route.ServiceID)
 		if err != nil {
 			return nil, err
 		}
 		result.Routes = append(result.Routes, info)
 	}
-	if proxySelector != nil {
-		result.DefaultRoute.CurrentNodeId = proxySelector.GetSelectedNodeId()
-		if node := findNodeByID(m.subscriptions.NodePool().Nodes, proxySelector.GetSelectedNodeId()); node != nil {
+	if proxy := intent.selector("proxy"); proxy != nil {
+		result.DefaultRoute.CurrentNodeId = proxy.Selected
+		if node := findNodeByID(m.subscriptions.NodePool().Nodes, proxy.Selected); node != nil {
 			result.DefaultRoute.CurrentNodeName = node.Name
 		}
 	}
@@ -120,50 +97,44 @@ func (m *Manager) SelectRouteNode(ctx context.Context, req *api.SelectRouteNodeR
 	defer m.opMu.Unlock()
 	pool := m.subscriptions.NodePool()
 	node := findNodeByID(pool.Nodes, req.GetNodeId())
-	if node == nil || !node.IsAvailable() {
+	nodeName := ""
+	if req.GetNodeId() == "direct" {
+		nodeName = "direct"
+	} else if node == nil || !node.IsAvailable() {
 		return nil, status.Error(codes.NotFound, "node not found or unavailable")
+	} else {
+		nodeName = node.Name
 	}
 	next := m.desiredForUpdate()
-	route := findRoute(next.ServiceRoutes, req.GetServiceId())
+	route := next.route(req.GetServiceId())
 	if route == nil {
 		return nil, status.Error(codes.NotFound, "route not found")
 	}
-	selector := findSelector(next.Selectors, route.GetSelectorTag())
-	if selector == nil {
-		return nil, status.Error(codes.Internal, "route selector not found")
-	}
-	previous := selector.GetSelectedNodeId()
-	selector.SelectedNodeId = req.GetNodeId()
-	selector.SelectedAtUnixMs = currentTimeMillis()
-	content, err := m.prepareRuntimeContent(next, pool.Nodes)
+	running, err := m.selectNode(ctx, next, pool.Nodes, route.Selector, req.GetNodeId())
 	if err != nil {
 		return nil, err
 	}
-	current, err := m.waitForStableStatus(ctx)
-	if err != nil {
-		return nil, err
-	}
-	running := current.Status == daemon.ServiceStatus_STARTED
-	if err := m.commitLiveSelector(ctx, next, content, selector.Tag, req.GetNodeId(), previous, running); err != nil {
-		return nil, err
-	}
-	return &api.SelectNodeResponse{NodeId: req.GetNodeId(), NodeName: node.Name, AppliedImmediately: running}, nil
+	return &api.SelectNodeResponse{NodeId: req.GetNodeId(), NodeName: nodeName, AppliedImmediately: running}, nil
 }
 
-func (m *Manager) routeInfo(runtime *api.RuntimeConfig, serviceID string) (*api.RouteInfo, error) {
-	route := findRoute(runtime.ServiceRoutes, serviceID)
+func (m *Manager) routeInfo(intent runtimeIntent, serviceID string) (*api.RouteInfo, error) {
+	route := intent.route(serviceID)
 	if route == nil {
 		return nil, status.Error(codes.NotFound, "route not found")
 	}
-	selector := findSelector(runtime.Selectors, route.GetSelectorTag())
+	selector := intent.selector(route.Selector)
 	if selector == nil {
 		return nil, status.Error(codes.Internal, "route selector not found")
 	}
-	info := &api.RouteInfo{ServiceId: route.GetServiceId(), DisplayName: route.GetDisplayName(), Domains: route.GetDomains(), SelectorTag: route.GetSelectorTag(), CurrentNodeId: selector.GetSelectedNodeId(), Enabled: route.GetEnabled()}
+	info := &api.RouteInfo{
+		ServiceId: route.ServiceID, DisplayName: route.DisplayName,
+		Domains: append([]string(nil), route.Domains...), SelectorTag: route.Selector,
+		CurrentNodeId: selector.Selected, Enabled: route.Enabled,
+	}
 	if node := findNodeByID(m.subscriptions.NodePool().Nodes, info.CurrentNodeId); node != nil {
 		info.CurrentNodeName = node.Name
 	}
-	info.Effective = route.GetEnabled() && runtime.GetSettings().GetRouteMode() != api.RouteMode_ROUTE_MODE_DIRECT
+	info.Effective = route.Enabled && intent.settings.RouteMode != config.RouteModeDirect
 	if info.Effective {
 		current, err := m.currentStatus()
 		if err != nil {

@@ -157,9 +157,6 @@ func cloneNodes(source []targetprofile.Node) []targetprofile.Node {
 	result := make([]targetprofile.Node, len(source))
 	for index, node := range source {
 		result[index] = node
-		if node.OutboundJSON != nil {
-			result[index].OutboundJSON = append([]byte(nil), node.OutboundJSON...)
-		}
 	}
 	return result
 }

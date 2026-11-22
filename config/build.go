@@ -62,8 +62,8 @@ type RuntimePlan struct {
 	Experimental option.ExperimentalOptions
 }
 
-// Blueprint 是按配置 section 划分的最终计划。Emit 不再推断或修补配置。
-type Blueprint struct {
+// blueprint 是按配置 section 划分的最终计划。
+type blueprint struct {
 	Inbounds  []option.Inbound
 	Outbounds []option.Outbound
 	DNS       *option.DNSOptions
@@ -71,8 +71,7 @@ type Blueprint struct {
 	Runtime   RuntimePlan
 }
 
-// Emit 将 Blueprint 序列化并校验，不包含配置决策。
-func Emit(plan Blueprint) ([]byte, error) {
+func emit(plan blueprint) ([]byte, error) {
 	experimental := plan.Runtime.Experimental
 	config := option.Options{
 		Schema: plan.Runtime.Schema, Log: &plan.Runtime.Log, DNS: plan.DNS, NTP: plan.Runtime.NTP,
@@ -81,18 +80,16 @@ func Emit(plan Blueprint) ([]byte, error) {
 		Route:    emitRoute(plan.Route),
 		Services: plan.Runtime.Services, Experimental: &experimental,
 	}
-	content, err := singjson.MarshalContext(targetprofile.Context(), &config)
-	if err != nil {
-		return nil, err
-	}
-	if err := validateConfig(content); err != nil {
-		return nil, fmt.Errorf("validate generated config: %w", err)
-	}
-	return content, nil
+	return singjson.MarshalContext(targetprofile.Context(), &config)
 }
 
-// Build 保留稳定的公开入口。
-func Build(settings Settings, source any) ([]byte, error) {
+type BuildResult struct {
+	Content []byte
+	Model   RuntimeModel
+}
+
+// Build generates sing-box JSON and returns the normalized model used to build it.
+func Build(settings Settings, source any) (BuildResult, error) {
 	var model RuntimeModel
 	switch value := source.(type) {
 	case targetprofile.Profile:
@@ -100,35 +97,34 @@ func Build(settings Settings, source any) ([]byte, error) {
 	case RuntimeModel:
 		model = value
 	default:
-		return nil, fmt.Errorf("%w: unsupported runtime model", ErrInvalidSource)
+		return BuildResult{}, fmt.Errorf("%w: unsupported runtime model", ErrInvalidSource)
 	}
 	model, err := NormalizeRuntimeModel(model)
 	if err != nil {
-		return nil, err
+		return BuildResult{}, err
 	}
-	return BuildNormalized(settings, model)
-}
-
-// BuildNormalized emits a model that has already passed NormalizeRuntimeModel.
-func BuildNormalized(settings Settings, model RuntimeModel) ([]byte, error) {
 	plan, err := planRuntimeModel(settings, model)
 	if err != nil {
-		return nil, err
+		return BuildResult{}, err
 	}
-	return Emit(plan)
+	content, err := emit(plan)
+	if err != nil {
+		return BuildResult{}, err
+	}
+	return BuildResult{Content: content, Model: model}, nil
 }
 
-func planRuntimeModel(settings Settings, model RuntimeModel) (Blueprint, error) {
+func planRuntimeModel(settings Settings, model RuntimeModel) (blueprint, error) {
 	if err := settings.Validate(); err != nil {
-		return Blueprint{}, err
+		return blueprint{}, err
 	}
 	inbounds, err := buildInbounds(settings)
 	if err != nil {
-		return Blueprint{}, err
+		return blueprint{}, err
 	}
 	outbounds, finalOutbound, err := planOutboundsWithSelectors(model.NodePool.Nodes, model.Selectors)
 	if err != nil {
-		return Blueprint{}, err
+		return blueprint{}, err
 	}
 	if settings.ProbeOnly {
 		filtered := outbounds[:0]
@@ -173,9 +169,9 @@ func planRuntimeModel(settings Settings, model RuntimeModel) (Blueprint, error) 
 	}
 	dns, err := planDNS(settings.ProxyMode == ProxyModeTun)
 	if err != nil {
-		return Blueprint{}, err
+		return blueprint{}, err
 	}
-	return Blueprint{Inbounds: inbounds, Outbounds: outbounds, DNS: dns, Route: route, Runtime: planRuntime(settings)}, nil
+	return blueprint{Inbounds: inbounds, Outbounds: outbounds, DNS: dns, Route: route, Runtime: planRuntime(settings)}, nil
 }
 
 func planOutboundsWithSelectors(nodes []targetprofile.Node, selectors []Selector) ([]option.Outbound, string, error) {
@@ -369,11 +365,6 @@ func planRuntime(settings Settings) RuntimePlan {
 	return RuntimePlan{
 		Log: option.LogOptions{Level: "error", Output: "target.log", Timestamp: true}, Experimental: experimental,
 	}
-}
-
-func validateConfig(content []byte) error {
-	_, err := singjson.UnmarshalExtendedContext[option.Options](targetprofile.Context(), content)
-	return err
 }
 
 // buildInbounds 生成应用拥有的入站面。订阅透传配置不得自带 inbounds

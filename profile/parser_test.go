@@ -1,7 +1,6 @@
 package profile
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/sagernet/sing-box/option"
@@ -13,6 +12,9 @@ func TestParseProducesNodeOnlyProfile(t *testing.T) {
 		"inbounds":[{"type":"mixed","tag":"source","listen":"127.0.0.1","listen_port":1080}],
 		"outbounds":[
 			{"type":"shadowsocks","tag":"node-a","server":"127.0.0.1","server_port":8388,"method":"aes-128-gcm","password":"secret"},
+			{"type":"ssh","tag":"🇸🇬 Singapore 01","server":"127.0.0.1","server_port":22,"user":"test","password":"secret"},
+			{"type":"vmess","tag":"Tokyo Premium","server":"127.0.0.2","server_port":443,"uuid":"00000000-0000-0000-0000-000000000000","security":"auto"},
+			{"type":"tor","tag":"tor-node"},
 			{"type":"selector","tag":"proxy","outbounds":["node-a","direct"]},
 			{"type":"block","tag":"reject"}
 		],
@@ -21,62 +23,30 @@ func TestParseProducesNodeOnlyProfile(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(parsed.Profile.Nodes) != 1 {
-		t.Fatalf("nodes = %d, want 1: %+v", len(parsed.Profile.Nodes), parsed.Profile.Nodes)
+	want := []struct {
+		name, protocol, server, country string
+		port                            int
+	}{
+		{"node-a", "shadowsocks", "127.0.0.1", "", 8388},
+		{"🇸🇬 Singapore 01", "ssh", "127.0.0.1", "SG", 22},
+		{"Tokyo Premium", "vmess", "127.0.0.2", "JP", 443},
+		{"tor-node", "tor", "", "", 0},
 	}
-	node := parsed.Profile.Nodes[0]
-	if node.Name != "node-a" || node.Type != "shadowsocks" || node.Server != "127.0.0.1" || node.Port != 8388 {
-		t.Fatalf("unexpected node: %+v", node)
+	if len(parsed.Profile.Nodes) != len(want) {
+		t.Fatalf("nodes = %d, want %d", len(parsed.Profile.Nodes), len(want))
 	}
-	if node.Phase != NodeReady {
-		t.Fatalf("node phase = %q, want ready: %s", node.Phase, node.Error)
-	}
-	if len(node.OutboundJSON) == 0 || node.Outbound == nil {
-		t.Fatalf("node outbound was not preserved: %+v", node)
+	for i, expected := range want {
+		node := parsed.Profile.Nodes[i]
+		if node.Name != expected.name || node.Type != expected.protocol || node.Server != expected.server ||
+			node.Port != expected.port || node.CountryCode != expected.country {
+			t.Fatalf("node %d = %+v, want %+v", i, node, expected)
+		}
+		if node.Phase != NodeReady || node.Outbound == nil {
+			t.Fatalf("node %q is not ready: %s", node.Name, node.Error)
+		}
 	}
 	if parsed.NodesHash == "" {
 		t.Fatal("nodes hash is empty")
-	}
-}
-
-func TestParseClassifiesRegisteredRemoteOutboundsAsNodes(t *testing.T) {
-	parsed, err := Parse([]byte(`{
-		"outbounds":[
-			{"type":"ssh","tag":"ssh-node","server":"127.0.0.1","server_port":22,"user":"test","password":"secret"},
-			{"type":"tor","tag":"tor-node"}
-		]
-	}`))
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(parsed.Profile.Nodes) != 2 {
-		t.Fatalf("nodes = %d, want 2: %+v", len(parsed.Profile.Nodes), parsed.Profile.Nodes)
-	}
-	for _, node := range parsed.Profile.Nodes {
-		if node.Phase != NodeReady {
-			t.Fatalf("node %q phase = %q, want ready: %s", node.Name, node.Phase, node.Error)
-		}
-		if len(node.OutboundJSON) == 0 || node.Outbound == nil {
-			t.Fatalf("node outbound was not preserved: %+v", node)
-		}
-	}
-}
-
-func TestParseInfersCountryCodeFromNodeName(t *testing.T) {
-	parsed, err := Parse([]byte(`{
-		"outbounds":[
-			{"type":"shadowsocks","tag":"🇸🇬 Singapore 01","server":"127.0.0.1","server_port":8388,"method":"aes-128-gcm","password":"secret"},
-			{"type":"vmess","tag":"Tokyo Premium","server":"127.0.0.2","server_port":443,"uuid":"00000000-0000-0000-0000-000000000000","security":"auto"}
-		]
-	}`))
-	if err != nil {
-		t.Fatal(err)
-	}
-	if got := parsed.Profile.Nodes[0].CountryCode; got != "SG" {
-		t.Fatalf("first country = %q, want SG", got)
-	}
-	if got := parsed.Profile.Nodes[1].CountryCode; got != "JP" {
-		t.Fatalf("second country = %q, want JP", got)
 	}
 }
 
@@ -113,12 +83,17 @@ func TestParseSkipsRemovedOutboundsAndSanitizesLegacyTLS(t *testing.T) {
 	if node.Phase != NodeReady {
 		t.Fatalf("node phase = %q, want ready: %s", node.Phase, node.Error)
 	}
-	if got := string(node.OutboundJSON); strings.Contains(got, "pq_signature_schemes_enabled") || strings.Contains(got, "chrome_pq") {
-		t.Fatalf("legacy TLS fields were not sanitized: %s", got)
+	wrapper, ok := node.Outbound.Options.(option.OutboundTLSOptionsWrapper)
+	if !ok {
+		t.Fatalf("typed outbound %T does not expose TLS options", node.Outbound.Options)
+	}
+	tls := wrapper.TakeOutboundTLSOptions()
+	if tls == nil || tls.ECH.PQSignatureSchemesEnabled || tls.ECH.DynamicRecordSizingDisabled || tls.UTLS.Fingerprint != "chrome" {
+		t.Fatalf("legacy TLS fields were not sanitized: %+v", tls)
 	}
 }
 
-func TestParseRemovesProviderALPNFromPersistedAndTypedOutbounds(t *testing.T) {
+func TestParseRemovesProviderALPNFromTypedOutbound(t *testing.T) {
 	parsed, err := Parse([]byte(`{
 		"outbounds":[{
 			"type":"anytls",
@@ -133,9 +108,6 @@ func TestParseRemovesProviderALPNFromPersistedAndTypedOutbounds(t *testing.T) {
 		t.Fatal(err)
 	}
 	node := parsed.Profile.Nodes[0]
-	if strings.Contains(string(node.OutboundJSON), `"alpn"`) {
-		t.Fatalf("persisted outbound still contains ALPN: %s", node.OutboundJSON)
-	}
 	wrapper, ok := node.Outbound.Options.(option.OutboundTLSOptionsWrapper)
 	if !ok {
 		t.Fatalf("typed outbound %T does not expose TLS options", node.Outbound.Options)
@@ -169,7 +141,19 @@ func TestParseRestrictsTrojanTransportToTCPWhenNetworkIsImplicit(t *testing.T) {
 	if node.Phase != NodeReady {
 		t.Fatalf("node phase = %q, want ready: %s", node.Phase, node.Error)
 	}
-	if got := string(node.OutboundJSON); !strings.Contains(got, `"network":"tcp"`) {
-		t.Fatalf("implicit trojan transport network was not restricted to tcp: %s", got)
+	options, ok := node.Outbound.Options.(*option.TrojanOutboundOptions)
+	if !ok || options.Network != "tcp" {
+		t.Fatalf("implicit trojan transport network was not restricted to tcp: %+v", node.Outbound.Options)
+	}
+}
+
+func TestParseRetainsOutboundDecodeFailure(t *testing.T) {
+	parsed, err := Parse([]byte(`{"outbounds":[{"type":"ssh","tag":"invalid","server":true,"server_port":22}]}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	nodes := WithSource(parsed.Profile, "subscription").Nodes
+	if len(nodes) != 1 || nodes[0].Phase != NodeFailed || nodes[0].Error == "" || nodes[0].Outbound != nil {
+		t.Fatalf("expected a failed node without an outbound, got %+v", nodes)
 	}
 }

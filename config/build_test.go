@@ -9,196 +9,95 @@ import (
 	"github.com/sagernet/sing/common/json/badoption"
 )
 
-func TestTunModeDoesNotCreateMixedInbound(t *testing.T) {
-	content, err := Build(Settings{
-		ListenAddress: "127.0.0.1",
-		MixedPort:     2080,
-		ProxyMode:     ProxyModeTun,
-	}, targetprofile.Profile{})
-	if err != nil {
-		t.Fatal(err)
-	}
-	var document struct {
-		Inbounds []struct {
-			Type string `json:"type"`
-		} `json:"inbounds"`
-	}
-	if err := json.Unmarshal(content, &document); err != nil {
-		t.Fatal(err)
-	}
-	if len(document.Inbounds) != 1 || document.Inbounds[0].Type != "tun" {
-		t.Fatalf("unexpected inbounds: %+v", document.Inbounds)
-	}
-}
-
-func TestBuildTunRouteModesKeepDNSHijackAndUpstream(t *testing.T) {
-	for _, mode := range []RouteMode{RouteModeDirect, RouteModeAll} {
-		t.Run(string(mode), func(t *testing.T) {
-			content, err := Build(Settings{
-				ListenAddress: "127.0.0.1",
-				MixedPort:     2080,
-				ProxyMode:     ProxyModeTun,
-				RouteMode:     mode,
+func TestBuildModes(t *testing.T) {
+	for _, test := range []struct {
+		name      string
+		proxyMode ProxyMode
+		routeMode RouteMode
+		wantGeoIP bool
+	}{
+		{"mixed/direct", ProxyModeMixed, RouteModeDirect, false},
+		{"mixed/all", ProxyModeMixed, RouteModeAll, false},
+		{"mixed/rule", ProxyModeMixed, RouteModeRule, true},
+		{"tun/direct", ProxyModeTun, RouteModeDirect, false},
+		{"tun/all", ProxyModeTun, RouteModeAll, false},
+		{"tun/rule", ProxyModeTun, RouteModeRule, true},
+		{"tun/unspecified", ProxyModeTun, "", false},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			built, err := Build(Settings{
+				ListenAddress: "127.0.0.1", MixedPort: 2080,
+				ProxyMode: test.proxyMode, RouteMode: test.routeMode,
 			}, targetprofile.Profile{})
 			if err != nil {
 				t.Fatal(err)
 			}
 			var document struct {
-				DNS struct {
-					Servers []struct {
-						Type   string `json:"type"`
-						Tag    string `json:"tag"`
-						Server string `json:"server"`
-					} `json:"servers"`
-					Final string `json:"final"`
-				} `json:"dns"`
+				Inbounds []struct{ Type string }
+				DNS      *struct {
+					Servers []struct{ Type, Tag, Server string }
+					Final   string
+				}
 				Route struct {
-					Rules []struct {
-						Port   uint16 `json:"port"`
-						Action string `json:"action"`
-					} `json:"rules"`
-				} `json:"route"`
+					Final   string
+					RuleSet []struct{ Type, Tag, Path string } `json:"rule_set"`
+					Rules   []struct {
+						Action, Outbound string
+						Port             uint16
+						RuleSet          string `json:"rule_set"`
+					}
+				}
+				Log struct {
+					Disabled, Timestamp bool
+					Level, Output       string
+				}
 			}
-			if err := json.Unmarshal(content, &document); err != nil {
+			if err := json.Unmarshal(built.Content, &document); err != nil {
 				t.Fatal(err)
 			}
-			if len(document.DNS.Servers) != 1 ||
-				document.DNS.Servers[0].Type != "udp" ||
-				document.DNS.Servers[0].Tag != tunDNSPublicTag ||
-				document.DNS.Servers[0].Server != tunDNSPublicAddr ||
-				document.DNS.Final != tunDNSPublicTag {
-				t.Fatalf("unexpected TUN DNS: %+v", document.DNS)
+			if len(document.Inbounds) != 1 || document.Inbounds[0].Type != string(test.proxyMode) {
+				t.Fatalf("unexpected inbounds: %+v", document.Inbounds)
 			}
-			if len(document.Route.Rules) != 2 ||
-				document.Route.Rules[0].Action != "sniff" ||
-				document.Route.Rules[1].Action != "hijack-dns" ||
-				document.Route.Rules[1].Port != 53 {
-				t.Fatalf("TUN DNS hijack rule missing: %+v", document.Route.Rules)
+			if document.Log.Disabled || document.Log.Level != "error" || document.Log.Output != "target.log" || !document.Log.Timestamp {
+				t.Fatalf("unexpected logging: %+v", document.Log)
 			}
-		})
-	}
-}
 
-func TestBuildEnablesSniffForMixedInbound(t *testing.T) {
-	content, err := Build(Settings{
-		ListenAddress: "127.0.0.1",
-		MixedPort:     2080,
-		ProxyMode:     ProxyModeMixed,
-		RouteMode:     RouteModeRule,
-	}, targetprofile.Profile{})
-	if err != nil {
-		t.Fatal(err)
-	}
-	var document struct {
-		Route struct {
-			RuleSet []struct {
-				Type string `json:"type"`
-				Tag  string `json:"tag"`
-				Path string `json:"path"`
-			} `json:"rule_set"`
-			Rules []struct {
-				RuleSet  string `json:"rule_set"`
-				Action   string `json:"action"`
-				Outbound string `json:"outbound"`
-			} `json:"rules"`
-		} `json:"route"`
-	}
-	if err := json.Unmarshal(content, &document); err != nil {
-		t.Fatal(err)
-	}
-	if len(document.Route.RuleSet) != 1 ||
-		document.Route.RuleSet[0].Type != "local" ||
-		document.Route.RuleSet[0].Tag != geoIPCNRuleSetTag ||
-		document.Route.RuleSet[0].Path != geoIPCNRuleSetPath {
-		t.Fatalf("unexpected China GeoIP rule set: %+v", document.Route.RuleSet)
-	}
-	if len(document.Route.Rules) != 2 ||
-		document.Route.Rules[0].Action != "sniff" ||
-		document.Route.Rules[1].RuleSet != geoIPCNRuleSetTag ||
-		document.Route.Rules[1].Outbound != "direct" {
-		t.Fatalf("unexpected rule-mode rules: %+v", document.Route.Rules)
-	}
-}
-
-func TestBuildTunRuleModeHijacksDNSBeforeGeoIP(t *testing.T) {
-	content, err := Build(Settings{
-		ListenAddress: "127.0.0.1",
-		MixedPort:     2080,
-		ProxyMode:     ProxyModeTun,
-		RouteMode:     RouteModeRule,
-	}, targetprofile.Profile{})
-	if err != nil {
-		t.Fatal(err)
-	}
-	var document struct {
-		Route struct {
-			Rules []struct {
-				RuleSet string `json:"rule_set"`
-				Action  string `json:"action"`
-			} `json:"rules"`
-		} `json:"route"`
-	}
-	if err := json.Unmarshal(content, &document); err != nil {
-		t.Fatal(err)
-	}
-	if len(document.Route.Rules) != 3 ||
-		document.Route.Rules[0].Action != "sniff" ||
-		document.Route.Rules[1].Action != "hijack-dns" ||
-		document.Route.Rules[2].RuleSet != geoIPCNRuleSetTag {
-		t.Fatalf("unexpected TUN rule order: %+v", document.Route.Rules)
-	}
-}
-
-func TestBuildAlwaysUsesErrorLoggingWithFileOutput(t *testing.T) {
-	content, err := Build(Settings{
-		ListenAddress: "127.0.0.1",
-		MixedPort:     2080,
-		ProxyMode:     ProxyModeTun,
-		RouteMode:     RouteModeDirect,
-	}, targetprofile.Profile{})
-	if err != nil {
-		t.Fatal(err)
-	}
-	var document struct {
-		Log struct {
-			Disabled  bool   `json:"disabled"`
-			Level     string `json:"level"`
-			Output    string `json:"output"`
-			Timestamp bool   `json:"timestamp"`
-		} `json:"log"`
-	}
-	if err := json.Unmarshal(content, &document); err != nil {
-		t.Fatal(err)
-	}
-	if document.Log.Disabled || document.Log.Level != "error" || document.Log.Output != "target.log" || !document.Log.Timestamp {
-		t.Fatalf("core logging was not normalized to persistent errors: %+v", document.Log)
-	}
-}
-
-func TestBuildRouteModesWithoutProfile(t *testing.T) {
-	for _, test := range []struct {
-		name string
-		mode RouteMode
-		want string
-	}{
-		{"direct", RouteModeDirect, "direct"},
-		{"all", RouteModeAll, "direct"},
-	} {
-		t.Run(test.name, func(t *testing.T) {
-			content, err := Build(Settings{ListenAddress: "127.0.0.1", MixedPort: 2080, ProxyMode: ProxyModeMixed, RouteMode: test.mode}, targetprofile.Profile{})
-			if err != nil {
-				t.Fatal(err)
+			rules := document.Route.Rules
+			wantRules := 1
+			if test.proxyMode == ProxyModeTun {
+				wantRules++
 			}
-			var document struct {
-				Route struct {
-					Final string `json:"final"`
-				} `json:"route"`
+			if test.wantGeoIP {
+				wantRules++
 			}
-			if err := json.Unmarshal(content, &document); err != nil {
-				t.Fatal(err)
+			if document.Route.Final != "direct" || len(rules) != wantRules || rules[0].Action != "sniff" {
+				t.Fatalf("unexpected routing without nodes: %+v", document.Route)
 			}
-			if document.Route.Final != test.want {
-				t.Fatalf("expected final %q, got %q", test.want, document.Route.Final)
+			if test.proxyMode == ProxyModeTun {
+				dns := document.DNS
+				if dns == nil || len(dns.Servers) != 1 ||
+					dns.Servers[0].Type != "udp" || dns.Servers[0].Tag != tunDNSPublicTag ||
+					dns.Servers[0].Server != tunDNSPublicAddr || dns.Final != tunDNSPublicTag {
+					t.Fatalf("unexpected TUN DNS: %+v", dns)
+				}
+				if rules[1].Action != "hijack-dns" || rules[1].Port != 53 {
+					t.Fatalf("unexpected TUN DNS hijack: %+v", rules[1])
+				}
+			} else if document.DNS != nil {
+				t.Fatalf("unexpected mixed-mode DNS: %+v", document.DNS)
+			}
+			ruleSets := document.Route.RuleSet
+			if test.wantGeoIP {
+				if len(ruleSets) != 1 || ruleSets[0].Type != "local" ||
+					ruleSets[0].Tag != geoIPCNRuleSetTag || ruleSets[0].Path != geoIPCNRuleSetPath {
+					t.Fatalf("unexpected China GeoIP rule set: %+v", ruleSets)
+				}
+				last := rules[len(rules)-1]
+				if last.RuleSet != geoIPCNRuleSetTag || last.Outbound != "direct" {
+					t.Fatalf("unexpected China GeoIP rule: %+v", last)
+				}
+			} else if len(ruleSets) != 0 {
+				t.Fatalf("unexpected rule sets: %+v", ruleSets)
 			}
 		})
 	}
@@ -206,184 +105,97 @@ func TestBuildRouteModesWithoutProfile(t *testing.T) {
 
 func TestBuildUsesNodesOnlyFromProfile(t *testing.T) {
 	parsed, err := targetprofile.Parse([]byte(`{
-		"dns":{"servers":[{"type":"local","tag":"local"}]},
+		"dns":{"servers":[{"type":"https","tag":"local","server":"1.1.1.1","detour":"direct"}]},
 		"inbounds":[{"type":"mixed","tag":"source","listen":"127.0.0.1","listen_port":9999}],
 		"outbounds":[
 			{"type":"shadowsocks","tag":"node-a","server":"127.0.0.1","server_port":8388,"method":"aes-128-gcm","password":"secret","tcp_fast_open":true},
-			{"type":"selector","tag":"proxy","outbounds":["node-a","direct"],"default":"node-a"},
+			{"type":"anytls","tag":"node-b","server":"example.com","server_port":443,"password":"secret","tls":{"enabled":true,"alpn":["h3"]}},
+			{"type":"selector","tag":"provider","outbounds":["node-a","direct"],"default":"node-a"},
+			{"type":"direct","tag":"direct","bind_interface":"loopback"},
 			{"type":"block","tag":"reject"}
 		],
-		"route":{"rules":[{"domain_suffix":["example.com"],"action":"route","outbound":"proxy"}],"final":"proxy"}
+		"route":{
+			"rule_set":[{"type":"remote","tag":"provider-cn","format":"binary","url":"https://example.invalid/cn.srs","download_detour":"provider"}],
+			"rules":[{"domain_suffix":["example.com"],"action":"route","outbound":"provider"}],
+			"final":"provider"
+		}
 	}`))
 	if err != nil {
 		t.Fatal(err)
 	}
-	content, err := Build(Settings{ListenAddress: "127.0.0.1", MixedPort: 2080, ProxyMode: ProxyModeMixed, RouteMode: RouteModeRule}, parsed.Profile)
+	if len(parsed.Profile.Nodes) != 2 {
+		t.Fatalf("expected two nodes, got %d", len(parsed.Profile.Nodes))
+	}
+	first, second := parsed.Profile.Nodes[0].ID, parsed.Profile.Nodes[1].ID
+	for i := range parsed.Profile.Nodes {
+		parsed.Profile.Nodes[i].Name = "same-name"
+	}
+	built, err := Build(Settings{ListenAddress: "127.0.0.1", MixedPort: 2080, ProxyMode: ProxyModeMixed, RouteMode: RouteModeRule}, parsed.Profile)
 	if err != nil {
 		t.Fatal(err)
 	}
 	var document struct {
-		DNS      map[string]any `json:"dns"`
+		DNS      map[string]any
 		Inbounds []struct {
-			Tag        string `json:"tag"`
-			ListenPort int    `json:"listen_port"`
-		} `json:"inbounds"`
+			Tag        string
+			ListenPort int `json:"listen_port"`
+		}
 		Outbounds []struct {
-			Type        string `json:"type"`
-			Tag         string `json:"tag"`
-			TCPFastOpen bool   `json:"tcp_fast_open"`
-		} `json:"outbounds"`
+			Type, Tag     string
+			TCPFastOpen   bool   `json:"tcp_fast_open"`
+			BindInterface string `json:"bind_interface"`
+			TLS           map[string]any
+		}
 		Route struct {
-			Rules []map[string]any `json:"rules"`
-			Final string           `json:"final"`
-		} `json:"route"`
+			RuleSet []struct{ Tag, Path string } `json:"rule_set"`
+			Rules   []map[string]any
+			Final   string
+		}
 	}
-	if err := json.Unmarshal(content, &document); err != nil {
+	if err := json.Unmarshal(built.Content, &document); err != nil {
 		t.Fatal(err)
 	}
 	if document.DNS != nil {
-		t.Fatalf("provider DNS was unexpectedly included: %+v", document.DNS)
+		t.Fatalf("provider DNS was included: %+v", document.DNS)
 	}
 	if len(document.Inbounds) != 1 || document.Inbounds[0].Tag != "mixed" || document.Inbounds[0].ListenPort != 2080 {
-		t.Fatalf("source inbounds were not replaced: %+v", document.Inbounds)
+		t.Fatalf("unexpected inbounds: %+v", document.Inbounds)
 	}
-	if document.Route.Final != "proxy" ||
-		len(document.Route.Rules) != 2 ||
-		document.Route.Rules[0]["action"] != "sniff" ||
-		document.Route.Rules[1]["rule_set"] != geoIPCNRuleSetTag ||
-		document.Route.Rules[1]["outbound"] != "direct" {
-		t.Fatalf("provider route was unexpectedly included: %+v", document.Route)
+	route := document.Route
+	if route.Final != "proxy" || len(route.RuleSet) != 1 ||
+		route.RuleSet[0].Tag != geoIPCNRuleSetTag || route.RuleSet[0].Path != geoIPCNRuleSetPath ||
+		len(route.Rules) != 2 || route.Rules[0]["action"] != "sniff" ||
+		route.Rules[1]["rule_set"] != geoIPCNRuleSetTag || route.Rules[1]["outbound"] != "direct" {
+		t.Fatalf("unexpected route: %+v", route)
 	}
-	wantTags := map[string]bool{"direct": true, parsed.Profile.Nodes[0].ID: true, "proxy": true, "urltest": true}
+	wantTypes := map[string]string{first: "shadowsocks", second: "anytls", "direct": "direct", "proxy": "selector", "urltest": "urltest"}
 	for _, outbound := range document.Outbounds {
-		if outbound.Tag == parsed.Profile.Nodes[0].ID && !outbound.TCPFastOpen {
-			t.Fatal("typed node outbound field was dropped")
+		if wantTypes[outbound.Tag] != outbound.Type {
+			t.Fatalf("unexpected outbound %q of type %q", outbound.Tag, outbound.Type)
 		}
-		delete(wantTags, outbound.Tag)
-	}
-	if len(wantTags) != 0 {
-		t.Fatalf("outbounds missing after Profile build: %v", wantTags)
-	}
-}
-
-func TestBuildUsesStableNodeIDsAsRuntimeTags(t *testing.T) {
-	parsed, err := targetprofile.Parse([]byte(`{
-		"outbounds":[
-			{"type":"shadowsocks","tag":"Singapore A","server":"127.0.0.1","server_port":8388,"method":"aes-128-gcm","password":"secret-a"},
-			{"type":"shadowsocks","tag":"Singapore B","server":"127.0.0.2","server_port":8389,"method":"aes-128-gcm","password":"secret-b"}
-		]
-	}`))
-	if err != nil {
-		t.Fatal(err)
-	}
-	parsed.Profile.Nodes[0].Name = "Singapore"
-	parsed.Profile.Nodes[1].Name = "Singapore"
-	content, err := Build(Settings{ListenAddress: "127.0.0.1", MixedPort: 2080, ProxyMode: ProxyModeMixed, RouteMode: RouteModeRule}, parsed.Profile)
-	if err != nil {
-		t.Fatal(err)
-	}
-	var document struct {
-		Outbounds []struct {
-			Tag string `json:"tag"`
-		} `json:"outbounds"`
-	}
-	if err := json.Unmarshal(content, &document); err != nil {
-		t.Fatal(err)
-	}
-	wantTags := map[string]bool{
-		parsed.Profile.Nodes[0].ID: true,
-		parsed.Profile.Nodes[1].ID: true,
-	}
-	for _, outbound := range document.Outbounds {
-		delete(wantTags, outbound.Tag)
-		if outbound.Tag == "Singapore" {
-			t.Fatal("runtime tag used display name instead of stable node ID")
+		delete(wantTypes, outbound.Tag)
+		switch outbound.Tag {
+		case first:
+			if !outbound.TCPFastOpen {
+				t.Fatal("typed node outbound field was dropped")
+			}
+		case second:
+			if _, ok := outbound.TLS["alpn"]; ok || outbound.TLS["enabled"] != true {
+				t.Fatalf("unexpected node TLS: %+v", outbound.TLS)
+			}
+		case "direct":
+			if outbound.BindInterface != "" {
+				t.Fatalf("provider direct outbound was included: %+v", outbound)
+			}
 		}
 	}
-	if len(wantTags) != 0 {
-		t.Fatalf("stable node IDs missing from runtime outbounds: %v", wantTags)
-	}
-}
-
-func TestBuildDropsProviderRuleSetsAndRulesButKeepsLocalGeoIP(t *testing.T) {
-	parsed, err := targetprofile.Parse([]byte(`{
-		"outbounds":[{"type":"shadowsocks","tag":"node-a","server":"127.0.0.1","server_port":8388,"method":"aes-128-gcm","password":"secret"}],
-		"route":{
-			"rule_set":[{"type":"remote","tag":"provider-cn","format":"binary","url":"https://example.invalid/cn.srs","download_detour":"自动选择"}],
-			"rules":[{"rule_set":["provider-cn"],"action":"route","outbound":"自动选择"}],
-			"final":"自动选择"
-		}
-	}`))
-	if err != nil {
-		t.Fatal(err)
-	}
-	content, err := Build(Settings{ListenAddress: "127.0.0.1", MixedPort: 2080, ProxyMode: ProxyModeMixed, RouteMode: RouteModeRule}, parsed.Profile)
-	if err != nil {
-		t.Fatal(err)
-	}
-	var document struct {
-		Route struct {
-			RuleSet []struct {
-				Tag  string `json:"tag"`
-				Path string `json:"path"`
-			} `json:"rule_set"`
-			Rules []struct {
-				RuleSet  string `json:"rule_set"`
-				Action   string `json:"action"`
-				Outbound string `json:"outbound"`
-			} `json:"rules"`
-			Final string `json:"final"`
-		} `json:"route"`
-	}
-	if err := json.Unmarshal(content, &document); err != nil {
-		t.Fatal(err)
-	}
-	if len(document.Route.RuleSet) != 1 ||
-		document.Route.RuleSet[0].Tag != geoIPCNRuleSetTag ||
-		document.Route.RuleSet[0].Path != geoIPCNRuleSetPath ||
-		len(document.Route.Rules) != 2 ||
-		document.Route.Rules[0].Action != "sniff" ||
-		document.Route.Rules[1].RuleSet != geoIPCNRuleSetTag ||
-		document.Route.Rules[1].Outbound != "direct" ||
-		document.Route.Final != "proxy" {
-		t.Fatalf("provider routing data was unexpectedly included: %+v", document.Route)
-	}
-}
-
-func TestBuildRemovesALPNFromAnyTLS(t *testing.T) {
-	parsed, err := targetprofile.Parse([]byte(`{
-		"outbounds":[{
-			"type":"anytls",
-			"tag":"Hong Kong",
-			"server":"example.com",
-			"server_port":443,
-			"password":"secret",
-			"tls":{"enabled":true,"server_name":"example.com","insecure":true,"alpn":["h3"]}
-		}]
-	}`))
-	if err != nil {
-		t.Fatal(err)
-	}
-	content, err := Build(Settings{
-		ListenAddress: "127.0.0.1",
-		MixedPort:     2080,
-		ProxyMode:     ProxyModeMixed,
-		RouteMode:     RouteModeRule,
-	}, parsed.Profile)
-	if err != nil {
-		t.Fatal(err)
-	}
-	var document any
-	if err := json.Unmarshal(content, &document); err != nil {
-		t.Fatal(err)
-	}
-	if hasJSONField(document, "alpn") {
-		t.Fatalf("generated config still contains ALPN: %s", content)
+	if len(wantTypes) != 0 {
+		t.Fatalf("missing runtime outbounds: %v", wantTypes)
 	}
 }
 
 func TestEmitPreservesTargetOwnedALPN(t *testing.T) {
-	content, err := Emit(Blueprint{
+	content, err := emit(blueprint{
 		Outbounds: []option.Outbound{{
 			Type: "anytls",
 			Tag:  "target-owned",
@@ -429,83 +241,4 @@ func hasJSONField(value any, field string) bool {
 		}
 	}
 	return false
-}
-
-func TestBuildDropsUpstreamDNS(t *testing.T) {
-	parsed, err := targetprofile.Parse([]byte(`{
-		"dns":{"servers":[{
-			"type":"https",
-			"tag":"local",
-			"server":"1.1.1.1",
-			"detour":"direct"
-		}]},
-		"outbounds":[
-			{"type":"direct","tag":"direct"},
-			{
-				"type":"ssh",
-				"tag":"node",
-				"server":"127.0.0.1",
-				"server_port":22,
-				"user":"test",
-				"password":"secret"
-			}
-		]
-	}`))
-	if err != nil {
-		t.Fatal(err)
-	}
-	content, err := Build(Settings{
-		ListenAddress: "127.0.0.1",
-		MixedPort:     2080,
-		ProxyMode:     ProxyModeMixed,
-		RouteMode:     RouteModeRule,
-	}, parsed.Profile)
-	if err != nil {
-		t.Fatal(err)
-	}
-	var document struct {
-		DNS map[string]any `json:"dns"`
-	}
-	if err := json.Unmarshal(content, &document); err != nil {
-		t.Fatal(err)
-	}
-	if document.DNS != nil {
-		t.Fatalf("provider DNS was unexpectedly included: %+v", document.DNS)
-	}
-}
-
-func TestBuildDropsDNSWhenManagedDirect(t *testing.T) {
-	parsed, err := targetprofile.Parse([]byte(`{
-		"dns":{"servers":[{
-			"type":"https",
-			"tag":"local",
-			"server":"1.1.1.1",
-			"detour":"direct"
-		}]},
-		"outbounds":[
-			{"type":"direct","tag":"direct","bind_interface":"loopback"},
-			{"type":"ssh","tag":"node","server":"127.0.0.1","server_port":22,"user":"test","password":"secret"}
-		]
-	}`))
-	if err != nil {
-		t.Fatal(err)
-	}
-	content, err := Build(Settings{
-		ListenAddress: "127.0.0.1",
-		MixedPort:     2080,
-		ProxyMode:     ProxyModeMixed,
-		RouteMode:     RouteModeRule,
-	}, parsed.Profile)
-	if err != nil {
-		t.Fatal(err)
-	}
-	var document struct {
-		DNS map[string]any `json:"dns"`
-	}
-	if err := json.Unmarshal(content, &document); err != nil {
-		t.Fatal(err)
-	}
-	if document.DNS != nil {
-		t.Fatalf("provider DNS was unexpectedly included: %+v", document.DNS)
-	}
 }

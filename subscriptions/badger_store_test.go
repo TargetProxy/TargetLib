@@ -6,7 +6,9 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/dgraph-io/badger/v4"
 	targetprofile "github.com/loafman1120/TargetLib/profile"
+	"github.com/sagernet/sing-box/option"
 )
 
 func TestBadgerStoreUpdateIsAtomic(t *testing.T) {
@@ -67,21 +69,22 @@ func TestBadgerStoreRestoresTypedOutbound(t *testing.T) {
 	}
 	t.Cleanup(func() { _ = store.Close() })
 
-	outboundJSON := []byte(`{
-		"type":"anytls",
-		"tag":"node",
-		"server":"example.com",
-		"server_port":443,
-		"password":"secret",
-		"tls":{"enabled":true,"server_name":"example.com"}
-	}`)
+	if err := store.db.Update(func(tx *badger.Txn) error {
+		return tx.Set([]byte("subscription/b2xk"), []byte("old data"))
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	outbound := &option.Outbound{Type: "anytls", Tag: "node", Options: &option.AnyTLSOutboundOptions{
+		ServerOptions: option.ServerOptions{Server: "example.com", ServerPort: 443}, Password: "secret",
+	}}
 	err = store.Update(context.Background(), func(tx StoreTx) error {
 		return tx.Put(Subscription{
 			ID:        "subscription",
 			NodesHash: "stored-hash",
 			Profile: targetprofile.Profile{Nodes: []targetprofile.Node{{
 				ID: "node", Name: "Node", Type: "anytls", Phase: targetprofile.NodeReady,
-				OutboundJSON: outboundJSON,
+				Outbound: outbound,
 			}}},
 		})
 	})
@@ -93,13 +96,16 @@ func TestBadgerStoreRestoresTypedOutbound(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	if len(state.Subscriptions) != 1 {
+		t.Fatalf("loaded subscriptions = %d, want 1", len(state.Subscriptions))
+	}
 	item := state.Subscriptions[0]
 	node := item.Profile.Nodes[0]
 	if node.Outbound == nil {
 		t.Fatal("typed outbound was not restored")
 	}
-	if string(node.OutboundJSON) != string(outboundJSON) {
-		t.Fatalf("persisted outbound was mutated: %s", node.OutboundJSON)
+	if node.Outbound.Tag != "node" || node.Outbound.Type != "anytls" {
+		t.Fatalf("typed outbound changed during persistence: %+v", node.Outbound)
 	}
 	if item.NodesHash != "stored-hash" {
 		t.Fatalf("nodes hash was mutated: %q", item.NodesHash)

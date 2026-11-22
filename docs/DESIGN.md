@@ -8,7 +8,6 @@ TargetLib 是跨平台 sing-box 管理库，为图形化代理客户端提供核
 | --- | --- |
 | 本文 | 系统架构、数据流、核心边界 |
 | [GRPC.md](GRPC.md) | gRPC 接口设计、RPC 分组、使用场景 |
-| [GRPC_V2_DESIGN.md](GRPC_V2_DESIGN.md) | 新接口设计理念（参考文档）|
 
 ---
 
@@ -27,12 +26,16 @@ flowchart TB
     subgraph CORE["Go Core (manager)"]
         direction TB
         SUBM[subscriptions.Manager<br/>下载/解析/调度]
-        CTRL[runtime_controller.go<br/>SelectNode/UpsertRoute]
+        IR[profile.Profile / NodePool<br/>规范化节点中间态]
+        CTRL[manager<br/>运行设置、选择器、路由]
+        MODEL[config.RuntimeModel<br/>运行时配置中间态]
         BUILD[config.Build<br/>Plan→Blueprint→Emit]
         
-        SUBM --> POOL[(NodePool<br/>稳定 node_id)]
-        CTRL --> BUILD
-        POOL -.读取.-> CTRL
+        SUBM --> IR
+        IR --> POOL[(NodePool<br/>稳定 node_id)]
+        POOL --> MODEL
+        CTRL --> MODEL
+        MODEL --> BUILD
     end
     
     subgraph PERSIST["持久化"]
@@ -47,17 +50,17 @@ flowchart TB
     GRPC -->|应用服务| CTRL
     GRPC -->|订阅管理| SUBM
     SUBM -.持久化.-> BADGER
-    CTRL -.保存配置.-> BADGER
-    BUILD -->|生成配置| BOX
-    BOX -.验证成功.-> CTRL
-    BOX -.回滚.-> CTRL
+    CTRL -.保存运行意图.-> BADGER
+    BUILD -->|sing-box JSON| CTRL
+    CTRL -->|apply/reload| BOX
+    BOX -->|应用结果| CTRL
     
     style CORE fill:#e1f5ff
     style RUNTIME fill:#fff4e6
     style PERSIST fill:#f3e5f5
 ```
 
-**依赖方向**：只能从外层指向内层。gRPC handler 不承担业务逻辑，manager 不依赖 Flutter/Activity 存活，config.Build 只消费规范化模型。
+**依赖方向**：只能从外层指向内层。gRPC handler 不承担业务逻辑，manager 不依赖 Flutter/Activity 存活。订阅解析产出节点中间态，manager 将节点池与应用运行意图合并为 `RuntimeModel`，`config.Build` 负责生成 sing-box 配置。
 
 ---
 
@@ -68,16 +71,17 @@ flowchart TB
 ```mermaid
 flowchart LR
     UI[UI: 添加订阅] -->|AddSubscription| SUB[subscriptions.Manager]
-    SUB -->|HTTP 下载| FETCH[解析 + 规范化]
-    FETCH -->|singleflight 去重| PARSE[生成稳定 node_id]
-    PARSE -->|失败保留上次| POOL[(NodePool)]
-    POOL -.存储.-> STORE[(Badger)]
+    SUB -->|按订阅 ID 合并并发更新| FETCH[HTTP 下载原始内容]
+    FETCH -->|解析、清理供应商运行配置| IR[profile.Profile 节点中间态]
+    IR -->|加入订阅作用域稳定 node_id| POOL[(NodePool 快照)]
+    SUB -.持久化订阅与节点中间态.-> STORE[(Badger)]
     POOL -->|GetNodePool RPC| UI
 ```
 
 **关键点**：
 - 原始订阅只作解析输入，供应商的 DNS/路由/rule set 不透传
-- `node_id` 基于订阅 ID + 节点特征生成，订阅更新后保持稳定
+- 解析后的节点中间态供订阅持久化、节点池及运行时配置生成使用
+- 可用节点的 `node_id` 由订阅 ID 和清理后的类型化连接参数生成，显示名称和节点顺序不参与计算。订阅刷新后，引用旧算法生成的 ID 的选择需要重新确认。
 - 失败时保留上次可用节点池，新订阅失败则回滚
 
 ### 节点切换（Layer 1）
@@ -87,27 +91,24 @@ sequenceDiagram
     participant UI as Target UI
     participant RPC as gRPC
     participant M as manager
-    participant C as config.Build
     participant B as sing-box
 
     UI->>RPC: SelectNode(node_id)
-    RPC->>M: 验证节点存在
-    M->>M: 更新 proxy selector
-    M->>C: 生成配置
-    C->>M: sing-box JSON
-    
-    alt 运行中
+    RPC->>M: 验证目标节点
+    alt 运行中且目标已加载
         M->>B: live select "proxy" → node_id
-        B-->>M: 验证成功
-        M->>M: 持久化配置
-        M-->>UI: 成功（同步）
+        B-->>M: 应用结果
+        M->>M: 保存并发布目标 selector 的选择
+        M-->>UI: 成功
+    else 运行中但目标尚未加载
+        M-->>UI: FAILED_PRECONDITION，需显式 Restart
     else 未运行
-        M->>M: 保存配置
+        M->>M: 保存目标 selector 的选择
         M-->>UI: 成功（下次启动生效）
     end
-    
-    Note over M,B: 失败时自动回滚上次节点
 ```
+
+`SelectRouteNode` 使用同一流程。启动或重载前，manager 检查已保存的选择是否仍可用。选择失效时返回 `FAILED_PRECONDITION`，可通过节点切换接口显式选择可用的已加载节点或 `direct`，也可停止后选择当前池中的节点再启动。
 
 ### 规则分流（Layer 2）
 
@@ -126,17 +127,14 @@ sequenceDiagram
     M->>C: 生成完整配置
     C->>M: sing-box JSON
     
-    alt 首次创建（新 selector）
-        M->>B: reload（需重启）
-        B-->>M: 运行时验证
-        M->>M: 持久化
-        M-->>UI: RouteInfo
-    else 切换节点（已有 selector）
-        M->>B: live select "route-{service_id}" → node_id
-        B-->>M: 验证成功
-        M->>M: 持久化
-        M-->>UI: 成功
+    alt 运行中
+        M->>B: reload 新配置
+        B-->>M: 应用结果
+    else 未运行
+        M->>M: 保存运行意图，供启动时生效
     end
+    M->>M: 持久化成功后提交状态
+    M-->>UI: RouteInfo
 ```
 
 ---
@@ -145,7 +143,7 @@ sequenceDiagram
 
 ```mermaid
 flowchart TB
-    INPUT["输入<br/>NodePool + RuntimeSettings + Selectors + Routes + Bindings"]
+    INPUT["输入<br/>NodePool + RuntimeSettings + Selectors + Routes"]
     
     subgraph BUILD["config.Build"]
         direction TB
@@ -169,8 +167,10 @@ flowchart TB
     style BUILD fill:#e8f5e9
 ```
 
+运行时配置以节点中间态和应用运行意图为输入。Start、Restart 和运行中配置变更会生成 sing-box JSON。停止期间的 settings/routes 变更会生成临时配置执行完整检查，随后丢弃内容并只提交运行意图；单独的 selector 选择只做模型校验。
+
 **config.Build 职责**：
-- **唯一入口**：所有 sing-box 配置生成必须经过此函数
+- **唯一入口**：`config.Build` 返回 sing-box JSON 及生成配置使用的规范化模型，manager 据此记录已应用状态
 - **不透传供应商配置**：订阅的 DNS/路由/rule set/入站/代理组不进入运行时
 - **确定性**：相同输入产生相同输出，无隐式状态
 
@@ -181,7 +181,9 @@ flowchart TB
 | 失败点 | 核心行为 | 客户端体验 |
 | --- | --- | --- |
 | 订阅下载/解析失败 | 保留上次可用节点池，按策略退避重试 | 订阅状态显示 failed；现有节点仍可切换 |
-| 节点不在池中 | 拒绝切换请求 | SelectNode 返回 `NOT_FOUND` |
+| 请求的订阅节点不在池中或不可用 | 拒绝切换 | 返回 `NOT_FOUND` |
+| 目标在当前池中，但尚未加载到运行中的 selector | 拒绝切换 | 返回 `FAILED_PRECONDITION`，显式重载后可重试 |
+| 启动或重载时已保存的节点不可用 | 保留已保存的选择和当前运行状态 | 返回 `FAILED_PRECONDITION`，需先显式修正选择 |
 | live select 失败 | 保持旧节点不变 | 返回错误，UI 显示切换失败 |
 | reload 失败 | 重载上次可用配置 | 返回错误，运行时恢复到上次状态 |
 | 配置保存失败 | 运行时回滚，不发布事件 | 返回错误，配置未改变 |
@@ -189,7 +191,7 @@ flowchart TB
 | sing-box 崩溃 | 平台重启 service，恢复上次配置 | 状态变为 failed，显示错误信息 |
 
 **核心原则**：
-- **同步 RPC 失败 = 无副作用**：SelectNode 失败时，节点选择不变
+- **同步提交**：只有持久化成功后才发布新运行状态；live selector 持久化失败时尝试恢复原选择
 - **异步故障不传播**：订阅更新失败不影响当前代理运行
 - **回滚优于降级**：配置应用失败时恢复 last-known-good
 - **客户端无状态**：UI 断开重连后通过 GetProxyStatus/ListRoutes 恢复，无需额外同步
@@ -215,48 +217,13 @@ flowchart TB
 
 ---
 
-## 架构优化建议
+## 当前整理点
 
-### 当前流程存在的优化空间
-
-**1. 配置生成与验证可前置**
-- 现状：`SelectNode` → 构造 selector → `prepareRuntimeContent` → 运行时应用
-- 问题：配置生成和验证发生在持锁期间，阻塞其他操作
-- 优化：验证节点可用性后立即释放锁，异步生成配置并应用
-
-**2. live select 验证冗余**
-- 现状：调用 `daemon.SelectOutbound` 后，通过 `SubscribeGroups` 读回验证
-- 问题：需要订阅流并等待下一次状态推送
-- 优化：sing-box 的 selector API 同步返回错误，可直接判断成功/失败
-
-**3. 节点池与配置生成耦合**
-- 现状：每次切换都要遍历完整节点池生成配置
-- 问题：订阅有 1000+ 节点时，只切换 1 个节点却要序列化全部
-- 优化：使用增量更新或配置模板，只替换变化的 selector
-
-**4. Store 写入在关键路径**
-- 现状：live select 成功后立即 `SaveSnapshot`，失败则回滚
-- 问题：存储慢会阻塞 RPC 返回，用户体验差
-- 优化：先返回成功，异步持久化，失败时记录日志并重试
-
-**5. 规则分流首次创建代价高**
-- 现状：`UpsertRoute` 创建新规则时必须 reload（因为新增 selector）
-- 问题：reload 会短暂断开连接
-- 优化：预创建常用服务的 selector（如 `route-netflix`），只修改其 members
-
-### 推荐优化优先级
-
-**P0（立即）**：
-- 缩小 `opMu` 锁粒度：配置生成移出临界区
-- 移除 live select 的流式验证：依赖 API 返回值
-
-**P1（短期）**：
-- 增量配置更新：selector 变更不重新序列化所有节点
-- 异步持久化：live select 成功后先返回，后台保存
-
-**P2（长期）**：
-- 配置模板机制：预留 selector slots，避免 reload
-- 节点池分片：大订阅场景下按区域/类型分组
+- `profile.Node` 在内存中只保留类型化 outbound；Badger 边界使用持久化投影编码节点配置。
+- NodePool revision 在订阅状态快照发布时计算，读取节点池时只复制并排序节点。
+- manager 以内存 `runtimeIntent` 处理 settings、selectors 和 routes。持久化使用独立的 CBOR 记录，protobuf 只用于 gRPC。
+- 升级后使用新的订阅和运行意图存储键。已有订阅需要重新导入，运行设置、节点选择和服务分流需要重新配置。
+- Emit 序列化 Blueprint。manager 在应用或保存候选配置前调用 sing-box `CheckConfig` 做完整检查，sing-box 在启动或重载时解析配置以创建实例。
 
 ---
 

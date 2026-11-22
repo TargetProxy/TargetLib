@@ -1,28 +1,23 @@
 package profile
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
-	"encoding/json"
 	"slices"
 	"strings"
 )
 
 // WithSource gives nodes a subscription-scoped identity based on their
-// normalized connection settings. Display names and input order are excluded.
+// parsed identity.
 func WithSource(source Profile, subscriptionID string) Profile {
 	result := Profile{}
 	seen := make(map[string]bool)
 	for _, node := range source.Nodes {
-		var value map[string]json.RawMessage
-		if json.Unmarshal(node.OutboundJSON, &value) != nil {
+		if node.ID == "" || (node.SubscriptionID != "" && node.SubscriptionID != subscriptionID) {
 			continue
 		}
-		delete(value, "tag")
-		canonical, _ := json.Marshal(value)
-		sum := sha256.Sum256(append([]byte(subscriptionID+"\x00"), canonical...))
-		node.ID = hex.EncodeToString(sum[:])
-		node.SubscriptionID = subscriptionID
+		if node.SubscriptionID != subscriptionID {
+			node.ID = hashBytes([]byte(subscriptionID + "\x00" + node.ID))
+			node.SubscriptionID = subscriptionID
+		}
 		if seen[node.ID] {
 			continue
 		}

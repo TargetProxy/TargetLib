@@ -99,7 +99,6 @@ UpdateSubscription 的结果字段含义：
 | changed | 拉取成功且节点内容发生变化。 |
 | not_modified | 服务商返回未修改（例如条件请求命中）。 |
 | original_config | 本次实际拉取的原始响应体；未产生新内容时为空。 |
-| generated_config | 本次更新对应的核心生成配置；仅在有新的 original_config 时生成。 |
 | duration_milliseconds | 本次更新耗时。 |
 
 更新失败但已有订阅记录时，RPC 仍返回包含 FAILED 状态和错误信息的 SubscriptionUpdateResult；订阅不存在或无法取得结果时返回 gRPC 错误。
@@ -114,14 +113,14 @@ GetNodePool 汇总所有启用订阅中的节点，并返回 revision。节点�
       string node_id = 1;
     }
 
-SelectNode 要求节点存在且可用，否则返回 NOT_FOUND。核心先等待服务离开 STARTING / STOPPING：
+SelectNode 接受当前池中可用的节点 ID 或内置的 `direct`。请求的订阅节点不可用时返回 `NOT_FOUND`。核心先等待服务离开 STARTING / STOPPING。
 
-- 服务运行中：通过 sing-box selector 即时切换并持久化；applied_immediately=true；
-- 服务未运行：只保存选择，下次 Start 或 Restart 生效；applied_immediately=false。
+- 服务运行中，目标已加载到 selector 时即时切换并持久化，`applied_immediately=true`。目标尚未加载时返回 `FAILED_PRECONDITION`，客户端可显式调用 Restart 后重试。
+- 服务未运行时只保存选择，下次 Start 或 Restart 生效，`applied_immediately=false`。
 
-持久化失败时，运行中的 selector 会尝试恢复原选择。
+持久化失败时，运行中的 selector 会尝试恢复原选择。Start 或 Restart 遇到已保存的失效节点时返回 `FAILED_PRECONDITION`，需要先通过节点切换接口修正选择。
 
-GetProxyStatus 返回默认 proxy selector 的选择、服务状态、节点可用性和 effective。actual_node_id 只有服务运行时才填充；节点不在当前池中时 unavailable_reason=node_not_in_pool，节点处于失败或未就绪状态时分别为 node_failed 或 node_not_ready。
+GetProxyStatus 返回默认 proxy selector 的已保存选择、服务状态和节点可用性。运行中的 `actual_node_id` 来自已应用快照，实际选择与保存选择一致时 `effective=true`。保存的订阅节点离开当前池时，`unavailable_reason=node_not_in_pool`。节点失败或未就绪时分别为 `node_failed` 和 `node_not_ready`。
 
 ## 运行时配置
 
@@ -135,7 +134,7 @@ GetRuntimeConfig 返回持久化的 RuntimeConfig：
 UpdateRuntimeConfig 要求 settings 非空，并替换 settings，同时保留已有 selector 和 service route。配置会先经过 config.Build 的 Plan -> Blueprint -> Emit 流程和 sing-box 校验：
 
 - 服务运行中：尝试热加载；校验、加载或持久化失败会恢复上一个运行配置；
-- 服务未运行：保存配置，下一次启动使用；
+- 服务未运行：先做完整配置检查，再只保存运行意图，下一次启动时重新生成配置；
 - 监听地址必须为单行非空字符串，mixed 端口为 1–65535；
 - route_mode 必须为 DIRECT、RULE 或 ALL；桌面端 proxy_mode 必须为 MIXED 或 TUN；Android/iOS 会强制使用 TUN。
 
@@ -152,7 +151,7 @@ GetIpInfo 从核心运行环境访问 ip-api.com 查询出口 IP 地理信息，
 | UpsertRoute | UpsertRouteRequest -> RouteInfo | 新建或更新服务规则；要求 service_id、至少一个域名和可用 node_id。 |
 | DeleteRoute | DeleteRouteRequest -> Empty | 删除服务规则及其 selector；不存在返回 NOT_FOUND。 |
 | ListRoutes | Empty -> RouteList | 返回所有服务规则，并在 default_route 返回默认 proxy selector 的当前节点。 |
-| SelectRouteNode | SelectRouteNodeRequest -> SelectNodeResponse | 切换指定服务的节点；运行中即时切换，未运行时保存到下次启动。 |
+| SelectRouteNode | SelectRouteNodeRequest -> SelectNodeResponse | 切换指定服务的节点，与 SelectNode 共用已加载成员检查和显式重载规则。 |
 
 UpsertRoute 会规范化域名（小写、去掉末尾点并排序），启用规则之间不允许重复域名。域名格式、服务 ID、节点和 selector 引用无效时返回 INVALID_ARGUMENT 或 NOT_FOUND。RouteInfo.effective 只有在规则启用、路由模式不是 DIRECT 且服务处于 RUNNING 时才为 true。
 
@@ -173,11 +172,11 @@ UpsertRoute 会规范化域名（小写、去掉末尾点并排序），启用�
 | INVALID_ARGUMENT | 缺少必填字段、非 HTTPS 订阅 URL、间隔或运行时设置越界、域名无效。 |
 | NOT_FOUND | 订阅、节点或规则不存在，或节点当前不可用。 |
 | ALREADY_EXISTS | 新增订阅使用了已有 ID。 |
-| FAILED_PRECONDITION | 重复启动、连接流要求服务运行、服务长时间停留在过渡状态。 |
+| FAILED_PRECONDITION | 目标节点尚未加载、已保存选择失效、重复启动、连接流要求服务运行或服务长时间停留在过渡状态。 |
 | UNAUTHENTICATED | 四个受保护 RPC 缺少或提供了错误 token。 |
 | UNAVAILABLE | 出口 IP 查询的上游不可用。 |
 | INTERNAL | sing-box 加载、持久化或其他核心操作失败。 |
-| DATA_LOSS | 新配置应用失败且回滚也失败。 |
+| DATA_LOSS | 配置应用或持久化失败，且回滚也失败。 |
 | CANCELED / DEADLINE_EXCEEDED | 客户端取消或 context 超时。 |
 
 服务端会记录未被客户端取消导致的 gRPC 错误；流式 RPC 应使用 context 管理生命周期，并在重连后重新建立所需的订阅流。

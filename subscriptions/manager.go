@@ -104,7 +104,6 @@ func (m *Manager) Load(ctx context.Context) error {
 			if item.Status == StatusUpdating {
 				item.Status, item.Stage = StatusIdle, StageIdle
 			}
-			item.Profile = targetprofile.WithSource(item.Profile, item.ID)
 			next.items[item.ID] = cloneSubscription(item)
 		}
 		return stateMutation{next: next}, nil
@@ -415,7 +414,6 @@ func (m *Manager) setStage(ctx context.Context, id string, stage UpdateStage) {
 	})
 }
 func (m *Manager) commit(ctx context.Context, item, persisted Subscription) error {
-	item.Profile = targetprofile.WithSource(item.Profile, item.ID)
 	return m.submit(context.WithoutCancel(ctx), func(current *managerState) (stateMutation, error) {
 		next := cloneManagerState(current)
 		next.items[item.ID] = cloneSubscription(item)

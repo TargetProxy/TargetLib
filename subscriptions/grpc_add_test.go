@@ -85,7 +85,7 @@ func TestUpdateSubscriptionReturnsFetchedConfigWithoutPersistingIt(t *testing.T)
 	if !ok {
 		t.Fatal("updated subscription was not stored")
 	}
-	if encoded := string(stored.Profile.Nodes[0].OutboundJSON); encoded == string(body) {
-		t.Fatal("full original document was persisted in the profile")
+	if stored.Profile.Nodes[0].Outbound == nil {
+		t.Fatal("typed node IR was not persisted")
 	}
 }

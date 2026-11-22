@@ -22,84 +22,60 @@ func (m *Manager) SelectNode(ctx context.Context, req *api.SelectNodeRequest) (*
 	defer m.opMu.Unlock()
 	pool := m.subscriptions.NodePool()
 	node := findNodeByID(pool.Nodes, req.NodeId)
-	if node == nil || !node.IsAvailable() {
+	nodeName := ""
+	if req.NodeId == "direct" {
+		nodeName = "direct"
+	} else if node == nil || !node.IsAvailable() {
 		return nil, status.Error(codes.NotFound, "node not found or unavailable")
+	} else {
+		nodeName = node.Name
 	}
 
 	next := m.desiredForUpdate()
-	next.NodePoolRevision = pool.Revision
-
-	// Find or create proxy selector
-	proxySelector := findSelector(next.Selectors, "proxy")
-	previousSelected := ""
-	if proxySelector != nil {
-		previousSelected = proxySelector.SelectedNodeId
-	}
-	if proxySelector == nil {
-		proxySelector = &api.SelectorConfig{
-			Tag:            "proxy",
-			SelectedNodeId: req.NodeId,
-		}
-		next.Selectors = append(next.Selectors, proxySelector)
-	} else {
-		proxySelector.SelectedNodeId = req.NodeId
-	}
-
-	proxySelector.SelectedAtUnixMs = currentTimeMillis()
-
-	content, err := m.prepareRuntimeContent(next, pool.Nodes)
+	running, err := m.selectNode(ctx, next, pool.Nodes, "proxy", req.NodeId)
 	if err != nil {
 		return nil, err
-	}
-
-	appliedImmediately := false
-
-	current, err := m.waitForStableStatus(ctx)
-	if err != nil {
-		return nil, err
-	}
-	running := current.Status == daemon.ServiceStatus_STARTED
-	if running {
-		// Try live select
-		err = m.commitLiveSelector(ctx, next, content, "proxy", req.NodeId, previousSelected, true)
-		if err != nil {
-			return nil, status.Errorf(codes.Internal, "live select failed: %v", err)
-		}
-		appliedImmediately = true
-	} else {
-		// Save config for next start
-		err = m.runtimeStore.SaveSnapshot(ctx, next)
-		if err != nil {
-			return nil, status.Errorf(codes.Internal, "save config failed: %v", err)
-		}
-		m.swapRuntime(next, content, false)
 	}
 
 	return &api.SelectNodeResponse{
 		NodeId:             req.NodeId,
-		NodeName:           node.Name,
-		AppliedImmediately: appliedImmediately,
+		NodeName:           nodeName,
+		AppliedImmediately: running,
 	}, nil
 }
 
 // GetProxyStatus returns current proxy status.
-func (m *Manager) GetProxyStatus(ctx context.Context, _ *emptypb.Empty) (*api.ProxyStatus, error) {
+func (m *Manager) GetProxyStatus(context.Context, *emptypb.Empty) (*api.ProxyStatus, error) {
+	current, err := m.currentStatus()
+	if err != nil {
+		return nil, err
+	}
+
 	m.configMu.RLock()
-	proxySelector := findSelector(m.runtimeConfig.Selectors, "proxy")
+	proxySelector := m.intent.selector("proxy")
+	if proxySelector == nil {
+		m.configMu.RUnlock()
+		return nil, status.Error(codes.Internal, "proxy selector not found")
+	}
+	selected := *proxySelector
+	actualNodeID := ""
+	if current.Status == daemon.ServiceStatus_STARTED {
+		if active := m.appliedSelector("proxy"); active != nil {
+			actualNodeID = active.Selected
+		}
+	}
 	m.configMu.RUnlock()
 
 	pool := m.subscriptions.NodePool()
-	if proxySelector == nil {
-		return nil, status.Error(codes.Internal, "proxy selector not found")
-	}
-
-	// Find node info
-	node := findNodeByID(pool.Nodes, proxySelector.SelectedNodeId)
+	node := findNodeByID(pool.Nodes, selected.Selected)
 	nodeName := ""
 	nodeAvailable := false
 	unavailableReason := ""
 
-	if node != nil {
+	if selected.Selected == "direct" {
+		nodeName = "direct"
+		nodeAvailable = true
+	} else if node != nil {
 		nodeName = node.Name
 		nodeAvailable = node.IsAvailable()
 		if !nodeAvailable {
@@ -113,29 +89,13 @@ func (m *Manager) GetProxyStatus(ctx context.Context, _ *emptypb.Empty) (*api.Pr
 		unavailableReason = "node_not_in_pool"
 	}
 
-	// Get service state
-	current, err := m.currentStatus()
-	if err != nil {
-		return nil, err
-	}
-	serviceState := managerState(current).State
-
-	// SelectOutbound is synchronous, so a running service has the selected
-	// node immediately after a successful live selection.
-	actualNodeID := ""
-	effective := false
-	if current.Status == daemon.ServiceStatus_STARTED {
-		actualNodeID = proxySelector.SelectedNodeId
-		effective = true
-	}
-
 	return &api.ProxyStatus{
-		ServiceState:      serviceState,
-		SelectedNodeId:    proxySelector.SelectedNodeId,
+		ServiceState:      managerState(current).State,
+		SelectedNodeId:    selected.Selected,
 		SelectedNodeName:  nodeName,
 		ActualNodeId:      actualNodeID,
-		Effective:         effective,
-		SelectedAtUnixMs:  proxySelector.SelectedAtUnixMs,
+		Effective:         actualNodeID != "" && actualNodeID == selected.Selected,
+		SelectedAtUnixMs:  selected.SelectedAtUnixMs,
 		NodeAvailable:     nodeAvailable,
 		UnavailableReason: unavailableReason,
 	}, nil

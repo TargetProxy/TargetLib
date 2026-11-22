@@ -25,73 +25,86 @@ func Parse(raw []byte) (Parsed, error) {
 	if len(bytes.TrimSpace(raw)) == 0 {
 		return Parsed{}, errors.New("parse profile JSON: empty input")
 	}
-	var document map[string]any
+	var document struct {
+		Outbounds []json.RawMessage `json:"outbounds"`
+	}
 	if err := decodeJSONNumber(raw, &document); err != nil {
 		return Parsed{}, fmt.Errorf("parse profile JSON: %w", err)
 	}
-	if document == nil {
-		return Parsed{}, errors.New("parse profile JSON: not a JSON object")
-	}
 
-	result := Profile{}
-	rawOutbounds, _ := document["outbounds"].([]any)
-	nodes := make([]Node, 0, len(rawOutbounds))
-	seen := make(map[string]int)
-	for _, rawEntry := range rawOutbounds {
-		rawOutbound, _ := rawEntry.(map[string]any)
-		outboundType := strings.TrimSpace(valueToString(valueFrom(rawOutbound, "type")))
-		if outboundType == "" || outboundType == "selector" || outboundType == "urltest" || !isNodeType(outboundType) {
+	nodes := make([]Node, 0, len(document.Outbounds))
+	byID := make(map[string]int, len(document.Outbounds))
+	ctx := Context()
+	for _, rawEntry := range document.Outbounds {
+		var fields struct {
+			Type       string `json:"type"`
+			Tag        any    `json:"tag"`
+			Server     any    `json:"server"`
+			ServerPort any    `json:"server_port"`
+		}
+		if err := decodeJSONNumber(rawEntry, &fields); err != nil {
+			continue
+		}
+		outboundType := strings.TrimSpace(fields.Type)
+		if !isNodeType(outboundType) {
 			continue
 		}
 
-		name := strings.TrimSpace(valueToString(valueFrom(rawOutbound, "tag")))
+		tag, _ := fields.Tag.(string)
+		name := strings.TrimSpace(tag)
 		if name == "" {
 			name = outboundType
 		}
-		server := valueToString(valueFrom(rawOutbound, "server", "address"))
-		port, _ := toInt(valueFrom(rawOutbound, "server_port", "port"))
-		baseID := nodeID(outboundType + "\x00" + name)
-		id := baseID
-		if seen[baseID] > 0 {
-			id = fmt.Sprintf("%s-%d", baseID, seen[baseID]+1)
-		}
-		seen[baseID]++
-
-		sanitizeOutboundJSON(outboundType, rawOutbound)
-		outboundJSON, _ := json.Marshal(rawOutbound)
 		node := Node{
-			ID:           id,
-			Name:         name,
-			Type:         outboundType,
-			CountryCode:  inferCountryCode(name),
-			Server:       server,
-			Port:         port,
-			Phase:        NodeNormalized,
-			OutboundJSON: outboundJSON,
+			Name: name, Type: outboundType, CountryCode: inferCountryCode(name),
+			Phase: NodeReady,
+		}
+		node.Server, _ = fields.Server.(string)
+		if port, ok := fields.ServerPort.(json.Number); ok {
+			number, err := port.Int64()
+			if err == nil && int64(int(number)) == number {
+				node.Port = int(number)
+			}
 		}
 
-		typedOutbound, err := singjson.UnmarshalExtendedContext[option.Outbound](Context(), outboundJSON)
+		outbound, err := singjson.UnmarshalExtendedContext[option.Outbound](ctx, rawEntry)
 		if err != nil {
+			node.ID = hashBytes(append([]byte("invalid outbound\x00"), rawEntry...))
 			node.Phase = NodeFailed
 			node.Error = "decode outbound: " + err.Error()
-			nodes = append(nodes, node)
+		} else {
+			sanitizeOutbound(&outbound)
+			outbound.Tag = ""
+			data, err := singjson.MarshalContext(ctx, &outbound)
+			if err != nil {
+				return Parsed{}, fmt.Errorf("identify outbound %q: %w", name, err)
+			}
+			node.ID = hashBytes(data)
+			node.Outbound = &outbound
+			if requiresServerEndpoint(outboundType) && (node.Server == "" || node.Port < 1 || node.Port > 65535) {
+				node.Phase = NodeFailed
+				node.Error = "server or server_port is invalid"
+			}
+		}
+		if index, exists := byID[node.ID]; exists {
+			if node.Name < nodes[index].Name {
+				nodes[index] = node
+			}
 			continue
 		}
-		node.Outbound = &typedOutbound
-		if requiresServerEndpoint(outboundType) && (server == "" || port < 1 || port > 65535) {
-			node.Phase = NodeFailed
-			node.Error = "server or server_port is invalid"
-		} else {
-			node.Phase = NodeReady
-		}
+		byID[node.ID] = len(nodes)
 		nodes = append(nodes, node)
 	}
 	if len(nodes) == 0 {
 		return Parsed{}, errors.New("profile has no usable outbounds")
 	}
-	result.Nodes = nodes
-	sum := sha256.Sum256(canonicalNodeBytes(nodes))
-	return Parsed{Profile: result, NodesHash: hex.EncodeToString(sum[:])}, nil
+	sorted := slices.Clone(nodes)
+	slices.SortFunc(sorted, func(a, b Node) int { return strings.Compare(a.ID, b.ID) })
+	content, err := json.Marshal(sorted)
+	if err != nil {
+		return Parsed{}, fmt.Errorf("hash profile: %w", err)
+	}
+	return Parsed{Profile: Profile{Nodes: nodes}, NodesHash: hashBytes(content)}, nil
 }
 
 var nodeTypes = []string{
@@ -115,41 +128,26 @@ func isNodeType(value string) bool {
 	return slices.Contains(nodeTypes, value)
 }
 
-func sanitizeOutboundJSON(outboundType string, outbound map[string]any) {
-	if outboundType == C.TypeTrojan && outbound["transport"] != nil && outbound["network"] == nil {
-		outbound["network"] = "tcp"
-	}
-
-	tlsOptions, _ := outbound["tls"].(map[string]any)
-	if tlsOptions == nil {
-		return
-	}
-	delete(tlsOptions, "alpn")
-	echOptions, _ := tlsOptions["ech"].(map[string]any)
-	if echOptions != nil {
-		for _, field := range []string{"pq_signature_schemes_enabled", "dynamic_record_sizing_disabled"} {
-			delete(echOptions, field)
+func sanitizeOutbound(outbound *option.Outbound) {
+	if outbound.Type == C.TypeTrojan {
+		if options, ok := outbound.Options.(*option.TrojanOutboundOptions); ok && options.Transport != nil && options.Network == "" {
+			options.Network = "tcp"
 		}
 	}
-	utlsOptions, _ := tlsOptions["utls"].(map[string]any)
-	if utlsOptions != nil {
-		if fingerprint, _ := utlsOptions["fingerprint"].(string); isRemovedChromeFingerprint(fingerprint) {
-			utlsOptions["fingerprint"] = "chrome"
+	if wrapper, ok := outbound.Options.(option.OutboundTLSOptionsWrapper); ok {
+		tls := wrapper.TakeOutboundTLSOptions()
+		if tls == nil {
+			return
+		}
+		tls.ALPN = nil
+		if tls.ECH != nil {
+			tls.ECH.PQSignatureSchemesEnabled = false
+			tls.ECH.DynamicRecordSizingDisabled = false
+		}
+		if tls.UTLS != nil && isRemovedChromeFingerprint(tls.UTLS.Fingerprint) {
+			tls.UTLS.Fingerprint = "chrome"
 		}
 	}
-}
-
-// RestoreNodeOutbound rebuilds the runtime-only typed outbound from its persisted representation.
-func RestoreNodeOutbound(node *Node) error {
-	if node == nil || len(node.OutboundJSON) == 0 {
-		return nil
-	}
-	typedOutbound, err := singjson.UnmarshalExtendedContext[option.Outbound](Context(), node.OutboundJSON)
-	if err != nil {
-		return err
-	}
-	node.Outbound = &typedOutbound
-	return nil
 }
 
 func isRemovedChromeFingerprint(value string) bool {
@@ -165,11 +163,6 @@ func requiresServerEndpoint(value string) bool {
 	return value != C.TypeTor
 }
 
-func canonicalNodeBytes(nodes []Node) []byte {
-	content, _ := json.Marshal(nodes)
-	return content
-}
-
 func decodeJSONNumber(content []byte, target any) error {
 	decoder := json.NewDecoder(bytes.NewReader(content))
 	decoder.UseNumber()
@@ -182,45 +175,7 @@ func decodeJSONNumber(content []byte, target any) error {
 	return nil
 }
 
-func valueFrom(config map[string]any, keys ...string) any {
-	for _, key := range keys {
-		if value, ok := config[key]; ok && value != nil {
-			return value
-		}
-	}
-	return nil
-}
-
-func valueToString(value any) string {
-	if value == nil {
-		return ""
-	}
-	if text, ok := value.(string); ok {
-		return text
-	}
-	return fmt.Sprint(value)
-}
-
-func toInt(value any) (int, bool) {
-	switch typed := value.(type) {
-	case json.Number:
-		value, err := typed.Int64()
-		return int(value), err == nil && int64(int(value)) == value
-	case float64:
-		value := int(typed)
-		return value, float64(value) == typed
-	case int:
-		return typed, true
-	case string:
-		var value int
-		_, err := fmt.Sscan(typed, &value)
-		return value, err == nil
-	default:
-		return 0, false
-	}
-}
-
-func nodeID(value string) string {
-	sum := sha256.Sum256([]byte(strings.ToLower(value)))
-	return hex.EncodeToString(sum[:8])
+func hashBytes(value []byte) string {
+	sum := sha256.Sum256(value)
+	return hex.EncodeToString(sum[:])
 }

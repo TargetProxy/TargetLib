@@ -190,7 +190,6 @@ message SubscriptionUpdateResult {
   bool not_modified = 3;
   int64 duration_milliseconds = 4;
   bytes original_config = 5;
-  bytes generated_config = 6;
 }
 
 enum ProxyMode {
@@ -219,14 +218,10 @@ message RuntimeConfig {
   repeated SelectorConfig selectors = 2;
   repeated ServiceRoute service_routes = 3;
   string node_pool_revision = 6;
-  reserved 4, 5;
-  reserved "service_bindings", "revision";
 }
 
 message UpdateRuntimeConfigRequest {
   RuntimeSettings settings = 1;
-  reserved 3;
-  reserved "expected_revision";
 }
 
 message SelectorConfig {
@@ -244,13 +239,6 @@ message ServiceRoute {
   string display_name = 5;
 }
 
-message RuntimeModel {
-  repeated SelectorConfig selectors = 1;
-  repeated ServiceRoute service_routes = 2;
-  reserved 3;
-  reserved "service_bindings";
-}
-
 message NodePool {
   string revision = 1;
   repeated ProfileNode nodes = 2;
@@ -265,7 +253,6 @@ message SelectNodeResponse {
   string node_id = 1;
   string node_name = 2;
   bool applied_immediately = 3;
-  string error_message = 4;
 }
 
 message ProxyStatus {

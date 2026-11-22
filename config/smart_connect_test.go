@@ -13,7 +13,7 @@ func TestSmartConnectIndependentSelectorsAndDomainPrecedence(t *testing.T) {
 		return profile.Node{ID: id, Phase: profile.NodeReady, Outbound: &option.Outbound{Type: "direct", Options: &option.DirectOutboundOptions{}}}
 	}
 	model := RuntimeModel{NodePool: NodePool{Nodes: []profile.Node{node("a"), node("b")}}, Selectors: []Selector{{Tag: "one", NodeIDs: []string{"a", "b"}, Selected: "a"}, {Tag: "two", NodeIDs: []string{"a", "b"}, Selected: "b"}}, ServiceRoutes: []ServiceRoute{{ServiceID: "one", Domains: []string{"example.com"}, Selector: "one", Enabled: true}, {ServiceID: "two", Domains: []string{"api.example.com"}, Selector: "two", Enabled: true}}}
-	content, err := Build(Settings{ListenAddress: "127.0.0.1", MixedPort: 2080, ProxyMode: ProxyModeMixed, RouteMode: RouteModeAll}, model)
+	built, err := Build(Settings{ListenAddress: "127.0.0.1", MixedPort: 2080, ProxyMode: ProxyModeMixed, RouteMode: RouteModeAll}, model)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -26,7 +26,7 @@ func TestSmartConnectIndependentSelectorsAndDomainPrecedence(t *testing.T) {
 			}
 		}
 	}
-	if err := json.Unmarshal(content, &document); err != nil {
+	if err := json.Unmarshal(built.Content, &document); err != nil {
 		t.Fatal(err)
 	}
 	counts := make(map[string]int)
@@ -36,7 +36,7 @@ func TestSmartConnectIndependentSelectorsAndDomainPrecedence(t *testing.T) {
 		selected[out.Tag] = out.Default
 	}
 	if counts["a"] != 1 || counts["b"] != 1 || selected["one"] != "a" || selected["two"] != "b" {
-		t.Fatalf("shared nodes or selectors incorrect: %s", content)
+		t.Fatalf("shared nodes or selectors incorrect: %s", built.Content)
 	}
 	var routes []string
 	for _, rule := range document.Route.Rules {
@@ -50,7 +50,7 @@ func TestSmartConnectIndependentSelectorsAndDomainPrecedence(t *testing.T) {
 }
 
 func TestSmartProbeRuntimeHasNoListenersCacheOrBackgroundURLTest(t *testing.T) {
-	content, err := Build(Settings{ProbeOnly: true, ListenAddress: "127.0.0.1", MixedPort: 2080, ProxyMode: ProxyModeMixed, RouteMode: RouteModeAll, CacheFilePath: "should-not-exist.db"}, profile.Profile{Nodes: []profile.Node{{ID: "node", Phase: profile.NodeReady, Outbound: &option.Outbound{Type: "direct", Options: &option.DirectOutboundOptions{}}}}})
+	built, err := Build(Settings{ProbeOnly: true, ListenAddress: "127.0.0.1", MixedPort: 2080, ProxyMode: ProxyModeMixed, RouteMode: RouteModeAll, CacheFilePath: "should-not-exist.db"}, profile.Profile{Nodes: []profile.Node{{ID: "node", Phase: profile.NodeReady, Outbound: &option.Outbound{Type: "direct", Options: &option.DirectOutboundOptions{}}}}})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -66,11 +66,11 @@ func TestSmartProbeRuntimeHasNoListenersCacheOrBackgroundURLTest(t *testing.T) {
 		}
 		Outbounds []struct{ Type string }
 	}
-	if err := json.Unmarshal(content, &document); err != nil {
+	if err := json.Unmarshal(built.Content, &document); err != nil {
 		t.Fatal(err)
 	}
 	if len(document.Inbounds) != 0 || len(document.Experimental.CacheFile) != 0 || len(document.Experimental.ClashAPI) != 0 || !document.Log.Disabled || document.Log.Output != "" {
-		t.Fatalf("probe runtime has side effects: %s", content)
+		t.Fatalf("probe runtime has side effects: %s", built.Content)
 	}
 	for _, out := range document.Outbounds {
 		if out.Type == "urltest" {

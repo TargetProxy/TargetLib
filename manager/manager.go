@@ -5,11 +5,9 @@ import (
 	"errors"
 	"io"
 	"os"
-	"path/filepath"
 	"sync"
 	"time"
 
-	"github.com/loafman1120/TargetLib/config"
 	box "github.com/sagernet/sing-box"
 	"github.com/sagernet/sing-box/adapter"
 	"github.com/sagernet/sing-box/daemon"
@@ -19,7 +17,6 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/emptypb"
 
 	targetlibapi "github.com/loafman1120/TargetLib/api/TargetLib"
@@ -49,17 +46,17 @@ type Manager struct {
 	subscriptionDone   chan struct{}
 	subscriptionStore  io.Closer
 
-	opMu          sync.Mutex
-	configMu      sync.RWMutex
-	config        string
-	runtimeConfig *targetlibapi.RuntimeConfig
-	checkConfig   func(context.Context, string) error
-	readStatus    func() (*daemon.ServiceStatus, error)
-	runtimeStore  runtimeConfigStore
-	cacheFilePath string
-	applyConfig   func(string) error
-	close         sync.Once
-	controlToken  string
+	opMu           sync.Mutex
+	configMu       sync.RWMutex
+	intent         runtimeIntent
+	activeRuntime  *runtimeSnapshot
+	checkConfig    func(context.Context, string) error
+	readStatus     func() (*daemon.ServiceStatus, error)
+	runtimeStore   runtimeConfigStore
+	applyConfig    func(string) error
+	selectOutbound func(context.Context, string, string) error
+	close          sync.Once
+	controlToken   string
 }
 
 func Setup(options Options) error {
@@ -97,45 +94,30 @@ func New(ctx context.Context, options Options) (*Manager, error) {
 		}
 		return nil, err
 	}
-	subscriptionContext, cancelSubscriptions := context.WithCancel(ctx)
 	runtimeStore := runtimeConfigStore{store: sharedStore}
-	runtimeConfig, err := runtimeStore.Load(ctx)
+	intent, err := runtimeStore.Load(ctx)
+	if err == nil && intent == nil {
+		initial := defaultRuntimeIntent()
+		intent = &initial
+		err = runtimeStore.Save(ctx, initial)
+	} else if err == nil {
+		err = intent.settings.Validate()
+	}
 	if err != nil {
-		cancelSubscriptions()
 		subscriptionManager.Close()
+		if closer, ok := sharedStore.(io.Closer); ok {
+			_ = closer.Close()
+		}
 		return nil, err
 	}
-	if runtimeConfig == nil {
-		runtimeConfig = defaultRuntimeConfig()
-		if err := runtimeStore.Save(ctx, runtimeConfig); err != nil {
-			cancelSubscriptions()
-			subscriptionManager.Close()
-			return nil, err
-		}
-	}
-	canonicalSettings := canonicalRuntimeSettings(runtimeConfig.GetSettings())
-	if !proto.Equal(canonicalSettings, runtimeConfig.GetSettings()) {
-		runtimeConfig.Settings = canonicalSettings
-		if err := runtimeStore.Save(ctx, runtimeConfig); err != nil {
-			cancelSubscriptions()
-			subscriptionManager.Close()
-			return nil, err
-		}
-	}
-	cacheFilePath := filepath.Join(options.BasePath, "cache.db")
-	if _, err := buildSettings(runtimeConfig.GetSettings(), cacheFilePath); err != nil {
-		cancelSubscriptions()
-		subscriptionManager.Close()
-		return nil, err
-	}
+	subscriptionContext, cancelSubscriptions := context.WithCancel(ctx)
 	m := &Manager{
 		Handler:            subscriptioncore.NewHandler(subscriptionManager),
 		subscriptions:      subscriptionManager,
 		subscriptionCancel: cancelSubscriptions,
 		subscriptionDone:   make(chan struct{}),
-		runtimeConfig:      runtimeConfig,
+		intent:             *intent,
 		runtimeStore:       runtimeStore,
-		cacheFilePath:      cacheFilePath,
 		controlToken:       controlToken,
 	}
 	if closer, ok := sharedStore.(io.Closer); ok {
@@ -154,6 +136,7 @@ func New(ctx context.Context, options Options) (*Manager, error) {
 	m.checkConfig = m.started.CheckConfig
 	m.daemon = newDaemonAdapter(m.started)
 	m.readStatus = m.daemon.Status
+	m.selectOutbound = m.daemon.SelectOutbound
 	go func() {
 		defer close(m.subscriptionDone)
 		_ = subscriptionManager.Run(subscriptionContext)
@@ -250,16 +233,6 @@ func (m *Manager) StopService() error {
 	return nil
 }
 
-func (m *Manager) startOrReload(config string) error {
-	if err := m.applyConfig(config); err != nil {
-		return status.Error(codes.Internal, err.Error())
-	}
-	m.configMu.Lock()
-	m.config = config
-	m.configMu.Unlock()
-	return nil
-}
-
 func (m *Manager) GetState(context.Context, *emptypb.Empty) (*targetlibapi.ServiceState, error) {
 	return m.State()
 }
@@ -306,36 +279,6 @@ func (m *Manager) SubscribeConnections(request *targetlibapi.SubscribeConnection
 	return err
 }
 
-// UpdateSubscription adds a one-shot generated configuration to the update
-// response so clients can compare it with the fetched provider document.
-func (m *Manager) UpdateSubscription(ctx context.Context, request *targetlibapi.SubscriptionId) (*targetlibapi.SubscriptionUpdateResult, error) {
-	result, err := m.Handler.UpdateSubscription(ctx, request)
-	if err != nil || len(result.GetOriginalConfig()) == 0 {
-		return result, err
-	}
-	subscription, ok := m.subscriptions.Get(request.GetId())
-	if !ok {
-		return nil, status.Errorf(codes.NotFound, "subscription %q not found", request.GetId())
-	}
-	m.configMu.RLock()
-	settingsProto := cloneRuntimeSettings(m.runtimeConfig.GetSettings())
-	m.configMu.RUnlock()
-	settings, err := buildSettings(settingsProto, m.cacheFilePath)
-	if err != nil {
-		return nil, err
-	}
-	model, err := normalizeRuntimeModel(config.RuntimeModel{NodePool: config.NodePool{Nodes: subscription.Profile.Nodes}})
-	if err != nil {
-		return nil, err
-	}
-	content, err := buildRuntimeConfigForModel(settings, model)
-	if err != nil {
-		return nil, err
-	}
-	result.GeneratedConfig = content
-	return result, nil
-}
-
 func (m *Manager) CloseConnection(ctx context.Context, request *targetlibapi.CloseConnectionRequest) (*emptypb.Empty, error) {
 	if request == nil || request.GetId() == "" {
 		return nil, status.Error(codes.InvalidArgument, "connection id is required")
@@ -350,12 +293,6 @@ func (m *Manager) CloseAllConnections(ctx context.Context, request *emptypb.Empt
 func (m *Manager) ServiceStop() error { return m.StopService() }
 
 func (m *Manager) ServiceReload() error {
-	m.configMu.RLock()
-	config := m.config
-	m.configMu.RUnlock()
-	if config == "" {
-		return status.Error(codes.FailedPrecondition, "no active configuration")
-	}
 	m.opMu.Lock()
 	defer m.opMu.Unlock()
 	current, err := m.currentStatus()
@@ -365,7 +302,7 @@ func (m *Manager) ServiceReload() error {
 	if current.Status != daemon.ServiceStatus_STARTED {
 		return status.Error(codes.FailedPrecondition, "service is not running")
 	}
-	return m.startOrReload(config)
+	return m.activateSavedRuntime(context.Background(), true)
 }
 
 type platformHandler struct{ manager *Manager }

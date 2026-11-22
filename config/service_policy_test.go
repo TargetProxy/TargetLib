@@ -21,12 +21,12 @@ func TestServiceSelectorAllowsDirect(t *testing.T) {
 func TestDirectOnlyServiceEmitsSelectorWithoutSubscriptions(t *testing.T) {
 	model := RuntimeModel{Selectors: []Selector{{Tag: "service-direct", NodeIDs: []string{"direct"}, Selected: "direct"}},
 		ServiceRoutes: []ServiceRoute{{ServiceID: "direct", Domains: []string{"example.com"}, Selector: "service-direct", Enabled: true}}}
-	content, err := Build(Settings{ListenAddress: "127.0.0.1", MixedPort: 2080, ProxyMode: ProxyModeMixed, RouteMode: RouteModeAll}, model)
+	built, err := Build(Settings{ListenAddress: "127.0.0.1", MixedPort: 2080, ProxyMode: ProxyModeMixed, RouteMode: RouteModeAll}, model)
 	if err != nil {
 		t.Fatal(err)
 	}
 	var parsed struct{ Outbounds []struct{ Tag string } }
-	if err := json.Unmarshal(content, &parsed); err != nil {
+	if err := json.Unmarshal(built.Content, &parsed); err != nil {
 		t.Fatal(err)
 	}
 	for _, out := range parsed.Outbounds {
@@ -34,5 +34,5 @@ func TestDirectOnlyServiceEmitsSelectorWithoutSubscriptions(t *testing.T) {
 			return
 		}
 	}
-	t.Fatalf("Direct-only service selector is missing: %s", content)
+	t.Fatalf("Direct-only service selector is missing: %s", built.Content)
 }

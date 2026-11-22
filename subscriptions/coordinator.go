@@ -2,13 +2,19 @@ package subscriptions
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
+	"fmt"
+	"slices"
+	"strings"
 )
 
 var errManagerClosed = errors.New("subscription manager is closed")
 
 type managerState struct {
-	items map[string]Subscription
+	items    map[string]Subscription
+	revision string
 }
 
 type stateMutation struct {
@@ -32,6 +38,7 @@ type stateCommand struct {
 func (m *Manager) runCoordinator(ctx context.Context) {
 	defer close(m.coordinatorDone)
 	current := &managerState{items: make(map[string]Subscription)}
+	current.revision = managerStateRevision(current)
 	m.snapshot.Store(current)
 	for {
 		select {
@@ -44,17 +51,37 @@ func (m *Manager) runCoordinator(ctx context.Context) {
 			}
 			if err == nil {
 				current = mutation.next
+				current.revision = managerStateRevision(current)
 				m.snapshot.Store(current)
 				for _, event := range mutation.events {
 					m.publish(event.type_, event.item)
 				}
 			} else if mutation.failure != nil {
 				current = mutation.failure
+				current.revision = managerStateRevision(current)
 				m.snapshot.Store(current)
 			}
 			command.result <- err
 		}
 	}
+}
+
+func managerStateRevision(state *managerState) string {
+	items := make([]Subscription, 0, len(state.items))
+	for _, item := range state.items {
+		if item.Enabled {
+			items = append(items, item)
+		}
+	}
+	slices.SortFunc(items, func(a, b Subscription) int { return strings.Compare(a.ID, b.ID) })
+	hash := sha256.New()
+	for _, item := range items {
+		_, _ = fmt.Fprintf(hash, "%s\x00%s\x00", item.ID, item.NodesHash)
+		for _, node := range item.Profile.Nodes {
+			_, _ = fmt.Fprintf(hash, "%s\x00%s\x00%s\x00%s\x00%s\x00%d\x00%s\x00", node.ID, node.Name, node.Type, node.CountryCode, node.Server, node.Port, node.Phase)
+		}
+	}
+	return hex.EncodeToString(hash.Sum(nil))
 }
 
 func (m *Manager) applyMutation(ctx context.Context, current *managerState, mutation stateMutation) error {

@@ -1,9 +1,6 @@
 package subscriptions
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
-	"encoding/json"
 	"slices"
 	"strings"
 
@@ -17,15 +14,13 @@ type NodePool struct {
 
 // NodePool reads one immutable coordinator snapshot.
 func (m *Manager) NodePool() NodePool {
-	pool := NodePool{}
-	for _, item := range m.snapshot.Load().items {
+	state := m.snapshot.Load()
+	pool := NodePool{Revision: state.revision}
+	for _, item := range state.items {
 		if item.Enabled {
 			pool.Nodes = append(pool.Nodes, cloneNodes(item.Profile.Nodes)...)
 		}
 	}
 	slices.SortFunc(pool.Nodes, func(a, b targetprofile.Node) int { return strings.Compare(a.ID, b.ID) })
-	content, _ := json.Marshal(pool.Nodes)
-	sum := sha256.Sum256(content)
-	pool.Revision = hex.EncodeToString(sum[:])
 	return pool
 }

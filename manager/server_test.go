@@ -29,7 +29,7 @@ func managerTestBasePath(t *testing.T) string {
 	return path
 }
 
-func TestListenUsesUnixSocketAndLoopbackTCP(t *testing.T) {
+func TestServeAcceptsUnixSocketAndLoopbackTCP(t *testing.T) {
 	basePath := managerTestBasePath(t)
 	manager, err := New(context.Background(), Options{
 		BasePath:          basePath,
@@ -58,25 +58,7 @@ func TestListenUsesUnixSocketAndLoopbackTCP(t *testing.T) {
 	if got := server.SocketEndpoint(); got != socketPath {
 		t.Fatalf("socket endpoint = %q, want %q", got, socketPath)
 	}
-}
-
-func TestServeAcceptsUnixSocketAndTCP(t *testing.T) {
-	basePath := managerTestBasePath(t)
-	manager, err := New(context.Background(), Options{
-		BasePath:          basePath,
-		SubscriptionStore: &subscriptions.MemoryStore{},
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	socketPath := filepath.Join(basePath, CommandSocket)
-	server, err := listen(manager, "127.0.0.1:0", socketPath)
-	if err != nil {
-		manager.Close()
-		t.Fatal(err)
-	}
 	go func() { _ = server.Serve() }()
-	t.Cleanup(server.Close)
 
 	tcpConnection, err := grpc.NewClient(
 		server.Endpoint(),
