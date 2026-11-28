@@ -193,6 +193,15 @@ class TargetLibClient extends $grpc.Client {
     return $createUnaryCall(_$getNodePool, request, options: options);
   }
 
+  $grpc.ResponseStream<$1.NodeDelayResult> testNodeDelay(
+    $1.TestNodeDelayRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createStreamingCall(
+        _$testNodeDelay, $async.Stream.fromIterable([request]),
+        options: options);
+  }
+
   $grpc.ResponseFuture<$1.SelectNodeResponse> selectNode(
     $1.SelectNodeRequest request, {
     $grpc.CallOptions? options,
@@ -356,6 +365,11 @@ class TargetLibClient extends $grpc.Client {
       '/targetlib.TargetLib/GetNodePool',
       ($0.Empty value) => value.writeToBuffer(),
       $1.NodePool.fromBuffer);
+  static final _$testNodeDelay =
+      $grpc.ClientMethod<$1.TestNodeDelayRequest, $1.NodeDelayResult>(
+          '/targetlib.TargetLib/TestNodeDelay',
+          ($1.TestNodeDelayRequest value) => value.writeToBuffer(),
+          $1.NodeDelayResult.fromBuffer);
   static final _$selectNode =
       $grpc.ClientMethod<$1.SelectNodeRequest, $1.SelectNodeResponse>(
           '/targetlib.TargetLib/SelectNode',
@@ -567,6 +581,14 @@ abstract class TargetLibServiceBase extends $grpc.Service {
         false,
         ($core.List<$core.int> value) => $0.Empty.fromBuffer(value),
         ($1.NodePool value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$1.TestNodeDelayRequest, $1.NodeDelayResult>(
+        'TestNodeDelay',
+        testNodeDelay_Pre,
+        false,
+        true,
+        ($core.List<$core.int> value) =>
+            $1.TestNodeDelayRequest.fromBuffer(value),
+        ($1.NodeDelayResult value) => value.writeToBuffer()));
     $addMethod($grpc.ServiceMethod<$1.SelectNodeRequest, $1.SelectNodeResponse>(
         'SelectNode',
         selectNode_Pre,
@@ -813,6 +835,14 @@ abstract class TargetLibServiceBase extends $grpc.Service {
 
   $async.Future<$1.NodePool> getNodePool(
       $grpc.ServiceCall call, $0.Empty request);
+
+  $async.Stream<$1.NodeDelayResult> testNodeDelay_Pre($grpc.ServiceCall $call,
+      $async.Future<$1.TestNodeDelayRequest> $request) async* {
+    yield* testNodeDelay($call, await $request);
+  }
+
+  $async.Stream<$1.NodeDelayResult> testNodeDelay(
+      $grpc.ServiceCall call, $1.TestNodeDelayRequest request);
 
   $async.Future<$1.SelectNodeResponse> selectNode_Pre($grpc.ServiceCall $call,
       $async.Future<$1.SelectNodeRequest> $request) async {

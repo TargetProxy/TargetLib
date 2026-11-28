@@ -55,6 +55,10 @@ final class TargetLibProxy {
   Future<NodePool> nodePool() =>
       _resolve().then((connection) => connection.getNodePool());
 
+  Stream<NodeDelayResult> testNodeDelay(Iterable<String> nodeIds) async* {
+    yield* (await _resolve()).testNodeDelay(nodeIds);
+  }
+
   Future<SelectNodeResponse> selectNode(String nodeId) =>
       _resolve().then((connection) => connection.selectNode(nodeId));
 

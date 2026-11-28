@@ -28,13 +28,11 @@ manager.NewLocal 同时监听：
 
 ## RPC 总览
 
-服务当前共有 30 个 RPC：Layer 1 有 26 个，Layer 2 有 4 个。
-
 | 分组 | RPC |
 | --- | --- |
 | 生命周期与观测（10） | Start, Restart, Stop, GetState, SubscribeState, SubscribeLogs, SubscribeTraffic, SubscribeConnections, CloseConnection, CloseAllConnections |
 | 订阅（10） | ListSubscriptions, GetSubscription, AddSubscription, RemoveSubscription, RenameSubscription, SetSubscriptionEnabled, ConfigureSubscriptionUpdates, UpdateSubscription, GetResolvedEndpoints, SubscribeSubscriptionEvents |
-| 节点选择（3） | GetNodePool, SelectNode, GetProxyStatus |
+| 节点管理（4） | GetNodePool, TestNodeDelay, SelectNode, GetProxyStatus |
 | 运行时与网络信息（3） | GetRuntimeConfig, UpdateRuntimeConfig, GetIpInfo |
 | 规则分流（4） | UpsertRoute, DeleteRoute, ListRoutes, SelectRouteNode |
 
@@ -121,6 +119,14 @@ SelectNode 接受当前池中可用的节点 ID 或内置的 `direct`。请求�
 持久化失败时，运行中的 selector 会尝试恢复原选择。Start 或 Restart 遇到已保存的失效节点时返回 `FAILED_PRECONDITION`，需要先通过节点切换接口修正选择。
 
 GetProxyStatus 返回默认 proxy selector 的已保存选择、服务状态和节点可用性。运行中的 `actual_node_id` 来自已应用快照，实际选择与保存选择一致时 `effective=true`。保存的订阅节点离开当前池时，`unavailable_reason=node_not_in_pool`。节点失败或未就绪时分别为 `node_failed` 和 `node_not_ready`。
+
+### 节点延迟测试
+
+`TestNodeDelay(TestNodeDelayRequest) → stream NodeDelayResult` 接收 `GetNodePool` 返回的节点 `tag` 列表（`node_ids`）。单测传一个 ID，测试列表传多个。服务端按完成顺序为每个不同的 ID 返回一条结果，客户端用 `node_id` 更新对应行。取消流会停止整批探测。Flutter 入口为 `runtime.proxy.testNodeDelay(nodeIds)`。
+
+核心通过指定节点向 `https://www.gstatic.com/generate_204` 发起 HTTPS `HEAD`，从开始拨号计时到收到响应头。`204` 返回 `OK` 和 `delay_ms`，其他结果为 `TIMEOUT`、`FAILED`、`NOT_FOUND`（节点缺失）或 `NOT_READY`。单节点限时 5 秒，核心同时最多探测 8 个节点。
+
+空列表或空白 ID 返回 `INVALID_ARGUMENT`，探测实例启动失败返回 `UNAVAILABLE`。
 
 ## 运行时配置
 

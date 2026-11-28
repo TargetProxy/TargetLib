@@ -2250,6 +2250,140 @@ class NodePool extends $pb.GeneratedMessage {
   $pb.PbList<ProfileNode> get nodes => $_getList(1);
 }
 
+class TestNodeDelayRequest extends $pb.GeneratedMessage {
+  factory TestNodeDelayRequest({
+    $core.Iterable<$core.String>? nodeIds,
+  }) {
+    final result = TestNodeDelayRequest._();
+    if (nodeIds != null) result.nodeIds.addAll(nodeIds);
+    return result;
+  }
+
+  TestNodeDelayRequest._();
+
+  factory TestNodeDelayRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      TestNodeDelayRequest()..mergeFromBuffer(data, registry);
+  factory TestNodeDelayRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      TestNodeDelayRequest()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'TestNodeDelayRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'targetlib'),
+      createEmptyInstance: TestNodeDelayRequest.$_createMessage)
+    ..pPS(1, _omitFieldNames ? '' : 'nodeIds')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  TestNodeDelayRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  TestNodeDelayRequest copyWith(void Function(TestNodeDelayRequest) updates) =>
+      super.copyWith((message) => updates(message as TestNodeDelayRequest))
+          as TestNodeDelayRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use TestNodeDelayRequest() / TestNodeDelayRequest.new instead')
+  static TestNodeDelayRequest create() => TestNodeDelayRequest._();
+  static $pb.GeneratedMessage $_createMessage() => TestNodeDelayRequest._();
+  @$core.override
+  TestNodeDelayRequest createEmptyInstance() => TestNodeDelayRequest._();
+  @$core.pragma('dart2js:noInline')
+  static TestNodeDelayRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<TestNodeDelayRequest>(
+          TestNodeDelayRequest.$_createMessage);
+  static TestNodeDelayRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $pb.PbList<$core.String> get nodeIds => $_getList(0);
+}
+
+class NodeDelayResult extends $pb.GeneratedMessage {
+  factory NodeDelayResult({
+    $core.String? nodeId,
+    NodeDelayStatus? status,
+    $core.int? delayMs,
+  }) {
+    final result = NodeDelayResult._();
+    if (nodeId != null) result.nodeId = nodeId;
+    if (status != null) result.status = status;
+    if (delayMs != null) result.delayMs = delayMs;
+    return result;
+  }
+
+  NodeDelayResult._();
+
+  factory NodeDelayResult.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      NodeDelayResult()..mergeFromBuffer(data, registry);
+  factory NodeDelayResult.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      NodeDelayResult()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'NodeDelayResult',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'targetlib'),
+      createEmptyInstance: NodeDelayResult.$_createMessage)
+    ..aOS(1, _omitFieldNames ? '' : 'nodeId')
+    ..aE<NodeDelayStatus>(2, _omitFieldNames ? '' : 'status',
+        enumValues: NodeDelayStatus.values)
+    ..aI(3, _omitFieldNames ? '' : 'delayMs', fieldType: $pb.PbFieldType.OU3)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  NodeDelayResult clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  NodeDelayResult copyWith(void Function(NodeDelayResult) updates) =>
+      super.copyWith((message) => updates(message as NodeDelayResult))
+          as NodeDelayResult;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use NodeDelayResult() / NodeDelayResult.new instead')
+  static NodeDelayResult create() => NodeDelayResult._();
+  static $pb.GeneratedMessage $_createMessage() => NodeDelayResult._();
+  @$core.override
+  NodeDelayResult createEmptyInstance() => NodeDelayResult._();
+  @$core.pragma('dart2js:noInline')
+  static NodeDelayResult getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<NodeDelayResult>(
+          NodeDelayResult.$_createMessage);
+  static NodeDelayResult? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get nodeId => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set nodeId($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasNodeId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearNodeId() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  NodeDelayStatus get status => $_getN(1);
+  @$pb.TagNumber(2)
+  set status(NodeDelayStatus value) => $_setField(2, value);
+  @$pb.TagNumber(2)
+  $core.bool hasStatus() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearStatus() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.int get delayMs => $_getIZ(2);
+  @$pb.TagNumber(3)
+  set delayMs($core.int value) => $_setUnsignedInt32(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasDelayMs() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearDelayMs() => $_clearField(3);
+}
+
 /// Layer 1: Node Selection
 class SelectNodeRequest extends $pb.GeneratedMessage {
   factory SelectNodeRequest({

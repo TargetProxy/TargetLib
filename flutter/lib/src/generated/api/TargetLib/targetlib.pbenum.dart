@@ -129,6 +129,38 @@ class RouteMode extends $pb.ProtobufEnum {
   const RouteMode._(super.value, super.name);
 }
 
+class NodeDelayStatus extends $pb.ProtobufEnum {
+  static const NodeDelayStatus NODE_DELAY_STATUS_UNSPECIFIED =
+      NodeDelayStatus._(
+          0, _omitEnumNames ? '' : 'NODE_DELAY_STATUS_UNSPECIFIED');
+  static const NodeDelayStatus NODE_DELAY_STATUS_OK =
+      NodeDelayStatus._(1, _omitEnumNames ? '' : 'NODE_DELAY_STATUS_OK');
+  static const NodeDelayStatus NODE_DELAY_STATUS_TIMEOUT =
+      NodeDelayStatus._(2, _omitEnumNames ? '' : 'NODE_DELAY_STATUS_TIMEOUT');
+  static const NodeDelayStatus NODE_DELAY_STATUS_FAILED =
+      NodeDelayStatus._(3, _omitEnumNames ? '' : 'NODE_DELAY_STATUS_FAILED');
+  static const NodeDelayStatus NODE_DELAY_STATUS_NOT_FOUND =
+      NodeDelayStatus._(4, _omitEnumNames ? '' : 'NODE_DELAY_STATUS_NOT_FOUND');
+  static const NodeDelayStatus NODE_DELAY_STATUS_NOT_READY =
+      NodeDelayStatus._(5, _omitEnumNames ? '' : 'NODE_DELAY_STATUS_NOT_READY');
+
+  static const $core.List<NodeDelayStatus> values = <NodeDelayStatus>[
+    NODE_DELAY_STATUS_UNSPECIFIED,
+    NODE_DELAY_STATUS_OK,
+    NODE_DELAY_STATUS_TIMEOUT,
+    NODE_DELAY_STATUS_FAILED,
+    NODE_DELAY_STATUS_NOT_FOUND,
+    NODE_DELAY_STATUS_NOT_READY,
+  ];
+
+  static final $core.List<NodeDelayStatus?> _byValue =
+      $pb.ProtobufEnum.$_initByValueList(values, 5);
+  static NodeDelayStatus? valueOf($core.int value) =>
+      value < 0 || value >= _byValue.length ? null : _byValue[value];
+
+  const NodeDelayStatus._(super.value, super.name);
+}
+
 class SubscriptionStatus extends $pb.ProtobufEnum {
   static const SubscriptionStatus SUBSCRIPTION_STATUS_UNSPECIFIED =
       SubscriptionStatus._(

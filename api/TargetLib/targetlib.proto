@@ -31,6 +31,7 @@ service TargetLib {
   rpc SubscribeSubscriptionEvents(google.protobuf.Empty) returns (stream SubscriptionEvent);
 
   rpc GetNodePool(google.protobuf.Empty) returns (NodePool);
+  rpc TestNodeDelay(TestNodeDelayRequest) returns (stream NodeDelayResult);
   rpc SelectNode(SelectNodeRequest) returns (SelectNodeResponse);
   rpc GetProxyStatus(google.protobuf.Empty) returns (ProxyStatus);
 
@@ -242,6 +243,25 @@ message ServiceRoute {
 message NodePool {
   string revision = 1;
   repeated ProfileNode nodes = 2;
+}
+
+message TestNodeDelayRequest {
+  repeated string node_ids = 1;
+}
+
+message NodeDelayResult {
+  string node_id = 1;
+  NodeDelayStatus status = 2;
+  optional uint32 delay_ms = 3;
+}
+
+enum NodeDelayStatus {
+  NODE_DELAY_STATUS_UNSPECIFIED = 0;
+  NODE_DELAY_STATUS_OK = 1;
+  NODE_DELAY_STATUS_TIMEOUT = 2;
+  NODE_DELAY_STATUS_FAILED = 3;
+  NODE_DELAY_STATUS_NOT_FOUND = 4;
+  NODE_DELAY_STATUS_NOT_READY = 5;
 }
 
 // Layer 1: Node Selection

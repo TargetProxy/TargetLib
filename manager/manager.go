@@ -45,6 +45,8 @@ type Manager struct {
 	subscriptionCancel context.CancelFunc
 	subscriptionDone   chan struct{}
 	subscriptionStore  io.Closer
+	nodeDelayRegistry  service.Registry
+	nodeDelaySlots     chan struct{}
 
 	opMu           sync.Mutex
 	configMu       sync.RWMutex
@@ -111,11 +113,14 @@ func New(ctx context.Context, options Options) (*Manager, error) {
 		return nil, err
 	}
 	subscriptionContext, cancelSubscriptions := context.WithCancel(ctx)
+	serviceCtx := serviceContext(ctx, options)
 	m := &Manager{
 		Handler:            subscriptioncore.NewHandler(subscriptionManager),
 		subscriptions:      subscriptionManager,
 		subscriptionCancel: cancelSubscriptions,
 		subscriptionDone:   make(chan struct{}),
+		nodeDelayRegistry:  service.RegistryFromContext(serviceCtx).Clone(),
+		nodeDelaySlots:     make(chan struct{}, nodeDelayConcurrency),
 		intent:             *intent,
 		runtimeStore:       runtimeStore,
 		controlToken:       controlToken,
@@ -124,7 +129,7 @@ func New(ctx context.Context, options Options) (*Manager, error) {
 		m.subscriptionStore = closer
 	}
 	m.started = daemon.NewStartedService(daemon.ServiceOptions{
-		Context:          serviceContext(ctx, options),
+		Context:          serviceCtx,
 		Handler:          platformHandler{manager: m},
 		Debug:            options.Debug,
 		LogMaxLines:      options.LogMaxLines,

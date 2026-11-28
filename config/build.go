@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	urlTestURL         = "https://www.gstatic.com/generate_204"
+	DefaultURLTestURL  = "https://www.gstatic.com/generate_204"
 	urlTestInterval    = 5 * time.Minute
 	urlTestTolerance   = 50
 	geoIPCNRuleSetTag  = "geoip-cn"
@@ -205,7 +205,7 @@ func planOutboundsWithSelectors(nodes []targetprofile.Node, selectors []Selector
 		return outbounds, "direct", nil
 	}
 	outbounds = append(outbounds, option.Outbound{Type: "urltest", Tag: "urltest", Options: option.URLTestOutboundOptions{
-		Outbounds: append([]string(nil), nodeTags...), URL: urlTestURL, Interval: badoption.Duration(urlTestInterval), Tolerance: urlTestTolerance,
+		Outbounds: append([]string(nil), nodeTags...), URL: DefaultURLTestURL, Interval: badoption.Duration(urlTestInterval), Tolerance: urlTestTolerance,
 	}})
 	defaultNode := nodeTags[0]
 	for _, selector := range selectors {

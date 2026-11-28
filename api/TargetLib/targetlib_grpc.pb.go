@@ -41,6 +41,7 @@ const (
 	TargetLib_GetResolvedEndpoints_FullMethodName         = "/targetlib.TargetLib/GetResolvedEndpoints"
 	TargetLib_SubscribeSubscriptionEvents_FullMethodName  = "/targetlib.TargetLib/SubscribeSubscriptionEvents"
 	TargetLib_GetNodePool_FullMethodName                  = "/targetlib.TargetLib/GetNodePool"
+	TargetLib_TestNodeDelay_FullMethodName                = "/targetlib.TargetLib/TestNodeDelay"
 	TargetLib_SelectNode_FullMethodName                   = "/targetlib.TargetLib/SelectNode"
 	TargetLib_GetProxyStatus_FullMethodName               = "/targetlib.TargetLib/GetProxyStatus"
 	TargetLib_GetRuntimeConfig_FullMethodName             = "/targetlib.TargetLib/GetRuntimeConfig"
@@ -78,6 +79,7 @@ type TargetLibClient interface {
 	GetResolvedEndpoints(ctx context.Context, in *ResolvedEndpointsRequest, opts ...grpc.CallOption) (*ResolvedEndpoints, error)
 	SubscribeSubscriptionEvents(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (grpc.ServerStreamingClient[SubscriptionEvent], error)
 	GetNodePool(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*NodePool, error)
+	TestNodeDelay(ctx context.Context, in *TestNodeDelayRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[NodeDelayResult], error)
 	SelectNode(ctx context.Context, in *SelectNodeRequest, opts ...grpc.CallOption) (*SelectNodeResponse, error)
 	GetProxyStatus(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ProxyStatus, error)
 	GetRuntimeConfig(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*RuntimeConfig, error)
@@ -353,6 +355,25 @@ func (c *targetLibClient) GetNodePool(ctx context.Context, in *emptypb.Empty, op
 	return out, nil
 }
 
+func (c *targetLibClient) TestNodeDelay(ctx context.Context, in *TestNodeDelayRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[NodeDelayResult], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &TargetLib_ServiceDesc.Streams[5], TargetLib_TestNodeDelay_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[TestNodeDelayRequest, NodeDelayResult]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type TargetLib_TestNodeDelayClient = grpc.ServerStreamingClient[NodeDelayResult]
+
 func (c *targetLibClient) SelectNode(ctx context.Context, in *SelectNodeRequest, opts ...grpc.CallOption) (*SelectNodeResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(SelectNodeResponse)
@@ -469,6 +490,7 @@ type TargetLibServer interface {
 	GetResolvedEndpoints(context.Context, *ResolvedEndpointsRequest) (*ResolvedEndpoints, error)
 	SubscribeSubscriptionEvents(*emptypb.Empty, grpc.ServerStreamingServer[SubscriptionEvent]) error
 	GetNodePool(context.Context, *emptypb.Empty) (*NodePool, error)
+	TestNodeDelay(*TestNodeDelayRequest, grpc.ServerStreamingServer[NodeDelayResult]) error
 	SelectNode(context.Context, *SelectNodeRequest) (*SelectNodeResponse, error)
 	GetProxyStatus(context.Context, *emptypb.Empty) (*ProxyStatus, error)
 	GetRuntimeConfig(context.Context, *emptypb.Empty) (*RuntimeConfig, error)
@@ -551,6 +573,9 @@ func (UnimplementedTargetLibServer) SubscribeSubscriptionEvents(*emptypb.Empty, 
 }
 func (UnimplementedTargetLibServer) GetNodePool(context.Context, *emptypb.Empty) (*NodePool, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetNodePool not implemented")
+}
+func (UnimplementedTargetLibServer) TestNodeDelay(*TestNodeDelayRequest, grpc.ServerStreamingServer[NodeDelayResult]) error {
+	return status.Error(codes.Unimplemented, "method TestNodeDelay not implemented")
 }
 func (UnimplementedTargetLibServer) SelectNode(context.Context, *SelectNodeRequest) (*SelectNodeResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method SelectNode not implemented")
@@ -943,6 +968,17 @@ func _TargetLib_GetNodePool_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TargetLib_TestNodeDelay_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(TestNodeDelayRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(TargetLibServer).TestNodeDelay(m, &grpc.GenericServerStream[TestNodeDelayRequest, NodeDelayResult]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type TargetLib_TestNodeDelayServer = grpc.ServerStreamingServer[NodeDelayResult]
+
 func _TargetLib_SelectNode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(SelectNodeRequest)
 	if err := dec(in); err != nil {
@@ -1237,6 +1273,11 @@ var TargetLib_ServiceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "SubscribeSubscriptionEvents",
 			Handler:       _TargetLib_SubscribeSubscriptionEvents_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "TestNodeDelay",
+			Handler:       _TargetLib_TestNodeDelay_Handler,
 			ServerStreams: true,
 		},
 	},

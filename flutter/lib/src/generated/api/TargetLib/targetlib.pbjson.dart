@@ -88,6 +88,26 @@ final $typed_data.Uint8List routeModeDescriptor = $convert.base64Decode(
     'CglSb3V0ZU1vZGUSGgoWUk9VVEVfTU9ERV9VTlNQRUNJRklFRBAAEhUKEVJPVVRFX01PREVfRE'
     'lSRUNUEAESEwoPUk9VVEVfTU9ERV9SVUxFEAISEgoOUk9VVEVfTU9ERV9BTEwQAw==');
 
+@$core.Deprecated('Use nodeDelayStatusDescriptor instead')
+const NodeDelayStatus$json = {
+  '1': 'NodeDelayStatus',
+  '2': [
+    {'1': 'NODE_DELAY_STATUS_UNSPECIFIED', '2': 0},
+    {'1': 'NODE_DELAY_STATUS_OK', '2': 1},
+    {'1': 'NODE_DELAY_STATUS_TIMEOUT', '2': 2},
+    {'1': 'NODE_DELAY_STATUS_FAILED', '2': 3},
+    {'1': 'NODE_DELAY_STATUS_NOT_FOUND', '2': 4},
+    {'1': 'NODE_DELAY_STATUS_NOT_READY', '2': 5},
+  ],
+};
+
+/// Descriptor for `NodeDelayStatus`. Decode as a `google.protobuf.EnumDescriptorProto`.
+final $typed_data.Uint8List nodeDelayStatusDescriptor = $convert.base64Decode(
+    'Cg9Ob2RlRGVsYXlTdGF0dXMSIQodTk9ERV9ERUxBWV9TVEFUVVNfVU5TUEVDSUZJRUQQABIYCh'
+    'ROT0RFX0RFTEFZX1NUQVRVU19PSxABEh0KGU5PREVfREVMQVlfU1RBVFVTX1RJTUVPVVQQAhIc'
+    'ChhOT0RFX0RFTEFZX1NUQVRVU19GQUlMRUQQAxIfChtOT0RFX0RFTEFZX1NUQVRVU19OT1RfRk'
+    '9VTkQQBBIfChtOT0RFX0RFTEFZX1NUQVRVU19OT1RfUkVBRFkQBQ==');
+
 @$core.Deprecated('Use subscriptionStatusDescriptor instead')
 const SubscriptionStatus$json = {
   '1': 'SubscriptionStatus',
@@ -898,6 +918,53 @@ const NodePool$json = {
 final $typed_data.Uint8List nodePoolDescriptor = $convert.base64Decode(
     'CghOb2RlUG9vbBIaCghyZXZpc2lvbhgBIAEoCVIIcmV2aXNpb24SLAoFbm9kZXMYAiADKAsyFi'
     '50YXJnZXRsaWIuUHJvZmlsZU5vZGVSBW5vZGVz');
+
+@$core.Deprecated('Use testNodeDelayRequestDescriptor instead')
+const TestNodeDelayRequest$json = {
+  '1': 'TestNodeDelayRequest',
+  '2': [
+    {'1': 'node_ids', '3': 1, '4': 3, '5': 9, '10': 'nodeIds'},
+  ],
+};
+
+/// Descriptor for `TestNodeDelayRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List testNodeDelayRequestDescriptor =
+    $convert.base64Decode(
+        'ChRUZXN0Tm9kZURlbGF5UmVxdWVzdBIZCghub2RlX2lkcxgBIAMoCVIHbm9kZUlkcw==');
+
+@$core.Deprecated('Use nodeDelayResultDescriptor instead')
+const NodeDelayResult$json = {
+  '1': 'NodeDelayResult',
+  '2': [
+    {'1': 'node_id', '3': 1, '4': 1, '5': 9, '10': 'nodeId'},
+    {
+      '1': 'status',
+      '3': 2,
+      '4': 1,
+      '5': 14,
+      '6': '.targetlib.NodeDelayStatus',
+      '10': 'status'
+    },
+    {
+      '1': 'delay_ms',
+      '3': 3,
+      '4': 1,
+      '5': 13,
+      '9': 0,
+      '10': 'delayMs',
+      '17': true
+    },
+  ],
+  '8': [
+    {'1': '_delay_ms'},
+  ],
+};
+
+/// Descriptor for `NodeDelayResult`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List nodeDelayResultDescriptor = $convert.base64Decode(
+    'Cg9Ob2RlRGVsYXlSZXN1bHQSFwoHbm9kZV9pZBgBIAEoCVIGbm9kZUlkEjIKBnN0YXR1cxgCIA'
+    'EoDjIaLnRhcmdldGxpYi5Ob2RlRGVsYXlTdGF0dXNSBnN0YXR1cxIeCghkZWxheV9tcxgDIAEo'
+    'DUgAUgdkZWxheU1ziAEBQgsKCV9kZWxheV9tcw==');
 
 @$core.Deprecated('Use selectNodeRequestDescriptor instead')
 const SelectNodeRequest$json = {

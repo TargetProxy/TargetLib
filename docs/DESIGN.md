@@ -110,6 +110,10 @@ sequenceDiagram
 
 `SelectRouteNode` 使用同一流程。启动或重载前，manager 检查已保存的选择是否仍可用。选择失效时返回 `FAILED_PRECONDITION`，可通过节点切换接口显式选择可用的已加载节点或 `direct`，也可停止后选择当前池中的节点再启动。
 
+### 手动节点延迟测试
+
+`manager` 用 `config.Build` 的 `ProbeOnly` 模式启动临时 sing-box 实例，通过指定出站测量延迟。Android 由前台 VPN service 持有的 Go 核心执行。调用方式见 [gRPC 接口](GRPC.md#节点延迟测试)。
+
 ### 规则分流（Layer 2）
 
 ```mermaid

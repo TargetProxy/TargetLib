@@ -211,6 +211,11 @@ final class TargetLibConnection {
 
   Future<NodePool> getNodePool() =>
       client.getNodePool(Empty(), options: options);
+  ResponseStream<NodeDelayResult> testNodeDelay(Iterable<String> nodeIds) =>
+      client.testNodeDelay(
+        TestNodeDelayRequest(nodeIds: nodeIds),
+        options: options,
+      );
   Future<SelectNodeResponse> selectNode(String nodeId) =>
       client.selectNode(SelectNodeRequest(nodeId: nodeId), options: options);
   Future<ProxyStatus> getProxyStatus() =>
